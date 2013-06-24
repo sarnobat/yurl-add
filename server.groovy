@@ -80,12 +80,13 @@ public class Server {
 		
 		@GET
 		@Path("batchInsert")
-		@Produces("application/text")
-		public Response batchInsert(@QueryParam("rootId") Integer iRootId) throws IOException,
+		@Produces("application/json")
+	public Response batchInsert(@QueryParam("rootId") Integer iRootId, @QueryParam("urls") String iUrls) throws IOException,
 				JSONException {
 			System.out.println("batchInsert - " + iRootId);
+			System.out.println("batchInsert - " + iUrls);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity("Success").type("text/plain").build();
+					.entity(new JSONObject()).type("application/json").build();
 		}
 		
 		//
