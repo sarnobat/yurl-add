@@ -17,6 +17,7 @@ $(document).ready(function() {
 		rootId = 45;
 		history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
 	}
+	var parentOfRootId = getParentId(rootId);
 	$("#status").text("Loading")  			
 
 	//// Get the URLs belonging to this root ID
@@ -43,15 +44,35 @@ $(document).ready(function() {
         		return;
         	}
         	if (binding.key == String.fromCharCode(event.which)) {
-				var url = urlBase + "/relate?parentId=" +binding.id+"&childId=" +  $("#urls").children()[0].id + "&currentParentId=" + rootId;
-				$.getJSON(url, function(result){})
-					.success(function() { $($("#urls").children()[0]).fadeOut("fast",function() { $(this).remove(); }) })
-					.error(function() { alert("error occurred "); })
-					.complete(function() { });
+        		var parentId = binding.id;
+        		var childId = $("#urls").children()[0].id;
+        		var currentRootId = rootId;
+        		relate(parentId, childId, currentRootId);
 			}
-			
 		});
+		
       });
+      
+	  $(window).keypress(function(event) {
+		 if (String.fromCharCode(event.which) == '<') {
+		   console.debug("put back in parent");
+		   var parentId = parentOfRootId;
+		   var childId = $("#urls").children()[0].id;
+		   var currentRootId = rootId;
+		   relate();
+		 }
+		 if (String.fromCharCode(event.which) == '>') {
+		   console.debug("remove from list (deal with it later)");
+		 }
+	  });
+	  
+	  function relate(parentId, childId, currentRootId) {
+	    var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;
+		$.getJSON(url, function(result){})
+			.success(function() { $($("#urls").children()[0]).fadeOut("fast",function() { $(this).remove(); }) })
+			.error(function() { alert("error occurred "); })
+			.complete(function() { });
+	  }			
     };
 
     //// Update the key bindings
@@ -77,6 +98,10 @@ $(document).ready(function() {
 			})
 			.complete(function() { });
     });
+    
+    function getParentId() {
+    	
+    }
 });
 
 

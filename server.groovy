@@ -56,6 +56,7 @@ public class Server {
 			// TODO: the source is null clause should be obsoleted
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("rootId", rootId);
+			// TODO: order these by most recent-first (so that they appear this way in the UI)
 			JSONObject json = queryNeo4j(
 					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?",
 					params);
@@ -210,8 +211,10 @@ public class Server {
 		@GET
 		@Path("relate")
 		@Produces("application/json")
-		public Response relate(@QueryParam("parentId") Integer newParentId,
-				@QueryParam("childId") Integer childId, @QueryParam("currentParentId")Integer currentParentId) throws JSONException, IOException {
+		public Response relate(
+				@QueryParam("parentId") Integer newParentId,
+				@QueryParam("childId") Integer childId, 
+				@QueryParam("currentParentId") Integer currentParentId) throws JSONException, IOException {
 			// TODO: first delete any existing contains relationship with the
 			// specified existing parent (but not with all parents since we could have a
 			// many-to-one contains)
