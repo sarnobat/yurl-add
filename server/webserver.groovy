@@ -38,17 +38,30 @@ class MyHandler implements HttpHandler {
 	}  
 
 	public void handle(HttpExchange t) throws IOException {
+
+		JSONObject json = new JSONObject();
+		String query = t.getRequestURI();
+		Map<String, String> map = getQueryMap(query);  
+		String  value = map.get("param1");
+		json.put("myKey",value);
+		println('Request headers: ' + t.getRequestHeaders());
+		String queryString = t.getRequestURI();
+		println('Request URI' + queryString);
+		println('value: ' + value);
+		
 		final String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
 		final String nodeEntryPointUri = SERVER_ROOT_URI + "node";
 		// http://localhost:7474/db/data/node
 		 
 		WebResource resource = Client.create().resource( nodeEntryPointUri );
+		String nodeData = "{\"name\" : \"" +queryString+ "\"}";
+		println("nodeData:" + nodeData);
 		
 		// POST {} to the node entry point URI
 		ClientResponse response = resource.accept( MediaType.APPLICATION_JSON )
 				.type( MediaType.APPLICATION_JSON )
 				.entity( "{ }" )
-				.post( ClientResponse.class, "{\"name\" : \"webserver.groovy\"}" );
+				.post( ClientResponse.class, nodeData );
 		 
 		final URI location = response.getLocation();
 		System.out.println( String.format(
@@ -56,14 +69,6 @@ class MyHandler implements HttpHandler {
 				nodeEntryPointUri, response.getStatus(), location.toString() ) );
 		response.close();
 	
-		JSONObject json = new JSONObject();
-		String query = t.getRequestURI();
-		Map<String, String> map = getQueryMap(query);  
-		String  value = map.get("param1");
-		json.put("myKey",value);
-		println('Request headers: ' + t.getRequestHeaders());
-		println('Request URI' + t.getRequestURI());
-		println('value: ' + value);
 		t.getResponseHeaders().add("Access-Control-Allow-Origin","*");
 		t.sendResponseHeaders(200, json.toString().length());
 		OutputStream os = t.getResponseBody();
