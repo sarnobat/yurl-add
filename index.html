@@ -8,6 +8,7 @@
 <script>
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
+var originalKeyBindings;
 $(document).ready(function() {
 
 	//// Determine the root ID
@@ -29,8 +30,7 @@ $(document).ready(function() {
 
 	//// Get the key bindings
   	$.getJSON(urlBase + "/keys?parentId=" + rootId,function(result){
-  	  var originalKeyBindings = $.extend(true, {}, result);
-  	  
+  	  originalKeyBindings = $.extend(true, {}, result);
 	  $.each(result, function(a,binding,c){
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
         $(window).keypress(function(event) {
@@ -45,18 +45,28 @@ $(document).ready(function() {
 		});
       });
     });
+    
+    var keyBindings;
+    $("#keys").focus(function() {
+    	keyBindings = $.trim($("#keys").val());
+    }).blur(function() {
+    	var newKeyBindings = $.trim($("#keys").val());
+    	var i = 1;
+    	if (keyBindings === newKeyBindings) {
+    		alert("not changed");
+    	} else {
+    		alert("changed");
+    	}
+		$.getJSON(url, function(result){})
+			.success(function() {  })
+			.error(function() { //alert("error occurred "); 
+			})
+			.complete(function() { });
+    	
+    });
 });
 
 
-function persistKeyBindings() {
-	var rootId = $.url().param('rootId')
-	var url = urlBase + "/keysUpdate?parentId=" + rootId;
-	alert(url);
-	$.getJSON(url, function(result){})
-		.success(function() {  })
-		.error(function() { alert("error occurred "); })
-		.complete(function() { });
-}
 </script>
 </head>
 <body>
