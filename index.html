@@ -16,7 +16,7 @@ $(document).ready(function() {
 	//// Determine the root ID
 	////
 	
-	var rootId = $.url().param('rootId')
+	rootId = $.url().param('rootId')
 	if (rootId == null || rootId == '') {
 		rootId = 45;
 		history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
