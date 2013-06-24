@@ -7,10 +7,16 @@
 <script type="text/javascript" src="jquery/purl.js"></script>
 
 <script>
-alert($.url().param('rootId'));
+
 		
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 $(document).ready(function(){
+var rootId = $.url().param('rootId')
+
+if (rootId == null || rootId == '') {
+	rootId = 0;
+	alert('No root id specified');
+}
 $("#status").text("Loading")  			
   	$.getJSON(urlBase + "/keys",function(result){
       $.each(result, function(a,binding,c){
@@ -29,7 +35,7 @@ $("#status").text("Loading")
 		});
       });
     });
-    $.getJSON(urlBase + "/uncategorized",function(result){
+    $.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
       $("#status").text("Populating")
       $.each(result, function(resultRowNumber, field){
         $("#urls").append("<li id="+field.id+">[" + field.id + "]: "+ field.title + " (" + field.url + ") " + "</li>");

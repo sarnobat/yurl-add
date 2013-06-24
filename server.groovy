@@ -45,7 +45,8 @@ public class Server {
 		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
-		public Response uncategorized() throws JSONException, IOException {
+		public Response uncategorized(@QueryParam("rootId") String rootId) throws JSONException, IOException {
+			println rootId;
 			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null) and not(has(n.type)) AND id(n) > 0 return ID(n),n.title?,n.url?", new HashMap());
 			JSONArray data = (JSONArray)json.get("data");
 			JSONArray ret = new JSONArray();
