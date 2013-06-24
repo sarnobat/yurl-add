@@ -34,7 +34,6 @@ import org.jsoup.nodes.Document;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import com.sun.net.httpserver.HttpServer;
 
 public class Server {
 	@Path("yurl")
@@ -48,7 +47,7 @@ public class Server {
 		public Response uncategorized(@QueryParam("rootId") Integer rootId) throws JSONException, IOException {
 			// TODO: check rootId is not null or empty
 			// TODO: the source is null clause should be obsoleted
-			Map params = new HashMap();
+			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("rootId", rootId);
 			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?", params);
 			JSONArray data = (JSONArray)json.get("data");
@@ -72,7 +71,8 @@ public class Server {
 		@Path("keys")
 		@Produces("application/json")
 		public Response keys() throws JSONException, IOException {
-			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN ID(n),n.name,n.key", new HashMap());JSONArray data = (JSONArray)json.get("data");
+			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN ID(n),n.name,n.key", new HashMap<String, Object>());
+			JSONArray data = (JSONArray)json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
 				JSONArray a = data.getJSONArray(i);
@@ -93,9 +93,9 @@ public class Server {
 		@Path("stash")
 		@Produces("application/json")
 		public Response stash(@QueryParam("param1") String url) throws JSONException, IOException {
-			String httpUrl = URLDecoder.decode(url);
+			String httpUrl = URLDecoder.decode(url, "UTF-8");
 			String title = getTitle(new URL(httpUrl));
-			Map paramValues = new HashMap();
+			Map<String, Object> paramValues = new HashMap<String, Object>();
 			paramValues.put("url", httpUrl);
 			paramValues.put("title", title);
 			paramValues.put("created", System.currentTimeMillis());
@@ -110,7 +110,6 @@ public class Server {
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json2.get("data").toString()).type("application/json").build();
 		}
-		
 		
 		private String getTitle(final URL url) {
 			String title = "";
@@ -141,13 +140,9 @@ public class Server {
 		@Produces("application/json")
 		public Response relate(@QueryParam("parentId") Integer parentId, @QueryParam("childId") Integer childId) throws JSONException, IOException {
 			// TODO: first delete any existing contains relationship with the root (but not with existing categories since we could have a many-to-one contains)
-			Map paramValues = new HashMap();
+			Map<String, Object> paramValues = new HashMap<String, Object>();
 			paramValues.put("childId", childId);
-			JSONObject json2 = queryNeo4j("start root=node(*) match root-[c:CONTAINS]->n where has(root.type) and root.type = 'categoryNode' and root.name = 'root' and id(n) = {childId} DELETE c RETURN id(c)", paramValues);
-			JSONArray dataArray = (JSONArray)json2.get("data");
-			for (int i =0; i < dataArray.length(); i++) {
-				JSONArray oldRelationshipsIds = (JSONArray) dataArray.get(0);
-			}
+			
 			JSONObject json = relateHelper(parentId, childId);
 			JSONObject ret = new JSONObject();
 			ret.put("status", "FAILURE");
@@ -156,14 +151,13 @@ public class Server {
 					ret.put("status", "SUCCESS");
 				}
 			}
-			
 
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
 		}
 		
 		private JSONObject relateHelper(Integer parentId, Integer childId) throws IOException, JSONException {
-			Map paramValues = new HashMap();
+			Map<String, Object> paramValues = new HashMap<String, Object>();
 			paramValues.put("parentId", parentId);
 			paramValues.put("childId", childId);
 			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b return a,r,b;", paramValues);
@@ -171,14 +165,14 @@ public class Server {
 		}
 		
 
-		private JSONObject queryNeo4j(String cypherQuery, Map params) throws IOException, JSONException {
+		private JSONObject queryNeo4j(String cypherQuery, Map<String, Object> params) throws IOException, JSONException {
 			WebResource resource = Client.create().resource(CYPHER_URI);
-			Map map = new HashMap();
-			map.put("query", cypherQuery);
-			map.put("params", params);
+			Map<String, Object> postBody = new HashMap<String, Object>();
+			postBody.put("query", cypherQuery);
+			postBody.put("params", params);
 			// POST {} to the node entry point URI
 			ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
-					.type(MediaType.APPLICATION_JSON).entity("{ }").post(ClientResponse.class, map);
+					.type(MediaType.APPLICATION_JSON).entity("{ }").post(ClientResponse.class, postBody);
 			if (response.getStatus() != 200) {
 				System.out.println("failed: " + cypherQuery + "\tparams: " + params);
 				throw new RuntimeException();
@@ -193,7 +187,7 @@ public class Server {
 	}
 
 	public static void main(String[] args) throws URISyntaxException {
-		HttpServer server = JdkHttpServerFactory.createHttpServer(
+		JdkHttpServerFactory.createHttpServer(
 				new URI("http://localhost:4447/"), new ResourceConfig(HelloWorldResource.class));
 	}
 }
