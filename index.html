@@ -40,7 +40,8 @@ $(document).ready(function() {
     function configureKeyBindings(result) {
       $.each(result, function(a,binding,c){
         if (binding.key == 'null') {
-          return;
+        	$("#keys").append("#");
+        	// Don't remove the "null" otherwise we'll assign hash to this category
         }
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
         $(window).keypress(function(event) {
