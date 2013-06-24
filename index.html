@@ -31,7 +31,7 @@ $(document).ready(function() {
     $.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
       $("#status").text("Populating")
       $.each(result, function(resultRowNumber, field){
-        $("#urls").append("<li id="+field.id+">[" + field.id + "]: "+ field.title + " (" + field.url + ") " + "<a href='" +field.url+"'>Open</a></li>");
+        $("#urls").append("<li id="+field.id+">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></li>");
       });
 	  $("#status").text("Done")
     });
