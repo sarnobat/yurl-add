@@ -54,8 +54,10 @@ public class Server {
 				IOException {
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("nodeId", nodeId);
-			// TODO: order these by most recent-first (so that they appear this way in the UI)
-			JSONObject json = queryNeo4j("start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)", params);
+			// TODO: order these by most recent-first (so that they appear this
+			// way in the UI)
+			JSONObject json = queryNeo4j(
+					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)", params);
 			JSONArray data = (JSONArray) json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
@@ -78,7 +80,8 @@ public class Server {
 			// TODO: the source is null clause should be obsoleted
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("rootId", rootId);
-			// TODO: order these by most recent-first (so that they appear this way in the UI)
+			// TODO: order these by most recent-first (so that they appear this
+			// way in the UI)
 			JSONObject json = queryNeo4j(
 					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?",
 					params);
@@ -102,7 +105,11 @@ public class Server {
 		@GET
 		@Path("keysUpdate")
 		@Produces("application/json")
-		public Response keysUpdate(@QueryParam("parentId") Integer parentId, @QueryParam("newKeyBindings") String newKeyBindings, @QueryParam("oldKeyBindings") String oldKeyBindings) throws JSONException, IOException {
+		// TODO: we will have to start supporting disassociation of key bindings with child categories
+		public Response keysUpdate(@QueryParam("parentId") Integer parentId,
+				@QueryParam("newKeyBindings") String newKeyBindings,
+				@QueryParam("oldKeyBindings") String oldKeyBindings) throws JSONException,
+				IOException {
 			System.out.println("keysUpdate");
 
 			Set<String> oldKeyBindingsSet = new HashSet<String>();
@@ -110,51 +117,67 @@ public class Server {
 			Set<String> newKeyBindingsSet = new HashSet<String>();
 			Collections.addAll(newKeyBindingsSet, newKeyBindings.trim().split("\n"));
 
-			// NOTE: This is not symmetric (commutative?). If you want to support removal do that in a separate loop
+			// NOTE: This is not symmetric (commutative?). If you want to
+			// support removal do that in a separate loop
 			Set<String> newKeyBindingLines = Sets.difference(newKeyBindingsSet, oldKeyBindingsSet);
 			System.out.println("Old: " + oldKeyBindingsSet);
 			System.out.println("New: " + newKeyBindingsSet);
 			System.out.println("Difference: " + newKeyBindingLines);
+			Map<String,String> keyBindings = new HashMap<String,String>();
 			for (String newKeyBinding : newKeyBindingLines) {
-				if (newKeyBinding.trim().startsWith("#") && !newKeyBinding.trim().startsWith("#=")){
+				if (newKeyBinding.trim().startsWith("#") && !newKeyBinding.trim().startsWith("#=")) {
 					continue;// A commented out keybinding
 				}
 				String[] lineElements = newKeyBinding.split("=");
 				String aKeyCode = lineElements[0].trim();
-				
+
 				// Ignore trailing comments
 				String[] aRightHandSideElements = lineElements[1].trim().split("#");
 				String aName = aRightHandSideElements[0].trim();
-				
-				
-				// Create a new node
-				// TODO: Check if the category already exists
-				Map<String, Object> paramValues = new HashMap<String, Object>();
-				paramValues.put("name", aName);
-				paramValues.put("key", aKeyCode);
-				paramValues.put("type", "categoryNode");
-				paramValues.put("created", System.currentTimeMillis());
-				System.out.println("cypher params: " + paramValues);
-				
-				JSONObject json = queryNeo4j(
-						"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
-						paramValues);
-				System.out.println(json.toString());
-				Integer newCategoryNodeId = Integer.parseInt((String)((JSONArray)((JSONArray)json.get("data")).get(0)).get(0));
-				
-				relateHelper(parentId, newCategoryNodeId);
-				
+
+				if (keyBindings.keySet().contains(aKeyCode)) {
+					return Response.serverError().entity("Cannot overwite existing key binding").build();
+				}
+				keyBindings.put(aKeyCode, aName);
+
 				// TODO: if it fails, recover and create the remaining ones
+			}
+			
+			for (String aKeyCode : keyBindings.keySet()) {
+				String aName = keyBindings.get(aKeyCode);
+				createNewKeyBinding(aName, aKeyCode, parentId);
 			}
 			JSONArray ret = getKeys(parentId);
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
 		}
 
+		private void createNewKeyBinding(String aName, String aKeyCode, Integer parentId)
+				throws IOException, JSONException {
+			// Create a new node
+			// TODO: Check if the category already exists
+			Map<String, Object> paramValues = new HashMap<String, Object>();
+			paramValues.put("name", aName);
+			paramValues.put("key", aKeyCode);
+			paramValues.put("type", "categoryNode");
+			paramValues.put("created", System.currentTimeMillis());
+			System.out.println("cypher params: " + paramValues);
+
+			JSONObject json = queryNeo4j(
+					"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
+					paramValues);
+			System.out.println(json.toString());
+			Integer newCategoryNodeId = Integer.parseInt((String) ((JSONArray) ((JSONArray) json
+					.get("data")).get(0)).get(0));
+
+			relateHelper(parentId, newCategoryNodeId);
+		}
+
 		@GET
 		@Path("keys")
 		@Produces("application/json")
-		public Response keys(@QueryParam("parentId") Integer parentId) throws JSONException, IOException {
+		public Response keys(@QueryParam("parentId") Integer parentId) throws JSONException,
+				IOException {
 			JSONArray ret = getKeys(parentId);
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
@@ -233,19 +256,22 @@ public class Server {
 		@GET
 		@Path("relate")
 		@Produces("application/json")
-		public Response relate(
-				@QueryParam("parentId") Integer newParentId,
-				@QueryParam("childId") Integer childId, 
-				@QueryParam("currentParentId") Integer currentParentId) throws JSONException, IOException {
+		public Response relate(@QueryParam("parentId") Integer newParentId,
+				@QueryParam("childId") Integer childId,
+				@QueryParam("currentParentId") Integer currentParentId) throws JSONException,
+				IOException {
 			// TODO: first delete any existing contains relationship with the
-			// specified existing parent (but not with all parents since we could have a
+			// specified existing parent (but not with all parents since we
+			// could have a
 			// many-to-one contains)
 			Map<String, Object> params2 = new HashMap<String, Object>();
 			params2.put("currentParentId", currentParentId);
 			params2.put("childId", childId);
-			
-			queryNeo4j("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r", params2);
-			
+
+			queryNeo4j(
+					"START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
+					params2);
+
 			Map<String, Object> paramValues = new HashMap<String, Object>();
 			paramValues.put("childId", childId);
 
@@ -261,10 +287,12 @@ public class Server {
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
 		}
-		
+
 		/**
-		 * @throws RuntimeException - If the command fails. This could legitimately happen if we 
-		 * try to relate to a newly created category if the system becomes non-deterministic.
+		 * @throws RuntimeException
+		 *             - If the command fails. This could legitimately happen if
+		 *             we try to relate to a newly created category if the
+		 *             system becomes non-deterministic.
 		 */
 		private JSONObject relateHelper(Integer parentId, Integer childId) throws IOException,
 				JSONException {
