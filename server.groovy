@@ -73,9 +73,10 @@ public class Server {
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
 		}
-		//------------------------------------------------------------------------------------
+
+		// ------------------------------------------------------------------------------------
 		// Page operations
-		//------------------------------------------------------------------------------------
+		// ------------------------------------------------------------------------------------
 
 		@GET
 		@Path("uncategorized")
@@ -197,26 +198,32 @@ public class Server {
 			// //
 			// // TODO (urgent): Check if the category already exists
 			// //
-
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
 			{
-				theParamValues.put("name", aName);
-				theParamValues.put("key", aKeyCode);
-				theParamValues.put("type", "categoryNode");
-				theParamValues.put("created", System.currentTimeMillis());
-				System.out.println("cypher params: " + theParamValues);
+				
 			}
-			// TODO: first check if there is already a node with this name,
-			// which is for re-associating the keycode with the category
-			JSONObject theNewKeyBindingResponseJson = execute(
-					"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
-					theParamValues);
-			System.out.println(theNewKeyBindingResponseJson.toString());
-			Integer newCategoryNodeId = Integer
-					.parseInt((String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
-							.get("data")).get(0)).get(0));
 
-			relateHelper(parentId, newCategoryNodeId);
+			{
+
+				Map<String, Object> theParamValues = new HashMap<String, Object>();
+				{
+					theParamValues.put("name", aName);
+					theParamValues.put("key", aKeyCode);
+					theParamValues.put("type", "categoryNode");
+					theParamValues.put("created", System.currentTimeMillis());
+					System.out.println("cypher params: " + theParamValues);
+				}
+				// TODO: first check if there is already a node with this name,
+				// which is for re-associating the keycode with the category
+				JSONObject theNewKeyBindingResponseJson = execute(
+						"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
+						theParamValues);
+				System.out.println(theNewKeyBindingResponseJson.toString());
+				Integer newCategoryNodeId = Integer
+						.parseInt((String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
+								.get("data")).get(0)).get(0));
+
+				relateHelper(parentId, newCategoryNodeId);
+			}
 		}
 
 		@GET
