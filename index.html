@@ -17,6 +17,7 @@ var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
 var originalKeyBindings;
 var parentOfRootId;
+var orderedDescending = true;
 
 function tag(nodeId,tagName) {
 	alert(nodeId+"::"+tagName);
@@ -198,6 +199,24 @@ $(document).ready(function() {
     
 });
 
+function moveToTop(source) {
+	var idToMove = source;
+	var firstId = $("#urls").children().first().attr("id");
+	var elem = $("#" + idToMove).remove();
+	$("#urls").prepend(elem);
+
+	if (orderedDescending) {
+	}
+}
+
+function moveToBottom(source) {
+	var idToMove = source;
+	var lastId = $("#urls").children().last().attr("id");
+	var elem = $("#" + idToMove).remove();
+	$("#urls").append(elem);
+	if (orderedDescending) {
+	}
+}
 
 function moveUp(source) {
 	var first = $("#" + source).prev().attr('id');
