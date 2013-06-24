@@ -192,21 +192,29 @@ public class Server {
 					.type("application/json").build();
 		}
 
-		private void createNewKeyBinding(String aName, String aKeyCode, Integer parentId)
+		private void createNewKeyBinding(String aCategoryName, String aKeyCode, Integer parentId)
 				throws IOException, JSONException {
 
 			// //
 			// // TODO (urgent): Check if the category already exists
 			// //
 			{
-				
-			}
+				Map<String, Object> theParamValues = new HashMap<String, Object>();
+				theParamValues.put("parentId", parentId);
+				theParamValues.put("aCategoryName", aCategoryName);
+				String iCypherQuery = "START parent=node({parentId}) MATCH parent -[r:CONTAINS]-> existingCategory WHERE existingCategory.name = {aCategoryName}";
+				JSONObject theJson = execute(iCypherQuery, theParamValues);
+				System.out.println("restoring unassociated category: " + iCypherQuery + "\t"
+						+ theParamValues);
 
-			{
+				theJson.get("data");
+
+			}
+			if (false) {
 
 				Map<String, Object> theParamValues = new HashMap<String, Object>();
 				{
-					theParamValues.put("name", aName);
+					theParamValues.put("name", aCategoryName);
 					theParamValues.put("key", aKeyCode);
 					theParamValues.put("type", "categoryNode");
 					theParamValues.put("created", System.currentTimeMillis());
@@ -325,10 +333,10 @@ public class Server {
 				@QueryParam("childId") Integer childId,
 				@QueryParam("currentParentId") Integer currentParentId) throws JSONException,
 				IOException {
-			// TODO: first delete any existing contains relationship with the
+			// first delete any existing contains relationship with the
 			// specified existing parent (but not with all parents since we
 			// could have a many-to-one contains)
-			{
+			if (false) {
 				Map<String, Object> params = new HashMap<String, Object>();
 				params.put("currentParentId", currentParentId);
 				params.put("childId", childId);
@@ -374,7 +382,7 @@ public class Server {
 				paramValues.put("childId", childId);
 			}
 			JSONObject theJson = execute(
-					"start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b return a,r,b;",
+					"start a=node({parentId}),b=node({childId}) CREATE a-[r:CONTAINS]->b return a,r,b;",
 					paramValues);
 			return theJson;
 		}
