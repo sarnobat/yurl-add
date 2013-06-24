@@ -337,7 +337,7 @@ function sendBatch() {
 	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + urls, function(result){})
 		.success(function(data) {  
 			console.debug(data);
-			$("#batchStatus").text("Successfully imported batch");
+			$("#batchStatus").text("Successfully imported batch, except for ones remaining in text box");
 			$("#urlBatchToSend").val("");
 			$("#urlBatchToSend").val(data.unsuccessful);
 		})

@@ -106,13 +106,17 @@ public class Server {
 				String first = lines[i];
 				String theHttpUrl = URLDecoder.decode(first, "UTF-8");
 				if (first.startsWith("=")) {
-					System.out.println("Not supported 1");
-					throw new RuntimeException("Not supported 1");
+					++i;
+					addToUnsuccessful(unsuccessfulLines, first, "");
+					System.out.println("1.1");
+					continue;
 				}
 				System.out.println("2");
 				if (first.startsWith("http")) {
-					System.out.println("Not supported 2, first: " + first);
-					throw new RuntimeException("Not supported 2, first: " + first);
+					++i;
+					addToUnsuccessful(unsuccessfulLines, first, "");
+					System.out.println("1.2");
+					continue;
 				}
 				System.out.println("3");
 				if (first.matches("^\\s*" + '$')) {
@@ -136,6 +140,7 @@ public class Server {
 						System.out.println("5.5");
 						String[] segments = reader.readNext();
 						if (segments == null) {
+							System.out.println("5.75");
 							addToUnsuccessful(unsuccessfulLines, first, second);
 						} else {
 
@@ -158,11 +163,13 @@ public class Server {
 						}
 
 					} catch (Exception e) {
+						System.out.println(e);
 						e.printStackTrace();
 						throw e;
 					}
 
 				} else {
+					System.out.println("10");
 					addToUnsuccessful(unsuccessfulLines, first, second);
 				}
 				i += 2;
