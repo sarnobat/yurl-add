@@ -26,13 +26,13 @@ $("#status").text("Loading")
 				var url = urlBase + "/relate?parentId=" +binding.id+"&childId=" +  $("#urls").children()[0].id;
 				//alert(url);
 				$.getJSON(url,function(result){
-					if (result.status == 'SUCCESS') {
-						$("#urls").children()[0].remove();
-					}
+						//alert("callback ");
+					
 				})
-				.success(function() { alert("success 2"); })
+				.success(function() { $("#urls").children()[0].remove(); })
 				.error(function() { alert("error occurred "); })
-				.complete(function() { alert("Done"); });
+				.complete(function() { //alert("Done"); 
+				});
 			}
 			// we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses
 		});
