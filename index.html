@@ -198,14 +198,14 @@ $(document).ready(function() {
 
 
 function moveUp(source) {
-	var second = source;
 	var first = $("#" + source).prev().attr('id');
+	var second = source;
 	swap(first, second);
 }
 
 function moveDown(source) {
-	var second = $("#" + source).next().attr('id');
 	var first = source;
+	var second = $("#" + source).next().attr('id');
 	swap(first, second);
 }
 
