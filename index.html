@@ -183,18 +183,19 @@ var rootColor = MD5(rootId).substring(0,6);
 	  $(window).keypress(function(event) {
 	  		var key = String.fromCharCode(event.which);
 			if (('_' == key) ||('j'==key)|| ('n' == key) ) {
-				removeTop();
+				var idOfTop = $("#urls").children()[0].id;
+				moveToBottom(idOfTop);
 			}
-		 if (String.fromCharCode(event.which) == '<') {
-		   console.debug("put back in parent");
-		   var parentId = parentOfRootId;
-		   var childId = $("#urls").children()[0].id;
-		   var currentRootId = rootId;
-		   relate(parentId, childId, currentRootId);
-		 }
-		 if (String.fromCharCode(event.which) == '>') {
-		   console.debug("remove from list (deal with it later)");
-		 }
+			if (String.fromCharCode(event.which) == '<') {
+				console.debug("put back in parent");
+				var parentId = parentOfRootId;
+				var childId = $("#urls").children()[0].id;
+				var currentRootId = rootId;
+				relate(parentId, childId, currentRootId);
+			}
+			if (String.fromCharCode(event.which) == '>') {
+				console.debug("remove from list (deal with it later)");
+			}
 	  });
 	  
 	  function relate(parentId, childId, currentRootId) {
