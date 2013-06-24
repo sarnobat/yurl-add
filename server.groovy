@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -28,25 +30,40 @@ public class Server {
 		@Path("keys")
 		@Produces("application/json")
 		public String keys() throws JSONException, IOException {
+		System.out.println("A");
 			JSONObject json = queryNeo4j("start n=node(*) where has(n.name) and has (n.key) return n.name,n.key");
 			return json.get("data").toString();
 		}
 
 		private JSONObject queryNeo4j(String cypherQuery) throws IOException, JSONException {
+		System.out.println("0");
+//		try {
 			WebResource resource = Client.create().resource(CYPHER_URI);
-
+//			}catch(Exception e) {
+//			print e;
+//			e.printStackTrace();
+//			}
+System.out.println("1");
+Map map = new HashMap();
+map.put("query", cypherQuery);
 			// POST {} to the node entry point URI
 			ClientResponse response = resource
 					.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON)
 					.entity("{ }")
-					.post(ClientResponse.class,
-							"{\"query\" : \"" + cypherQuery + "\", \"params\" : {}}");
+					.post(ClientResponse.class,map);
+//							"{\"query\" : \"" + cypherQuery + "\", \"params\" : {}}");
+System.out.println("2");
 			String neo4jResponse = IOUtils.toString(response.getEntityInputStream());
+System.out.println("3");
 			System.out.println(neo4jResponse);
+System.out.println("4");
 			response.getEntityInputStream().close();
+System.out.println("5");
 			response.close();
+System.out.println("6");
 			JSONObject json = new JSONObject(neo4jResponse);
+System.out.println("7");
 			return json;
 		}
 	}
