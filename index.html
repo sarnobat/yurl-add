@@ -74,7 +74,7 @@ $(document).ready(function() {
         
         $("#urls").append("<li id="+field.id+"><font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open");
         if (field.url.match(".jpg$")) {
-			$("#" + field.id).append("<br><img src="+field.url+">");        	
+			$("#" + field.id).append("<br><img src="+field.url+">");
         }
         // TODO: This performs badly unless you manually expand one at a time
         if (field.url.match("youtube.com")) {
