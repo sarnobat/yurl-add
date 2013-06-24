@@ -116,7 +116,7 @@ public class Server {
 			System.out.println("New: " + newKeyBindingsSet);
 			System.out.println("Difference: " + newKeyBindingLines);
 			for (String newKeyBinding : newKeyBindingLines) {
-				if (newKeyBinding.trim().startsWith("#")){
+				if (newKeyBinding.trim().startsWith("#") && !newKeyBinding.trim().startsWith("#=")){
 					continue;// A commented out keybinding
 				}
 				String[] lineElements = newKeyBinding.split("=");
