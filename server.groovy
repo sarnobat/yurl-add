@@ -48,6 +48,19 @@ public class Server {
 		final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 
 		@GET
+		@Path("parent")
+		@Produces("application/json")
+		public Response parent(@QueryParam("nodeId") Integer nodeId) throws JSONException,
+				IOException {
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("nodeId", nodeId);
+			// TODO: order these by most recent-first (so that they appear this way in the UI)
+			JSONObject json = queryNeo4j("start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)", params);
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(json.toString())
+					.type("application/json").build();
+		}
+
+		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
 		public Response uncategorized(@QueryParam("rootId") Integer rootId) throws JSONException,

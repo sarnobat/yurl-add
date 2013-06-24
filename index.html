@@ -99,8 +99,15 @@ $(document).ready(function() {
 			.complete(function() { });
     });
     
-    function getParentId() {
-    	
+    function getParentId(nodeId) {    	
+		$.getJSON(urlBase + "/parent?nodeId=" + nodeId, function(result){
+		})
+		.success(function(data) {  
+			alert(data.data[0]);
+		})
+		.error(function() { //alert("error occurred "); 
+		})
+		.complete(function() { });
     }
 });
 
