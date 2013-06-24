@@ -270,7 +270,7 @@ public class Server {
 			// TODO: order these by most recent-first (so that they appear this
 			// way in the UI)
 			JSONObject theQueryResultJson = execute(
-					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?,n.created? ORDER BY n.created? DESC",
+					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?,n.created?,n.ordinal? ORDER BY n.ordinal? DESC",
 					theParams);
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -492,10 +492,12 @@ public class Server {
 			_1: {
 				theParamValues.put("url", theHttpUrl);
 				theParamValues.put("title", theTitle);
-				theParamValues.put("created", System.currentTimeMillis());
+				long currentTimeMillis = System.currentTimeMillis();
+				theParamValues.put("created", currentTimeMillis);
+				theParamValues.put("ordinal", currentTimeMillis);
 			}
 			JSONObject json = execute(
-					"CREATE (n { title : {title} , url : {url}, created: {created} }) RETURN id(n)",
+					"CREATE (n { title : {title} , url : {url}, created: {created}, ordinal: {ordinal} }) RETURN id(n)",
 					theParamValues);
 
 			JSONArray theNewNodeId = (JSONArray) ((JSONArray) json.get("data")).get(0);
@@ -533,8 +535,15 @@ public class Server {
 		@Path("swapOrdinals")
 		@Produces("application/json")
 		public Response swapOrdinals(@QueryParam("firstId") Integer iFirstId,
-				@QueryParam("secondId") Integer iSecondId) {
+				@QueryParam("secondId") Integer iSecondId) throws IOException, JSONException {
 			System.out.println("swapOrdinals");
+
+			Map<String, Object> theParams = new HashMap<String, Object>();
+			theParams.put("id1", iFirstId);
+			theParams.put("id2", iSecondId);
+
+			JSONObject jsonObject = execute(" start n=node({id1}),n2=node({id2}) set n.temp=n2.ordinal, n2.ordinal=n.ordinal,n.ordinal=n.temp  return n.ordinal,n2.ordinal", theParams);
+
 			JSONObject ret = new JSONObject();
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
