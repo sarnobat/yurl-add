@@ -128,6 +128,7 @@ $(document).ready(function() {
 		.success(function(data) {  
 			if (data[0] != null) {
 				parentOfRootId = data[0].id;
+				$("#up").attr("href", "/yurl/?rootId=" + parentOfRootId);
 			}
 		})
 		.error(function() { //alert("error occurred "); 
@@ -140,7 +141,9 @@ $(document).ready(function() {
 </script>
 </head>
 <body>
+	<a id="up">Up</a>
 	<table width="100%"><tr>
+
 		<td width="25%" valign=top>
 			Key bindings<br>
 			<textarea id="keys" cols="30" rows="20px"></textarea>
