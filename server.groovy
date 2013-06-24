@@ -56,7 +56,16 @@ public class Server {
 			params.put("nodeId", nodeId);
 			// TODO: order these by most recent-first (so that they appear this way in the UI)
 			JSONObject json = queryNeo4j("start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)", params);
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(json.toString())
+			JSONArray data = (JSONArray) json.get("data");
+			JSONArray ret = new JSONArray();
+			for (int i = 0; i < data.length(); i++) {
+				JSONArray a = data.getJSONArray(i);
+				JSONObject o = new JSONObject();
+				String id = (String) a.get(0);
+				o.put("id", id);
+				ret.put(o);
+			}
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
 		}
 

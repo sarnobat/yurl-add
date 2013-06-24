@@ -9,6 +9,7 @@
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
 var originalKeyBindings;
+var parentOfRootId;
 $(document).ready(function() {
 
 	//// Determine the root ID
@@ -17,7 +18,7 @@ $(document).ready(function() {
 		rootId = 45;
 		history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
 	}
-	var parentOfRootId = getParentId(rootId);
+	parentOfRootId = getParentId(rootId);
 	$("#status").text("Loading")  			
 
 	//// Get the URLs belonging to this root ID
@@ -59,7 +60,7 @@ $(document).ready(function() {
 		   var parentId = parentOfRootId;
 		   var childId = $("#urls").children()[0].id;
 		   var currentRootId = rootId;
-		   relate();
+		   relate(parentId, childId, currentRootId);
 		 }
 		 if (String.fromCharCode(event.which) == '>') {
 		   console.debug("remove from list (deal with it later)");
@@ -103,7 +104,9 @@ $(document).ready(function() {
 		$.getJSON(urlBase + "/parent?nodeId=" + nodeId, function(result){
 		})
 		.success(function(data) {  
-			alert(data.data[0]);
+			if (data[0] != null) {
+				parentOfRootId = data[0].id;
+			}
 		})
 		.error(function() { //alert("error occurred "); 
 		})
