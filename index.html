@@ -55,7 +55,11 @@ $(document).ready(function() {
         	color= "#FF0000";
         } 
         
-        $("#urls").append("<li id="+field.id+"><font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></font></li>");
+        $("#urls").append("<li id="+field.id+"><font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></font>");
+        if (field.url.match(".jpg$")) {
+			$("#urls").append("<img src="+field.url+">");        	
+        }
+        $("#urls").append("</li>");
       });
 	  $("#status").text("Done")
     });
