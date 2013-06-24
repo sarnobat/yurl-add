@@ -10,14 +10,15 @@
 
 		
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
-$(document).ready(function(){
-var rootId = $.url().param('rootId')
-
-if (rootId == null || rootId == '') {
-	rootId = 45;
-	alert('No root id specified');
-}
-$("#status").text("Loading")  			
+$(document).ready(function() {
+	var rootId = $.url().param('rootId')
+	
+	if (rootId == null || rootId == '') {
+		rootId = 45;
+		alert('No root id specified');
+	}
+	
+	$("#status").text("Loading")  			
 
   	$.getJSON(urlBase + "/keys",function(result){
       $.each(result, function(a,binding,c){
