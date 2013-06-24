@@ -175,20 +175,16 @@ public class Server {
 
 		private JSONObject queryNeo4j(String cypherQuery, Map params) throws IOException, JSONException {
 			WebResource resource = Client.create().resource(CYPHER_URI);
-			println("A");
 			Map map = new HashMap();
 			map.put("query", cypherQuery);
 			map.put("params", params);
-						println("B");
 			// POST {} to the node entry point URI
 			ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }").post(ClientResponse.class, map);
-								println("C");
 			if (response.getStatus() != 200) {
-						System.out.println("failed: " + cypherQuery + "\tparams: " + params);
+				System.out.println("failed: " + cypherQuery + "\tparams: " + params);
 				throw new RuntimeException();
 			}
-						println("E");
 			String neo4jResponse = IOUtils.toString(response.getEntityInputStream());
 			System.out.println(neo4jResponse);
 			response.getEntityInputStream().close();
