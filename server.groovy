@@ -633,6 +633,7 @@ public class Server {
 		}
 
 		/**
+		 * No deletion of existing relationships occurs here.
 		 * @throws RuntimeException
 		 *             - If the command fails. This could legitimately happen if
 		 *             we try to relate to a newly created category if the
