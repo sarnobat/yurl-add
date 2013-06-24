@@ -12,6 +12,7 @@ body{font-family:Verdana; font-size: 12px;
 <script src="jquery/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
+<script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
 <script>
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var nodeIdZero = 0;
@@ -88,7 +89,7 @@ $(document).ready(function() {
 
 			var urlRoot = field.url.replace(/(http:\/\/[^\/]+).*/ig,"$1");
 			$("#" + field.id).append("<font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<br><a href='" +field.url+"'>Open</a>");
-			$("#" + field.id).append("{" + urlRoot + "} ");
+			$("#" + field.id).append("{" + MD5(urlRoot) + "} ");
 			if (field.url.match(".jpg$")) {
 				$("#" + field.id).append("<br><img src="+field.url+">");
 			}
