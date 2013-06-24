@@ -30,13 +30,15 @@ $(document).ready(function() {
 	  $("#status").text("Done")
     });
 
+	////
 	//// Get the key bindings
+	////
+	
   	$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
   	  originalKeyBindings = $.extend(true, {}, result);
-  	  configureKeyBindings(result);
-
-  	  
+  	  configureKeyBindings(result);  	  
     });
+
     function configureKeyBindings(result) {
       $.each(result, function(a,binding,c){
         if (binding.key == 'null') {
