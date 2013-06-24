@@ -148,17 +148,19 @@ public class Server {
 				if (newKeyBinding.trim().startsWith("#") && !newKeyBinding.trim().startsWith("#=")) {
 					continue;// A commented out keybinding
 				}
-				String[] lineElements = newKeyBinding.split("=");
-				String aKeyCode = lineElements[0].trim();
 
-				// Ignore trailing comments
-				String[] aRightHandSideElements = lineElements[1].trim().split("#");
-				String aName = aRightHandSideElements[0].trim();
-
-				//
-				System.out.println("Accepting proposal to create key binding for " + aName + "("
-						+ aKeyCode + ")");
-				keyBindings.put(aKeyCode, aName);
+				{
+					// Ignore trailing comments
+					String[] lineElements = newKeyBinding.split("=");
+					String aKeyCode = lineElements[0].trim();
+					String[] aRightHandSideElements = lineElements[1].trim().split("#");
+					{
+						String aName = aRightHandSideElements[0].trim();
+						System.out.println("Accepting proposal to create key binding for " + aName
+								+ "(" + aKeyCode + ")");
+						keyBindings.put(aKeyCode, aName);
+					}
+				}
 
 				// TODO: if it fails, recover and create the remaining ones?
 			}
