@@ -46,7 +46,7 @@ public class Server {
 		@Path("uncategorized")
 		@Produces("application/json")
 		public Response uncategorized() throws JSONException, IOException {
-			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or source.name = 'root') and not(has(n.type)) AND id(n) > 0 return ID(n),n.title?,n.url?", new HashMap());
+			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null) and not(has(n.type)) AND id(n) > 0 return ID(n),n.title?,n.url?", new HashMap());
 			JSONArray data = (JSONArray)json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {

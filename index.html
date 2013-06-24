@@ -8,8 +8,7 @@
 <script>
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 $(document).ready(function(){
-  $("button").click(function(){
-  			
+$("#status").text("Loading")  			
   	$.getJSON(urlBase + "/keys",function(result){
       $.each(result, function(a,binding,c){
         $("#keys").append(binding.key + "::" + binding.name +" # node " + binding.id + "\n");
@@ -28,11 +27,13 @@ $(document).ready(function(){
       });
     });
     $.getJSON(urlBase + "/uncategorized",function(result){
+      $("#status").text("Populating")
       $.each(result, function(resultRowNumber, field){
         $("#urls").append("<li id="+field.id+">[" + field.id + "]: "+ field.title + " (" + field.url + ") " + "</li>");
       });
+	  $("#status").text("Done")
     });
-  });
+//  });
 });
 </script>
 </head>
@@ -40,7 +41,8 @@ $(document).ready(function(){
 Key bindings<br>
 <textarea id="keys"></textarea>
 <br><br>
-<button>get urls</button>
+<!--<button>get urls</button>-->
+<div id="status">Init</div>
 <ol id="urls"></ol>
 
 </body>
