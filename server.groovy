@@ -83,27 +83,53 @@ public class Server {
 		@Produces("application/text")
 		public Response dumpUrls(@QueryParam("rootId") Integer iRootId) throws IOException,
 				JSONException {
+			Set<String> visitedInternalNodes = new HashSet<String>();
 			Integer startId = iRootId;
 			if (startId == null) {
 				startId = 0;
 			}
 			StringBuffer sb = new StringBuffer();
+			StringBuffer plainText = new StringBuffer();
 			sb.append("foo\n");
-			printNode(startId, sb);
+			printNode(startId, sb,plainText,visitedInternalNodes);
 			System.out.println("dumpUrls");
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(sb.toString())
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(plainText.toString())
 					.type("text/plain").build();
 		}
 
-		private void printNode(Integer iRootId, StringBuffer sb) throws IOException, JSONException {
-			sb.append("bar");
+		private void printNode(Integer iRootId, StringBuffer json, StringBuffer plainText,Set<String> visitedInternalNodes) throws IOException, JSONException {
+			json.append("bar");
 			Map<String, Object> theParams = new HashMap<String, Object>();
 			theParams.put("nodeId", iRootId);
 			JSONObject theResponse = execute(
-					"start root=node({nodeId}) MATCH root--n RETURN distinct n", theParams);
+					"start root=node({nodeId}) MATCH root--n RETURN distinct n, id(n)", theParams);
 			JSONArray jsonArray = (JSONArray) theResponse.get("data");
 			for (int i = 0; i < jsonArray.length(); i++) {
-				sb.append(((JSONObject) ((JSONArray) jsonArray.get(i)).get(0)).get("data"));
+				JSONArray aNode = (JSONArray) jsonArray.get(i);
+				JSONObject object = (JSONObject) ((JSONObject) aNode.get(0)).get("data");
+				
+				String id = (String) checkNotNull(aNode.get(1));
+				if (visitedInternalNodes.contains(id)) {
+					continue;
+				}
+				System.out.println("1.5");
+				
+				if (object.has("type") && object.get("type") != null) {
+					plainText.append("===");
+					plainText.append(object.get("name"));
+					plainText.append("===\n");
+					
+				} else {
+//					if (object.names()) {
+//						plainText.append(object.names());
+//					}
+//					plainText.append("\n");
+				}
+				json.append(object);
+				System.out.println("2");
+				visitedInternalNodes.add(id);
+				
+				printNode(Integer.parseInt(id), json,plainText,visitedInternalNodes);
 			}
 		}
 
