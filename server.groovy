@@ -105,7 +105,8 @@ public class Server {
 		@GET
 		@Path("keysUpdate")
 		@Produces("application/json")
-		// TODO: we will have to start supporting disassociation of key bindings with child categories
+		// TODO: we will have to start supporting disassociation of key bindings
+		// with child categories
 		public Response keysUpdate(@QueryParam("parentId") Integer parentId,
 				@QueryParam("newKeyBindings") String newKeyBindings,
 				@QueryParam("oldKeyBindings") String oldKeyBindings) throws JSONException,
@@ -123,7 +124,7 @@ public class Server {
 			System.out.println("Old: " + oldKeyBindingsSet);
 			System.out.println("New: " + newKeyBindingsSet);
 			System.out.println("Difference: " + newKeyBindingLines);
-			Map<String,String> keyBindings = new HashMap<String,String>();
+			Map<String, String> keyBindings = new HashMap<String, String>();
 			for (String newKeyBinding : newKeyBindingLines) {
 				if (newKeyBinding.trim().startsWith("#") && !newKeyBinding.trim().startsWith("#=")) {
 					continue;// A commented out keybinding
@@ -135,17 +136,30 @@ public class Server {
 				String[] aRightHandSideElements = lineElements[1].trim().split("#");
 				String aName = aRightHandSideElements[0].trim();
 
-				if (keyBindings.keySet().contains(aKeyCode)) {
-					// TODO: remove the keyCode associated with the current category
-					return Response.serverError().entity("Cannot overwite existing key binding").build();
-				}
+//				
+				System.out.println("Accepting proposal to create key binding for " + aName + "("
+						+ aKeyCode + ")");
 				keyBindings.put(aKeyCode, aName);
 
 				// TODO: if it fails, recover and create the remaining ones
 			}
-			
+
 			for (String aKeyCode : keyBindings.keySet()) {
 				String aName = keyBindings.get(aKeyCode);
+//				{
+					Map<String, Object> paramValues = new HashMap<String, Object>();
+					paramValues.put("parendId", parentId);
+					paramValues.put("key", aKeyCode);
+					System.out.println("About to remove keybinding for " + aName);
+					JSONObject json = queryNeo4j(
+							"start parent=node({parentId}) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} SET category.key = null",
+							paramValues);
+					// TODO: remove the keyCode associated with the current
+					// category
+					keyBindings.remove(aKeyCode);
+					System.out.println("Removed keybinding for " + aName);
+//				}
+				
 				createNewKeyBinding(aName, aKeyCode, parentId);
 			}
 			JSONArray ret = getKeys(parentId);
@@ -164,7 +178,8 @@ public class Server {
 			paramValues.put("created", System.currentTimeMillis());
 			System.out.println("cypher params: " + paramValues);
 
-			// TODO: first check if there is already a node with this name, which is for re-associating the keycode with the category
+			// TODO: first check if there is already a node with this name,
+			// which is for re-associating the keycode with the category
 			JSONObject json = queryNeo4j(
 					"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
 					paramValues);
@@ -188,9 +203,8 @@ public class Server {
 		public JSONArray getKeys(Integer parentId) throws IOException, JSONException {
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("parentId", parentId);
-			// TODO: we would need to make the "key" part optional and instead check that it is a category node
 			JSONObject json = queryNeo4j(
-					"START n=node(*) MATCH parent-[c:CONTAINS]->n WHERE has(n.name) and has(n.key) and id(parent) = {parentId} RETURN ID(n),n.name,n.key",
+					"START n=node(*) MATCH parent-[c:CONTAINS]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN ID(n),n.name,n.key?",
 					params);
 			JSONArray data = (JSONArray) json.get("data");
 			JSONArray ret = new JSONArray();
@@ -202,7 +216,7 @@ public class Server {
 				String title = (String) a.get(1);
 				String url = (String) a.get(2);
 				o.put("name", title);
-				o.put("key", url);//TODO: this could be null
+				o.put("key", url);// TODO: this could be null
 				ret.put(o);
 			}
 			return ret;
