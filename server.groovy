@@ -101,11 +101,12 @@ public class Server {
 			
 			String newNodeId = (String) ((JSONArray)json.get("data")).get(0);
 			println "New node: " + newNodeId;
+			// TODO: Do not hard-code the root ID
 			JSONObject json2 = relateHelper(45, newNodeId);
 			// TODO: check that it returned successfully (redundant?)
-			
+			println( json2.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(json.get("data").toString()).type("application/json").build();
+					.entity(json2.get("data").toString()).type("application/json").build();
 		}
 		
 		
