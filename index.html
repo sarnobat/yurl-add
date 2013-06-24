@@ -10,9 +10,9 @@ var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
 var originalKeyBindings;
 var parentOfRootId;
-function addEmbeddedVideo(test) {
-	alert("added " + test);
-	//$("#embed-"+field.url).append(text);
+function addEmbeddedVideo(id, url) {
+//alert(id + "::" + url);
+	$("#" + id).append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
 }
 $(document).ready(function() {
 
@@ -65,9 +65,9 @@ $(document).ready(function() {
         }
         // TODO: This performs badly
         if (field.url.match("youtube.com")) {
+
+			$("#urls").append("<div id=\"youtube-"+field.id+"\"><a href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</a></div>");
         	
-			$("#urls").append("<div id=\"embed-"+field.url+"\"><a href='#' onclick='addEmbeddedVideo(\""+field.url+"\")'>Expand</a></div>");
-        	//$("#urls").append("<iframe width=420 height=345 src="+field.url.replace("watch?v=","embed/")+"></iframe>");
         }
         $("#urls").append("</li>");
       });
