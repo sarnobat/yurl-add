@@ -136,6 +136,7 @@ public class Server {
 				String aName = aRightHandSideElements[0].trim();
 
 				if (keyBindings.keySet().contains(aKeyCode)) {
+					// TODO: remove the keyCode associated with the current category
 					return Response.serverError().entity("Cannot overwite existing key binding").build();
 				}
 				keyBindings.put(aKeyCode, aName);
@@ -163,6 +164,7 @@ public class Server {
 			paramValues.put("created", System.currentTimeMillis());
 			System.out.println("cypher params: " + paramValues);
 
+			// TODO: first check if there is already a node with this name, which is for re-associating the keycode with the category
 			JSONObject json = queryNeo4j(
 					"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
 					paramValues);
@@ -186,6 +188,7 @@ public class Server {
 		public JSONArray getKeys(Integer parentId) throws IOException, JSONException {
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("parentId", parentId);
+			// TODO: we would need to make the "key" part optional and instead check that it is a category node
 			JSONObject json = queryNeo4j(
 					"START n=node(*) MATCH parent-[c:CONTAINS]->n WHERE has(n.name) and has(n.key) and id(parent) = {parentId} RETURN ID(n),n.name,n.key",
 					params);
@@ -199,7 +202,7 @@ public class Server {
 				String title = (String) a.get(1);
 				String url = (String) a.get(2);
 				o.put("name", title);
-				o.put("key", url);
+				o.put("key", url);//TODO: this could be null
 				ret.put(o);
 			}
 			return ret;
