@@ -139,6 +139,17 @@ $(document).ready(function() {
 
 
 function sendBatch() {
+
+
+	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + $("#urlBatchToSend").val() , function(result){
+	})
+	.success(function(data) {  
+		console.debug(data);
+	})
+	.error(function() { //alert("error occurred "); 
+	})
+	.complete(function() { });
+
 	alert('Batch sent');
 }
 
@@ -163,7 +174,7 @@ function sendBatch() {
 			<td></td>
 			<td>
 				<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
-				<textarea rows="20" cols="100"></textarea>
+				<textarea id="urlBatchToSend" rows="20" cols="100"></textarea>
 			</td>
 		</td>
 	</table>

@@ -74,6 +74,21 @@ public class Server {
 					.type("application/json").build();
 		}
 
+		//
+		// Batch
+		//
+		
+		@GET
+		@Path("batchInsert")
+		@Produces("application/text")
+		public Response batchInsert() throws IOException,
+				JSONException {
+			System.out.println("batchInsert");
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity("Success").type("text/plain").build();
+		}
+		
+		//
 		// ------------------------------------------------------------------------------------
 		// Backup
 		// ------------------------------------------------------------------------------------
