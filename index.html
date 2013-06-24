@@ -90,10 +90,8 @@ $(document).ready(function() {
 			if (field.url.match(".jpg$")) {
 				$("#" + field.id).append("<br><img src="+field.url+">");
 			}
-			// TODO: This performs badly unless you manually expand one at a time
 			if (field.url.match("youtube.com")) {
 				if (field.url.match("youtube.com/watch")) {
-					//http://img.youtube.com/vi/r53amME4wUE/sddefault.jpg
 					var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
 					$("#" + field.id).append("<br>");
 					$("#" + field.id).append("<img src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg'>");
