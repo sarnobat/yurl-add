@@ -4,10 +4,7 @@ open "index.html" || xdg-open "index.html"
 
 cd ..
 
-cd server
-cd .groovy/lib
-mkdir -p ~/.groovy/lib
-mv *jar ~/.groovy/lib/
-cd ../..
+mkdir -p ~/.groovy/lib 
+cp server/.groovy/lib/*jar ~/.groovy/lib/
 
-groovy webserver.groovy
+groovy server/webserver.groovy
