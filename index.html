@@ -52,6 +52,7 @@ $(document).ready(function() {
         	// Don't remove the "null" otherwise we'll assign hash to this category
         }
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
+        $("#keyLinks").append("<li style='text-transform:capitalize;'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + "</a></li>");
         $(window).keypress(function(event) {
         	if ($("#keys").is(":focus")) {
         		return;
@@ -143,6 +144,7 @@ $(document).ready(function() {
 		<td width="25%" valign=top>
 			Key bindings<br>
 			<textarea id="keys" cols="30" rows="20px"></textarea>
+			<ol id="keyLinks"></ol>
 			<br><br>
 		</td>
 		<td width="75%">
