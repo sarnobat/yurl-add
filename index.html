@@ -46,19 +46,20 @@ $(document).ready(function() {
     });
 
     function configureKeyBindings(result) {
+
       $.each(result, function(a,binding,c){
+            alert('here');
         if (binding.key == 'null') {
         	$("#keys").append("#");
         	// Don't remove the "null" otherwise we'll assign hash to this category
         }
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
         $("#keyLinks").append("<li style='text-transform:capitalize;'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + "</a></li>");
+
         $(window).keypress(function(event) {
+
         	if ($("#keys").is(":focus")) {
         		return;
-        	}
-        	if ('_' == String.fromCharCode(event.which)) {
-				removeTop();
         	}
         	if (binding.key == String.fromCharCode(event.which)) {
         		var parentId = binding.id;
@@ -71,6 +72,9 @@ $(document).ready(function() {
       });
       
 	  $(window).keypress(function(event) {
+			if ('_' == String.fromCharCode(event.which)) {
+				removeTop();
+			}
 		 if (String.fromCharCode(event.which) == '<') {
 		   console.debug("put back in parent");
 		   var parentId = parentOfRootId;
