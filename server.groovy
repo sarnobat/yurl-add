@@ -150,7 +150,7 @@ public class Server {
 					Map<String, Object> paramValues = new HashMap<String, Object>();
 					paramValues.put("parendId", parentId);
 					paramValues.put("key", aKeyCode);
-					System.out.println("About to remove keybinding for " + aName);
+					System.out.println("About to remove keybinding for " + aKeyCode);
 					JSONObject json = queryNeo4j(
 							"start parent=node({parentId}) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
 							paramValues);
