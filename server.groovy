@@ -477,10 +477,10 @@ public class Server {
 		@GET
 		@Path("stash")
 		@Produces("application/json")
-		public Response stash(@QueryParam("param1") String iUrl) throws JSONException, IOException {
+		public Response stash(@QueryParam("param1") String iUrl, @QueryParam("rootId") Integer iRoodId) throws JSONException, IOException {
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 			String theTitle = getTitle(new URL(theHttpUrl));
-			JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle, new Integer(45));
+			JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle, new Integer(iRoodId));
 			// TODO: check that it returned successfully (redundant?)
 			System.out.println(newNodeJsonObject.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")

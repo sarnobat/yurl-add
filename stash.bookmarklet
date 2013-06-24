@@ -1,6 +1,6 @@
 javascript:(function(){
 	var x = new XMLHttpRequest();
-	x.open('GET','http://netgear.rohidekar.com:4447/yurl/stash?param1=' +  encodeURIComponent(location.href),true);
+	x.open('GET','http://netgear.rohidekar.com:4447/yurl/stash?rootId=45&param1=' +  encodeURIComponent(location.href),true);
 	x.onreadystatechange = function(){
 	
 		if(x.readyState==4) {

@@ -101,15 +101,7 @@ $(document).ready(function() {
 					$("#" + field.id).append("<img src='http://img.youtube.com/vi/"+youtubeId+"/1.jpg'>");
 					$("#" + field.id).append("<img src='http://img.youtube.com/vi/"+youtubeId+"/2.jpg'>");
 					$("#" + field.id).append("<img src='http://img.youtube.com/vi/"+youtubeId+"/3.jpg'>");
-					/*$("#" + field.id).append("<img src='http://img.youtube.com/vi/"+youtubeId+"/sddefault.jpg'>");
-					$("#" + field.id).append("<img src='http://img.youtube.com/vi/"+youtubeId+"/mqdefault.jpg'>");
-					$("#" + field.id).append("<img src='http://img.youtube.com/vi/"+youtubeId+"/hqdefault.jpg'>");
-					$("#" + field.id).append("<img src='http://img.youtube.com/vi/"+youtubeId+"/default.jpg'>");
-					$("#" + field.id).append("<img src='http://img.youtube.com/vi/"+youtubeId+"/maxresdefault.jpg'>");
-					*/
 					$("#" + field.id).append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
-					$("#" + field.id).append("<br>");
-					$("#" + field.id).append("<input type=button value=Tag onClick='tagUrlWithSelections("+field.id+")'>");
 					$("#" + field.id).append("");
 					$("#" + field.id).append("");
 				}
@@ -120,6 +112,9 @@ $(document).ready(function() {
 				var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
 				$("#" + field.id).append("<img src='"+productImageUrl+"' height='280'>");
 			}
+			$("#" + field.id).append("<br>");
+			$("#" + field.id).append("<input type=button value=Tag onClick='tagUrlWithSelections("+field.id+")'>");
+
 			$("#urls").append("</font></li>");
 		});
 		$("#status").text("Done")
@@ -196,7 +191,7 @@ $(document).ready(function() {
 		.success(
 			function(data) { 
 			      $.each(data, function(a,category,c){
-						$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"'>" + category.name + " (" + category.id + ")</a></input>");
+						$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"' style='text-transform:capitalize;'>" + category.name + " (" + category.id + ")</a></input>");
 						$("#categoriesRecursive").append("<br>");
 					});
 				//categoriesRecursive
