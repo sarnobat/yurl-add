@@ -107,7 +107,6 @@ $(document).ready(function() {
 					$("#" + field.id).append("<img src='http://img.youtube.com/vi/"+youtubeId+"/maxresdefault.jpg'>");
 					*/
 					$("#" + field.id).append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
-//					$("#" + field.id).append("<div>Tags:<br><input type=\"checkbox\" onclick='tag("+field.id+",\"watch these\")' /> watch this</div>");
 					$("#" + field.id).append("<br>");
 					$("#" + field.id).append("<input type=button value=Tag onClick='tagUrlWithSelections("+field.id+")'>");
 					$("#" + field.id).append("");
@@ -378,7 +377,6 @@ function tagUrlWithSelections(nodeId) {
 				<textarea id="keys" cols="30" rows="20px"></textarea>
 				<ol id="keyLinks"></ol>
 				<br><br>
-				<input type=button onclick="getTagSelections()">
 				<div id="categoriesRecursive">
 				</div>
 				
