@@ -80,23 +80,28 @@ public class Server {
 		//
 		// Batch
 		//
-		
+
 		@GET
 		@Path("batchInsert")
 		@Produces("application/json")
-	public Response batchInsert(@QueryParam("rootId") Integer iRootId, @QueryParam("urls") String iUrls) throws IOException,
-				JSONException {
+		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
+				@QueryParam("urls") String iUrls) throws IOException, JSONException {
 			System.out.println("batchInsert - " + iRootId);
-//			System.out.println("batchInsert - " + URLDecoder.decode(iUrls, "UTF-8"));
+			// System.out.println("batchInsert - " + URLDecoder.decode(iUrls,
+			// "UTF-8"));
 			StringBuffer unsuccessfulLines = new StringBuffer();
-			
+
 			String[] lines = iUrls.trim().split("\\n");
 			int i = 0;
 			while (i < lines.length) {
-				if (lines[i].matches("^=")) {
-					throw new RuntimeException("Not supported");
+				if (lines[i].startsWith("=")) {
+					throw new RuntimeException("Not supported 1");
 				}
-               if (lines[i].matches("^\\s*" + '$')) {
+				if (lines[i].startsWith("http")) {
+
+					throw new RuntimeException("Not supported 2");
+				}
+				if (lines[i].matches("^\\s*" + '$')) {
 
 					System.out.println("whitespace: " + lines[i]);
 					++i;
@@ -105,8 +110,8 @@ public class Server {
 				if (lines[i].startsWith("\"") && lines[i + 1].startsWith("http")) {
 
 					System.out.println("to be processed: " + lines[i]);
-					System.out.println("to be processed: " + lines[i+1]);
-					i+=2;
+					System.out.println("to be processed: " + lines[i + 1]);
+					i += 2;
 				} else {
 					unsuccessfulLines.append(lines[i]);
 					unsuccessfulLines.append(lines[i + 1]);
@@ -118,10 +123,10 @@ public class Server {
 			}
 			JSONObject entity = new JSONObject();
 			entity.put("unsuccessful", unsuccessfulLines.toString());
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(entity).type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(entity)
+					.type("application/json").build();
 		}
-		
+
 		//
 		// ------------------------------------------------------------------------------------
 		// Backup
@@ -146,7 +151,8 @@ public class Server {
 					.entity(plainText.toString()).type("text/plain").build();
 		}
 
-		private void printNode(Integer iRootId, StringBuffer json, StringBuffer plainText,Set<String> visitedInternalNodes) throws IOException, JSONException {
+		private void printNode(Integer iRootId, StringBuffer json, StringBuffer plainText,
+				Set<String> visitedInternalNodes) throws IOException, JSONException {
 			json.append("bar");
 			Map<String, Object> theParams = new HashMap<String, Object>();
 			theParams.put("nodeId", iRootId);
@@ -156,20 +162,21 @@ public class Server {
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONArray aNode = (JSONArray) jsonArray.get(i);
 				JSONObject object = (JSONObject) ((JSONObject) aNode.get(0)).get("data");
-				
+
 				String id = (String) checkNotNull(aNode.get(1));
 				if (visitedInternalNodes.contains(id)) {
 					continue;
 				}
 				System.out.println("1.5");
-				
-				if (object.has("type") && object.get("type") != null && object.get("type").equals("categoryNode")) {
+
+				if (object.has("type") && object.get("type") != null
+						&& object.get("type").equals("categoryNode")) {
 					plainText.append("=== ");
 					plainText.append(object.get("name"));
 					plainText.append(" ===\n");
-					
-				}  
-				
+
+				}
+
 				if (object.has("title")) {
 					plainText.append("\"");
 					plainText.append(object.get("title"));
@@ -185,12 +192,12 @@ public class Server {
 					plainText.append("\n");
 					plainText.append("\n");
 				}
-				
+
 				json.append(object);
 				System.out.println("2");
 				visitedInternalNodes.add(id);
-				
-				printNode(Integer.parseInt(id), json,plainText,visitedInternalNodes);
+
+				printNode(Integer.parseInt(id), json, plainText, visitedInternalNodes);
 			}
 		}
 
