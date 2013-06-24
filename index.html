@@ -59,6 +59,10 @@ $(document).ready(function() {
         if (field.url.match(".jpg$")) {
 			$("#urls").append("<img src="+field.url+">");        	
         }
+        // TODO: This performs badly
+        if (field.url.match("youtube.com")) {
+        	//$("#urls").append("<iframe width=420 height=345 src="+field.url.replace("watch?v=","embed/")+"></iframe>");
+        }
         $("#urls").append("</li>");
       });
 	  $("#status").text("Done")
