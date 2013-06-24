@@ -200,13 +200,13 @@ $(document).ready(function() {
 function moveUp(source) {
 	var second = source;
 	var first = $("#" + source).prev().attr('id');
-//	alert($("#" + source).prev().children().eq(0).text());
-//alert(first+"::" + second);
 	$("#" + second).after($("#" + first));
 }
 
 function moveDown(source) {
-	alert($("#" + source).next().children().eq(0).text());
+	var second = $("#" + source).next().attr('id');
+	var first = source;
+	$("#" + second).after($("#" + first));
 }
 
 function sendBatch() {
