@@ -270,7 +270,7 @@ public class Server {
 			// TODO: order these by most recent-first (so that they appear this
 			// way in the UI)
 			JSONObject theQueryResultJson = execute(
-					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?",
+					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?,n.created? ORDER BY n.created? DESC",
 					theParams);
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
