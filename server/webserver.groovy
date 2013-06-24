@@ -3,7 +3,7 @@ import java.net.URISyntaxException;
 import org.htmlcleaner.*;
 import org.codehaus.jettison.json.JSONObject;
 import org.apache.commons.lang.StringEscapeUtils;
-
+import java.net.URLDecoder;
 import javax.ws.rs.core.MediaType;
 
 import com.sun.jersey.api.client.Client;
@@ -34,7 +34,7 @@ class MyHandler implements HttpHandler {
 		for (String param : params)  
 		{  
 			String name = param.split("=")[0];  
-			String value = param.split("=")[1];  
+			String value = URLDecoder.decode(param.split("=")[1], "UTF-8");
 			map.put(name, value);  
 		}
 		println(map.keySet());
