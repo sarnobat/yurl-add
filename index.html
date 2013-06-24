@@ -202,14 +202,16 @@ $(document).ready(function() {
 function moveToTop(source) {
 	var idToMove = source;
 	var firstId = $("#urls").children().first().attr("id");
-	var elem = $("#" + idToMove).remove();
-	$("#urls").prepend(elem);
+
 
 	if (orderedDescending) {
 		// 1 more than latest timestamp
-		$.getJSON(urlBase + "/surpassOrdinal?nodeIdToChange=" + nodeId + "&nodeIdToSurpass=" + firstId, function(result){
-		})
+		$.getJSON(urlBase + "/surpassOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToSurpass=" + firstId,
+			function(result){
+			})
 			.success(function(data) {  
+				var elem = $("#" + idToMove).remove();
+				$("#urls").prepend(elem);
 			})
 			.error(function() {
 				alert("error occurred "); 
@@ -224,12 +226,14 @@ function moveToTop(source) {
 function moveToBottom(source) {
 	var idToMove = source;
 	var lastId = $("#urls").children().last().attr("id");
-	var elem = $("#" + idToMove).remove();
-	$("#urls").append(elem);
+
 	if (orderedDescending) {
-		$.getJSON(urlBase + "/undercutOrdinal?nodeIdToChange=" + nodeId + "&nodeIdToUndercut=" + lastId, function(result){
-		})
+		$.getJSON(urlBase + "/undercutOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToUndercut=" + lastId, 
+			function(result){
+			})
 			.success(function(data) {  
+				var elem = $("#" + idToMove).remove();
+				$("#urls").append(elem);
 			})
 			.error(function() {
 				alert("error occurred "); 

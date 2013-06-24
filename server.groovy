@@ -532,6 +532,45 @@ public class Server {
 		}
 
 		@GET
+		@Path("surpassOrdinal")
+		@Produces("application/json")
+		public Response surpassOrdinal(@QueryParam("nodeIdToChange") Integer nodeIdToChange,
+				@QueryParam("nodeIdToSurpass") Integer nodeIdToSurpass) throws IOException, JSONException {
+			
+			System.out.println("surpassOrdinals");
+
+			Map<String, Object> theParams = new HashMap<String, Object>();
+			theParams.put("nodeIdToChange", nodeIdToChange);
+			theParams.put("nodeIdToSurpass", nodeIdToSurpass);
+
+			JSONObject jsonObject = execute(" start n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) set n.ordinal=n2.ordinal + 100 return n.ordinal,n2.ordinal", theParams);
+
+			JSONObject ret = new JSONObject();
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
+					.type("application/json").build();
+		}
+
+		@GET
+		@Path("undercutOrdinal")
+		@Produces("application/json")
+		public Response undercutOrdinal(@QueryParam("nodeIdToChange") Integer nodeIdToChange,
+				@QueryParam("nodeIdToUndercut") Integer nodeIdToUndercut) throws IOException, JSONException {
+		
+			System.out.println("undercutOrdinal");
+
+			Map<String, Object> theParams = new HashMap<String, Object>();
+			theParams.put("nodeIdToChange", nodeIdToChange);
+			theParams.put("nodeIdToUndercut", nodeIdToUndercut);
+
+			JSONObject jsonObject = execute(" start n=node({nodeIdToChange}),n2=node({nodeIdToUndercut}) set n.ordinal=n2.ordinal - 100 return n.ordinal,n2.ordinal", theParams);
+
+			JSONObject ret = new JSONObject();
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
+					.type("application/json").build();
+			
+		}
+
+		@GET
 		@Path("swapOrdinals")
 		@Produces("application/json")
 		public Response swapOrdinals(@QueryParam("firstId") Integer iFirstId,
