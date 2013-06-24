@@ -138,7 +138,7 @@ public class Server {
 							System.out.println("Not supported 3");
 							throw new RuntimeException("Not supported 3");
 						}
-						
+
 						i += 2;
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -455,7 +455,7 @@ public class Server {
 		public Response stash(@QueryParam("param1") String iUrl) throws JSONException, IOException {
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 			String theTitle = getTitle(new URL(theHttpUrl));
-			JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle);
+			JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle, new Integer(45));
 			// TODO: check that it returned successfully (redundant?)
 			System.out.println(newNodeJsonObject.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -463,8 +463,8 @@ public class Server {
 					.build();
 		}
 
-		public JSONObject createNode(String theHttpUrl, String theTitle) throws IOException,
-				JSONException {
+		public JSONObject createNode(String theHttpUrl, String theTitle, Integer rootId)
+				throws IOException, JSONException {
 			Map<String, Object> theParamValues = new HashMap<String, Object>();
 			_1: {
 				theParamValues.put("url", theHttpUrl);
@@ -478,8 +478,7 @@ public class Server {
 			JSONArray theNewNodeId = (JSONArray) ((JSONArray) json.get("data")).get(0);
 			System.out.println("New node: " + theNewNodeId.get(0));
 			// TODO: Do not hard-code the root ID
-			JSONObject newNodeJsonObject = relateHelper(new Integer(45),
-					(Integer) theNewNodeId.get(0));
+			JSONObject newNodeJsonObject = relateHelper(rootId, (Integer) theNewNodeId.get(0));
 			return newNodeJsonObject;
 		}
 
