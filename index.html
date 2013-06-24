@@ -52,23 +52,23 @@ $(document).ready(function() {
 			var color = "";
 			var titlePlusUrl = field.title + field.url;
 			if (titlePlusUrl.match(new RegExp('neo','i'))) {
-				color= "MediumSeaGreen";
+				color = "MediumSeaGreen";
 			} else if (titlePlusUrl.match(new RegExp('ubuntu','i'))) {
-				color= "LightSteelBlue";
+				color = "LightSteelBlue";
 			} else if (titlePlusUrl.match(new RegExp('database','i'))
 					   || titlePlusUrl.match(new RegExp('sql','i'))) {
-				color= "SlateBlue";
+				color = "SlateBlue";
 			} else if (titlePlusUrl.match(new RegExp('java\\b','i'))
 					   || titlePlusUrl.match(new RegExp('exception\\b','i'))) {
-				color= "DarkOrange";
+				color = "DarkOrange";
 			}  else if (titlePlusUrl.match(new RegExp('javascript','i'))
 						|| titlePlusUrl.match(new RegExp('ajax','i')) 
 						|| titlePlusUrl.match(new RegExp('jquery','i')) ) {
-				color= "Gold";
+				color = "Gold";
 			} else if (titlePlusUrl.match(new RegExp('amazon\\b','i'))) {
-				color= "Chocolate";
+				color = "Chocolate";
 			} else if (titlePlusUrl.match(new RegExp('youtube','i'))) {
-				color= "#FF0000";
+				color = "#FF0000";
 			} 
 			
 			$("#urls").append("<li id="+field.id+">");
