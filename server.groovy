@@ -154,11 +154,8 @@ public class Server {
 				JSONObject json = execute(
 						"start parent=node({parentId}) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
 						paramValues);
-				// TODO: remove the keyCode associated with the current
-				// category
 				keyBindings.remove(aKeyCode);
 				System.out.println("Removed keybinding for " + aName);
-				// }
 
 				createNewKeyBinding(aName, aKeyCode, parentId);
 			}
