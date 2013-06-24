@@ -192,9 +192,9 @@ $(document).ready(function() {
 		.success(
 			function(data) { 
 			      $.each(data, function(a,category,c){
-						$("#categoriesRecursive").append("<input type=checkbox name=nodeId value="+category.id +">");
-						$("#categoriesRecursive").append(category.name);
-						$("#categoriesRecursive").append("</input>");
+						$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +">");
+						$("#categoriesRecursive").append(category.name + " (" + category.id);
+						$("#categoriesRecursive").append(")</input>");
 						$("#categoriesRecursive").append("<br>");
 					});
 				//categoriesRecursive
