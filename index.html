@@ -139,15 +139,15 @@ $(document).ready(function() {
 
 
 function sendBatch() {
-alert("about to encode");
-var urls = "";
-//var urls = $("#urlBatchToSend").val();
-alert("encoded");
-	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + urls) , function(result){})
+//alert("about to encode");
+var urls = encodeURIComponent($("#urlBatchToSend").val());
+//alert("encoded");
+	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + urls, function(result){})
 		.success(function(data) {  
 			console.debug(data);	
 		})
 		.error( function(data) { 
+			console.debug(data);
 			alert("error occurred "); 
 		} )
 		.complete( function() {} );
@@ -174,14 +174,122 @@ alert("encoded");
 		<tr>
 			<td></td>
 			<td>
-				<input type="button" value="Add URLs" onclick="alert('hi');sendBatch()" /><br>
+				<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
 				<textarea id="urlBatchToSend" rows="20" cols="100">
-"Nationalism - Wikipedia, the free encyclopedia","http://en.wikipedia.org/wiki/Nationalism"
-http://en.wikipedia.org/wiki/Nationalism
 
-"Battle of Kosovo - Wikipedia, the free encyclopedia","http://en.wikipedia.org/wiki/Battle_of_Kosovo"
-http://en.wikipedia.org/wiki/Battle_of_Kosovo
+"Pamela gets felt up - YouTube","http://www.youtube.com/watch?v=AKMm6eYVo0Y"
+http://www.youtube.com/watch?v=AKMm6eYVo0Y
 
+"Applied mathematics - Wikipedia, the free encyclopedia","http://en.wikipedia.org/wiki/Applied_mathematics"
+http://en.wikipedia.org/wiki/Applied_mathematics
+
+"Amazon.com: Dance The Night Away: The Mavericks: MP3 Downloads","http://www.amazon.com/Dance-The-Night-Away/dp/B000W02PD8/ref=sr_1_1?ie=UTF8&qid=1372979722&sr=8-1&keywords=Mavericks+-+Dance+The+Night+Away"
+http://www.amazon.com/Dance-The-Night-Away/dp/B000W02PD8/ref=sr_1_1?ie=UTF8&qid=1372979722&sr=8-1&keywords=Mavericks+-+Dance+The+Night+Away
+
+"The Game Of Their Lives (North Korea/Football Documentary) - YouTube","http://www.youtube.com/watch?v=zncAUDE3v10"
+http://www.youtube.com/watch?v=zncAUDE3v10
+
+"Day 1 Part 1: Intro to Software RE (Reverse Engineering) - YouTube","http://www.youtube.com/watch?v=byK0tXH5axQ&list=PLJUuc7dxszFRu7O4xoDSheuKs5yURM7W6"
+http://www.youtube.com/watch?v=byK0tXH5axQ&list=PLJUuc7dxszFRu7O4xoDSheuKs5yURM7W6
+
+"OSCON 09: Michael Lopp, "A Brief History of Software" - YouTube","http://www.youtube.com/watch?v=EP9aURVOq7M"
+http://www.youtube.com/watch?v=EP9aURVOq7M
+
+"r tutorial - YouTube","http://www.youtube.com/results?search_query=r+tutorial&page=2"
+http://www.youtube.com/results?search_query=r+tutorial&page=2
+
+"Hamming, "History of Computers - Software" (April 4, 1995) - YouTube","http://www.youtube.com/watch?v=2e5_Z6oZ0rM"
+http://www.youtube.com/watch?v=2e5_Z6oZ0rM
+
+"Hamming, "History of Computers - Applications" (April 6, 1995) - YouTube","http://www.youtube.com/watch?v=Au6kopvPKCI"
+http://www.youtube.com/watch?v=Au6kopvPKCI
+
+"Us dancing to My first kiss - YouTube","http://www.youtube.com/watch?v=ZpWHyVsGobM"
+http://www.youtube.com/watch?v=ZpWHyVsGobM
+
+"us dancing to starships:) :) :) :) - YouTube","http://www.youtube.com/watch?v=e3eBoCCtxeQ"
+http://www.youtube.com/watch?v=e3eBoCCtxeQ
+
+"Us Dancing :) - YouTube","http://www.youtube.com/watch?v=fSY_cyGtwPY"
+http://www.youtube.com/watch?v=fSY_cyGtwPY
+
+"Us dancing and being retarted - YouTube","http://www.youtube.com/watch?v=ikm5IO2Y6K8"
+http://www.youtube.com/watch?v=ikm5IO2Y6K8
+
+"hit the lights 1 - YouTube","http://www.youtube.com/watch?v=UL5TIE59RNo"
+http://www.youtube.com/watch?v=UL5TIE59RNo
+
+"laell dancing to omg - YouTube","http://www.youtube.com/watch?v=TPDbNVD6ewk"
+http://www.youtube.com/watch?v=TPDbNVD6ewk
+
+"Good cop/bad cop - Wikipedia, the free encyclopedia","http://en.wikipedia.org/wiki/Good_cop/bad_cop"
+http://en.wikipedia.org/wiki/Good_cop/bad_cop
+
+"Timeline Photos","http://www.facebook.com/photo.php?fbid=568421266529581&set=a.131620973542948.11384.114984995206546&type=1&ref=nf"
+http://www.facebook.com/photo.php?fbid=568421266529581&set=a.131620973542948.11384.114984995206546&type=1&ref=nf
+
+"Mega bolly treat - All in one place !! - Page 551 - eXBii","http://www.exbii.com/showthread.php?t=56603&page=551"
+http://www.exbii.com/showthread.php?t=56603&page=551
+
+"Laila Rouass - Bollygallery Album","http://www.bollygallery.com/index.php?f=157545"
+http://www.bollygallery.com/index.php?f=157545
+
+"a.r.kp (12).jpg (800×427)","http://f6.filesquick.com/1499731/1368578414/a.r.kp%20(12).jpg"
+http://f6.filesquick.com/1499731/1368578414/a.r.kp%20(12).jpg
+
+"a.r.kp (11).jpg (800×427)","http://f6.filesquick.com/1499730/1368578414/a.r.kp%20(11).jpg"
+http://f6.filesquick.com/1499730/1368578414/a.r.kp%20(11).jpg
+
+"a.r.kp (9).jpg (800×427)","http://f6.filesquick.com/1499728/1368578414/a.r.kp%20(9).jpg"
+http://f6.filesquick.com/1499728/1368578414/a.r.kp%20(9).jpg
+
+"cs-nnan.flv0850.jpg (640×480)","http://f6.filesquick.com/1499424/1368553134/cs-nnan.flv0850.jpg"
+http://f6.filesquick.com/1499424/1368553134/cs-nnan.flv0850.jpg
+
+"Kareena Kapoor Khan - 3101 - Bollygallery Image","http://www.bollygallery.com/index.php?i=166408"
+http://www.bollygallery.com/index.php?i=166408
+
+"Katrina Kaif - Bollygallery Album","http://www.bollygallery.com/index.php?f=7179"
+http://www.bollygallery.com/index.php?f=7179
+
+"Esha Gupta - Bollygallery Album","http://www.bollygallery.com/index.php?f=2364"
+http://www.bollygallery.com/index.php?f=2364
+
+"Facebook","http://www.facebook.com/"
+http://www.facebook.com/
+
+"Happy in St. Helena!","http://www.facebook.com/photo.php?fbid=10100672036240783&set=pcb.10100672037697863&type=1&relevant_count=3&ref=nf"
+http://www.facebook.com/photo.php?fbid=10100672036240783&set=pcb.10100672037697863&type=1&relevant_count=3&ref=nf
+
+"Happy in St. Helena!","http://www.facebook.com/photo.php?fbid=10100672036275713&set=pcb.10100672037697863&type=1&relevant_count=2&ref=nf"
+http://www.facebook.com/photo.php?fbid=10100672036275713&set=pcb.10100672037697863&type=1&relevant_count=2&ref=nf
+
+"Timeline Photos","http://www.facebook.com/photo.php?fbid=678460945503773&set=a.106824956000711.13776.100000196222438&type=1&ref=nf"
+http://www.facebook.com/photo.php?fbid=678460945503773&set=a.106824956000711.13776.100000196222438&type=1&ref=nf
+
+"Anybody else here hate jocks & cheerleaders? - Yahoo! Answers","http://answers.yahoo.com/question/index?qid=20130519185430AAXmi0A"
+http://answers.yahoo.com/question/index?qid=20130519185430AAXmi0A
+
+"Cheerleader draining Jocks of muscle - YouTube","http://www.youtube.com/watch?v=ASY-bjpv90Y"
+http://www.youtube.com/watch?v=ASY-bjpv90Y
+
+"Back To School Emergency Kit For Middle School Girls (video4) - YouTube","http://www.youtube.com/watch?v=JManrRaRHUg"
+http://www.youtube.com/watch?v=JManrRaRHUg
+
+"Cute girly Back To School Outfits 2011: Featuring Skirts - YouTube","http://www.youtube.com/watch?v=n7qHw1_KUzo"
+http://www.youtube.com/watch?v=n7qHw1_KUzo
+
+"High School Makeup Tutorial - YouTube","http://www.youtube.com/watch?v=OxWgq9HmzDM"
+http://www.youtube.com/watch?v=OxWgq9HmzDM
+
+"First Day of Freshman Year Vlog - YouTube","http://www.youtube.com/watch?v=oP73jpS4_3s"
+http://www.youtube.com/watch?v=oP73jpS4_3s
+
+"How to Become Popular in High School *Girl Edition* - YouTube","http://www.youtube.com/watch?v=E2hHzhgYd04"
+http://www.youtube.com/watch?v=E2hHzhgYd04
+
+"Middle School Girls Rock Out - YouTube","http://www.youtube.com/watch?v=QexlcNvkchk"
+http://www.youtube.com/watch?v=QexlcNvkchk
 				</textarea>
 			</td>
 		</td>

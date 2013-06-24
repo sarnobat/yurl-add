@@ -1,6 +1,8 @@
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -39,6 +41,8 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.apache.commons.lang.*;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -85,7 +89,7 @@ public class Server {
 		@Path("batchInsert")
 		@Produces("application/json")
 		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
-				@QueryParam("urls") String iUrls) throws IOException, JSONException {
+				@QueryParam("urls") String iUrls) throws Exception {
 			System.out.println("batchInsert - " + iRootId);
 			// System.out.println("batchInsert - " + URLDecoder.decode(iUrls,
 			// "UTF-8"));
@@ -94,30 +98,62 @@ public class Server {
 			String[] lines = iUrls.trim().split("\\n");
 			int i = 0;
 			while (i < lines.length) {
+
+				System.out.println("1");
 				if (lines[i].startsWith("=")) {
+					System.out.println("Not supported 1");
 					throw new RuntimeException("Not supported 1");
 				}
+				System.out.println("2");
 				if (lines[i].startsWith("http")) {
-
+					System.out.println("Not supported 2");
 					throw new RuntimeException("Not supported 2");
 				}
+				System.out.println("3");
 				if (lines[i].matches("^\\s*" + '$')) {
 
 					System.out.println("whitespace: " + lines[i]);
 					++i;
 					continue;
 				}
+				System.out.println("4");
 				if (lines[i].startsWith("\"") && lines[i + 1].startsWith("http")) {
 
 					System.out.println("to be processed: " + lines[i]);
 					System.out.println("to be processed: " + lines[i + 1]);
-					i += 2;
-				} else {
-					unsuccessfulLines.append(lines[i]);
-					unsuccessfulLines.append(lines[i + 1]);
-					unsuccessfulLines.append(lines[i + 2]);
 
-					System.out.println("unsuccessful: " + lines[i]);
+					System.out.println("5");
+					Reader reader2 = new StringReader(lines[i]);
+					System.out.println("5.25");
+					try {
+						CSVReader reader = new CSVReader(reader2);
+						System.out.println("5.5");
+						String[] segments = reader.readNext();
+
+						System.out.println("6");
+						String title = segments[0];
+						String url = segments[1];
+						reader.close();
+						System.out.println("7");
+						if (!url.equals(lines[i + 1])) {
+							System.out.println("Not supported 3");
+							throw new RuntimeException("Not supported 3");
+						}
+
+						i += 2;
+					} catch (Exception e) {
+						e.printStackTrace();
+						throw e;
+					}
+
+				} else {
+					// unsuccessfulLines.append(lines[i]);
+					// unsuccessfulLines.append(lines[i + 1]);
+					// unsuccessfulLines.append(lines[i + 2]);
+					//
+					// System.out.println("unsuccessful: " + lines[i]);
+					System.out.println("Not supported 4");
+					throw new RuntimeException("Not supported 4");
 				}
 
 			}
