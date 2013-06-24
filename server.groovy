@@ -1,4 +1,4 @@
-import static com.google.common.base.Preconditions.checkNotNull;P
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.net.URI;
@@ -72,6 +72,20 @@ public class Server {
 			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
+		}
+
+
+		// ------------------------------------------------------------------------------------
+		// Page operations
+		// ------------------------------------------------------------------------------------
+
+		@GET
+		@Path("dumpurls")
+		@Produces("application/text")
+		public Response dumpUrls(@QueryParam("rootId") Integer iRootId) {
+			println("dumpUrls");
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity("foobar")
+					.type("text/plain").build();
 		}
 
 		// ------------------------------------------------------------------------------------
