@@ -683,27 +683,29 @@ public class Server {
 		@GET
 		@Path("categoriesRecursive")
 		@Produces("application/json")
-		public Response relate(@QueryParam("parentId") Integer iParentId) throws JSONException,
+		public Response categoriesRecursive(@QueryParam("parentId") Integer iParentId) throws JSONException,
 				IOException {
+			System.out.println("categoriesRecurisve() - begin");
 			Map<String, Object> theParams = new HashMap<String, Object>();
 			_1: {
 				theParams.put("parentId", iParentId);
 			}
 			JSONObject theQueryJsonResult = execute(
-					"START n=node(*) MATCH parent-[c:CONTAINS]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN ID(n),n.name,n.key?",
+					"START n=node(*) MATCH parent-[c:CONTAINS*]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN distinct ID(n),n.name",
 					theParams);
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
+				System.out.println("categoriesRecurisve() - " + i);
 				JSONObject aBindingObject = new JSONObject();
 				_1: {
 					JSONArray aBindingArray = theData.getJSONArray(i);
 					String id = (String) aBindingArray.get(0);
 					aBindingObject.put("id", id);
 					String title = (String) aBindingArray.get(1);
-					String aUrl = (String) aBindingArray.get(2);
 					aBindingObject.put("name", title);
 					oKeys.put(aBindingObject);
+					System.out.println("categoriesRecurisve() - " + id + "\t::\t" + title);
 				}
 			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")

@@ -189,8 +189,8 @@ $(document).ready(function() {
     ////
 	var url = urlBase + "/categoriesRecursive?parentId=" + rootId;
 	$.getJSON(url, function(result){})
-		.success(function() { alert("success "); })
-		.error(function() { //alert("error occurred "); })
+		.success(function(data) { alert(data[0].name); })
+		.error(function() {  })
 		.complete(function() {  });
 
 
