@@ -455,6 +455,16 @@ public class Server {
 		public Response stash(@QueryParam("param1") String iUrl) throws JSONException, IOException {
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 			String theTitle = getTitle(new URL(theHttpUrl));
+			JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle);
+			// TODO: check that it returned successfully (redundant?)
+			System.out.println(newNodeJsonObject.toString());
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(newNodeJsonObject.get("data").toString()).type("application/json")
+					.build();
+		}
+
+		public JSONObject createNode(String theHttpUrl, String theTitle) throws IOException,
+				JSONException {
 			Map<String, Object> theParamValues = new HashMap<String, Object>();
 			_1: {
 				theParamValues.put("url", theHttpUrl);
@@ -470,11 +480,7 @@ public class Server {
 			// TODO: Do not hard-code the root ID
 			JSONObject newNodeJsonObject = relateHelper(new Integer(45),
 					(Integer) theNewNodeId.get(0));
-			// TODO: check that it returned successfully (redundant?)
-			System.out.println(newNodeJsonObject.toString());
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(newNodeJsonObject.get("data").toString()).type("application/json")
-					.build();
+			return newNodeJsonObject;
 		}
 
 		private String getTitle(final URL iUrl) {
