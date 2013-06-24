@@ -76,17 +76,25 @@ public class Server {
 
 
 		// ------------------------------------------------------------------------------------
-		// Page operations
+		// Backup
 		// ------------------------------------------------------------------------------------
 
 		@GET
 		@Path("dumpurls")
 		@Produces("application/text")
 		public Response dumpUrls(@QueryParam("rootId") Integer iRootId) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("foo\n");
+			printNode(iRootId, sb);
 			println("dumpUrls");
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity("foobar")
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(sb.toString())
 					.type("text/plain").build();
 		}
+		
+		private static void printNode(Integer iRootId, StringBuffer sb) {
+			sb.append("bar");
+		} 
+		
 
 		// ------------------------------------------------------------------------------------
 		// Page operations
