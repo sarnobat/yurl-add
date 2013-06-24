@@ -62,10 +62,9 @@ var rootColor = MD5(rootId).substring(0,6);
     
 	$.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
 		$("#status").text("Populating")
-		var number = 0;
-		$.each(result, function(resultRowNumber, field) {				
-			number++;
-			if (number > 500) {
+		$.each(result, function(resultRowNumber, field) {
+			console.debug("resultRowNumber:  "+ resultRowNumber + " of " + result.length);
+			if (resultRowNumber > 500 && resultRowNumber < result.length - 10) {
 				return;
 			}
 			// Colors
@@ -94,21 +93,22 @@ var rootColor = MD5(rootId).substring(0,6);
 			$("#urls").append("<li id="+field.id+" class='buttonize'>");
 			
 
-			var urlElements = field.url.match(/^http:\/\/[^/]+/);
-			if (urlElements != null) {
-				var site = urlElements[0];
-				$("#" + field.id).append("<img src='" + site + "/favicon.ico' width=30 onerror=\"this.style.display='none'\" class='buttonize'>");
-			}
-
 			$("#" + field.id).append("<input type=button value='Top' onclick='moveToTop("+field.id+")'>");
 			$("#" + field.id).append("<input type=button value='Move Up' onclick='moveUp("+field.id+")'>");
 			$("#" + field.id).append("<input type=button value='Move Down' onclick='moveDown("+field.id+")'>");
 			$("#" + field.id).append("<input type=button value='Bottom' onclick='moveToBottom("+field.id+")'>");
+
+			var urlElements = field.url.match(/^http:\/\/[^/]+/);
+			if (urlElements != null) {
+				var site = urlElements[0];
+				$("#" + field.id).append("<br>");
+				$("#" + field.id).append("<img src='" + site + "/favicon.ico' width=30 onerror=\"this.style.display='none'\" class='buttonize'>");
+			}
 			
 			var urlRoot = field.url.replace(/.*:(\/\/[^\/]+).*/ig,"$1");
 			var colorCode = MD5(urlRoot).substring(0,6);
 			$("#" + field.id).append("<font style=\"color: #"+colorCode+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<br><a href='" +field.url+"'>Open</a>");
-			if (field.url.match(".jpg$") || field.url.match(".gif$")) {
+			if (field.url.match(".jpg\??") || field.url.match(".gif$") || field.url.match(".png\??")) {
 				$("#" + field.id).append("<br><img src="+field.url+">");
 			}
 			if (field.url.match("youtube.com")) {
