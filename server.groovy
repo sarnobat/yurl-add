@@ -138,7 +138,7 @@ public class Server {
 							System.out.println("Not supported 3");
 							throw new RuntimeException("Not supported 3");
 						}
-
+						
 						i += 2;
 					} catch (Exception e) {
 						e.printStackTrace();
