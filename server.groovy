@@ -152,7 +152,7 @@ public class Server {
 					paramValues.put("key", aKeyCode);
 					System.out.println("About to remove keybinding for " + aName);
 					JSONObject json = queryNeo4j(
-							"start parent=node({parentId}) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} SET category.key = null",
+							"start parent=node({parentId}) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
 							paramValues);
 					// TODO: remove the keyCode associated with the current
 					// category
