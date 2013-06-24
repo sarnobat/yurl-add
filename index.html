@@ -138,6 +138,10 @@ $(document).ready(function() {
 });
 
 
+function sendBatch() {
+	alert('Batch sent');
+}
+
 </script>
 </head>
 <body>
@@ -155,6 +159,13 @@ $(document).ready(function() {
 				<ol id="urls"></ol>
 			</td>
 		</tr>
+		<tr>
+			<td></td>
+			<td>
+				<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
+				<textarea rows="20" cols="100"></textarea>
+			</td>
+		</td>
 	</table>
 </body>
 </html>
