@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -46,8 +47,25 @@ public class Server {
 		@Produces("application/json")
 		public Response uncategorized() throws JSONException, IOException {	
 			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where not(has(n.type)) return n.title?,n.url?", new HashMap());
+			JSONArray data = (JSONArray)json.get("data");
+			JSONArray ret = new JSONArray();
+			for (int i = 0; i < data.length(); i++) {
+				println 1;
+				JSONArray a = data.getJSONArray(i);
+				JSONObject o = new JSONObject();
+				String title = (String) a.get(0);
+				println 2;
+				String url = (String) a.get(1);
+				o.put("title", title);
+				println 3;
+				o.put("url", url);
+				ret.put(o);
+				println 4;
+			}
+			
+			println 5;
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(json.get("data").toString()).type("application/json").build();
+					.entity(ret.toString()).type("application/json").build();
 		}
 
 		@GET
