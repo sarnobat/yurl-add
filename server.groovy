@@ -74,7 +74,6 @@ public class Server {
 					.type("application/json").build();
 		}
 
-
 		// ------------------------------------------------------------------------------------
 		// Backup
 		// ------------------------------------------------------------------------------------
@@ -82,19 +81,31 @@ public class Server {
 		@GET
 		@Path("dumpurls")
 		@Produces("application/text")
-		public Response dumpUrls(@QueryParam("rootId") Integer iRootId) {
+		public Response dumpUrls(@QueryParam("rootId") Integer iRootId) throws IOException,
+				JSONException {
+			Integer startId = iRootId;
+			if (startId == null) {
+				startId = 0;
+			}
 			StringBuffer sb = new StringBuffer();
 			sb.append("foo\n");
-			printNode(iRootId, sb);
-			println("dumpUrls");
+			printNode(startId, sb);
+			System.out.println("dumpUrls");
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(sb.toString())
 					.type("text/plain").build();
 		}
-		
-		private static void printNode(Integer iRootId, StringBuffer sb) {
+
+		private void printNode(Integer iRootId, StringBuffer sb) throws IOException, JSONException {
 			sb.append("bar");
-		} 
-		
+			Map<String, Object> theParams = new HashMap<String, Object>();
+			theParams.put("nodeId", iRootId);
+			JSONObject theResponse = execute(
+					"start root=node({nodeId}) MATCH root--n RETURN distinct n", theParams);
+			JSONArray jsonArray = (JSONArray) theResponse.get("data");
+			for (int i = 0; i < jsonArray.length(); i++) {
+				sb.append(((JSONObject) ((JSONArray) jsonArray.get(i)).get(0)).get("data"));
+			}
+		}
 
 		// ------------------------------------------------------------------------------------
 		// Page operations
@@ -163,7 +174,8 @@ public class Server {
 
 			// NOTE: This is not symmetric (commutative?). If you want to
 			// support removal do that in a separate loop
-			Set<String> theNewKeyBindingLines = Sets.difference(theNewKeyBindingsSet, theOldKeyBindingsSet);
+			Set<String> theNewKeyBindingLines = Sets.difference(theNewKeyBindingsSet,
+					theOldKeyBindingsSet);
 			_1: {
 				System.out.println("Old: " + theOldKeyBindingsSet);
 				System.out.println("New: " + theNewKeyBindingsSet);
@@ -173,7 +185,8 @@ public class Server {
 			// Remove duplicates by putting the bindings in a map
 			Map<String, String> theKeyBindingsNoDuplicates = new HashMap<String, String>();
 			for (String aNewKeyBinding : theNewKeyBindingLines) {
-				if (aNewKeyBinding.trim().startsWith("#") && !aNewKeyBinding.trim().startsWith("#=")) {
+				if (aNewKeyBinding.trim().startsWith("#")
+						&& !aNewKeyBinding.trim().startsWith("#=")) {
 					continue;// A commented out keybinding
 				}
 				// TODO: do not allow key binding that is "_". This is reserved
@@ -220,7 +233,7 @@ public class Server {
 				throws IOException, JSONException {
 
 			// TODO: Also create a trash category for each new category key node
-			
+
 			boolean shouldCreateNewCategoryNode = false;
 			_1: {
 				Map<String, Object> theParamValues = new HashMap<String, Object>();
@@ -393,7 +406,7 @@ public class Server {
 			}
 			// TODO: I think this is pointless. If the relate operation fails an
 			// exception should get thrown so we never reach the below code
-			 JSONObject ret = new JSONObject();
+			JSONObject ret = new JSONObject();
 
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
