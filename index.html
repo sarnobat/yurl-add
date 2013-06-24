@@ -12,7 +12,10 @@ var originalKeyBindings;
 var parentOfRootId;
 $(document).ready(function() {
 
+	////
 	//// Determine the root ID
+	////
+	
 	var rootId = $.url().param('rootId')
 	if (rootId == null || rootId == '') {
 		rootId = 45;
@@ -21,7 +24,10 @@ $(document).ready(function() {
 	parentOfRootId = getParentId(rootId);
 	$("#status").text("Loading")  			
 
+	////
 	//// Get the URLs belonging to this root ID
+	////
+    
     $.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
       $("#status").text("Populating")
       $.each(result, function(resultRowNumber, field){
@@ -88,7 +94,10 @@ $(document).ready(function() {
 	  }
     };
 
+	////
     //// Update the key bindings
+    ////
+    
     var oldKeyBindings;
     $("#keys").focus(function() {
     	oldKeyBindings = $.trim($("#keys").val());
