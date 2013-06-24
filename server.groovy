@@ -32,6 +32,15 @@ public class Server {
 	public static class HelloWorldResource { // Must be public
 
 		final String CYPHER_URI = "http://localhost:7474/db/data/cypher";
+	
+		@GET
+		@Path("uncategorized")
+		@Produces("application/json")
+		public Response uncategorized() throws JSONException {	
+			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where not(has(n.type)) return n.title?,n.url?");
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(json.get("data").toString()).type("application/json").build();
+		}
 
 		@GET
 		@Path("keys")
