@@ -84,7 +84,12 @@ public class Server {
 	public Response batchInsert(@QueryParam("rootId") Integer iRootId, @QueryParam("urls") String iUrls) throws IOException,
 				JSONException {
 			System.out.println("batchInsert - " + iRootId);
-			System.out.println("batchInsert - " + iUrls);
+//			System.out.println("batchInsert - " + URLDecoder.decode(iUrls, "UTF-8"));
+			
+			String[] lines = iUrls.split("\\n");
+			for (int i=0;i< lines.length;i++) {
+				System.out.println("a line: "+lines[i]);
+			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(new JSONObject()).type("application/json").build();
 		}

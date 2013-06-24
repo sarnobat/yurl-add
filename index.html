@@ -141,7 +141,7 @@ $(document).ready(function() {
 function sendBatch() {
 
 
-	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + $("#urlBatchToSend").val() , function(result){})
+	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + encodeURIComponent($("#urlBatchToSend").val()) , function(result){})
 		.success(function(data) {  
 			console.debug(data);	
 		})
