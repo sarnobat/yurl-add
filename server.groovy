@@ -383,16 +383,16 @@ public class Server {
 		 *             we try to relate to a newly created category if the
 		 *             system becomes non-deterministic.
 		 */
-		private JSONObject relateHelper(Integer iParentId, Integer childId) throws IOException,
+		private JSONObject relateHelper(Integer iParentId, Integer iChildId) throws IOException,
 				JSONException {
-			Map<String, Object> paramValues = new HashMap<String, Object>();
+			Map<String, Object> theParamValues = new HashMap<String, Object>();
 			_1: {
-				paramValues.put("parentId", iParentId);
-				paramValues.put("childId", childId);
+				theParamValues.put("parentId", iParentId);
+				theParamValues.put("childId", iChildId);
 			}
 			JSONObject theJson = execute(
 					"start a=node({parentId}),b=node({childId}) CREATE a-[r:CONTAINS]->b return a,r,b;",
-					paramValues);
+					theParamValues);
 			return theJson;
 		}
 
