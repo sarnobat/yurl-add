@@ -201,8 +201,8 @@ var rootColor = MD5(rootId).substring(0,6);
 	    var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;
 		$.getJSON(url, function(result){})
 			.success(function() { 
-				removeTop(); 
-				
+				removeTop();
+				$("#list_"+parentId).effect("highlight", null, 500, function() {});
 			})
 			.error(function() { alert("error occurred "); })
 			.complete(function() { });
@@ -396,13 +396,12 @@ function tagUrlWithSelections(nodeId) {
 	<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
 	<div id=rootColor class="buttonize">&nbsp;</div>
 	
-<div id="p">This is a paragraph.</div>
 	<table width="100%">
 		<tr>
 			<td width="25%" valign=top>
 				Key bindings<br>
-				<textarea id="keys" cols="30" rows="20px" class="buttonize"></textarea>
 				<ol id="keyLinks"  class="buttonize"></ol>
+				<textarea id="keys" cols="30" rows="20px" class="buttonize"></textarea>
 				<br><br>
 				<div id="categoriesRecursive"  class="buttonize">
 				</div>
