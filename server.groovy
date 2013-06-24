@@ -91,10 +91,10 @@ public class Server {
 			StringBuffer sb = new StringBuffer();
 			StringBuffer plainText = new StringBuffer();
 			sb.append("foo\n");
-			printNode(startId, sb,plainText,visitedInternalNodes);
+			printNode(startId, sb, plainText, visitedInternalNodes);
 			System.out.println("dumpUrls");
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(plainText.toString())
-					.type("text/plain").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(plainText.toString()).type("text/plain").build();
 		}
 
 		private void printNode(Integer iRootId, StringBuffer json, StringBuffer plainText,Set<String> visitedInternalNodes) throws IOException, JSONException {
@@ -114,17 +114,23 @@ public class Server {
 				}
 				System.out.println("1.5");
 				
-				if (object.has("type") && object.get("type") != null) {
+				if (object.has("type") && object.get("type") != null && object.get("type").equals("categoryNode")) {
 					plainText.append("===");
 					plainText.append(object.get("name"));
 					plainText.append("===\n");
 					
-				} else {
-//					if (object.names()) {
-//						plainText.append(object.names());
-//					}
-//					plainText.append("\n");
+				}  
+				
+				if (object.has("title")) {
+					plainText.append(object.get("title"));
+					plainText.append("\n");
 				}
+				if (object.has("url")) {
+					plainText.append(object.get("url"));
+					plainText.append("\n");
+					plainText.append("\n");
+				}
+				
 				json.append(object);
 				System.out.println("2");
 				visitedInternalNodes.add(id);
