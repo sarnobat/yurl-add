@@ -30,7 +30,7 @@ public class Server {
 		@Path("keys")
 		@Produces("application/json")
 		public String keys() throws JSONException, IOException {
-			JSONObject json = queryNeo4j("start n=node(*) where has(n.name) and has (n.key) return n.name,n.key");
+			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN n.name,n.key");
 			return json.get("data").toString();
 		}
 
