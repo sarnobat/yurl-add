@@ -201,7 +201,8 @@ $(document).ready(function() {
 			}
 		)
 		.error(function() {  })
-		.complete(function() {  });
+		.complete(function() {  }
+	);
 
 
 	////
@@ -336,6 +337,14 @@ function sendBatch() {
 		.complete( function() {} );
 }
 
+function dumpSelections() {
+	var selected = new Array();
+	$('#categoriesRecursive input:checked').each(function() {
+		selected.push($(this).attr('name'));
+	});
+	alert(selected);
+}
+
 </script>
 </head>
 <body>
@@ -348,6 +357,7 @@ function sendBatch() {
 				<textarea id="keys" cols="30" rows="20px"></textarea>
 				<ol id="keyLinks"></ol>
 				<br><br>
+				<input type=button onclick="dumpSelections()">
 				<div id="categoriesRecursive">
 				</div>
 				
