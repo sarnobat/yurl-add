@@ -139,9 +139,11 @@ $(document).ready(function() {
 
 
 function sendBatch() {
-
-
-	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + encodeURIComponent($("#urlBatchToSend").val()) , function(result){})
+alert("about to encode");
+var urls = "";
+//var urls = $("#urlBatchToSend").val();
+alert("encoded");
+	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + urls) , function(result){})
 		.success(function(data) {  
 			console.debug(data);	
 		})
@@ -172,7 +174,7 @@ function sendBatch() {
 		<tr>
 			<td></td>
 			<td>
-				<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
+				<input type="button" value="Add URLs" onclick="alert('hi');sendBatch()" /><br>
 				<textarea id="urlBatchToSend" rows="20" cols="100">
 "Nationalism - Wikipedia, the free encyclopedia","http://en.wikipedia.org/wiki/Nationalism"
 http://en.wikipedia.org/wiki/Nationalism

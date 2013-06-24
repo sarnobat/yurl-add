@@ -20,6 +20,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -39,6 +41,7 @@ import org.jsoup.nodes.Document;
 import org.apache.commons.lang.*;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -85,13 +88,38 @@ public class Server {
 				JSONException {
 			System.out.println("batchInsert - " + iRootId);
 //			System.out.println("batchInsert - " + URLDecoder.decode(iUrls, "UTF-8"));
+			StringBuffer unsuccessfulLines = new StringBuffer();
 			
-			String[] lines = iUrls.split("\\n");
-			for (int i=0;i< lines.length;i++) {
-				System.out.println("a line: "+lines[i]);
+			String[] lines = iUrls.trim().split("\\n");
+			int i = 0;
+			while (i < lines.length) {
+				if (lines[i].matches("^=")) {
+					throw new RuntimeException("Not supported");
+				}
+               if (lines[i].matches("^\\s*" + '$')) {
+
+					System.out.println("whitespace: " + lines[i]);
+					++i;
+					continue;
+				}
+				if (lines[i].startsWith("\"") && lines[i + 1].startsWith("http")) {
+
+					System.out.println("to be processed: " + lines[i]);
+					System.out.println("to be processed: " + lines[i+1]);
+					i+=2;
+				} else {
+					unsuccessfulLines.append(lines[i]);
+					unsuccessfulLines.append(lines[i + 1]);
+					unsuccessfulLines.append(lines[i + 2]);
+
+					System.out.println("unsuccessful: " + lines[i]);
+				}
+
 			}
+			JSONObject entity = new JSONObject();
+			entity.put("unsuccessful", unsuccessfulLines.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(new JSONObject()).type("application/json").build();
+					.entity(entity).type("application/json").build();
 		}
 		
 		//
