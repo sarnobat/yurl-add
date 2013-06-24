@@ -214,10 +214,8 @@ function swap(firstId, secondId) {
 }
 
 function sendBatch() {
-//alert("about to encode");
-var urls = encodeURIComponent($("#urlBatchToSend").val());
-//alert("encoded");
-			$("#batchStatus").text("Sending new batch");	
+	var urls = encodeURIComponent($("#urlBatchToSend").val());
+	$("#batchStatus").text("Sending new batch");	
 	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + urls, function(result){})
 		.success(function(data) {  
 			console.debug(data);
@@ -230,7 +228,6 @@ var urls = encodeURIComponent($("#urlBatchToSend").val());
 			alert("error occurred "); 
 		} )
 		.complete( function() {} );
-
 }
 
 </script>
