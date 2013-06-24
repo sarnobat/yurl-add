@@ -13,7 +13,6 @@ $(document).ready(function() {
 	var rootId = $.url().param('rootId')
 	if (rootId == null || rootId == '') {
 		rootId = 45;
-		alert('No root id specified');
 	}
 	$("#status").text("Loading")  			
 
@@ -28,7 +27,9 @@ $(document).ready(function() {
 
 	//// Get the key bindings
   	$.getJSON(urlBase + "/keys",function(result){
-      $.each(result, function(a,binding,c){
+  	  var originalKeyBindings = $.extend(true, {}, result);
+  	  
+	  $.each(result, function(a,binding,c){
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
         $(window).keypress(function(event) {
         	if (binding.key == String.fromCharCode(event.which)) {
