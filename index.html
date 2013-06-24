@@ -48,6 +48,9 @@ $(document).ready(function() {
         	if ($("#keys").is(":focus")) {
         		return;
         	}
+        	if ('_' == String.fromCharCode(event.which)) {
+				removeTop();
+        	}
         	if (binding.key == String.fromCharCode(event.which)) {
         		var parentId = binding.id;
         		var childId = $("#urls").children()[0].id;
@@ -74,10 +77,13 @@ $(document).ready(function() {
 	  function relate(parentId, childId, currentRootId) {
 	    var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;
 		$.getJSON(url, function(result){})
-			.success(function() { $($("#urls").children()[0]).fadeOut("fast",function() { $(this).remove(); }) })
+			.success(function() { removeTop(); })
 			.error(function() { alert("error occurred "); })
 			.complete(function() { });
 	  }			
+	  function removeTop() {
+	  	$($("#urls").children()[0]).fadeOut("fast",function() { $(this).remove(); })
+	  }
     };
 
     //// Update the key bindings
