@@ -3,6 +3,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -604,8 +605,17 @@ public class Server {
 		@Path("relateCategoriesToItem")
 		@Produces("application/json")
 		public Response relateCategoriesToItem(@QueryParam("nodeId") Integer iNodeToBeTagged,
-				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo) {
-
+				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo)
+				throws UnsupportedEncodingException, JSONException {
+			System.out.println("relateCategoriesToItem(): begin");
+			String decode = URLDecoder.decode(iCategoriesToBeAddedTo, "UTF-8");
+			System.out.println(decode);
+			JSONArray theCategoryIdsToBeAddedTo = new JSONArray(decode);
+			for (int i = 0; i < theCategoryIdsToBeAddedTo.length(); i++) {
+				Integer aCategoryIdToBeAddedTo = theCategoryIdsToBeAddedTo.getInt(i);
+				System.out.println("relateCategoriesToItem(): " + aCategoryIdToBeAddedTo + " --> " + iNodeToBeTagged);
+				//relateHelper();
+			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(new JSONObject().toString()).type("application/json").build();
 		}

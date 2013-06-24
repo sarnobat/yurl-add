@@ -346,15 +346,12 @@ function getTagSelections() {
 	$('#categoriesRecursive input:checked').each(function() {
 		selected.push($(this).attr('name'));
 	});
-	alert(selected);
-	return selected;
+	return JSON.stringify(selected);
 }
 
 function tagUrlWithSelections(nodeId) {
 	var selections = getTagSelections();
 	var url = urlBase + "/relateCategoriesToItem?nodeId=" + nodeId + "&newCategoryIds=" + encodeURIComponent(selections);
-	alert (url);
-	/*
 	$.getJSON(url, 
 		function(result){
 		})
@@ -367,7 +364,6 @@ function tagUrlWithSelections(nodeId) {
 		.complete(function() { 
 		}
 	);
-	*/
 }
 
 </script>
