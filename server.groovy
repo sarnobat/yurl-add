@@ -1,17 +1,24 @@
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -20,6 +27,8 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -50,7 +59,48 @@ public class Server {
 					.entity(json.get("data").toString()).type("application/json").build();
 		}
 		
+		@GET
+		@Path("stash")
+		@Produces("application/json")
+		public Response stash(@QueryParam("param1") String url) throws JSONException, IOException {
+			String httpUrl = URLDecoder.decode(url);
+			String title = getTitle(new URL(httpUrl));
+			Map paramValues = new HashMap();
+			paramValues.put("url", httpUrl);
+			paramValues.put("title", title);
+			paramValues.put("created", System.currentTimeMillis());
+			JSONObject json = queryNeo4j("CREATE (n { title : {title} , url : {url}, created: {created} })", paramValues);
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(json.get("data").toString()).type("application/json").build();
+		}
 		
+		
+		private String getTitle(final URL url) {
+			String title = "";
+			ExecutorService service = Executors.newFixedThreadPool(2);
+			Collection<Callable<String>> tasks = new ArrayList<Callable<String>>();
+			Callable<String> callable = new Callable<String>() {
+	
+				@Override
+				public String call() throws Exception {
+					Document doc = Jsoup.connect(url.toString()).get();
+					return doc.title();
+	
+				}
+			};
+			tasks.add(callable);
+			try {
+				List<Future<String>> taskFutures = service
+						.invokeAll(tasks, 3000L, TimeUnit.SECONDS);
+				title = taskFutures.get(0).get();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+			return title;
+		}
+
 		@GET
 		@Path("relate")
 		@Produces("application/json")
