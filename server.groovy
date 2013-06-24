@@ -103,8 +103,8 @@ public class Server {
 			while (i < lines.length) {
 
 				System.out.println("1");
-				System.out.println("lines 1");
-				System.out.println("lines 2: " + lines);
+				//System.out.println("lines 1");
+				//System.out.println("lines 2: " + lines);
 				String first = lines[i];
 				System.out.println("first: " + first);
 				String theHttpUrl;
@@ -179,14 +179,15 @@ public class Server {
 							System.out.println("7");
 							if (!url.equals(second)) {
 								System.out.println("Not supported 3");
-								throw new RuntimeException("Not supported 3");
+								addToUnsuccessful(unsuccessfulLines, first, second);
+							} else {
+								JSONObject newNodeJsonObject = createNode(url, title, iRootId);
 							}
-							JSONObject newNodeJsonObject = createNode(url, title, iRootId);
 						}
-
 					} catch (Exception e) {
 						System.out.println(e);
 						e.printStackTrace();
+						System.out.println("Problem 4");
 						throw e;
 					}
 
