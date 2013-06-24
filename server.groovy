@@ -46,16 +46,18 @@ public class Server {
 		@Path("uncategorized")
 		@Produces("application/json")
 		public Response uncategorized() throws JSONException, IOException {	
-			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where not(has(n.type)) return n.title?,n.url?", new HashMap());
+			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where not(has(n.type)) AND id(n) > 0 return ID(n),n.title?,n.url?", new HashMap());
 			JSONArray data = (JSONArray)json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
 				println 1;
 				JSONArray a = data.getJSONArray(i);
 				JSONObject o = new JSONObject();
-				String title = (String) a.get(0);
+				String id = (String) a.get(0);
+				o.put("id", id);
+				String title = (String) a.get(1);
 				println 2;
-				String url = (String) a.get(1);
+				String url = (String) a.get(2);
 				o.put("title", title);
 				println 3;
 				o.put("url", url);
@@ -72,9 +74,27 @@ public class Server {
 		@Path("keys")
 		@Produces("application/json")
 		public Response keys() throws JSONException, IOException {
-			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN n.name,n.key", new HashMap());
+			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN ID(n),n.name,n.key", new HashMap());JSONArray data = (JSONArray)json.get("data");
+			JSONArray ret = new JSONArray();
+			for (int i = 0; i < data.length(); i++) {
+				println 1;
+				JSONArray a = data.getJSONArray(i);
+				JSONObject o = new JSONObject();
+				String id = (String) a.get(0);
+				o.put("id", id);
+				String title = (String) a.get(1);
+				println 2;
+				String url = (String) a.get(2);
+				o.put("name", title);
+				println 3;
+				o.put("key", url);
+				ret.put(o);
+				println 4;
+			}
+			
+			println 5;
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(json.get("data").toString()).type("application/json").build();
+					.entity(ret.toString()).type("application/json").build();
 		}
 		
 		@GET
