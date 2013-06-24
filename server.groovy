@@ -123,10 +123,9 @@ public class Server {
 					System.out.println("to be processed: " + lines[i + 1]);
 
 					System.out.println("5");
-					Reader reader2 = new StringReader(lines[i]);
 					System.out.println("5.25");
 					try {
-						CSVReader reader = new CSVReader(reader2);
+						CSVReader reader = new CSVReader(new StringReader(lines[i]));
 						System.out.println("5.5");
 						String[] segments = reader.readNext();
 
