@@ -50,22 +50,16 @@ public class Server {
 			JSONArray data = (JSONArray)json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
-				println 1;
 				JSONArray a = data.getJSONArray(i);
 				JSONObject o = new JSONObject();
 				String id = (String) a.get(0);
 				o.put("id", id);
 				String title = (String) a.get(1);
-				println 2;
 				String url = (String) a.get(2);
 				o.put("title", title);
-				println 3;
 				o.put("url", url);
 				ret.put(o);
-				println 4;
 			}
-			
-			println 5;
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
 		}
@@ -77,22 +71,16 @@ public class Server {
 			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN ID(n),n.name,n.key", new HashMap());JSONArray data = (JSONArray)json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
-				println 1;
 				JSONArray a = data.getJSONArray(i);
 				JSONObject o = new JSONObject();
 				String id = (String) a.get(0);
 				o.put("id", id);
 				String title = (String) a.get(1);
-				println 2;
 				String url = (String) a.get(2);
 				o.put("name", title);
-				println 3;
 				o.put("key", url);
 				ret.put(o);
-				println 4;
 			}
-			
-			println 5;
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
 		}
@@ -108,7 +96,6 @@ public class Server {
 			paramValues.put("title", title);
 			paramValues.put("created", System.currentTimeMillis());
 			JSONObject json = queryNeo4j("CREATE (n { title : {title} , url : {url}, created: {created} })", paramValues);
-			println 9;
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json.get("data").toString()).type("application/json").build();
 		}
@@ -146,9 +133,7 @@ public class Server {
 		public Response relate(@QueryParam("parentId") Integer parentId, @QueryParam("childId") Integer childId) throws JSONException, IOException {
 			Map paramValues = new HashMap();
 			paramValues.put("parentId", parentId);
-			println parentId;
 			paramValues.put("childId", childId);
-			println childId;
 			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b;", paramValues);
 			JSONObject ret = new JSONObject();
 			ret.put("status", "FAILURE");
@@ -167,17 +152,13 @@ public class Server {
 			Map map = new HashMap();
 			map.put("query", cypherQuery);
 			map.put("params", params);
-			println "A";
 			// POST {} to the node entry point URI
 			ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }").post(ClientResponse.class, map);
 			if (response.getStatus() != 200) {
-				println('failed' + response.getStatus());
 				throw new RuntimeException("failed:  + cypherQuery");
 			}
-			println "B";
 			String neo4jResponse = IOUtils.toString(response.getEntityInputStream());
-			println "C";
 			System.out.println(neo4jResponse);
 			response.getEntityInputStream().close();
 			response.close();
