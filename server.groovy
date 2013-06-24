@@ -91,7 +91,7 @@ public class Server {
 		@Produces("application/json")
 		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
 				@QueryParam("urls") String iUrls) throws Exception {
-			Preconditions.checkArgument(iRootId!=null);
+			Preconditions.checkArgument(iRootId != null);
 			System.out.println("batchInsert - " + iRootId);
 			// System.out.println("batchInsert - " + URLDecoder.decode(iUrls,
 			// "UTF-8"));
@@ -102,66 +102,82 @@ public class Server {
 			while (i < lines.length) {
 
 				System.out.println("1");
-				if (lines[i].startsWith("=")) {
+				String first = lines[i];
+				if (first.startsWith("=")) {
 					System.out.println("Not supported 1");
 					throw new RuntimeException("Not supported 1");
 				}
 				System.out.println("2");
-				if (lines[i].startsWith("http")) {
+				if (first.startsWith("http")) {
 					System.out.println("Not supported 2");
 					throw new RuntimeException("Not supported 2");
 				}
 				System.out.println("3");
-				if (lines[i].matches("^\\s*" + '$')) {
+				if (first.matches("^\\s*" + '$')) {
 
-					System.out.println("whitespace: " + lines[i]);
+					System.out.println("whitespace: " + first);
 					++i;
 					continue;
 				}
 				System.out.println("4");
-				
-				if (lines[i].startsWith("\"") && lines[i + 1].startsWith("http")) {
 
-					System.out.println("to be processed: " + lines[i]);
-					System.out.println("to be processed: " + lines[i + 1]);
+				String second = lines[i + 1];
+				if (first.startsWith("\"") && second.startsWith("http")) {
+
+					System.out.println("to be processed: " + first);
+					System.out.println("to be processed: " + second);
 
 					System.out.println("5");
 					System.out.println("5.25");
 					try {
-						CSVReader reader = new CSVReader(new StringReader(lines[i]));
+						CSVReader reader = new CSVReader(new StringReader(first));
 						System.out.println("5.5");
 						String[] segments = reader.readNext();
+						if (segments == null) {
+							addToUnsuccessful(unsuccessfulLines, first, second);
+						} else {
 
-						System.out.println("6");
-						String title = segments[0];
-						String url = segments[1];
-						reader.close();
-						System.out.println("7");
-						if (!url.equals(lines[i + 1])) {
-							System.out.println("Not supported 3");
-							throw new RuntimeException("Not supported 3");
+							System.out.println("6");
+							if (segments.length != 2) {
+								System.out.println("not 2 columns in csv entry");
+								throw new RuntimeException("not 2 columns in csv entry");
+							}
+							String title = segments[0];
+							System.out.println("6.1");
+							String url = segments[1];
+							System.out.println("6.2");
+							reader.close();
+							System.out.println("7");
+							if (!url.equals(second)) {
+								System.out.println("Not supported 3");
+								throw new RuntimeException("Not supported 3");
+							}
+							JSONObject newNodeJsonObject = createNode(url, title, iRootId);
 						}
-						JSONObject newNodeJsonObject = createNode(url, title, iRootId);
-						
+
 					} catch (Exception e) {
 						e.printStackTrace();
 						throw e;
 					}
 
 				} else {
-					unsuccessfulLines.append(lines[i]);
-					unsuccessfulLines.append("\n");
-					unsuccessfulLines.append(lines[i+1]);
-					unsuccessfulLines.append("\n");
-					unsuccessfulLines.append("\n");
+					addToUnsuccessful(unsuccessfulLines, first, second);
 				}
 				i += 2;
 
 			}
 			JSONObject entity = new JSONObject();
 			entity.put("unsuccessful", unsuccessfulLines.toString());
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(entity.toString())
-					.type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(entity.toString()).type("application/json").build();
+		}
+
+		public void addToUnsuccessful(StringBuffer unsuccessfulLines, String first, String second) {
+			unsuccessfulLines.append(first);
+			unsuccessfulLines.append("\n");
+			unsuccessfulLines.append(second);
+			unsuccessfulLines.append("\n");
+			unsuccessfulLines.append("\n");
 		}
 
 		//
