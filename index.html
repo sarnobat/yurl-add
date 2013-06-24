@@ -30,8 +30,14 @@ $(document).ready(function() {
     
     $.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
       $("#status").text("Populating")
-      $.each(result, function(resultRowNumber, field){
-        $("#urls").append("<li id="+field.id+">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></li>");
+      $.each(result, function(resultRowNumber, field) {
+        var color = "";
+		console.debug(field.url);
+        if (field.url.match('java')) {
+        	console.debug(field.url);
+        	color= "orange";
+        }
+        $("#urls").append("<font color=\""+color+"\"><li id="+field.id+">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></li></font>");
       });
 	  $("#status").text("Done")
     });
