@@ -278,12 +278,12 @@ public class Server {
 			// specified existing parent (but not with all parents since we
 			// could have a
 			// many-to-one contains)
-			Map<String, Object> params2 = new HashMap<String, Object>();
-			params2.put("currentParentId", currentParentId);
-			params2.put("childId", childId);
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("currentParentId", currentParentId);
+			params.put("childId", childId);
 
 			execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
-					params2);
+					params);
 
 			Map<String, Object> paramValues = new HashMap<String, Object>();
 			paramValues.put("childId", childId);
