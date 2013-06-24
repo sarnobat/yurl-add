@@ -101,7 +101,7 @@ public class Server {
 			
 			String newNodeId = (String) ((JSONArray)json.get("data")).get(0);
 			println "New node: " + newNodeId;
-			JSONObject json2 = relate(45, newNodeId);
+			JSONObject json2 = relateHelper(45, newNodeId);
 			// TODO: check that it returned successfully (redundant?)
 			
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -139,10 +139,25 @@ public class Server {
 		@Path("relate")
 		@Produces("application/json")
 		public Response relate(@QueryParam("parentId") Integer parentId, @QueryParam("childId") Integer childId) throws JSONException, IOException {
+			println(1);
 			// TODO: first delete any existing contains relationship with the root (but not with existing categories since we could have a many-to-one contains)
-		
-			JSONObject json = relateHelper(parentId.toString(), childId.toString());
-			
+			Map paramValues = new HashMap();
+						println(2);
+			paramValues.put("childId", childId);
+						println(3);
+			JSONObject json2 = queryNeo4j("start root=node(*) match root-[c:CONTAINS]->n where has(root.type) and root.type = 'categoryNode' and root.name = 'root' and id(n) = {childId} DELETE c RETURN id(c)", paramValues);
+						println(4);
+			JSONArray dataArray = (JSONArray)json2.get("data");
+
+						println(5 + "dataArray: " + dataArray.toString());
+			for (int i =0; i < dataArray.length(); i++) {
+				JSONArray oldRelationshipsIds = (JSONArray) dataArray.get(0);
+				println("Deleted relationship: " + oldRelationshipsIds.get(0));
+										println(6);
+			}
+			println(6);
+			JSONObject json = relateHelper(parentId, childId);
+			println json;
 			JSONObject ret = new JSONObject();
 			ret.put("status", "FAILURE");
 			if (((JSONArray)json.get("data")).length() == 0) {
@@ -156,26 +171,31 @@ public class Server {
 					.entity(ret.toString()).type("application/json").build();
 		}
 		
-		private JSONObject relateHelper(String parentId, String childId) throws IOException, JSONException {
+		private JSONObject relateHelper(Integer parentId, Integer childId) throws IOException, JSONException {
 			Map paramValues = new HashMap();
 			paramValues.put("parentId", parentId);
 			paramValues.put("childId", childId);
-			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b;", paramValues);
+			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b return a,r,b;", paramValues);
 			return json;
 		}
 		
 
 		private JSONObject queryNeo4j(String cypherQuery, Map params) throws IOException, JSONException {
 			WebResource resource = Client.create().resource(CYPHER_URI);
+			println("A");
 			Map map = new HashMap();
 			map.put("query", cypherQuery);
 			map.put("params", params);
+						println("B");
 			// POST {} to the node entry point URI
 			ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }").post(ClientResponse.class, map);
+								println("C");
 			if (response.getStatus() != 200) {
-				throw new RuntimeException("failed:  + cypherQuery");
+						System.out.println("failed: " + cypherQuery + "\tparams: " + params);
+				throw new RuntimeException();
 			}
+						println("E");
 			String neo4jResponse = IOUtils.toString(response.getEntityInputStream());
 			System.out.println(neo4jResponse);
 			response.getEntityInputStream().close();
