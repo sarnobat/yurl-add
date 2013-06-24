@@ -7,7 +7,7 @@
 <script>
 $(document).ready(function(){
   $("button").click(function(){
-    $.getJSON("http://localhost:4444?param1=" + $('#urls').text(),function(result){
+    $.getJSON("http://localhost:4444?param1=" + $('#urls').val(),function(result){
       $.each(result, function(i, field){
         $("div").append(i + " " + field + " ");
       });

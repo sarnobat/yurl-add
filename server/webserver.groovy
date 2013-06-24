@@ -1,5 +1,8 @@
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.htmlcleaner.*;
+import org.codehaus.jettison.json.JSONObject;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import javax.ws.rs.core.MediaType;
 
@@ -33,7 +36,8 @@ class MyHandler implements HttpHandler {
 			String name = param.split("=")[0];  
 			String value = param.split("=")[1];  
 			map.put(name, value);  
-		}  
+		}
+		println(map.keySet());
 		return map;  
 	}  
 
@@ -42,11 +46,11 @@ class MyHandler implements HttpHandler {
 		JSONObject json = new JSONObject();
 		String query = t.getRequestURI();
 		Map<String, String> map = getQueryMap(query);  
-		String  value = map.get("param1");
+		String  value = map.get("/?param1");
 		json.put("myKey",value);
 		println('Request headers: ' + t.getRequestHeaders());
 		String queryString = t.getRequestURI();
-		println('Request URI' + queryString);
+		println('Request URI: ' + queryString);
 		println('value: ' + value);
 		
 		final String SERVER_ROOT_URI = "http://localhost:7474/db/data/";
@@ -54,7 +58,7 @@ class MyHandler implements HttpHandler {
 		// http://localhost:7474/db/data/node
 		 
 		WebResource resource = Client.create().resource( nodeEntryPointUri );
-		String nodeData = "{\"name\" : \"" +queryString+ "\",\"foo\" : \"bar\"}";
+		String nodeData = "{\"name\" : \"" +value+ "\",\"title\" : \""+getTitle(value)+"\"}";
 		println("nodeData:" + nodeData);
 		
 		// POST {} to the node entry point URI
@@ -74,6 +78,24 @@ class MyHandler implements HttpHandler {
 		OutputStream os = t.getResponseBody();
 		os.write(json.toString().getBytes());
 		os.close();
+	}
+
+	private String getTitle(String url) {
+		HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+		con.connect();
+		
+		InputStream inputStream = con.getInputStream();
+		
+		HtmlCleaner cleaner = new HtmlCleaner();
+		CleanerProperties props = cleaner.getProperties();
+		
+		TagNode node = cleaner.clean(inputStream)
+		TagNode titleNode = node.findElementByName("title", true);
+		
+		String title = titleNode.getText().toString();
+	
+		//return JSONObject.quote("\"We are the best\"");
+		return StringEscapeUtils.escapeJava(title);
 	}
 }
     
