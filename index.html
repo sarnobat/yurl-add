@@ -44,6 +44,9 @@ $(document).ready(function() {
 	parentOfRootId = getParentId(rootId);
 	$("#status").text("Loading")  			
 
+var rootColor = MD5(rootId).substring(0,6);
+	$("#rootColor").attr("style", "background-color: #" + rootColor);
+
 	////
 	//// Uncategorized URLs
 	////
@@ -366,6 +369,7 @@ function tagUrlWithSelections(nodeId) {
 <body>
 	<a id="up">Up</a>
 	<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
+	<div id=rootColor>&nbsp;</div>
 	<table width="100%">
 		<tr>
 			<td width="25%" valign=top>
