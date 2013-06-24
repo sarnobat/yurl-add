@@ -108,6 +108,10 @@ $(document).ready(function() {
 					*/
 					$("#" + field.id).append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
 					$("#" + field.id).append("<div>Tags:<br><input type=\"checkbox\" onclick='tag("+field.id+",\"watch these\")' /> watch this</div>");
+					$("#" + field.id).append("<br>");
+					$("#" + field.id).append("<input type=button value=Tag onClick='tagUrlWithSelections("+field.id+")'>");
+					$("#" + field.id).append("");
+					$("#" + field.id).append("");
 				}
 				
 			} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
@@ -344,6 +348,26 @@ function getTagSelections() {
 	});
 	alert(selected);
 	return selected;
+}
+
+function tagUrlWithSelections(nodeId) {
+	var selections = getTagSelections();
+	var url = urlBase + "/relateCategoriesToItem?nodeId=" + nodeId + "&categoryIds=" + encodeURIComponent(selections);
+	alert (url);
+	/*
+	$.getJSON(url, 
+		function(result){
+		})
+		.success(function(data) {  
+			alert("success");
+		})
+		.error(function() { 
+			alert("error occurred "); 
+		})
+		.complete(function() { 
+		}
+	);
+	*/
 }
 
 </script>
