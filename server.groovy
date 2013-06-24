@@ -45,7 +45,7 @@ public class Server {
 		@Path("uncategorized")
 		@Produces("application/json")
 		public Response uncategorized() throws JSONException, IOException {	
-			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where not(has(n.type)) return n.title?,n.url?, n.id", new HashMap());
+			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where not(has(n.type)) return n.title?,n.url?", new HashMap());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json.get("data").toString()).type("application/json").build();
 		}
@@ -54,7 +54,7 @@ public class Server {
 		@Path("keys")
 		@Produces("application/json")
 		public Response keys() throws JSONException, IOException {
-			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN n.name,n.key,n.id", new HashMap());
+			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN n.name,n.key", new HashMap());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json.get("data").toString()).type("application/json").build();
 		}
@@ -70,6 +70,7 @@ public class Server {
 			paramValues.put("title", title);
 			paramValues.put("created", System.currentTimeMillis());
 			JSONObject json = queryNeo4j("CREATE (n { title : {title} , url : {url}, created: {created} })", paramValues);
+			println 9;
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json.get("data").toString()).type("application/json").build();
 		}
@@ -119,10 +120,13 @@ public class Server {
 			Map map = new HashMap();
 			map.put("query", cypherQuery);
 			map.put("params", params);
+			println "A";
 			// POST {} to the node entry point URI
 			ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }").post(ClientResponse.class, map);
+			println "B";
 			String neo4jResponse = IOUtils.toString(response.getEntityInputStream());
+			println "C";
 			System.out.println(neo4jResponse);
 			response.getEntityInputStream().close();
 			response.close();
