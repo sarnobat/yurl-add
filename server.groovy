@@ -5,9 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.*;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.GET;
@@ -36,8 +35,8 @@ public class Server {
 		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
-		public Response uncategorized() throws JSONException {	
-			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where not(has(n.type)) return n.title?,n.url?");
+		public Response uncategorized() throws JSONException, IOException {	
+			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where not(has(n.type)) return n.title?,n.url?, n.id", new HashMap());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json.get("data").toString()).type("application/json").build();
 		}
@@ -46,15 +45,30 @@ public class Server {
 		@Path("keys")
 		@Produces("application/json")
 		public Response keys() throws JSONException, IOException {
-			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN n.name,n.key");
+			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN n.name,n.key,n.id", new HashMap());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json.get("data").toString()).type("application/json").build();
 		}
+		
+		
+		@GET
+		@Path("relate")
+		@Produces("application/json")
+		public Response relate(@QueryParam("parentId") Integer parentId, @QueryParam("childId") Integer childId) throws JSONException, IOException {
+			Map paramValues = new HashMap();
+			paramValues.put("parentId", parentId);
+			paramValues.put("childId", childId);
+			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b;", paramValues);
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(json.get("data").toString()).type("application/json").build();
+		}
+		
 
-		private JSONObject queryNeo4j(String cypherQuery) throws IOException, JSONException {
+		private JSONObject queryNeo4j(String cypherQuery, Map params) throws IOException, JSONException {
 			WebResource resource = Client.create().resource(CYPHER_URI);
 			Map map = new HashMap();
 			map.put("query", cypherQuery);
+			map.put("params", params);
 			// POST {} to the node entry point URI
 			ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }").post(ClientResponse.class, map);
