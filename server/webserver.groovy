@@ -48,7 +48,7 @@ class MyHandler implements HttpHandler {
 		ClientResponse response = resource.accept( MediaType.APPLICATION_JSON )
 				.type( MediaType.APPLICATION_JSON )
 				.entity( "{ }" )
-				.post( ClientResponse.class );
+				.post( ClientResponse.class, "{\"name\" : \"webserver.groovy\"}" );
 		 
 		final URI location = response.getLocation();
 		System.out.println( String.format(
