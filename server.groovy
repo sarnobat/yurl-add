@@ -103,8 +103,28 @@ public class Server {
 			while (i < lines.length) {
 
 				System.out.println("1");
+				System.out.println("lines 1");
+				System.out.println("lines 2: " + lines);
 				String first = lines[i];
-				String theHttpUrl = URLDecoder.decode(first, "UTF-8");
+				System.out.println("first: " + first);
+				String theHttpUrl;
+				try {
+					// Fails if it sees the string "%)"
+					theHttpUrl = URLDecoder.decode(first, "UTF-8");
+				} catch (Exception e) {
+					System.out.println("Could not decode");
+					System.out.println(e);
+					System.out.println(e.getStackTrace());
+					//i += lines.length();
+					addToUnsuccessful(unsuccessfulLines, first, "");
+					++i;
+					//for (int j = 0; j < lines.length(); j++) {
+					//	addToUnsuccessful(unsuccessfulLines, lines[j], "");
+					//	++i;
+					//}
+					continue;
+				}
+				System.out.println("decoded: " + theHttpUrl);
 				if (first.startsWith("=")) {
 					++i;
 					addToUnsuccessful(unsuccessfulLines, first, "");
@@ -147,7 +167,9 @@ public class Server {
 							System.out.println("6");
 							if (segments.length != 2) {
 								System.out.println("not 2 columns in csv entry");
-								throw new RuntimeException("not 2 columns in csv entry");
+								i+=2;
+								addToUnsuccessful(unsuccessfulLines, first, second);
+								continue;
 							}
 							String title = segments[0];
 							System.out.println("6.1");
