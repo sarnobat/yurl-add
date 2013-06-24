@@ -47,6 +47,7 @@ public class Server {
 		@Produces("application/json")
 		public Response uncategorized(@QueryParam("rootId") String rootId) throws JSONException, IOException {
 			println rootId;
+			// TODO: check rootId is not null or empty
 			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null) and not(has(n.type)) AND id(n) > 0 return ID(n),n.title?,n.url?", new HashMap());
 			JSONArray data = (JSONArray)json.get("data");
 			JSONArray ret = new JSONArray();
@@ -132,6 +133,8 @@ public class Server {
 		@Path("relate")
 		@Produces("application/json")
 		public Response relate(@QueryParam("parentId") Integer parentId, @QueryParam("childId") Integer childId) throws JSONException, IOException {
+			// TODO: first delete any existing contains relationship with the root (but not with existing categories since we could have a many-to-one contains)
+		
 			Map paramValues = new HashMap();
 			paramValues.put("parentId", parentId);
 			paramValues.put("childId", childId);
@@ -143,6 +146,8 @@ public class Server {
 					ret.put("status", "SUCCESS");
 				}
 			}
+			
+
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
 		}
