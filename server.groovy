@@ -115,14 +115,20 @@ public class Server {
 				System.out.println("1.5");
 				
 				if (object.has("type") && object.get("type") != null && object.get("type").equals("categoryNode")) {
-					plainText.append("===");
+					plainText.append("=== ");
 					plainText.append(object.get("name"));
-					plainText.append("===\n");
+					plainText.append(" ===\n");
 					
 				}  
 				
 				if (object.has("title")) {
+					plainText.append("\"");
 					plainText.append(object.get("title"));
+					plainText.append("\",\"");
+					if (object.has("url")) {
+						plainText.append(object.get("url"));
+					}
+					plainText.append("\"");
 					plainText.append("\n");
 				}
 				if (object.has("url")) {
