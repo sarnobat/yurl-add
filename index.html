@@ -59,17 +59,17 @@ $(document).ready(function() {
         	color= "#FF0000";
         } 
         
-        $("#urls").append("<li id="+field.id+"><font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></font>");
+        $("#urls").append("<li id="+field.id+"><font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open");
         if (field.url.match(".jpg$")) {
-			$("#urls").append("<img src="+field.url+">");        	
+			$("#" + field.id).append("<br><img src="+field.url+">");        	
         }
         // TODO: This performs badly
         if (field.url.match("youtube.com")) {
 
-			$("#urls").append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
+			$("#" + field.id).append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
         	
         }
-        $("#urls").append("</li>");
+        $("#urls").append("</a></font></li>");
       });
 	  $("#status").text("Done")
     });
