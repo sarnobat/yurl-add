@@ -189,7 +189,17 @@ $(document).ready(function() {
     ////
 	var url = urlBase + "/categoriesRecursive?parentId=" + rootId;
 	$.getJSON(url, function(result){})
-		.success(function(data) { alert(data[0].name); })
+		.success(
+			function(data) { 
+			      $.each(data, function(a,category,c){
+						$("#categoriesRecursive").append("<input type=checkbox name=nodeId value="+category.id +">");
+						$("#categoriesRecursive").append(category.name);
+						$("#categoriesRecursive").append("</input>");
+						$("#categoriesRecursive").append("<br>");
+					});
+				//categoriesRecursive
+			}
+		)
 		.error(function() {  })
 		.complete(function() {  });
 
