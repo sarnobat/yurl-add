@@ -39,9 +39,9 @@ $(document).ready(function() {
         } else if (field.title.match(new RegExp('youtube','i'))) {
         	color= "#FF0000";
         } else if (field.title.match(new RegExp('neo','i'))) {
-        	color= "green";
+        	color= "#00FF00";
         } else if (field.title.match(new RegExp('database','i'))) {
-        	color= "purple";
+        	color= "SlateBlue";
         } 
         
         $("#urls").append("<font style=\"color:"+color+"\"><li id="+field.id+">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></li></font>");
