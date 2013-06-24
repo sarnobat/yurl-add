@@ -45,8 +45,8 @@ public class Server {
 		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
-		public Response uncategorized() throws JSONException, IOException {	
-			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where not(has(n.type)) AND id(n) > 0 return ID(n),n.title?,n.url?", new HashMap());
+		public Response uncategorized() throws JSONException, IOException {
+			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or source.name = 'root') and not(has(n.type)) AND id(n) > 0 return ID(n),n.title?,n.url?", new HashMap());
 			JSONArray data = (JSONArray)json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
@@ -146,10 +146,19 @@ public class Server {
 		public Response relate(@QueryParam("parentId") Integer parentId, @QueryParam("childId") Integer childId) throws JSONException, IOException {
 			Map paramValues = new HashMap();
 			paramValues.put("parentId", parentId);
+			println parentId;
 			paramValues.put("childId", childId);
+			println childId;
 			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b;", paramValues);
+			JSONObject ret = new JSONObject();
+			ret.put("status", "FAILURE");
+			if (((JSONArray)json.get("data")).length() == 0) {
+				if (((JSONArray)json.get("columns")).length() == 0) {
+					ret.put("status", "SUCCESS");
+				}
+			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(json.get("data").toString()).type("application/json").build();
+					.entity(ret.toString()).type("application/json").build();
 		}
 		
 
@@ -162,6 +171,10 @@ public class Server {
 			// POST {} to the node entry point URI
 			ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }").post(ClientResponse.class, map);
+			if (response.getStatus() != 200) {
+				println('failed' + response.getStatus());
+				throw new RuntimeException("failed:  + cypherQuery");
+			}
 			println "B";
 			String neo4jResponse = IOUtils.toString(response.getEntityInputStream());
 			println "C";

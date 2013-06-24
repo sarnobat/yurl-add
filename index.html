@@ -12,10 +12,11 @@ $(document).ready(function(){
   			
   	$.getJSON(urlBase + "/keys",function(result){
       $.each(result, function(a,binding,c){
-        $("#keys").append(binding.key + "::" + binding.name + "\n");
+        $("#keys").append(binding.key + "::" + binding.name +" # node " + binding.id + "\n");
         $(window).keypress(function(event) {
         	if (binding.key == String.fromCharCode(event.which)) {
-				var url = urlBase + "/relate?parentID=" +binding.id+"&childID=" +  $("#urls").children()[0].id;
+				var url = urlBase + "/relate?parentId=" +binding.id+"&childId=" +  $("#urls").children()[0].id;
+				//alert(url);
 				$.getJSON(url,function(result){
 					if (result.status == 'SUCCESS') {
 						$("#urls").children()[0].remove();
