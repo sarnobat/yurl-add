@@ -173,16 +173,14 @@ var urls = encodeURIComponent($("#urlBatchToSend").val());
 			<td width="75%">
 				<font color=grey><div id="status">Init</div></font>
 				<ol id="urls"></ol>
+				<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
+				<div id="batchStatus"></div>
+				<textarea id="urlBatchToSend" rows="20" cols="100"></textarea>
 			</td>
 		</tr>
 		<tr>
 			<td></td>
 			<td>
-				<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
-				<div id="batchStatus"></div>
-				<textarea id="urlBatchToSend" rows="20" cols="100">
-
-				</textarea>
 			</td>
 		</td>
 	</table>
