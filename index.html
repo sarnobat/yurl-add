@@ -96,7 +96,7 @@ var rootColor = MD5(rootId).substring(0,6);
 			var urlElements = field.url.match(/^http:\/\/[^/]+/);
 			if (urlElements != null) {
 				var site = urlElements[0];
-				$("#" + field.id).append("<img src='" + site + "/favicon.ico' width=30 onerror=\"this.style.display='none'\">");
+				$("#" + field.id).append("<img src='" + site + "/favicon.ico' width=30 onerror=\"this.style.display='none'\" class='buttonize'>");
 			}
 
 			var urlRoot = field.url.replace(/.*:(\/\/[^\/]+).*/ig,"$1");
