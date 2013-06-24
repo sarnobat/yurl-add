@@ -56,7 +56,7 @@ public class Server {
 			params.put("nodeId", nodeId);
 			// TODO: order these by most recent-first (so that they appear this
 			// way in the UI)
-			JSONObject json = queryNeo4j(
+			JSONObject json = execute(
 					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)", params);
 			JSONArray data = (JSONArray) json.get("data");
 			JSONArray ret = new JSONArray();
@@ -82,7 +82,7 @@ public class Server {
 			params.put("rootId", rootId);
 			// TODO: order these by most recent-first (so that they appear this
 			// way in the UI)
-			JSONObject json = queryNeo4j(
+			JSONObject json = execute(
 					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?",
 					params);
 			JSONArray data = (JSONArray) json.get("data");
@@ -151,7 +151,7 @@ public class Server {
 					paramValues.put("parentId", parentId);
 					paramValues.put("key", aKeyCode);
 					System.out.println("About to remove keybinding for " + aKeyCode);
-					JSONObject json = queryNeo4j(
+					JSONObject json = execute(
 							"start parent=node({parentId}) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
 							paramValues);
 					// TODO: remove the keyCode associated with the current
@@ -180,7 +180,7 @@ public class Server {
 
 			// TODO: first check if there is already a node with this name,
 			// which is for re-associating the keycode with the category
-			JSONObject json = queryNeo4j(
+			JSONObject json = execute(
 					"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
 					paramValues);
 			System.out.println(json.toString());
@@ -203,7 +203,7 @@ public class Server {
 		public JSONArray getKeys(Integer parentId) throws IOException, JSONException {
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("parentId", parentId);
-			JSONObject json = queryNeo4j(
+			JSONObject json = execute(
 					"START n=node(*) MATCH parent-[c:CONTAINS]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN ID(n),n.name,n.key?",
 					params);
 			JSONArray data = (JSONArray) json.get("data");
@@ -232,7 +232,7 @@ public class Server {
 			paramValues.put("url", httpUrl);
 			paramValues.put("title", title);
 			paramValues.put("created", System.currentTimeMillis());
-			JSONObject json = queryNeo4j(
+			JSONObject json = execute(
 					"CREATE (n { title : {title} , url : {url}, created: {created} }) RETURN id(n)",
 					paramValues);
 
@@ -285,7 +285,7 @@ public class Server {
 			params2.put("currentParentId", currentParentId);
 			params2.put("childId", childId);
 
-			queryNeo4j(
+			execute(
 					"START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
 					params2);
 
@@ -316,13 +316,13 @@ public class Server {
 			Map<String, Object> paramValues = new HashMap<String, Object>();
 			paramValues.put("parentId", parentId);
 			paramValues.put("childId", childId);
-			JSONObject json = queryNeo4j(
+			JSONObject json = execute(
 					"start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b return a,r,b;",
 					paramValues);
 			return json;
 		}
 
-		private JSONObject queryNeo4j(String cypherQuery, Map<String, Object> params)
+		private JSONObject execute(String cypherQuery, Map<String, Object> params)
 				throws IOException, JSONException {
 			WebResource resource = Client.create().resource(CYPHER_URI);
 			Map<String, Object> postBody = new HashMap<String, Object>();
