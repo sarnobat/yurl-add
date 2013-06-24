@@ -209,16 +209,18 @@ function moveDown(source) {
 }
 
 function swap(firstId, secondId) {
-	$("#" + secondId).after($("#" + firstId));
-	$.getJSON(urlBase + "/swapOrdinals?firstId=" + nodeId + "&secondId=" + nodeId, 
+	$.getJSON(urlBase + "/swapOrdinals?firstId=" + firstId + "&secondId=" + secondId, 
 		function(result){
 		})
 		.success(function(data) {  
+			alert("successfully swapped");
+			$("#" + secondId).after($("#" + firstId));
 		})
 		.error(function() { 
 			alert("error occurred "); 
 		})
-		.complete(function() { });
+		.complete(function() { 
+		});
 
 }
 

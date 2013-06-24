@@ -530,6 +530,17 @@ public class Server {
 		}
 
 		@GET
+		@Path("swapOrdinals")
+		@Produces("application/json")
+		public Response swapOrdinals(@QueryParam("firstId") Integer iFirstId,
+				@QueryParam("secondId") Integer iSecondId) {
+			System.out.println("swapOrdinals");
+			JSONObject ret = new JSONObject();
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
+					.type("application/json").build();
+		}
+
+		@GET
 		@Path("relate")
 		@Produces("application/json")
 		public Response relate(@QueryParam("parentId") Integer iNewParentId,
