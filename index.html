@@ -34,12 +34,12 @@ $(document).ready(function() {
       
         // Colors
         var color = "";
-        if (field.title.match(new RegExp('java\\b','i'))) {
-        	color= "orange";
+        if (field.title.match(new RegExp('neo','i'))) {
+        	color= "MediumSeaGreen";
+        } else if (field.title.match(new RegExp('java\\b','i'))) {
+        	color= "DarkOrange";
         } else if (field.title.match(new RegExp('youtube','i'))) {
         	color= "#FF0000";
-        } else if (field.title.match(new RegExp('neo','i'))) {
-        	color= "#00FF00";
         } else if (field.title.match(new RegExp('database','i'))) {
         	color= "SlateBlue";
         } 
