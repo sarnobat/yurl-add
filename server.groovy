@@ -79,7 +79,6 @@ public class Server {
 		@Produces("application/json")
 		public Response uncategorized(@QueryParam("rootId") Integer rootId) throws JSONException,
 				IOException {
-			// TODO: check rootId is not null or empty
 			checkNotNull(rootId);
 			// TODO: the source is null clause should be obsoleted
 			Map<String, Object> params = new HashMap<String, Object>();
@@ -90,20 +89,28 @@ public class Server {
 					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?",
 					params);
 			JSONArray data = (JSONArray) json.get("data");
-			JSONArray ret = new JSONArray();
+			JSONArray theUncategorizedNodesJson = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
-				JSONArray a = data.getJSONArray(i);
-				JSONObject o = new JSONObject();
-				String id = (String) a.get(0);
-				o.put("id", id);
-				String title = (String) a.get(1);
-				String url = (String) a.get(2);
-				o.put("title", title);
-				o.put("url", url);
-				ret.put(o);
+				JSONObject anUncategorizedNodeJsonObject = new JSONObject();
+				{
+					JSONArray a = data.getJSONArray(i);
+					{
+						String id = (String) a.get(0);
+						anUncategorizedNodeJsonObject.put("id", id);
+					}
+					{
+						String title = (String) a.get(1);
+						anUncategorizedNodeJsonObject.put("title", title);
+					}
+					{
+						String url = (String) a.get(2);
+						anUncategorizedNodeJsonObject.put("url", url);
+					}
+				}
+				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
 			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
-					.type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(theUncategorizedNodesJson.toString()).type("application/json").build();
 		}
 
 		// -----------------------------------------------------------------------------
@@ -311,7 +318,8 @@ public class Server {
 			paramValues.put("childId", childId);
 
 			JSONObject theRelateOperationResponseJson = relateHelper(newParentId, childId);
-			// TODO: I think this is pointless. If the relate operation fails an exception should get thrown so we never reach the below code
+			// TODO: I think this is pointless. If the relate operation fails an
+			// exception should get thrown so we never reach the below code
 			JSONObject ret = new JSONObject();
 			{
 				ret.put("status", "FAILURE");
@@ -320,8 +328,8 @@ public class Server {
 						ret.put("status", "SUCCESS");
 					}
 				}
-				
-				if  (!ret.get("status").equals("SUCCESS")) {
+
+				if (!ret.get("status").equals("SUCCESS")) {
 					System.err.println("We should never reach this case");
 				}
 			}
