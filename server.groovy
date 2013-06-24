@@ -131,10 +131,12 @@ public class Server {
 		@GET
 		@Path("keys")
 		@Produces("application/json")
-		public Response keys() throws JSONException, IOException {
+		public Response keys(@QueryParam("parentId") Integer parentId) throws JSONException, IOException {
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("parentId", parentId);
 			JSONObject json = queryNeo4j(
-					"START n=node(*) WHERE has(n.name) and has(n.key) RETURN ID(n),n.name,n.key",
-					new HashMap<String, Object>());
+					"START n=node(*) MATCH parent-[c:CONTAINS]->n WHERE has(n.name) and has(n.key) and id(parent) = {parentId} RETURN ID(n),n.name,n.key",
+					params);
 			JSONArray data = (JSONArray) json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
