@@ -147,11 +147,6 @@ public class Server {
 					}
 
 				} else {
-					// unsuccessfulLines.append(lines[i]);
-					// unsuccessfulLines.append(lines[i + 1]);
-					// unsuccessfulLines.append(lines[i + 2]);
-					//
-					// System.out.println("unsuccessful: " + lines[i]);
 					System.out.println("Not supported 4");
 					throw new RuntimeException("Not supported 4");
 				}
