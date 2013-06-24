@@ -103,7 +103,7 @@ public class Server {
 
 				System.out.println("1");
 				String first = lines[i];
-				String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
+				String theHttpUrl = URLDecoder.decode(first, "UTF-8");
 				if (first.startsWith("=")) {
 					System.out.println("Not supported 1");
 					throw new RuntimeException("Not supported 1");
@@ -667,6 +667,18 @@ public class Server {
 			JSONObject oJson = new JSONObject(theNeo4jResponse);
 			return oJson;
 		}
+	}
+	
+	//----------------------------------------------------------------------------
+	// Read operations
+	//----------------------------------------------------------------------------
+
+
+	@GET
+	@Path("categoriesRecursive")
+	@Produces("application/json")
+	public Response relate(@QueryParam("parentId") Integer iNewParentId) {
+		return null;
 	}
 
 	public static void main(String[] args) throws URISyntaxException {
