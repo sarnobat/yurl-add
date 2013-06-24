@@ -213,7 +213,6 @@ function swap(firstId, secondId) {
 		function(result){
 		})
 		.success(function(data) {  
-			alert("successfully swapped");
 			$("#" + secondId).after($("#" + firstId));
 		})
 		.error(function() { 
