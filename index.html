@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+<style>
+
+body{font-family:Verdana; font-size: 12px;
+
+}
+
+</style>
 <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"><script> -->
 <script src="jquery/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="jquery/purl.js"></script>
@@ -10,10 +17,16 @@ var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
 var originalKeyBindings;
 var parentOfRootId;
+
+function tag(nodeId,tagName) {
+	alert(nodeId+"::"+tagName);
+}
+
 function addEmbeddedVideo(id, url) {
 //alert(id + "::" + url);
 	$("#" + id).children().last().append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
 }
+
 $(document).ready(function() {
 
 	////
@@ -65,8 +78,8 @@ $(document).ready(function() {
         }
         // TODO: This performs badly unless you manually expand one at a time
         if (field.url.match("youtube.com")) {
-
 			$("#" + field.id).append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
+            $("#" + field.id).append("<div>Tags:<br><input type=\"checkbox\" onclick='tag("+field.id+",\"watch these\")' /> watch this</div>");
         	
         }
         $("#urls").append("</a></font></li>");
