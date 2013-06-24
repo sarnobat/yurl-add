@@ -119,6 +119,7 @@ public class Server {
 					continue;
 				}
 				System.out.println("4");
+				
 				if (lines[i].startsWith("\"") && lines[i + 1].startsWith("http")) {
 
 					System.out.println("to be processed: " + lines[i]);
