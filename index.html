@@ -337,12 +337,13 @@ function sendBatch() {
 		.complete( function() {} );
 }
 
-function dumpSelections() {
+function getTagSelections() {
 	var selected = new Array();
 	$('#categoriesRecursive input:checked').each(function() {
 		selected.push($(this).attr('name'));
 	});
 	alert(selected);
+	return selected;
 }
 
 </script>
@@ -357,7 +358,7 @@ function dumpSelections() {
 				<textarea id="keys" cols="30" rows="20px"></textarea>
 				<ol id="keyLinks"></ol>
 				<br><br>
-				<input type=button onclick="dumpSelections()">
+				<input type=button onclick="getTagSelections()">
 				<div id="categoriesRecursive">
 				</div>
 				
