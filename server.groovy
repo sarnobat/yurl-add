@@ -103,14 +103,15 @@ public class Server {
 
 				System.out.println("1");
 				String first = lines[i];
+				String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 				if (first.startsWith("=")) {
 					System.out.println("Not supported 1");
 					throw new RuntimeException("Not supported 1");
 				}
 				System.out.println("2");
 				if (first.startsWith("http")) {
-					System.out.println("Not supported 2");
-					throw new RuntimeException("Not supported 2");
+					System.out.println("Not supported 2, first: " + first);
+					throw new RuntimeException("Not supported 2, first: " + first);
 				}
 				System.out.println("3");
 				if (first.matches("^\\s*" + '$')) {
