@@ -142,10 +142,11 @@ function sendBatch() {
 //alert("about to encode");
 var urls = encodeURIComponent($("#urlBatchToSend").val());
 //alert("encoded");
+			$("#batchStatus").text("Sending new batch");	
 	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + urls, function(result){})
 		.success(function(data) {  
 			console.debug(data);
-			$("#batchStatus").text("Success");	
+			$("#batchStatus").text("Successfully imported batch");	
 		})
 		.error( function(data) { 
 			console.debug(data);
@@ -176,7 +177,7 @@ var urls = encodeURIComponent($("#urlBatchToSend").val());
 			<td></td>
 			<td>
 				<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
-				<div id="batchStatus" value="none" text="no">Nothing</div>
+				<div id="batchStatus"></div>
 				<textarea id="urlBatchToSend" rows="20" cols="100">
 
 
