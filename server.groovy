@@ -606,7 +606,7 @@ public class Server {
 		@Produces("application/json")
 		public Response relateCategoriesToItem(@QueryParam("nodeId") Integer iNodeToBeTagged,
 				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo)
-				throws UnsupportedEncodingException, JSONException {
+				throws JSONException, IOException {
 			System.out.println("relateCategoriesToItem(): begin");
 			String decode = URLDecoder.decode(iCategoriesToBeAddedTo, "UTF-8");
 			System.out.println(decode);
@@ -614,7 +614,7 @@ public class Server {
 			for (int i = 0; i < theCategoryIdsToBeAddedTo.length(); i++) {
 				Integer aCategoryIdToBeAddedTo = theCategoryIdsToBeAddedTo.getInt(i);
 				System.out.println("relateCategoriesToItem(): " + aCategoryIdToBeAddedTo + " --> " + iNodeToBeTagged);
-				//relateHelper();
+				relateHelper(aCategoryIdToBeAddedTo,iNodeToBeTagged);
 			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(new JSONObject().toString()).type("application/json").build();
