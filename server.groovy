@@ -197,9 +197,8 @@ public class Server {
 		private void createNewKeyBinding(String aCategoryName, String aKeyCode, Integer parentId)
 				throws IOException, JSONException {
 
-			// //
-			// // TODO (urgent): Check if the category already exists
-			// //
+			// TODO: Also create a trash category for each new category key node
+			
 			boolean createNewCategoryNode = false;
 			_1: {
 				Map<String, Object> theParamValues = new HashMap<String, Object>();
@@ -373,21 +372,6 @@ public class Server {
 			// TODO: I think this is pointless. If the relate operation fails an
 			// exception should get thrown so we never reach the below code
 			 JSONObject ret = new JSONObject();
-			// _1: {
-			// ret.put("status", "FAILURE");
-			// if (((JSONArray)
-			// theRelateOperationResponseJson.get("data")).length() == 0) {
-			// if (((JSONArray)
-			// theRelateOperationResponseJson.get("columns")).length() == 0) {
-			// ret.put("status", "SUCCESS");
-			// }
-			// }
-			//
-			// if (ret.get("status").equals("FAILURE")) {
-			// System.err.println("We should never reach this case");
-			// System.err.println(theRelateOperationResponseJson);
-			// }
-			// }
 
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
