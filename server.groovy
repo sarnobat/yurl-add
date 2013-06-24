@@ -603,11 +603,11 @@ public class Server {
 		@GET
 		@Path("relateCategoriesToItem")
 		@Produces("application/json")
-		public Response relateCategoriesToItem(@QueryParam("nodeId") Integer iNodeToBeTagged, @QueryParam("newCategoryIds") String iCategoriesToBeAddedTo) {
+		public Response relateCategoriesToItem(@QueryParam("nodeId") Integer iNodeToBeTagged,
+				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo) {
 
-			JSONObject ret = new JSONObject();
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
-					.type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(new JSONObject().toString()).type("application/json").build();
 		}
 
 		/**
