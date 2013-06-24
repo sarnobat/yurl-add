@@ -38,7 +38,6 @@ public class Server {
 		@Produces("application/json")
 		public Response keys() throws JSONException, IOException {
 			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN n.name,n.key");
-			//return json.get("data").toString();
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json.get("data").toString()).type("application/json").build();
 		}
