@@ -24,15 +24,10 @@ $("#status").text("Loading")
         $(window).keypress(function(event) {
         	if (binding.key == String.fromCharCode(event.which)) {
 				var url = urlBase + "/relate?parentId=" +binding.id+"&childId=" +  $("#urls").children()[0].id;
-				//alert(url);
-				$.getJSON(url,function(result){
-						//alert("callback ");
-					
-				})
-				.success(function() { $("#urls").children()[0].remove(); })
-				.error(function() { alert("error occurred "); })
-				.complete(function() { //alert("Done"); 
-				});
+				$.getJSON(url, function(result){})
+					.success(function() { $("#urls").children()[0].remove(); })
+					.error(function() { alert("error occurred "); })
+					.complete(function() { });
 			}
 			// we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses
 		});
