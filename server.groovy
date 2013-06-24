@@ -635,9 +635,10 @@ public class Server {
 			_1: {
 				theParamValues.put("parentId", iParentId);
 				theParamValues.put("childId", iChildId);
+				theParamValues.put("currentTime",System.currentTimeMillis());
 			}
 			JSONObject theJson = execute(
-					"start a=node({parentId}),b=node({childId}) CREATE a-[r:CONTAINS]->b return a,r,b;",
+					"start a=node({parentId}),b=node({childId}) CREATE a-[r:CONTAINS]->b SET b.accessed = {currentTime} return a,r,b;",
 					theParamValues);
 			return theJson;
 		}
