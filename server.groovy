@@ -1,4 +1,4 @@
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkNotNull;P
 
 import java.io.IOException;
 import java.net.URI;
@@ -53,18 +53,18 @@ public class Server {
 		@GET
 		@Path("parent")
 		@Produces("application/json")
-		public Response parent(@QueryParam("nodeId") Integer nodeId) throws JSONException,
+		public Response parent(@QueryParam("nodeId") Integer iNodeId) throws JSONException,
 				IOException {
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("nodeId", nodeId);
+			Map<String, Object> theParams = new HashMap<String, Object>();
+			theParams.put("nodeId", iNodeId);
 			// TODO: order these by most recent-first (so that they appear this
 			// way in the UI)
-			JSONObject json = execute(
-					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)", params);
-			JSONArray data = (JSONArray) json.get("data");
+			JSONObject theParentNodeJson = execute(
+					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)", theParams);
+			JSONArray theData = (JSONArray) theParentNodeJson.get("data");
 			JSONArray ret = new JSONArray();
-			for (int i = 0; i < data.length(); i++) {
-				JSONArray a = data.getJSONArray(i);
+			for (int i = 0; i < theData.length(); i++) {
+				JSONArray a = theData.getJSONArray(i);
 				JSONObject o = new JSONObject();
 				String id = (String) a.get(0);
 				o.put("id", id);
@@ -81,34 +81,34 @@ public class Server {
 		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
-		public Response uncategorized(@QueryParam("rootId") Integer rootId) throws JSONException,
+		public Response uncategorized(@QueryParam("rootId") Integer iRootId) throws JSONException,
 				IOException {
-			checkNotNull(rootId);
+			checkNotNull(iRootId);
 			// TODO: the source is null clause should be obsoleted
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("rootId", rootId);
+			Map<String, Object> theParams = new HashMap<String, Object>();
+			theParams.put("rootId", iRootId);
 			// TODO: order these by most recent-first (so that they appear this
 			// way in the UI)
-			JSONObject json = execute(
+			JSONObject theQueryResultJson = execute(
 					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?",
-					params);
-			JSONArray data = (JSONArray) json.get("data");
+					theParams);
+			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
-			for (int i = 0; i < data.length(); i++) {
+			for (int i = 0; i < theDataJson.length(); i++) {
 				JSONObject anUncategorizedNodeJsonObject = new JSONObject();
 				_1: {
-					JSONArray a = data.getJSONArray(i);
+					JSONArray a = theDataJson.getJSONArray(i);
 					_11: {
-						String id = (String) a.get(0);
-						anUncategorizedNodeJsonObject.put("id", id);
+						String anId = (String) a.get(0);
+						anUncategorizedNodeJsonObject.put("id", anId);
 					}
 					_12: {
-						String title = (String) a.get(1);
-						anUncategorizedNodeJsonObject.put("title", title);
+						String aTitle = (String) a.get(1);
+						anUncategorizedNodeJsonObject.put("title", aTitle);
 					}
 					_13: {
-						String url = (String) a.get(2);
-						anUncategorizedNodeJsonObject.put("url", url);
+						String aUrl = (String) a.get(2);
+						anUncategorizedNodeJsonObject.put("url", aUrl);
 					}
 				}
 				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
@@ -128,30 +128,30 @@ public class Server {
 		// I don't know how to do that.
 		// TODO: we will have to start supporting disassociation of key bindings
 		// with child categories
-		public Response keysUpdate(@QueryParam("parentId") Integer parentId,
-				@QueryParam("newKeyBindings") String newKeyBindings,
-				@QueryParam("oldKeyBindings") String oldKeyBindings) throws JSONException,
+		public Response keysUpdate(@QueryParam("parentId") Integer iParentId,
+				@QueryParam("newKeyBindings") String iNewKeyBindings,
+				@QueryParam("oldKeyBindings") String iOldKeyBindings) throws JSONException,
 				IOException {
 			System.out.println("keysUpdate");
 
-			Set<String> oldKeyBindingsSet = new HashSet<String>();
-			Collections.addAll(oldKeyBindingsSet, oldKeyBindings.trim().split("\n"));
-			Set<String> newKeyBindingsSet = new HashSet<String>();
-			Collections.addAll(newKeyBindingsSet, newKeyBindings.trim().split("\n"));
+			Set<String> theOldKeyBindingsSet = new HashSet<String>();
+			Collections.addAll(theOldKeyBindingsSet, iOldKeyBindings.trim().split("\n"));
+			Set<String> theNewKeyBindingsSet = new HashSet<String>();
+			Collections.addAll(theNewKeyBindingsSet, iNewKeyBindings.trim().split("\n"));
 
 			// NOTE: This is not symmetric (commutative?). If you want to
 			// support removal do that in a separate loop
-			Set<String> newKeyBindingLines = Sets.difference(newKeyBindingsSet, oldKeyBindingsSet);
+			Set<String> theNewKeyBindingLines = Sets.difference(theNewKeyBindingsSet, theOldKeyBindingsSet);
 			_1: {
-				System.out.println("Old: " + oldKeyBindingsSet);
-				System.out.println("New: " + newKeyBindingsSet);
-				System.out.println("Difference: " + newKeyBindingLines);
+				System.out.println("Old: " + theOldKeyBindingsSet);
+				System.out.println("New: " + theNewKeyBindingsSet);
+				System.out.println("Difference: " + theNewKeyBindingLines);
 			}
 
 			// Remove duplicates by putting the bindings in a map
 			Map<String, String> theKeyBindingsNoDuplicates = new HashMap<String, String>();
-			for (String newKeyBinding : newKeyBindingLines) {
-				if (newKeyBinding.trim().startsWith("#") && !newKeyBinding.trim().startsWith("#=")) {
+			for (String aNewKeyBinding : theNewKeyBindingLines) {
+				if (aNewKeyBinding.trim().startsWith("#") && !aNewKeyBinding.trim().startsWith("#=")) {
 					continue;// A commented out keybinding
 				}
 				// TODO: do not allow key binding that is "_". This is reserved
@@ -159,9 +159,9 @@ public class Server {
 
 				_1: {
 					// Ignore trailing comments
-					String[] lineElements = newKeyBinding.split("=");
-					String aKeyCode = lineElements[0].trim();
-					String[] aRightHandSideElements = lineElements[1].trim().split("#");
+					String[] aLineElements = aNewKeyBinding.split("=");
+					String aKeyCode = aLineElements[0].trim();
+					String[] aRightHandSideElements = aLineElements[1].trim().split("#");
 					_2: {
 						String aName = aRightHandSideElements[0].trim();
 						System.out.println("Accepting proposal to create key binding for " + aName
@@ -175,37 +175,37 @@ public class Server {
 
 			for (String aKeyCode : theKeyBindingsNoDuplicates.keySet()) {
 				String aName = theKeyBindingsNoDuplicates.get(aKeyCode);
-				Map<String, Object> paramValues = new HashMap<String, Object>();
+				Map<String, Object> aParamValues = new HashMap<String, Object>();
 				_1: {
-					paramValues.put("parentId", parentId);
-					paramValues.put("key", aKeyCode);
+					aParamValues.put("parentId", iParentId);
+					aParamValues.put("key", aKeyCode);
 				}
 				System.out.println("About to remove keybinding for " + aKeyCode);
 				JSONObject json = execute(
 						"START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
-						paramValues);
+						aParamValues);
 				theKeyBindingsNoDuplicates.remove(aKeyCode);
 				System.out.println("Removed keybinding for " + aName);
 
-				createNewKeyBinding(aName, aKeyCode, parentId);
+				createNewKeyBinding(aName, aKeyCode, iParentId);
 			}
-			JSONArray ret = getKeys(parentId);
+			JSONArray ret = getKeys(iParentId);
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
 		}
 
-		private void createNewKeyBinding(String aCategoryName, String aKeyCode, Integer parentId)
+		private void createNewKeyBinding(String iCategoryName, String iKeyCode, Integer iParentId)
 				throws IOException, JSONException {
 
 			// TODO: Also create a trash category for each new category key node
 			
-			boolean createNewCategoryNode = false;
+			boolean shouldCreateNewCategoryNode = false;
 			_1: {
 				Map<String, Object> theParamValues = new HashMap<String, Object>();
-				theParamValues.put("parentId", parentId);
+				theParamValues.put("parentId", iParentId);
 				// TODO: change this back
-				theParamValues.put("aCategoryName", aCategoryName);
-				theParamValues.put("aKeyCode", aKeyCode);
+				theParamValues.put("aCategoryName", iCategoryName);
+				theParamValues.put("aKeyCode", iKeyCode);
 				String iCypherQuery = "START parent=node({parentId}) MATCH parent -[r:CONTAINS]-> existingCategory WHERE has(existingCategory.type) and existingCategory.type = 'categoryNode' and existingCategory.name = {aCategoryName} SET existingCategory.key = {aKeyCode} RETURN id(existingCategory)";
 				JSONObject theJson = execute(iCypherQuery, theParamValues);
 				System.out.println("restoring unassociated category: " + iCypherQuery + "\t"
@@ -218,21 +218,21 @@ public class Server {
 						throw new RuntimeException(
 								"There should never be 2 child categories of the same node with the same name");
 					}
-					String newCategoryNodeIdString = "-1";
+					String theNewCategoryNodeIdString = "-1";
 
-					newCategoryNodeIdString = (String) theCategoryNodes.get(0);
-					System.out.println("Category ID to reattach: " + newCategoryNodeIdString);
+					theNewCategoryNodeIdString = (String) theCategoryNodes.get(0);
+					System.out.println("Category ID to reattach: " + theNewCategoryNodeIdString);
 				} else {
-					createNewCategoryNode = true;
+					shouldCreateNewCategoryNode = true;
 				}
 
 			}
-			if (createNewCategoryNode) {
+			if (shouldCreateNewCategoryNode) {
 
 				Map<String, Object> theParamValues = new HashMap<String, Object>();
 				_1: {
-					theParamValues.put("name", aCategoryName);
-					theParamValues.put("key", aKeyCode);
+					theParamValues.put("name", iCategoryName);
+					theParamValues.put("key", iKeyCode);
 					theParamValues.put("type", "categoryNode");
 					theParamValues.put("created", System.currentTimeMillis());
 					System.out.println("cypher params: " + theParamValues);
@@ -243,19 +243,19 @@ public class Server {
 						"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
 						theParamValues);
 				System.out.println(theNewKeyBindingResponseJson.toString());
-				String newCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
+				String theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
 						.get("data")).get(0)).get(0);
-				Integer newCategoryNodeId = Integer.parseInt(newCategoryNodeIdString);
-				relateHelper(parentId, newCategoryNodeId);
+				Integer theNewCategoryNodeId = Integer.parseInt(theNewCategoryNodeIdString);
+				relateHelper(iParentId, theNewCategoryNodeId);
 			}
 		}
 
 		@GET
 		@Path("keys")
 		@Produces("application/json")
-		public Response keys(@QueryParam("parentId") Integer parentId) throws JSONException,
+		public Response keys(@QueryParam("parentId") Integer iParentId) throws JSONException,
 				IOException {
-			JSONArray ret = getKeys(parentId);
+			JSONArray ret = getKeys(iParentId);
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
 		}
@@ -265,15 +265,15 @@ public class Server {
 			_1: {
 				theParams.put("parentId", iParentId);
 			}
-			JSONObject json = execute(
+			JSONObject theQueryJsonResult = execute(
 					"START n=node(*) MATCH parent-[c:CONTAINS]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN ID(n),n.name,n.key?",
 					theParams);
-			JSONArray data = (JSONArray) json.get("data");
+			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
-			for (int i = 0; i < data.length(); i++) {
+			for (int i = 0; i < theData.length(); i++) {
 				JSONObject aBindingObject = new JSONObject();
 				_1: {
-					JSONArray aBindingArray = data.getJSONArray(i);
+					JSONArray aBindingArray = theData.getJSONArray(i);
 					String id = (String) aBindingArray.get(0);
 					aBindingObject.put("id", id);
 					String title = (String) aBindingArray.get(1);
@@ -293,8 +293,8 @@ public class Server {
 		@GET
 		@Path("stash")
 		@Produces("application/json")
-		public Response stash(@QueryParam("param1") String url) throws JSONException, IOException {
-			String theHttpUrl = URLDecoder.decode(url, "UTF-8");
+		public Response stash(@QueryParam("param1") String iUrl) throws JSONException, IOException {
+			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 			String theTitle = getTitle(new URL(theHttpUrl));
 			Map<String, Object> theParamValues = new HashMap<String, Object>();
 			_1: {
@@ -318,14 +318,14 @@ public class Server {
 					.build();
 		}
 
-		private String getTitle(final URL url) {
+		private String getTitle(final URL iUrl) {
 			String title = "";
 			ExecutorService theExecutorService = Executors.newFixedThreadPool(2);
 			Collection<Callable<String>> tasks = new ArrayList<Callable<String>>();
 			Callable<String> callable = new Callable<String>() {
 				@Override
 				public String call() throws Exception {
-					Document doc = Jsoup.connect(url.toString()).get();
+					Document doc = Jsoup.connect(iUrl.toString()).get();
 					return doc.title();
 				}
 			};
@@ -345,28 +345,28 @@ public class Server {
 		@GET
 		@Path("relate")
 		@Produces("application/json")
-		public Response relate(@QueryParam("parentId") Integer newParentId,
-				@QueryParam("childId") Integer childId,
-				@QueryParam("currentParentId") Integer currentParentId) throws JSONException,
+		public Response relate(@QueryParam("parentId") Integer iNewParentId,
+				@QueryParam("childId") Integer iChildId,
+				@QueryParam("currentParentId") Integer iCurrentParentId) throws JSONException,
 				IOException {
 			// first delete any existing contains relationship with the
 			// specified existing parent (but not with all parents since we
 			// could have a many-to-one contains)
 			_1: {
-				Map<String, Object> params = new HashMap<String, Object>();
-				params.put("currentParentId", currentParentId);
-				params.put("childId", childId);
+				Map<String, Object> theParams = new HashMap<String, Object>();
+				theParams.put("currentParentId", iCurrentParentId);
+				theParams.put("childId", iChildId);
 
 				execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
-						params);
+						theParams);
 				System.out.println("Finished trying to delete relationship between "
-						+ currentParentId + " and " + childId);
+						+ iCurrentParentId + " and " + iChildId);
 			}
 			_2: {
-				Map<String, Object> paramValues = new HashMap<String, Object>();
-				paramValues.put("childId", childId);
+				Map<String, Object> theParamValues = new HashMap<String, Object>();
+				theParamValues.put("childId", iChildId);
 
-				JSONObject theRelateOperationResponseJson = relateHelper(newParentId, childId);
+				JSONObject theRelateOperationResponseJson = relateHelper(iNewParentId, iChildId);
 				System.out.println("Finished relating to new category");
 			}
 			// TODO: I think this is pointless. If the relate operation fails an
@@ -383,11 +383,11 @@ public class Server {
 		 *             we try to relate to a newly created category if the
 		 *             system becomes non-deterministic.
 		 */
-		private JSONObject relateHelper(Integer parentId, Integer childId) throws IOException,
+		private JSONObject relateHelper(Integer iParentId, Integer childId) throws IOException,
 				JSONException {
 			Map<String, Object> paramValues = new HashMap<String, Object>();
 			_1: {
-				paramValues.put("parentId", parentId);
+				paramValues.put("parentId", iParentId);
 				paramValues.put("childId", childId);
 			}
 			JSONObject theJson = execute(
