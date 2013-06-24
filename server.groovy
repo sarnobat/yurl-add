@@ -40,17 +40,20 @@ public class Server {
 	public static class HelloWorldResource { // Must be public
 
 		final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
-	
+
 		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
-		public Response uncategorized(@QueryParam("rootId") Integer rootId) throws JSONException, IOException {
+		public Response uncategorized(@QueryParam("rootId") Integer rootId) throws JSONException,
+				IOException {
 			// TODO: check rootId is not null or empty
 			// TODO: the source is null clause should be obsoleted
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("rootId", rootId);
-			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?", params);
-			JSONArray data = (JSONArray)json.get("data");
+			JSONObject json = queryNeo4j(
+					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?",
+					params);
+			JSONArray data = (JSONArray) json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
 				JSONArray a = data.getJSONArray(i);
@@ -63,16 +66,27 @@ public class Server {
 				o.put("url", url);
 				ret.put(o);
 			}
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
+					.type("application/json").build();
+		}
+
+		@GET
+		@Path("keysUpdate")
+		@Produces("application/json")
+		public Response keysUpdate(@QueryParam("parentId") String parentId, @QueryParam("newKeyBindings") String newKeyBindings, @QueryParam("oldKeyBindings") String oldKeyBindings) throws JSONException, IOException {
+
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
+					.type("application/json").build();
 		}
 
 		@GET
 		@Path("keys")
 		@Produces("application/json")
 		public Response keys() throws JSONException, IOException {
-			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN ID(n),n.name,n.key", new HashMap<String, Object>());
-			JSONArray data = (JSONArray)json.get("data");
+			JSONObject json = queryNeo4j(
+					"START n=node(*) WHERE has(n.name) and has(n.key) RETURN ID(n),n.name,n.key",
+					new HashMap<String, Object>());
+			JSONArray data = (JSONArray) json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
 				JSONArray a = data.getJSONArray(i);
@@ -85,10 +99,10 @@ public class Server {
 				o.put("key", url);
 				ret.put(o);
 			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
+					.type("application/json").build();
 		}
-		
+
 		@GET
 		@Path("stash")
 		@Produces("application/json")
@@ -99,18 +113,20 @@ public class Server {
 			paramValues.put("url", httpUrl);
 			paramValues.put("title", title);
 			paramValues.put("created", System.currentTimeMillis());
-			JSONObject json = queryNeo4j("CREATE (n { title : {title} , url : {url}, created: {created} }) RETURN id(n)", paramValues);
-			
-			JSONArray newNodeId = (JSONArray)((JSONArray)json.get("data")).get(0);
+			JSONObject json = queryNeo4j(
+					"CREATE (n { title : {title} , url : {url}, created: {created} }) RETURN id(n)",
+					paramValues);
+
+			JSONArray newNodeId = (JSONArray) ((JSONArray) json.get("data")).get(0);
 			System.out.println("New node: " + newNodeId.get(0));
 			// TODO: Do not hard-code the root ID
-			JSONObject json2 = relateHelper(new Integer(45), (Integer)newNodeId.get(0));
+			JSONObject json2 = relateHelper(new Integer(45), (Integer) newNodeId.get(0));
 			// TODO: check that it returned successfully (redundant?)
 			System.out.println(json2.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json2.get("data").toString()).type("application/json").build();
 		}
-		
+
 		private String getTitle(final URL url) {
 			String title = "";
 			ExecutorService service = Executors.newFixedThreadPool(2);
@@ -120,7 +136,7 @@ public class Server {
 				public String call() throws Exception {
 					Document doc = Jsoup.connect(url.toString()).get();
 					return doc.title();
-				}		
+				}
 			};
 			tasks.add(callable);
 			try {
@@ -138,41 +154,48 @@ public class Server {
 		@GET
 		@Path("relate")
 		@Produces("application/json")
-		public Response relate(@QueryParam("parentId") Integer parentId, @QueryParam("childId") Integer childId) throws JSONException, IOException {
-			// TODO: first delete any existing contains relationship with the root (but not with existing categories since we could have a many-to-one contains)
+		public Response relate(@QueryParam("parentId") Integer parentId,
+				@QueryParam("childId") Integer childId) throws JSONException, IOException {
+			// TODO: first delete any existing contains relationship with the
+			// root (but not with existing categories since we could have a
+			// many-to-one contains)
 			Map<String, Object> paramValues = new HashMap<String, Object>();
 			paramValues.put("childId", childId);
-			
+
 			JSONObject json = relateHelper(parentId, childId);
 			JSONObject ret = new JSONObject();
 			ret.put("status", "FAILURE");
-			if (((JSONArray)json.get("data")).length() == 0) {
-				if (((JSONArray)json.get("columns")).length() == 0) {
+			if (((JSONArray) json.get("data")).length() == 0) {
+				if (((JSONArray) json.get("columns")).length() == 0) {
 					ret.put("status", "SUCCESS");
 				}
 			}
 
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
+					.type("application/json").build();
 		}
-		
-		private JSONObject relateHelper(Integer parentId, Integer childId) throws IOException, JSONException {
+
+		private JSONObject relateHelper(Integer parentId, Integer childId) throws IOException,
+				JSONException {
 			Map<String, Object> paramValues = new HashMap<String, Object>();
 			paramValues.put("parentId", parentId);
 			paramValues.put("childId", childId);
-			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b return a,r,b;", paramValues);
+			JSONObject json = queryNeo4j(
+					"start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b return a,r,b;",
+					paramValues);
 			return json;
 		}
-		
 
-		private JSONObject queryNeo4j(String cypherQuery, Map<String, Object> params) throws IOException, JSONException {
+		private JSONObject queryNeo4j(String cypherQuery, Map<String, Object> params)
+				throws IOException, JSONException {
 			WebResource resource = Client.create().resource(CYPHER_URI);
 			Map<String, Object> postBody = new HashMap<String, Object>();
 			postBody.put("query", cypherQuery);
 			postBody.put("params", params);
 			// POST {} to the node entry point URI
 			ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
-					.type(MediaType.APPLICATION_JSON).entity("{ }").post(ClientResponse.class, postBody);
+					.type(MediaType.APPLICATION_JSON).entity("{ }")
+					.post(ClientResponse.class, postBody);
 			if (response.getStatus() != 200) {
 				System.out.println("failed: " + cypherQuery + "\tparams: " + params);
 				throw new RuntimeException();
@@ -187,7 +210,7 @@ public class Server {
 	}
 
 	public static void main(String[] args) throws URISyntaxException {
-		JdkHttpServerFactory.createHttpServer(
-				new URI("http://localhost:4447/"), new ResourceConfig(HelloWorldResource.class));
+		JdkHttpServerFactory.createHttpServer(new URI("http://localhost:4447/"),
+				new ResourceConfig(HelloWorldResource.class));
 	}
 }
