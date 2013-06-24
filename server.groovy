@@ -40,7 +40,7 @@ public class Server {
 	@Path("yurl")
 	public static class HelloWorldResource { // Must be public
 
-		final String CYPHER_URI = "http://localhost:7474/db/data/cypher";
+		final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 	
 		@GET
 		@Path("uncategorized")
@@ -99,10 +99,10 @@ public class Server {
 			paramValues.put("created", System.currentTimeMillis());
 			JSONObject json = queryNeo4j("CREATE (n { title : {title} , url : {url}, created: {created} }) RETURN id(n)", paramValues);
 			
-			String newNodeId = (String) ((JSONArray)json.get("data")).get(0);
-			println "New node: " + newNodeId;
+			JSONArray newNodeId = (JSONArray)((JSONArray)json.get("data")).get(0);
+			println "New node: " + newNodeId.get(0);
 			// TODO: Do not hard-code the root ID
-			JSONObject json2 = relateHelper(45, Integer.parseInt(newNodeId));
+			JSONObject json2 = relateHelper(new Integer(45), newNodeId.get(0));
 			// TODO: check that it returned successfully (redundant?)
 			println( json2.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
