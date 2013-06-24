@@ -45,50 +45,49 @@ $(document).ready(function() {
 	//// Uncategorized URLs
 	////
     
-    $.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
-      $("#status").text("Populating")
-      $.each(result, function(resultRowNumber, field) {
-      
-        // Colors
-        var color = "";
-        var titlePlusUrl = field.title + field.url;
-        if (titlePlusUrl.match(new RegExp('neo','i'))) {
-        	color= "MediumSeaGreen";
-        } else if (titlePlusUrl.match(new RegExp('ubuntu','i'))) {
-        	color= "LightSteelBlue";
-        } else if (titlePlusUrl.match(new RegExp('database','i'))
-        		   || titlePlusUrl.match(new RegExp('sql','i'))) {
-        	color= "SlateBlue";
-        } else if (titlePlusUrl.match(new RegExp('java\\b','i'))
-        		   || titlePlusUrl.match(new RegExp('exception\\b','i'))) {
-        	color= "DarkOrange";
-        }  else if (titlePlusUrl.match(new RegExp('javascript','i'))
-        			|| titlePlusUrl.match(new RegExp('ajax','i')) 
-        			|| titlePlusUrl.match(new RegExp('jquery','i')) ) {
-        	color= "Gold";
-        } else if (titlePlusUrl.match(new RegExp('amazon\\b','i'))) {
-        	color= "Chocolate";
-        } else if (titlePlusUrl.match(new RegExp('youtube','i'))) {
-        	color= "#FF0000";
-        } 
-        
-        $("#urls").append("<li id="+field.id+">");
-        $("#" + field.id).append("<input id=up-"+field.id+" type=button value='Move Up' onclick='moveUp("+field.id+")'>");
-		$("#" + field.id).append("<input id=down"+field.id+" type=button value='Move Down' onclick='moveDown("+field.id+")'>");
-		$("#" + field.id).append("<font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a>");
-        if (field.url.match(".jpg$")) {
-			$("#" + field.id).append("<br><img src="+field.url+">");
-        }
-        // TODO: This performs badly unless you manually expand one at a time
-        if (field.url.match("youtube.com")) {
-			$("#" + field.id).append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
-            $("#" + field.id).append("<div>Tags:<br><input type=\"checkbox\" onclick='tag("+field.id+",\"watch these\")' /> watch this</div>");
-        	
-        }
-        $("#urls").append("</font></li>");
-      });
-	  $("#status").text("Done")
-    });
+	$.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
+		$("#status").text("Populating")
+		$.each(result, function(resultRowNumber, field) {				
+			// Colors
+			var color = "";
+			var titlePlusUrl = field.title + field.url;
+			if (titlePlusUrl.match(new RegExp('neo','i'))) {
+				color= "MediumSeaGreen";
+			} else if (titlePlusUrl.match(new RegExp('ubuntu','i'))) {
+				color= "LightSteelBlue";
+			} else if (titlePlusUrl.match(new RegExp('database','i'))
+					   || titlePlusUrl.match(new RegExp('sql','i'))) {
+				color= "SlateBlue";
+			} else if (titlePlusUrl.match(new RegExp('java\\b','i'))
+					   || titlePlusUrl.match(new RegExp('exception\\b','i'))) {
+				color= "DarkOrange";
+			}  else if (titlePlusUrl.match(new RegExp('javascript','i'))
+						|| titlePlusUrl.match(new RegExp('ajax','i')) 
+						|| titlePlusUrl.match(new RegExp('jquery','i')) ) {
+				color= "Gold";
+			} else if (titlePlusUrl.match(new RegExp('amazon\\b','i'))) {
+				color= "Chocolate";
+			} else if (titlePlusUrl.match(new RegExp('youtube','i'))) {
+				color= "#FF0000";
+			} 
+			
+			$("#urls").append("<li id="+field.id+">");
+			$("#" + field.id).append("<input id=up-"+field.id+" type=button value='Move Up' onclick='moveUp("+field.id+")'>");
+			$("#" + field.id).append("<input id=down"+field.id+" type=button value='Move Down' onclick='moveDown("+field.id+")'>");
+			$("#" + field.id).append("<font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a>");
+			if (field.url.match(".jpg$")) {
+				$("#" + field.id).append("<br><img src="+field.url+">");
+			}
+			// TODO: This performs badly unless you manually expand one at a time
+			if (field.url.match("youtube.com")) {
+				$("#" + field.id).append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
+				$("#" + field.id).append("<div>Tags:<br><input type=\"checkbox\" onclick='tag("+field.id+",\"watch these\")' /> watch this</div>");
+				
+			}
+			$("#urls").append("</font></li>");
+		});
+		$("#status").text("Done")
+	});
 
 	////
 	//// Get the key bindings
