@@ -45,6 +45,7 @@ import org.apache.commons.lang.*;
 import au.com.bytecode.opencsv.CSVReader;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.Client;
@@ -90,6 +91,7 @@ public class Server {
 		@Produces("application/json")
 		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
 				@QueryParam("urls") String iUrls) throws Exception {
+			Preconditions.checkArgument(iRootId!=null);
 			System.out.println("batchInsert - " + iRootId);
 			// System.out.println("batchInsert - " + URLDecoder.decode(iUrls,
 			// "UTF-8"));
@@ -138,7 +140,7 @@ public class Server {
 							System.out.println("Not supported 3");
 							throw new RuntimeException("Not supported 3");
 						}
-
+						JSONObject newNodeJsonObject = createNode(url, title, iRootId);
 						i += 2;
 					} catch (Exception e) {
 						e.printStackTrace();
