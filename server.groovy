@@ -677,7 +677,7 @@ public class Server {
 	@GET
 	@Path("categoriesRecursive")
 	@Produces("application/json")
-	public Response relate(@QueryParam("parentId") Integer iNewParentId) {
+	public Response relate(@QueryParam("parentId") Integer iParentId) {
 		return null;
 	}
 
