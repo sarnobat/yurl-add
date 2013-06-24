@@ -31,10 +31,17 @@ $(document).ready(function() {
     $.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
       $("#status").text("Populating")
       $.each(result, function(resultRowNumber, field) {
+      
+        // Colors
         var color = "";
         if (field.title.match(new RegExp('java\\b','i'))) {
         	color= "orange";
-        }
+        } else if (field.title.match(new RegExp('youtube','i'))) {
+        	color= "red";
+        } else if (field.title.match(new RegExp('neo','i'))) {
+        	color= "green";
+        } 
+        
         $("#urls").append("<font color=\""+color+"\"><li id="+field.id+">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></li></font>");
       });
 	  $("#status").text("Done")
