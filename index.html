@@ -45,7 +45,7 @@ $(document).ready(function() {
         	if (binding.key == String.fromCharCode(event.which)) {
 				var url = urlBase + "/relate?parentId=" +binding.id+"&childId=" +  $("#urls").children()[0].id + "&currentParentId=" + rootId;
 				$.getJSON(url, function(result){})
-					.success(function() { $($("#urls").children()[0]).fadeOut("slow",function() { $(this).remove(); }) })
+					.success(function() { $($("#urls").children()[0]).fadeOut("fast",function() { $(this).remove(); }) })
 					.error(function() { alert("error occurred "); })
 					.complete(function() { });
 			}
