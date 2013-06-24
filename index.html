@@ -10,7 +10,7 @@ var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 $(document).ready(function(){
   $("button").click(function(){
   			
-  	/*$.getJSON(urlBase + "/keys",function(result){
+  	$.getJSON(urlBase + "/keys",function(result){
       $.each(result, function(a,binding,c){
         $("#keys").append(binding.key + "::" + binding.name + "\n");
         $(window).keypress(function(event) {
@@ -25,7 +25,7 @@ $(document).ready(function(){
 			// we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses
 		});
       });
-    });*/
+    });
     $.getJSON(urlBase + "/uncategorized",function(result){
       $.each(result, function(resultRowNumber, field){
         $("#urls").append("<li id="+field.id+">[" + field.id + "]: "+ field.title + " (" + field.url + ") " + "</li>");
