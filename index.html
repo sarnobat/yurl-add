@@ -11,15 +11,16 @@
 		
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 $(document).ready(function() {
+
+	//// Determine the root ID
 	var rootId = $.url().param('rootId')
-	
 	if (rootId == null || rootId == '') {
 		rootId = 45;
 		alert('No root id specified');
 	}
-	
 	$("#status").text("Loading")  			
 
+	//// Get the key bindings
   	$.getJSON(urlBase + "/keys",function(result){
       $.each(result, function(a,binding,c){
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
@@ -36,6 +37,7 @@ $(document).ready(function() {
       });
     });
 
+	//// Get the URLs belonging to this root ID
     $.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
       $("#status").text("Populating")
       $.each(result, function(resultRowNumber, field){
