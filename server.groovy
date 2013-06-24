@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -9,10 +8,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jettison.json.JSONObject;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -26,11 +25,14 @@ public class Server {
 		final String CYPHER_URI = "http://localhost:7474/db/data/cypher";
 
 		@GET
-		@Path("json")
+		@Path("keys")
 		@Produces("application/json")
-		public String json() throws JSONException, org.codehaus.jettison.json.JSONException,
-				IOException {
+		public String keys() throws JSONException, IOException {
+			JSONObject json = queryNeo4j("start n=node(*) where has(n.name) and has (n.key) return n.name,n.key");
+			return json.get("data").toString();
+		}
 
+		private JSONObject queryNeo4j(String cypherQuery) throws IOException, JSONException {
 			WebResource resource = Client.create().resource(CYPHER_URI);
 
 			// POST {} to the node entry point URI
@@ -39,15 +41,13 @@ public class Server {
 					.type(MediaType.APPLICATION_JSON)
 					.entity("{ }")
 					.post(ClientResponse.class,
-							"{\"query\" : \"start n=node(*) where has(n.name) and has (n.key) return n.name,n.key\", \"params\" : {}}");
-			InputStream stream = response.getEntityInputStream();
-			String s = IOUtils.toString(stream);
-			System.out.println(s);
-			stream.close();
+							"{\"query\" : \"" + cypherQuery + "\", \"params\" : {}}");
+			String neo4jResponse = IOUtils.toString(response.getEntityInputStream());
+			System.out.println(neo4jResponse);
+			response.getEntityInputStream().close();
 			response.close();
-			JSONObject json = new JSONObject(s);
-
-			return json.get("data").toString();
+			JSONObject json = new JSONObject(neo4jResponse);
+			return json;
 		}
 	}
 
