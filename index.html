@@ -54,7 +54,7 @@ $(document).ready(function() {
         	color= "#FF0000";
         } 
         
-        $("#urls").append("<font style=\"color:"+color+"\"><li id="+field.id+">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></li></font>");
+        $("#urls").append("<li id="+field.id+"><font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></font></li>");
       });
 	  $("#status").text("Done")
     });
