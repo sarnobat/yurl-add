@@ -72,7 +72,8 @@ $(document).ready(function() {
         	color= "#FF0000";
         } 
         
-        $("#urls").append("<li id="+field.id+"><font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open");
+        $("#urls").append("<li id="+field.id+"><font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a>");
+        
         if (field.url.match(".jpg$")) {
 			$("#" + field.id).append("<br><img src="+field.url+">");
         }
@@ -82,7 +83,7 @@ $(document).ready(function() {
             $("#" + field.id).append("<div>Tags:<br><input type=\"checkbox\" onclick='tag("+field.id+",\"watch these\")' /> watch this</div>");
         	
         }
-        $("#urls").append("</a></font></li>");
+        $("#urls").append("</font></li>");
       });
 	  $("#status").text("Done")
     });
