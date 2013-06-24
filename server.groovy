@@ -142,21 +142,25 @@ public class Server {
 							throw new RuntimeException("Not supported 3");
 						}
 						JSONObject newNodeJsonObject = createNode(url, title, iRootId);
-						i += 2;
+						
 					} catch (Exception e) {
 						e.printStackTrace();
 						throw e;
 					}
 
 				} else {
-					System.out.println("Not supported 4");
-					throw new RuntimeException("Not supported 4");
+					unsuccessfulLines.append(lines[i]);
+					unsuccessfulLines.append("\n");
+					unsuccessfulLines.append(lines[i+1]);
+					unsuccessfulLines.append("\n");
+					unsuccessfulLines.append("\n");
 				}
+				i += 2;
 
 			}
 			JSONObject entity = new JSONObject();
 			entity.put("unsuccessful", unsuccessfulLines.toString());
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(entity)
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(entity.toString())
 					.type("application/json").build();
 		}
 

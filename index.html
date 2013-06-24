@@ -146,7 +146,9 @@ var urls = encodeURIComponent($("#urlBatchToSend").val());
 	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + urls, function(result){})
 		.success(function(data) {  
 			console.debug(data);
-			$("#batchStatus").text("Successfully imported batch");	
+			$("#batchStatus").text("Successfully imported batch");
+			$("#urlBatchToSend").val("");
+			$("#urlBatchToSend").val(data.unsuccessful);
 		})
 		.error( function(data) { 
 			console.debug(data);
