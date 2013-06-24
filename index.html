@@ -70,7 +70,7 @@ var rootColor = MD5(rootId).substring(0,6);
 			// Colors
 			var color = "";
 			var titlePlusUrl = field.title + field.url;
-			if (titlePlusUrl.match(new RegExp('neo','i'))) {
+			/*if (titlePlusUrl.match(new RegExp('neo','i'))) {
 				color = "MediumSeaGreen";
 			} else if (titlePlusUrl.match(new RegExp('ubuntu','i'))) {
 				color = "LightSteelBlue";
@@ -88,7 +88,7 @@ var rootColor = MD5(rootId).substring(0,6);
 				color = "Chocolate";
 			} else if (titlePlusUrl.match(new RegExp('youtube','i'))) {
 				color = "#FF0000";
-			} 
+			} */
 			
 			$("#urls").append("<li id="+field.id+" class='buttonize'>");
 			
