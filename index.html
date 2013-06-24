@@ -63,7 +63,7 @@ $(document).ready(function() {
         if (field.url.match(".jpg$")) {
 			$("#" + field.id).append("<br><img src="+field.url+">");        	
         }
-        // TODO: This performs badly
+        // TODO: This performs badly unless you manually expand one at a time
         if (field.url.match("youtube.com")) {
 
 			$("#" + field.id).append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
