@@ -1,3 +1,5 @@
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,6 +38,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.apache.commons.lang.*;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -77,6 +80,7 @@ public class Server {
 		public Response uncategorized(@QueryParam("rootId") Integer rootId) throws JSONException,
 				IOException {
 			// TODO: check rootId is not null or empty
+			checkNotNull(rootId);
 			// TODO: the source is null clause should be obsoleted
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("rootId", rootId);
@@ -141,18 +145,17 @@ public class Server {
 						+ aKeyCode + ")");
 				keyBindings.put(aKeyCode, aName);
 
-				// TODO: if it fails, recover and create the remaining ones
+				// TODO: if it fails, recover and create the remaining ones?
 			}
 
 			for (String aKeyCode : keyBindings.keySet()) {
 				String aName = keyBindings.get(aKeyCode);
-				// {
 				Map<String, Object> paramValues = new HashMap<String, Object>();
 				paramValues.put("parentId", parentId);
 				paramValues.put("key", aKeyCode);
 				System.out.println("About to remove keybinding for " + aKeyCode);
 				JSONObject json = execute(
-						"start parent=node({parentId}) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
+						"START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
 						paramValues);
 				keyBindings.remove(aKeyCode);
 				System.out.println("Removed keybinding for " + aName);
