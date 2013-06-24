@@ -5,9 +5,13 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -30,7 +34,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.apache.commons.lang.*;
 
+import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -73,8 +79,51 @@ public class Server {
 		@GET
 		@Path("keysUpdate")
 		@Produces("application/json")
-		public Response keysUpdate(@QueryParam("parentId") String parentId, @QueryParam("newKeyBindings") String newKeyBindings, @QueryParam("oldKeyBindings") String oldKeyBindings) throws JSONException, IOException {
+		public Response keysUpdate(@QueryParam("parentId") Integer parentId, @QueryParam("newKeyBindings") String newKeyBindings, @QueryParam("oldKeyBindings") String oldKeyBindings) throws JSONException, IOException {
+			System.out.println("keysUpdate");
 
+			Set<String> oldKeyBindingsSet = new HashSet<String>();
+			Collections.addAll(oldKeyBindingsSet, oldKeyBindings.trim().split("\n"));
+			Set<String> newKeyBindingsSet = new HashSet<String>();
+			Collections.addAll(newKeyBindingsSet, newKeyBindings.trim().split("\n"));
+
+			// NOTE: This is not symmetric (commutative?). If you want to support removal do that in a separate loop
+			Set<String> newKeyBindingLines = Sets.difference(newKeyBindingsSet, oldKeyBindingsSet);
+			System.out.println("Old: " + oldKeyBindingsSet);
+			System.out.println("New: " + newKeyBindingsSet);
+			System.out.println("Difference: " + newKeyBindingLines);
+			for (String newKeyBinding : newKeyBindingLines) {
+				if (newKeyBinding.trim().startsWith("#")){
+					continue;// A commented out keybinding
+				}
+				String[] lineElements = newKeyBinding.split("=");
+				String aKeyCode = lineElements[0].trim();
+				
+				// Ignore trailing comments
+				String[] aRightHandSideElements = lineElements[1].trim().split("#");
+				String aName = aRightHandSideElements[0].trim();
+				
+				
+				// Create a new node
+				// TODO: Check if the category already exists
+				Map<String, Object> paramValues = new HashMap<String, Object>();
+				paramValues.put("name", aName);
+				paramValues.put("key", aKeyCode);
+				paramValues.put("type", "categoryNode");
+				paramValues.put("created", System.currentTimeMillis());
+				System.out.println("cypher params: " + paramValues);
+				
+				JSONObject json = queryNeo4j(
+						"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
+						paramValues);
+				System.out.println(json.toString());
+				Integer newCategoryNodeId = Integer.parseInt((String)((JSONArray)((JSONArray)json.get("data")).get(0)).get(0));
+				
+				relateHelper(parentId, newCategoryNodeId);
+				
+				// TODO: if it fails, recover and create the remaining ones
+			}
+			// TODO: return all new keybindings so that the text area can show the new node number
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.type("application/json").build();
 		}
@@ -174,7 +223,11 @@ public class Server {
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
 		}
-
+		
+		/**
+		 * @throws RuntimeException - If the command fails. This could legitimately happen if we 
+		 * try to relate to a newly created category if the system becomes non-deterministic.
+		 */
 		private JSONObject relateHelper(Integer parentId, Integer childId) throws IOException,
 				JSONException {
 			Map<String, Object> paramValues = new HashMap<String, Object>();

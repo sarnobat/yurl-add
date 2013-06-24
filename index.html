@@ -61,7 +61,9 @@ $(document).ready(function() {
     	}
 
 		$.getJSON(url, function(result){})
-			.success(function() {  })
+			.success(function() {  
+				// Set oldKeyBindings to newKeyBindings
+			})
 			.error(function() { //alert("error occurred "); 
 			})
 			.complete(function() { });
@@ -79,7 +81,7 @@ $(document).ready(function() {
 		</td>
 		<td width="25%">
 			Key bindings<br>
-			<textarea id="keys" onblur="persistKeyBindings(rootId)" rows="10px"></textarea>
+			<textarea id="keys" rows="10px"></textarea>
 			<br><br>
 		</td>
 	</td></table>
