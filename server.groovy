@@ -143,7 +143,9 @@ public class Server {
 				System.out.println("New: " + newKeyBindingsSet);
 				System.out.println("Difference: " + newKeyBindingLines);
 			}
-			Map<String, String> keyBindings = new HashMap<String, String>();
+
+			// Remove duplicates by putting the bindings in a map
+			Map<String, String> theKeyBindingsNoDuplicates = new HashMap<String, String>();
 			for (String newKeyBinding : newKeyBindingLines) {
 				if (newKeyBinding.trim().startsWith("#") && !newKeyBinding.trim().startsWith("#=")) {
 					continue;// A commented out keybinding
@@ -158,15 +160,15 @@ public class Server {
 						String aName = aRightHandSideElements[0].trim();
 						System.out.println("Accepting proposal to create key binding for " + aName
 								+ "(" + aKeyCode + ")");
-						keyBindings.put(aKeyCode, aName);
+						theKeyBindingsNoDuplicates.put(aKeyCode, aName);
 					}
 				}
 
 				// TODO: if it fails, recover and create the remaining ones?
 			}
 
-			for (String aKeyCode : keyBindings.keySet()) {
-				String aName = keyBindings.get(aKeyCode);
+			for (String aKeyCode : theKeyBindingsNoDuplicates.keySet()) {
+				String aName = theKeyBindingsNoDuplicates.get(aKeyCode);
 				Map<String, Object> paramValues = new HashMap<String, Object>();
 				{
 					paramValues.put("parentId", parentId);
@@ -176,7 +178,7 @@ public class Server {
 				JSONObject json = execute(
 						"START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
 						paramValues);
-				keyBindings.remove(aKeyCode);
+				theKeyBindingsNoDuplicates.remove(aKeyCode);
 				System.out.println("Removed keybinding for " + aName);
 
 				createNewKeyBinding(aName, aKeyCode, parentId);
@@ -188,8 +190,12 @@ public class Server {
 
 		private void createNewKeyBinding(String aName, String aKeyCode, Integer parentId)
 				throws IOException, JSONException {
-			// Create a new node
-			// TODO: Check if the category already exists
+			
+			////
+			//// TODO (urgent): Check if the category already exists
+			////
+			
+			
 			Map<String, Object> paramValues = new HashMap<String, Object>();
 			{
 				paramValues.put("name", aName);
