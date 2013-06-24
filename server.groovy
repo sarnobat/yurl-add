@@ -106,10 +106,15 @@ public class Server {
 					.type("application/json").build();
 		}
 
+		// -----------------------------------------------------------------------------
+		// Key bindings
+		// -----------------------------------------------------------------------------
+
 		@GET
 		@Path("keysUpdate")
 		@Produces("application/json")
-		// Ideally we should wrap this method inside a transaction but over REST I don't know how to do that.
+		// Ideally we should wrap this method inside a transaction but over REST
+		// I don't know how to do that.
 		// TODO: we will have to start supporting disassociation of key bindings
 		// with child categories
 		public Response keysUpdate(@QueryParam("parentId") Integer parentId,
@@ -126,9 +131,11 @@ public class Server {
 			// NOTE: This is not symmetric (commutative?). If you want to
 			// support removal do that in a separate loop
 			Set<String> newKeyBindingLines = Sets.difference(newKeyBindingsSet, oldKeyBindingsSet);
-			System.out.println("Old: " + oldKeyBindingsSet);
-			System.out.println("New: " + newKeyBindingsSet);
-			System.out.println("Difference: " + newKeyBindingLines);
+			{
+				System.out.println("Old: " + oldKeyBindingsSet);
+				System.out.println("New: " + newKeyBindingsSet);
+				System.out.println("Difference: " + newKeyBindingLines);
+			}
 			Map<String, String> keyBindings = new HashMap<String, String>();
 			for (String newKeyBinding : newKeyBindingLines) {
 				if (newKeyBinding.trim().startsWith("#") && !newKeyBinding.trim().startsWith("#=")) {
@@ -152,8 +159,10 @@ public class Server {
 			for (String aKeyCode : keyBindings.keySet()) {
 				String aName = keyBindings.get(aKeyCode);
 				Map<String, Object> paramValues = new HashMap<String, Object>();
-				paramValues.put("parentId", parentId);
-				paramValues.put("key", aKeyCode);
+				{
+					paramValues.put("parentId", parentId);
+					paramValues.put("key", aKeyCode);
+				}
 				System.out.println("About to remove keybinding for " + aKeyCode);
 				JSONObject json = execute(
 						"START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
@@ -173,12 +182,13 @@ public class Server {
 			// Create a new node
 			// TODO: Check if the category already exists
 			Map<String, Object> paramValues = new HashMap<String, Object>();
-			paramValues.put("name", aName);
-			paramValues.put("key", aKeyCode);
-			paramValues.put("type", "categoryNode");
-			paramValues.put("created", System.currentTimeMillis());
-			System.out.println("cypher params: " + paramValues);
-
+			{
+				paramValues.put("name", aName);
+				paramValues.put("key", aKeyCode);
+				paramValues.put("type", "categoryNode");
+				paramValues.put("created", System.currentTimeMillis());
+				System.out.println("cypher params: " + paramValues);
+			}
 			// TODO: first check if there is already a node with this name,
 			// which is for re-associating the keycode with the category
 			JSONObject json = execute(
@@ -201,26 +211,30 @@ public class Server {
 					.type("application/json").build();
 		}
 
-		public JSONArray getKeys(Integer parentId) throws IOException, JSONException {
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("parentId", parentId);
+		public JSONArray getKeys(Integer iParentId) throws IOException, JSONException {
+			Map<String, Object> theParams = new HashMap<String, Object>();
+			{
+				theParams.put("parentId", iParentId);
+			}
 			JSONObject json = execute(
 					"START n=node(*) MATCH parent-[c:CONTAINS]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN ID(n),n.name,n.key?",
-					params);
+					theParams);
 			JSONArray data = (JSONArray) json.get("data");
-			JSONArray ret = new JSONArray();
+			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
-				JSONArray a = data.getJSONArray(i);
-				JSONObject o = new JSONObject();
-				String id = (String) a.get(0);
-				o.put("id", id);
-				String title = (String) a.get(1);
-				String url = (String) a.get(2);
-				o.put("name", title);
-				o.put("key", url);// TODO: this could be null
-				ret.put(o);
+				JSONArray aBindingArray = data.getJSONArray(i);
+				JSONObject aBindingObject = new JSONObject();
+				{
+					String id = (String) aBindingArray.get(0);
+					aBindingObject.put("id", id);
+					String title = (String) aBindingArray.get(1);
+					String aUrl = (String) aBindingArray.get(2);
+					aBindingObject.put("name", title);
+					aBindingObject.put("key", aUrl);// TODO: this could be null
+					oKeys.put(aBindingObject);
+				}
 			}
-			return ret;
+			return oKeys;
 		}
 
 		@GET
