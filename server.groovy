@@ -109,6 +109,7 @@ public class Server {
 		@GET
 		@Path("keysUpdate")
 		@Produces("application/json")
+		// Ideally we should wrap this method inside a transaction but over REST I don't know how to do that.
 		// TODO: we will have to start supporting disassociation of key bindings
 		// with child categories
 		public Response keysUpdate(@QueryParam("parentId") Integer parentId,
