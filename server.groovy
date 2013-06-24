@@ -46,9 +46,9 @@ public class Server {
 		@Path("uncategorized")
 		@Produces("application/json")
 		public Response uncategorized(@QueryParam("rootId") String rootId) throws JSONException, IOException {
-			println rootId;
 			// TODO: check rootId is not null or empty
-			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null) and not(has(n.type)) AND id(n) > 0 return ID(n),n.title?,n.url?", new HashMap());
+			// TODO: the source is null clause should be obsoleted
+			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = 45) and not(has(n.type)) AND id(n) > 0 return ID(n),n.title?,n.url?", new HashMap());
 			JSONArray data = (JSONArray)json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
@@ -97,7 +97,13 @@ public class Server {
 			paramValues.put("url", httpUrl);
 			paramValues.put("title", title);
 			paramValues.put("created", System.currentTimeMillis());
-			JSONObject json = queryNeo4j("CREATE (n { title : {title} , url : {url}, created: {created} })", paramValues);
+			JSONObject json = queryNeo4j("CREATE (n { title : {title} , url : {url}, created: {created} }) RETURN id(n)", paramValues);
+			
+			String newNodeId = (String) ((JSONArray)json.get("data")).get(0);
+			println "New node: " + newNodeId;
+			JSONObject json2 = relate(45, newNodeId);
+			// TODO: check that it returned successfully (redundant?)
+			
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json.get("data").toString()).type("application/json").build();
 		}
@@ -135,10 +141,8 @@ public class Server {
 		public Response relate(@QueryParam("parentId") Integer parentId, @QueryParam("childId") Integer childId) throws JSONException, IOException {
 			// TODO: first delete any existing contains relationship with the root (but not with existing categories since we could have a many-to-one contains)
 		
-			Map paramValues = new HashMap();
-			paramValues.put("parentId", parentId);
-			paramValues.put("childId", childId);
-			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b;", paramValues);
+			JSONObject json = relateHelper(parentId.toString(), childId.toString());
+			
 			JSONObject ret = new JSONObject();
 			ret.put("status", "FAILURE");
 			if (((JSONArray)json.get("data")).length() == 0) {
@@ -150,6 +154,14 @@ public class Server {
 
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
+		}
+		
+		private JSONObject relateHelper(String parentId, String childId) throws IOException, JSONException {
+			Map paramValues = new HashMap();
+			paramValues.put("parentId", parentId);
+			paramValues.put("childId", childId);
+			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b;", paramValues);
+			return json;
 		}
 		
 
