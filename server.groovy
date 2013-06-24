@@ -136,7 +136,7 @@ public class Server {
 				String[] aRightHandSideElements = lineElements[1].trim().split("#");
 				String aName = aRightHandSideElements[0].trim();
 
-//				
+				//
 				System.out.println("Accepting proposal to create key binding for " + aName + "("
 						+ aKeyCode + ")");
 				keyBindings.put(aKeyCode, aName);
@@ -146,20 +146,20 @@ public class Server {
 
 			for (String aKeyCode : keyBindings.keySet()) {
 				String aName = keyBindings.get(aKeyCode);
-//				{
-					Map<String, Object> paramValues = new HashMap<String, Object>();
-					paramValues.put("parentId", parentId);
-					paramValues.put("key", aKeyCode);
-					System.out.println("About to remove keybinding for " + aKeyCode);
-					JSONObject json = execute(
-							"start parent=node({parentId}) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
-							paramValues);
-					// TODO: remove the keyCode associated with the current
-					// category
-					keyBindings.remove(aKeyCode);
-					System.out.println("Removed keybinding for " + aName);
-//				}
-				
+				// {
+				Map<String, Object> paramValues = new HashMap<String, Object>();
+				paramValues.put("parentId", parentId);
+				paramValues.put("key", aKeyCode);
+				System.out.println("About to remove keybinding for " + aKeyCode);
+				JSONObject json = execute(
+						"start parent=node({parentId}) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
+						paramValues);
+				// TODO: remove the keyCode associated with the current
+				// category
+				keyBindings.remove(aKeyCode);
+				System.out.println("Removed keybinding for " + aName);
+				// }
+
 				createNewKeyBinding(aName, aKeyCode, parentId);
 			}
 			JSONArray ret = getKeys(parentId);
@@ -285,8 +285,7 @@ public class Server {
 			params2.put("currentParentId", currentParentId);
 			params2.put("childId", childId);
 
-			execute(
-					"START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
+			execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
 					params2);
 
 			Map<String, Object> paramValues = new HashMap<String, Object>();
