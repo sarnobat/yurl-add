@@ -18,8 +18,14 @@ body{
 
 </style>
 <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"><script> -->
+
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
+<!--
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>-->
 <script src="jquery/jquery-1.9.1.js"></script>
-<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script src="jquery/jquery-ui.js"></script>
 <script type="text/javascript" src="jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
@@ -65,7 +71,7 @@ var rootColor = MD5(rootId).substring(0,6);
 		$("#status").text("Populating")
 		$.each(result, function(resultRowNumber, field) {
 			console.debug("resultRowNumber:  "+ resultRowNumber + " of " + result.length);
-			if (resultRowNumber > 500 && resultRowNumber < result.length - 10) {
+			if (resultRowNumber > 50 && resultRowNumber < result.length - 10) {
 				return;
 			}
 			// Colors
@@ -141,7 +147,7 @@ var rootColor = MD5(rootId).substring(0,6);
 	});
 
 	////
-	//// Get the key bindings
+	//// Get the key bindings and categories (non-recursive)
 	////
 	
   	$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
@@ -157,7 +163,7 @@ var rootColor = MD5(rootId).substring(0,6);
         	// Don't remove the "null" otherwise we'll assign hash to this category
         }
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
-        $("#keyLinks").append("<li style='text-transform:capitalize;'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + "</a></li>");
+        $("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + "</a></li>");
 
         $(window).keypress(function(event) {
 
@@ -194,7 +200,10 @@ var rootColor = MD5(rootId).substring(0,6);
 	  function relate(parentId, childId, currentRootId) {
 	    var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;
 		$.getJSON(url, function(result){})
-			.success(function() { removeTop(); })
+			.success(function() { 
+				removeTop(); 
+				
+			})
 			.error(function() { alert("error occurred "); })
 			.complete(function() { });
 	  }			
@@ -386,6 +395,8 @@ function tagUrlWithSelections(nodeId) {
 	<a id="up">Up</a>
 	<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
 	<div id=rootColor class="buttonize">&nbsp;</div>
+	
+<div id="p">This is a paragraph.</div>
 	<table width="100%">
 		<tr>
 			<td width="25%" valign=top>
