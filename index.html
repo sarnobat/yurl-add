@@ -7,13 +7,14 @@
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script>
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
-
+var rootId;
 $(document).ready(function() {
 
 	//// Determine the root ID
 	var rootId = $.url().param('rootId')
 	if (rootId == null || rootId == '') {
 		rootId = 45;
+		history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
 	}
 	$("#status").text("Loading")  			
 
@@ -27,7 +28,7 @@ $(document).ready(function() {
     });
 
 	//// Get the key bindings
-  	$.getJSON(urlBase + "/keys",function(result){
+  	$.getJSON(urlBase + "/keys?parentId=" + rootId,function(result){
   	  var originalKeyBindings = $.extend(true, {}, result);
   	  
 	  $.each(result, function(a,binding,c){
@@ -48,7 +49,13 @@ $(document).ready(function() {
 
 
 function persistKeyBindings() {
-	alert("persistKeyBindings()");
+	var rootId = $.url().param('rootId')
+	var url = urlBase + "/keysUpdate?parentId=" + rootId;
+	alert(url);
+	$.getJSON(url, function(result){})
+		.success(function() {  })
+		.error(function() { alert("error occurred "); })
+		.complete(function() { });
 }
 </script>
 </head>
@@ -60,7 +67,7 @@ function persistKeyBindings() {
 		</td>
 		<td width="25%">
 			Key bindings<br>
-			<textarea id="keys" onblur="persistKeyBindings()" rows="10px"></textarea>
+			<textarea id="keys" onblur="persistKeyBindings(rootId)" rows="10px"></textarea>
 			<br><br>
 		</td>
 	</td></table>
