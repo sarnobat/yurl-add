@@ -29,7 +29,10 @@ $("#status").text("Loading")
 					if (result.status == 'SUCCESS') {
 						$("#urls").children()[0].remove();
 					}
-				});
+				})
+				.success(function() { alert("success 2"); })
+				.error(function() { alert("error occurred "); })
+				.complete(function() { alert("Done"); });
 			}
 			// we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses
 		});
