@@ -123,8 +123,8 @@ public class Server {
 				
 				// TODO: if it fails, recover and create the remaining ones
 			}
-			// TODO: return all new keybindings so that the text area can show the new node number
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
+			JSONArray ret = getKeys(parentId);
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
 		}
 
@@ -132,6 +132,12 @@ public class Server {
 		@Path("keys")
 		@Produces("application/json")
 		public Response keys(@QueryParam("parentId") Integer parentId) throws JSONException, IOException {
+			JSONArray ret = getKeys(parentId);
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
+					.type("application/json").build();
+		}
+
+		public JSONArray getKeys(Integer parentId) throws IOException, JSONException {
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("parentId", parentId);
 			JSONObject json = queryNeo4j(
@@ -150,8 +156,7 @@ public class Server {
 				o.put("key", url);
 				ret.put(o);
 			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
-					.type("application/json").build();
+			return ret;
 		}
 
 		@GET
@@ -205,15 +210,21 @@ public class Server {
 		@GET
 		@Path("relate")
 		@Produces("application/json")
-		public Response relate(@QueryParam("parentId") Integer parentId,
-				@QueryParam("childId") Integer childId) throws JSONException, IOException {
+		public Response relate(@QueryParam("parentId") Integer newParentId,
+				@QueryParam("childId") Integer childId, @QueryParam("currentParentId")Integer currentParentId) throws JSONException, IOException {
 			// TODO: first delete any existing contains relationship with the
-			// root (but not with existing categories since we could have a
+			// specified existing parent (but not with all parents since we could have a
 			// many-to-one contains)
+			Map<String, Object> params2 = new HashMap<String, Object>();
+			params2.put("currentParentId", currentParentId);
+			params2.put("childId", childId);
+			
+			queryNeo4j("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r", params2);
+			
 			Map<String, Object> paramValues = new HashMap<String, Object>();
 			paramValues.put("childId", childId);
 
-			JSONObject json = relateHelper(parentId, childId);
+			JSONObject json = relateHelper(newParentId, childId);
 			JSONObject ret = new JSONObject();
 			ret.put("status", "FAILURE");
 			if (((JSONArray) json.get("data")).length() == 0) {

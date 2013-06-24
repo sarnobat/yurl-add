@@ -32,11 +32,18 @@ $(document).ready(function() {
   	$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
   	  originalKeyBindings = $.extend(true, {}, result);
   	  configureKeyBindings(result);
-	  $.each(result, function(a,binding,c){
+
+  	  
+    });
+    function configureKeyBindings(result) {
+      $.each(result, function(a,binding,c){
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
         $(window).keypress(function(event) {
+        	if ($("#keys").is(":focus")) {
+        		return;
+        	}
         	if (binding.key == String.fromCharCode(event.which)) {
-				var url = urlBase + "/relate?parentId=" +binding.id+"&childId=" +  $("#urls").children()[0].id;
+				var url = urlBase + "/relate?parentId=" +binding.id+"&childId=" +  $("#urls").children()[0].id + "&currentParentId=" + rootId;
 				$.getJSON(url, function(result){})
 					.success(function() { $($("#urls").children()[0]).fadeOut("slow",function() { $(this).remove(); }) })
 					.error(function() { alert("error occurred "); })
@@ -45,11 +52,7 @@ $(document).ready(function() {
 			
 		});
       });
-  	  
-    });
-    configureKeyBindings(result) {
-      
-    }
+    };
 
     //// Update the key bindings
     var oldKeyBindings;
@@ -66,8 +69,9 @@ $(document).ready(function() {
     	}
 
 		$.getJSON(url, function(result){})
-			.success(function() {  
-				// Set oldKeyBindings to newKeyBindings
+			.success(function(data) {  
+				//alert(data);
+				configureKeyBindings(data);
 			})
 			.error(function() { //alert("error occurred "); 
 			})
