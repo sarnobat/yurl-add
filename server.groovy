@@ -102,11 +102,11 @@ public class Server {
 			JSONObject json = queryNeo4j("CREATE (n { title : {title} , url : {url}, created: {created} }) RETURN id(n)", paramValues);
 			
 			JSONArray newNodeId = (JSONArray)((JSONArray)json.get("data")).get(0);
-			println "New node: " + newNodeId.get(0);
+			System.out.println("New node: " + newNodeId.get(0));
 			// TODO: Do not hard-code the root ID
 			JSONObject json2 = relateHelper(new Integer(45), newNodeId.get(0));
 			// TODO: check that it returned successfully (redundant?)
-			println( json2.toString());
+			println(json2.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json2.get("data").toString()).type("application/json").build();
 		}
@@ -142,25 +142,15 @@ public class Server {
 		@Path("relate")
 		@Produces("application/json")
 		public Response relate(@QueryParam("parentId") Integer parentId, @QueryParam("childId") Integer childId) throws JSONException, IOException {
-			println(1);
 			// TODO: first delete any existing contains relationship with the root (but not with existing categories since we could have a many-to-one contains)
 			Map paramValues = new HashMap();
-						println(2);
 			paramValues.put("childId", childId);
-						println(3);
 			JSONObject json2 = queryNeo4j("start root=node(*) match root-[c:CONTAINS]->n where has(root.type) and root.type = 'categoryNode' and root.name = 'root' and id(n) = {childId} DELETE c RETURN id(c)", paramValues);
-						println(4);
 			JSONArray dataArray = (JSONArray)json2.get("data");
-
-						println(5 + "dataArray: " + dataArray.toString());
 			for (int i =0; i < dataArray.length(); i++) {
 				JSONArray oldRelationshipsIds = (JSONArray) dataArray.get(0);
-				println("Deleted relationship: " + oldRelationshipsIds.get(0));
-										println(6);
 			}
-			println(6);
 			JSONObject json = relateHelper(parentId, childId);
-			println json;
 			JSONObject ret = new JSONObject();
 			ret.put("status", "FAILURE");
 			if (((JSONArray)json.get("data")).length() == 0) {
@@ -175,14 +165,10 @@ public class Server {
 		}
 		
 		private JSONObject relateHelper(Integer parentId, Integer childId) throws IOException, JSONException {
-			println "AA";
 			Map paramValues = new HashMap();
-			println "BB";
 			paramValues.put("parentId", parentId);
 			paramValues.put("childId", childId);
-			println "CC";
 			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b return a,r,b;", paramValues);
-			println "DD";
 			return json;
 		}
 		
