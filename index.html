@@ -210,6 +210,15 @@ function moveDown(source) {
 
 function swap(firstId, secondId) {
 	$("#" + secondId).after($("#" + firstId));
+	$.getJSON(urlBase + "/swapOrdinals?firstId=" + nodeId + "&secondId=" + nodeId, 
+		function(result){
+		})
+		.success(function(data) {  
+		})
+		.error(function() { //alert("error occurred "); 
+		})
+		.complete(function() { });
+
 }
 
 function sendBatch() {
