@@ -66,7 +66,7 @@ $(document).ready(function() {
         // TODO: This performs badly
         if (field.url.match("youtube.com")) {
 
-			$("#urls").append("<div id=\"youtube-"+field.id+"\"><a href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</a></div>");
+			$("#urls").append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
         	
         }
         $("#urls").append("</li>");
@@ -133,6 +133,7 @@ $(document).ready(function() {
 			.complete(function() { });
 	  }			
 	  function removeTop() {
+	  alert($("#urls").children()[0]);
 	  	$($("#urls").children()[0]).fadeOut("fast",function() { $(this).remove(); })
 	  }
     };
