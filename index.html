@@ -37,12 +37,14 @@ $(document).ready(function() {
         if (field.title.match(new RegExp('java\\b','i'))) {
         	color= "orange";
         } else if (field.title.match(new RegExp('youtube','i'))) {
-        	color= "red";
+        	color= "#FF0000";
         } else if (field.title.match(new RegExp('neo','i'))) {
         	color= "green";
+        } else if (field.title.match(new RegExp('database','i'))) {
+        	color= "purple";
         } 
         
-        $("#urls").append("<font color=\""+color+"\"><li id="+field.id+">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></li></font>");
+        $("#urls").append("<font style=\"color:"+color+"\"><li id="+field.id+">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a></li></font>");
       });
 	  $("#status").text("Done")
     });
