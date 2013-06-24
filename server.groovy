@@ -104,9 +104,9 @@ public class Server {
 			JSONArray newNodeId = (JSONArray)((JSONArray)json.get("data")).get(0);
 			System.out.println("New node: " + newNodeId.get(0));
 			// TODO: Do not hard-code the root ID
-			JSONObject json2 = relateHelper(new Integer(45), newNodeId.get(0));
+			JSONObject json2 = relateHelper(new Integer(45), (Integer)newNodeId.get(0));
 			// TODO: check that it returned successfully (redundant?)
-			println(json2.toString());
+			System.out.println(json2.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(json2.get("data").toString()).type("application/json").build();
 		}
@@ -117,13 +117,11 @@ public class Server {
 			ExecutorService service = Executors.newFixedThreadPool(2);
 			Collection<Callable<String>> tasks = new ArrayList<Callable<String>>();
 			Callable<String> callable = new Callable<String>() {
-	
 				@Override
 				public String call() throws Exception {
 					Document doc = Jsoup.connect(url.toString()).get();
 					return doc.title();
-	
-				}
+				}		
 			};
 			tasks.add(callable);
 			try {
