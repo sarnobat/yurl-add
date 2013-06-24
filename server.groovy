@@ -597,6 +597,23 @@ public class Server {
 					.type("application/json").build();
 		}
 
+		/**
+		 * No existing relationships get deleted
+		 */
+		@GET
+		@Path("relateCategoriesToItem")
+		@Produces("application/json")
+		public Response relateCategoriesToItem(@QueryParam("nodeId") Integer iNodeToBeTagged, @QueryParam("newCategoryIds") String iCategoriesToBeAddedTo) {
+
+			JSONObject ret = new JSONObject();
+			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
+					.type("application/json").build();
+		}
+
+		/**
+		 * This MOVES a node to a new subcategory. It deletes the relationship
+		 * with the existing parent
+		 */
 		@GET
 		@Path("relate")
 		@Produces("application/json")
@@ -634,6 +651,7 @@ public class Server {
 
 		/**
 		 * No deletion of existing relationships occurs here.
+		 * 
 		 * @throws RuntimeException
 		 *             - If the command fails. This could legitimately happen if
 		 *             we try to relate to a newly created category if the
@@ -684,8 +702,8 @@ public class Server {
 		@GET
 		@Path("categoriesRecursive")
 		@Produces("application/json")
-		public Response categoriesRecursive(@QueryParam("parentId") Integer iParentId) throws JSONException,
-				IOException {
+		public Response categoriesRecursive(@QueryParam("parentId") Integer iParentId)
+				throws JSONException, IOException {
 			System.out.println("categoriesRecurisve() - begin");
 			Map<String, Object> theParams = new HashMap<String, Object>();
 			_1: {

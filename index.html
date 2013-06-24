@@ -352,7 +352,7 @@ function getTagSelections() {
 
 function tagUrlWithSelections(nodeId) {
 	var selections = getTagSelections();
-	var url = urlBase + "/relateCategoriesToItem?nodeId=" + nodeId + "&categoryIds=" + encodeURIComponent(selections);
+	var url = urlBase + "/relateCategoriesToItem?nodeId=" + nodeId + "&newCategoryIds=" + encodeURIComponent(selections);
 	alert (url);
 	/*
 	$.getJSON(url, 
