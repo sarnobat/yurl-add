@@ -73,6 +73,9 @@ public class Server {
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
 		}
+		//------------------------------------------------------------------------------------
+		// Page operations
+		//------------------------------------------------------------------------------------
 
 		@GET
 		@Path("uncategorized")
@@ -190,28 +193,28 @@ public class Server {
 
 		private void createNewKeyBinding(String aName, String aKeyCode, Integer parentId)
 				throws IOException, JSONException {
-			
-			////
-			//// TODO (urgent): Check if the category already exists
-			////
-			
-			
-			Map<String, Object> paramValues = new HashMap<String, Object>();
+
+			// //
+			// // TODO (urgent): Check if the category already exists
+			// //
+
+			Map<String, Object> theParamValues = new HashMap<String, Object>();
 			{
-				paramValues.put("name", aName);
-				paramValues.put("key", aKeyCode);
-				paramValues.put("type", "categoryNode");
-				paramValues.put("created", System.currentTimeMillis());
-				System.out.println("cypher params: " + paramValues);
+				theParamValues.put("name", aName);
+				theParamValues.put("key", aKeyCode);
+				theParamValues.put("type", "categoryNode");
+				theParamValues.put("created", System.currentTimeMillis());
+				System.out.println("cypher params: " + theParamValues);
 			}
 			// TODO: first check if there is already a node with this name,
 			// which is for re-associating the keycode with the category
-			JSONObject json = execute(
+			JSONObject theNewKeyBindingResponseJson = execute(
 					"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
-					paramValues);
-			System.out.println(json.toString());
-			Integer newCategoryNodeId = Integer.parseInt((String) ((JSONArray) ((JSONArray) json
-					.get("data")).get(0)).get(0));
+					theParamValues);
+			System.out.println(theNewKeyBindingResponseJson.toString());
+			Integer newCategoryNodeId = Integer
+					.parseInt((String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
+							.get("data")).get(0)).get(0));
 
 			relateHelper(parentId, newCategoryNodeId);
 		}
@@ -251,6 +254,10 @@ public class Server {
 			}
 			return oKeys;
 		}
+
+		// --------------------------------------------------------------------------------------
+		// Write operations
+		// --------------------------------------------------------------------------------------
 
 		@GET
 		@Path("stash")
