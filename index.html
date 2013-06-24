@@ -73,7 +73,8 @@ $(document).ready(function() {
         } 
         
         $("#urls").append("<li id="+field.id+"><font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a>");
-        
+        $("#" + field.id).append("<input id=up-"+field.id+" type=button value='Move Up' onclick='moveUp("+field.id+")'>");
+		$("#" + field.id).append("<input id=down"+field.id+" type=button value='Move Down' onclick='moveDown("+field.id+")'>");
         if (field.url.match(".jpg$")) {
 			$("#" + field.id).append("<br><img src="+field.url+">");
         }
@@ -191,8 +192,25 @@ $(document).ready(function() {
 		})
 		.complete(function() { });
     }
+    
+    //
+    //
+    //
+    
 });
 
+
+function moveUp(source) {
+	var second = source;
+	var first = $("#" + source).prev().attr('id');
+//	alert($("#" + source).prev().children().eq(0).text());
+//alert(first+"::" + second);
+	$("#" + second).after($("#" + first));
+}
+
+function moveDown(source) {
+	alert($("#" + source).next().children().eq(0).text());
+}
 
 function sendBatch() {
 //alert("about to encode");
