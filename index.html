@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"> -->
-<script type="text/javascript" src="js/kb_shortcut.packed.js" ></script>
-<script src="jquery/jquery-1.9.1.js">
-</script>
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"><script> -->
+
+<script src="jquery/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="jquery/purl.js"></script>
+
 <script>
+alert($.url().param('rootId'));
+		
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 $(document).ready(function(){
 $("#status").text("Loading")  			
