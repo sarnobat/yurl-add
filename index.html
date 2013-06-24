@@ -5,7 +5,7 @@
 
 <script src="jquery/jquery-1.9.1.js"></script>
 <script type="text/javascript" src="jquery/purl.js"></script>
-// we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses
+<!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script>
 
 		
@@ -19,6 +19,15 @@ $(document).ready(function() {
 		alert('No root id specified');
 	}
 	$("#status").text("Loading")  			
+
+	//// Get the URLs belonging to this root ID
+    $.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
+      $("#status").text("Populating")
+      $.each(result, function(resultRowNumber, field){
+        $("#urls").append("<li id="+field.id+">[" + field.id + "]: "+ field.title + " (" + field.url + ") " + "</li>");
+      });
+	  $("#status").text("Done")
+    });
 
 	//// Get the key bindings
   	$.getJSON(urlBase + "/keys",function(result){
@@ -35,15 +44,6 @@ $(document).ready(function() {
 			
 		});
       });
-    });
-
-	//// Get the URLs belonging to this root ID
-    $.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
-      $("#status").text("Populating")
-      $.each(result, function(resultRowNumber, field){
-        $("#urls").append("<li id="+field.id+">[" + field.id + "]: "+ field.title + " (" + field.url + ") " + "</li>");
-      });
-	  $("#status").text("Done")
     });
 
 });
