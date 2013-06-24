@@ -4,10 +4,17 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.ws.rs.*;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
@@ -29,9 +36,11 @@ public class Server {
 		@GET
 		@Path("keys")
 		@Produces("application/json")
-		public String keys() throws JSONException, IOException {
+		public Response keys() throws JSONException, IOException {
 			JSONObject json = queryNeo4j("START n=node(*) WHERE has(n.name) and has(n.key) RETURN n.name,n.key");
-			return json.get("data").toString();
+			//return json.get("data").toString();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(json.get("data").toString()).type("application/json").build();
 		}
 
 		private JSONObject queryNeo4j(String cypherQuery) throws IOException, JSONException {
@@ -39,11 +48,8 @@ public class Server {
 			Map map = new HashMap();
 			map.put("query", cypherQuery);
 			// POST {} to the node entry point URI
-			ClientResponse response = resource
-					.accept(MediaType.APPLICATION_JSON)
-					.type(MediaType.APPLICATION_JSON)
-					.entity("{ }")
-					.post(ClientResponse.class,map);
+			ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+					.type(MediaType.APPLICATION_JSON).entity("{ }").post(ClientResponse.class, map);
 			String neo4jResponse = IOUtils.toString(response.getEntityInputStream());
 			System.out.println(neo4jResponse);
 			response.getEntityInputStream().close();
