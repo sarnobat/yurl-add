@@ -190,10 +190,9 @@ $(document).ready(function() {
 	var url = urlBase + "/categoriesRecursive?parentId=" + rootId;
 	$.getJSON(url, function(result){})
 		.success(function() { alert("success "); })
-		.error(function() { alert("error occurred "); })
-		.complete(function() { alert("complete"); });
+		.error(function() { //alert("error occurred "); })
+		.complete(function() {  });
 
-    
 
 	////
     //// Update the key bindings
