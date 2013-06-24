@@ -222,9 +222,9 @@ public class Server {
 			JSONArray data = (JSONArray) json.get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
-				JSONArray aBindingArray = data.getJSONArray(i);
 				JSONObject aBindingObject = new JSONObject();
 				{
+					JSONArray aBindingArray = data.getJSONArray(i);
 					String id = (String) aBindingArray.get(0);
 					aBindingObject.put("id", id);
 					String title = (String) aBindingArray.get(1);
@@ -241,24 +241,26 @@ public class Server {
 		@Path("stash")
 		@Produces("application/json")
 		public Response stash(@QueryParam("param1") String url) throws JSONException, IOException {
-			String httpUrl = URLDecoder.decode(url, "UTF-8");
-			String title = getTitle(new URL(httpUrl));
-			Map<String, Object> paramValues = new HashMap<String, Object>();
-			paramValues.put("url", httpUrl);
-			paramValues.put("title", title);
-			paramValues.put("created", System.currentTimeMillis());
+			String theHttpUrl = URLDecoder.decode(url, "UTF-8");
+			String theTitle = getTitle(new URL(theHttpUrl));
+			Map<String, Object> theParamValues = new HashMap<String, Object>();
+			{
+				theParamValues.put("url", theHttpUrl);
+				theParamValues.put("title", theTitle);
+				theParamValues.put("created", System.currentTimeMillis());
+			}
 			JSONObject json = execute(
 					"CREATE (n { title : {title} , url : {url}, created: {created} }) RETURN id(n)",
-					paramValues);
+					theParamValues);
 
-			JSONArray newNodeId = (JSONArray) ((JSONArray) json.get("data")).get(0);
-			System.out.println("New node: " + newNodeId.get(0));
+			JSONArray theNewNodeId = (JSONArray) ((JSONArray) json.get("data")).get(0);
+			System.out.println("New node: " + theNewNodeId.get(0));
 			// TODO: Do not hard-code the root ID
-			JSONObject json2 = relateHelper(new Integer(45), (Integer) newNodeId.get(0));
+			JSONObject newNodeJsonObject = relateHelper(new Integer(45), (Integer) theNewNodeId.get(0));
 			// TODO: check that it returned successfully (redundant?)
-			System.out.println(json2.toString());
+			System.out.println(newNodeJsonObject.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(json2.get("data").toString()).type("application/json").build();
+					.entity(newNodeJsonObject.get("data").toString()).type("application/json").build();
 		}
 
 		private String getTitle(final URL url) {
