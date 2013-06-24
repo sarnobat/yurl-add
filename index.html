@@ -14,6 +14,7 @@ body{font-family:Verdana; font-size: 12px;
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script>
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
+var nodeIdZero = 0;
 var rootId;
 var originalKeyBindings;
 var parentOfRootId;
@@ -190,7 +191,7 @@ $(document).ready(function() {
     ////
     //// Get all recursive categories bindings
     ////
-	var url = urlBase + "/categoriesRecursive?parentId=" + rootId;
+	var url = urlBase + "/categoriesRecursive?parentId=" + nodeIdZero;
 	$.getJSON(url, function(result){})
 		.success(
 			function(data) { 
@@ -355,7 +356,8 @@ function tagUrlWithSelections(nodeId) {
 		function(result){
 		})
 		.success(function(data) {  
-			alert("success");
+			//alert("success");
+			$("#"+nodeId).remove();
 		})
 		.error(function() { 
 			alert("error occurred "); 
