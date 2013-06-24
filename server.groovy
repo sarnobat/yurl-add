@@ -148,7 +148,7 @@ public class Server {
 				String aName = keyBindings.get(aKeyCode);
 //				{
 					Map<String, Object> paramValues = new HashMap<String, Object>();
-					paramValues.put("parendId", parentId);
+					paramValues.put("parentId", parentId);
 					paramValues.put("key", aKeyCode);
 					System.out.println("About to remove keybinding for " + aKeyCode);
 					JSONObject json = queryNeo4j(
