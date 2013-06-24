@@ -12,7 +12,7 @@ var originalKeyBindings;
 var parentOfRootId;
 function addEmbeddedVideo(id, url) {
 //alert(id + "::" + url);
-	$("#" + id).append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
+	$("#" + id).children().last().append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
 }
 $(document).ready(function() {
 
@@ -133,7 +133,6 @@ $(document).ready(function() {
 			.complete(function() { });
 	  }			
 	  function removeTop() {
-	  alert($("#urls").children()[0]);
 	  	$($("#urls").children()[0]).fadeOut("fast",function() { $(this).remove(); })
 	  }
     };
