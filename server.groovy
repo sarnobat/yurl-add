@@ -45,10 +45,12 @@ public class Server {
 		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
-		public Response uncategorized(@QueryParam("rootId") String rootId) throws JSONException, IOException {
+		public Response uncategorized(@QueryParam("rootId") Integer rootId) throws JSONException, IOException {
 			// TODO: check rootId is not null or empty
 			// TODO: the source is null clause should be obsoleted
-			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = 45) and not(has(n.type)) AND id(n) > 0 return ID(n),n.title?,n.url?", new HashMap());
+			Map params = new HashMap();
+			params.put("rootId", rootId);
+			JSONObject json = queryNeo4j("start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?", params);
 			JSONArray data = (JSONArray)json.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < data.length(); i++) {
