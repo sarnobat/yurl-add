@@ -110,6 +110,11 @@ $(document).ready(function() {
 					$("#" + field.id).append("<div>Tags:<br><input type=\"checkbox\" onclick='tag("+field.id+",\"watch these\")' /> watch this</div>");
 				}
 				
+			} else if (field.url.match(".amazon.co")) {
+				$("#" + field.id).append("<br>");
+				var asin = field.url.replace(/.+dp\/([^\/]+)\/?.*/,'$1');
+				var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+				$("#" + field.id).append("<img src='"+productImageUrl+"' height='280'>");
 			}
 			$("#urls").append("</font></li>");
 		});
