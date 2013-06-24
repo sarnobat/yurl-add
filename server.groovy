@@ -102,7 +102,7 @@ public class Server {
 			String newNodeId = (String) ((JSONArray)json.get("data")).get(0);
 			println "New node: " + newNodeId;
 			// TODO: Do not hard-code the root ID
-			JSONObject json2 = relateHelper(45, newNodeId);
+			JSONObject json2 = relateHelper(45, Integer.parseInt(newNodeId));
 			// TODO: check that it returned successfully (redundant?)
 			println( json2.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -173,10 +173,14 @@ public class Server {
 		}
 		
 		private JSONObject relateHelper(Integer parentId, Integer childId) throws IOException, JSONException {
+			println "AA";
 			Map paramValues = new HashMap();
+			println "BB";
 			paramValues.put("parentId", parentId);
 			paramValues.put("childId", childId);
+			println "CC";
 			JSONObject json = queryNeo4j("start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b return a,r,b;", paramValues);
+			println "DD";
 			return json;
 		}
 		
