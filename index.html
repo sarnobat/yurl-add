@@ -72,8 +72,11 @@ $(document).ready(function() {
 			} 
 			
 			$("#urls").append("<li id="+field.id+">");
-			$("#" + field.id).append("<input id=up-"+field.id+" type=button value='Move Up' onclick='moveUp("+field.id+")'>");
-			$("#" + field.id).append("<input id=down"+field.id+" type=button value='Move Down' onclick='moveDown("+field.id+")'>");
+
+			$("#" + field.id).append("<input type=button value='Top' onclick='moveToTop("+field.id+")'>");
+			$("#" + field.id).append("<input type=button value='Move Up' onclick='moveUp("+field.id+")'>");
+			$("#" + field.id).append("<input type=button value='Move Down' onclick='moveDown("+field.id+")'>");
+			$("#" + field.id).append("<input type=button value='Bottom' onclick='moveToBottom("+field.id+")'>");
 			$("#" + field.id).append("<font style=\"color:"+color+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<a href='" +field.url+"'>Open</a>");
 			if (field.url.match(".jpg$")) {
 				$("#" + field.id).append("<br><img src="+field.url+">");
