@@ -19,6 +19,7 @@ body{
 </style>
 <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"><script> -->
 <script src="jquery/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 <script type="text/javascript" src="jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
@@ -198,7 +199,7 @@ var rootColor = MD5(rootId).substring(0,6);
 			.complete(function() { });
 	  }			
 	  function removeTop() {
-	  	$($("#urls").children()[0]).fadeOut("fast",function() { $(this).remove(); })
+	  	$($("#urls").children()[0]).effect( "blind",null, 500, function() { $(this).remove(); });
 	  }
     };
     
