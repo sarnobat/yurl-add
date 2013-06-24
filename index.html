@@ -200,13 +200,17 @@ $(document).ready(function() {
 function moveUp(source) {
 	var second = source;
 	var first = $("#" + source).prev().attr('id');
-	$("#" + second).after($("#" + first));
+	swap(first, second);
 }
 
 function moveDown(source) {
 	var second = $("#" + source).next().attr('id');
 	var first = source;
-	$("#" + second).after($("#" + first));
+	swap(first, second);
+}
+
+function swap(firstId, secondId) {
+	$("#" + secondId).after($("#" + firstId));
 }
 
 function sendBatch() {
