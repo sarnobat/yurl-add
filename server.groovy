@@ -536,15 +536,18 @@ public class Server {
 		@Path("surpassOrdinal")
 		@Produces("application/json")
 		public Response surpassOrdinal(@QueryParam("nodeIdToChange") Integer nodeIdToChange,
-				@QueryParam("nodeIdToSurpass") Integer nodeIdToSurpass) throws IOException, JSONException {
-			
+				@QueryParam("nodeIdToSurpass") Integer nodeIdToSurpass) throws IOException,
+				JSONException {
+
 			System.out.println("surpassOrdinals");
 
 			Map<String, Object> theParams = new HashMap<String, Object>();
 			theParams.put("nodeIdToChange", nodeIdToChange);
 			theParams.put("nodeIdToSurpass", nodeIdToSurpass);
 
-			JSONObject jsonObject = execute(" start n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) set n.ordinal=n2.ordinal + 100 return n.ordinal,n2.ordinal", theParams);
+			JSONObject jsonObject = execute(
+					" start n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) set n.ordinal=n2.ordinal + 100 return n.ordinal,n2.ordinal",
+					theParams);
 
 			JSONObject ret = new JSONObject();
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
@@ -555,20 +558,23 @@ public class Server {
 		@Path("undercutOrdinal")
 		@Produces("application/json")
 		public Response undercutOrdinal(@QueryParam("nodeIdToChange") Integer nodeIdToChange,
-				@QueryParam("nodeIdToUndercut") Integer nodeIdToUndercut) throws IOException, JSONException {
-		
+				@QueryParam("nodeIdToUndercut") Integer nodeIdToUndercut) throws IOException,
+				JSONException {
+
 			System.out.println("undercutOrdinal");
 
 			Map<String, Object> theParams = new HashMap<String, Object>();
 			theParams.put("nodeIdToChange", nodeIdToChange);
 			theParams.put("nodeIdToUndercut", nodeIdToUndercut);
 
-			JSONObject jsonObject = execute(" start n=node({nodeIdToChange}),n2=node({nodeIdToUndercut}) set n.ordinal=n2.ordinal - 100 return n.ordinal,n2.ordinal", theParams);
+			JSONObject jsonObject = execute(
+					" start n=node({nodeIdToChange}),n2=node({nodeIdToUndercut}) set n.ordinal=n2.ordinal - 100 return n.ordinal,n2.ordinal",
+					theParams);
 
 			JSONObject ret = new JSONObject();
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
 					.type("application/json").build();
-			
+
 		}
 
 		@GET
@@ -582,7 +588,9 @@ public class Server {
 			theParams.put("id1", iFirstId);
 			theParams.put("id2", iSecondId);
 
-			JSONObject jsonObject = execute(" start n=node({id1}),n2=node({id2}) set n.temp=n2.ordinal, n2.ordinal=n.ordinal,n.ordinal=n.temp  return n.ordinal,n2.ordinal", theParams);
+			JSONObject jsonObject = execute(
+					" start n=node({id1}),n2=node({id2}) set n.temp=n2.ordinal, n2.ordinal=n.ordinal,n.ordinal=n.temp  return n.ordinal,n2.ordinal",
+					theParams);
 
 			JSONObject ret = new JSONObject();
 			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
@@ -636,7 +644,7 @@ public class Server {
 			_1: {
 				theParamValues.put("parentId", iParentId);
 				theParamValues.put("childId", iChildId);
-				theParamValues.put("currentTime",System.currentTimeMillis());
+				theParamValues.put("currentTime", System.currentTimeMillis());
 			}
 			JSONObject theJson = execute(
 					"start a=node({parentId}),b=node({childId}) CREATE a-[r:CONTAINS]->b SET b.accessed = {currentTime} return a,r,b;",
@@ -667,18 +675,40 @@ public class Server {
 			JSONObject oJson = new JSONObject(theNeo4jResponse);
 			return oJson;
 		}
-	}
-	
-	//----------------------------------------------------------------------------
-	// Read operations
-	//----------------------------------------------------------------------------
 
+		// ----------------------------------------------------------------------------
+		// Read operations
+		// ----------------------------------------------------------------------------
 
-	@GET
-	@Path("categoriesRecursive")
-	@Produces("application/json")
-	public Response relate(@QueryParam("parentId") Integer iParentId) {
-		return null;
+		@GET
+		@Path("categoriesRecursive")
+		@Produces("application/json")
+		public Response relate(@QueryParam("parentId") Integer iParentId) throws JSONException,
+				IOException {
+			Map<String, Object> theParams = new HashMap<String, Object>();
+			_1: {
+				theParams.put("parentId", iParentId);
+			}
+			JSONObject theQueryJsonResult = execute(
+					"START n=node(*) MATCH parent-[c:CONTAINS]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN ID(n),n.name,n.key?",
+					theParams);
+			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
+			JSONArray oKeys = new JSONArray();
+			for (int i = 0; i < theData.length(); i++) {
+				JSONObject aBindingObject = new JSONObject();
+				_1: {
+					JSONArray aBindingArray = theData.getJSONArray(i);
+					String id = (String) aBindingArray.get(0);
+					aBindingObject.put("id", id);
+					String title = (String) aBindingArray.get(1);
+					String aUrl = (String) aBindingArray.get(2);
+					aBindingObject.put("name", title);
+					oKeys.put(aBindingObject);
+				}
+			}
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(oKeys.toString()).type("application/json").build();
+		}
 	}
 
 	public static void main(String[] args) throws URISyntaxException {
