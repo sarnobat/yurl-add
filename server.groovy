@@ -256,16 +256,18 @@ public class Server {
 			JSONArray theNewNodeId = (JSONArray) ((JSONArray) json.get("data")).get(0);
 			System.out.println("New node: " + theNewNodeId.get(0));
 			// TODO: Do not hard-code the root ID
-			JSONObject newNodeJsonObject = relateHelper(new Integer(45), (Integer) theNewNodeId.get(0));
+			JSONObject newNodeJsonObject = relateHelper(new Integer(45),
+					(Integer) theNewNodeId.get(0));
 			// TODO: check that it returned successfully (redundant?)
 			System.out.println(newNodeJsonObject.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(newNodeJsonObject.get("data").toString()).type("application/json").build();
+					.entity(newNodeJsonObject.get("data").toString()).type("application/json")
+					.build();
 		}
 
 		private String getTitle(final URL url) {
 			String title = "";
-			ExecutorService service = Executors.newFixedThreadPool(2);
+			ExecutorService theExecutorService = Executors.newFixedThreadPool(2);
 			Collection<Callable<String>> tasks = new ArrayList<Callable<String>>();
 			Callable<String> callable = new Callable<String>() {
 				@Override
@@ -276,8 +278,8 @@ public class Server {
 			};
 			tasks.add(callable);
 			try {
-				List<Future<String>> taskFutures = service
-						.invokeAll(tasks, 3000L, TimeUnit.SECONDS);
+				List<Future<String>> taskFutures = theExecutorService.invokeAll(tasks, 3000L,
+						TimeUnit.SECONDS);
 				title = taskFutures.get(0).get();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -296,24 +298,31 @@ public class Server {
 				IOException {
 			// TODO: first delete any existing contains relationship with the
 			// specified existing parent (but not with all parents since we
-			// could have a
-			// many-to-one contains)
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("currentParentId", currentParentId);
-			params.put("childId", childId);
+			// could have a many-to-one contains)
+			{
+				Map<String, Object> params = new HashMap<String, Object>();
+				params.put("currentParentId", currentParentId);
+				params.put("childId", childId);
 
-			execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
-					params);
-
+				execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
+						params);
+			}
 			Map<String, Object> paramValues = new HashMap<String, Object>();
 			paramValues.put("childId", childId);
 
-			JSONObject json = relateHelper(newParentId, childId);
+			JSONObject theRelateOperationResponseJson = relateHelper(newParentId, childId);
+			// TODO: I think this is pointless. If the relate operation fails an exception should get thrown so we never reach the below code
 			JSONObject ret = new JSONObject();
-			ret.put("status", "FAILURE");
-			if (((JSONArray) json.get("data")).length() == 0) {
-				if (((JSONArray) json.get("columns")).length() == 0) {
-					ret.put("status", "SUCCESS");
+			{
+				ret.put("status", "FAILURE");
+				if (((JSONArray) theRelateOperationResponseJson.get("data")).length() == 0) {
+					if (((JSONArray) theRelateOperationResponseJson.get("columns")).length() == 0) {
+						ret.put("status", "SUCCESS");
+					}
+				}
+				
+				if  (!ret.get("status").equals("SUCCESS")) {
+					System.err.println("We should never reach this case");
 				}
 			}
 
@@ -330,34 +339,38 @@ public class Server {
 		private JSONObject relateHelper(Integer parentId, Integer childId) throws IOException,
 				JSONException {
 			Map<String, Object> paramValues = new HashMap<String, Object>();
-			paramValues.put("parentId", parentId);
-			paramValues.put("childId", childId);
-			JSONObject json = execute(
+			{
+				paramValues.put("parentId", parentId);
+				paramValues.put("childId", childId);
+			}
+			JSONObject theJson = execute(
 					"start a=node({parentId}),b=node({childId}) create a-[r:CONTAINS]->b return a,r,b;",
 					paramValues);
-			return json;
+			return theJson;
 		}
 
-		private JSONObject execute(String cypherQuery, Map<String, Object> params)
+		private JSONObject execute(String iCypherQuery, Map<String, Object> iParams)
 				throws IOException, JSONException {
-			WebResource resource = Client.create().resource(CYPHER_URI);
-			Map<String, Object> postBody = new HashMap<String, Object>();
-			postBody.put("query", cypherQuery);
-			postBody.put("params", params);
+			WebResource theWebResource = Client.create().resource(CYPHER_URI);
+			Map<String, Object> thePostBody = new HashMap<String, Object>();
+			thePostBody.put("query", iCypherQuery);
+			thePostBody.put("params", iParams);
 			// POST {} to the node entry point URI
-			ClientResponse response = resource.accept(MediaType.APPLICATION_JSON)
+			ClientResponse theResponse = theWebResource.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }")
-					.post(ClientResponse.class, postBody);
-			if (response.getStatus() != 200) {
-				System.out.println("failed: " + cypherQuery + "\tparams: " + params);
+					.post(ClientResponse.class, thePostBody);
+			if (theResponse.getStatus() != 200) {
+				System.out.println("failed: " + iCypherQuery + "\tparams: " + iParams);
 				throw new RuntimeException();
 			}
-			String neo4jResponse = IOUtils.toString(response.getEntityInputStream());
-			System.out.println(neo4jResponse);
-			response.getEntityInputStream().close();
-			response.close();
-			JSONObject json = new JSONObject(neo4jResponse);
-			return json;
+			String theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream());
+			{
+				System.out.println(theNeo4jResponse);
+				theResponse.getEntityInputStream().close();
+				theResponse.close();
+			}
+			JSONObject oJson = new JSONObject(theNeo4jResponse);
+			return oJson;
 		}
 	}
 
