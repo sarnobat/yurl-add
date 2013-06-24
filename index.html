@@ -29,8 +29,9 @@ $(document).ready(function() {
     });
 
 	//// Get the key bindings
-  	$.getJSON(urlBase + "/keys?parentId=" + rootId,function(result){
+  	$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
   	  originalKeyBindings = $.extend(true, {}, result);
+  	  configureKeyBindings(result);
 	  $.each(result, function(a,binding,c){
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
         $(window).keypress(function(event) {
@@ -44,8 +45,12 @@ $(document).ready(function() {
 			
 		});
       });
+  	  
     });
-    
+    configureKeyBindings(result) {
+      
+    }
+
     //// Update the key bindings
     var oldKeyBindings;
     $("#keys").focus(function() {
@@ -75,15 +80,15 @@ $(document).ready(function() {
 </head>
 <body>
 	<table width="100%"><tr>
-		<td width="75%">
-			<font color=grey><div id="status">Init</div></font>
-			<ol id="urls"></ol>
-		</td>
-		<td width="25%">
+		<td width="25%" valign=top>
 			Key bindings<br>
 			<textarea id="keys" rows="10px"></textarea>
 			<br><br>
 		</td>
-	</td></table>
+		<td width="75%">
+			<font color=grey><div id="status">Init</div></font>
+			<ol id="urls"></ol>
+		</td>
+	</tr></table>
 </body>
 </html>
