@@ -183,6 +183,17 @@ $(document).ready(function() {
 	  	$($("#urls").children()[0]).fadeOut("fast",function() { $(this).remove(); })
 	  }
     };
+    
+    ////
+    //// Get all recursive categories bindings
+    ////
+	var url = urlBase + "/categoriesRecursive?parentId=" + rootId;
+	$.getJSON(url, function(result){})
+		.success(function() { alert("success "); })
+		.error(function() { alert("error occurred "); })
+		.complete(function() { alert("complete"); });
+
+    
 
 	////
     //// Update the key bindings
