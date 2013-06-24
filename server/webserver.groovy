@@ -54,7 +54,7 @@ class MyHandler implements HttpHandler {
 		// http://localhost:7474/db/data/node
 		 
 		WebResource resource = Client.create().resource( nodeEntryPointUri );
-		String nodeData = "{\"name\" : \"" +queryString+ "\"}";
+		String nodeData = "{\"name\" : \"" +queryString+ "\",\"foo\" : \"bar\"}";
 		println("nodeData:" + nodeData);
 		
 		// POST {} to the node entry point URI
