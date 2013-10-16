@@ -2,6 +2,7 @@
 <html>
 <head>
 <style>
+    .ui-effects-transfer { border: 2px dotted gray; }
 
 body{
 	font-family:Verdana; font-size: 12px;
@@ -26,6 +27,8 @@ body{
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>-->
 <script src="jquery/jquery-1.9.1.js"></script>
 <script src="jquery/jquery-ui.js"></script>
+
+
 <script type="text/javascript" src="jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
@@ -60,8 +63,10 @@ $(document).ready(function() {
 	parentOfRootId = getParentId(rootId);
 	$("#status").text("Loading")  			
 
-var rootColor = MD5(rootId).substring(0,6);
+	var rootColor = MD5(rootId).substring(0,6);
 	$("#rootColor").attr("style", "background-color: #" + rootColor);
+
+	var limit = $.url().param('limit')
 
 	////
 	//// Uncategorized URLs
@@ -71,8 +76,14 @@ var rootColor = MD5(rootId).substring(0,6);
 		$("#status").text("Populating")
 		$.each(result, function(resultRowNumber, field) {
 			console.debug("resultRowNumber:  "+ resultRowNumber + " of " + result.length);
-			if (resultRowNumber > 50 && resultRowNumber < result.length - 10) {
-				return;
+			if (limit == null) {
+				if (resultRowNumber > 50 && resultRowNumber < result.length - 10) {
+					return;
+				}
+			} else {
+				if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
+					return;
+				}
 			}
 			// Colors
 			var color = "";
@@ -185,7 +196,7 @@ var rootColor = MD5(rootId).substring(0,6);
       
 	  $(window).keypress(function(event) {
 	  		var key = String.fromCharCode(event.which);
-			if (('_' == key) ||('j'==key)|| ('n' == key) ) {
+			if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
 				var idOfTop = $("#urls").children()[0].id;
 				moveToBottom(idOfTop);
 			}
@@ -205,14 +216,18 @@ var rootColor = MD5(rootId).substring(0,6);
 	    var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;
 		$.getJSON(url, function(result){})
 			.success(function() { 
-				removeTop();
+				removeTop(parentId);
 				$("#list_"+parentId).effect("highlight", null, 500, function() {});
 			})
 			.error(function() { alert("error occurred "); })
 			.complete(function() { });
 	  }			
-	  function removeTop() {
-	  	$($("#urls").children()[0]).effect( "blind",null, 100, function() { $(this).remove(); });
+	  function removeTop(parentId) {
+		var options = { to: "#list_"+parentId, className: "ui-effects-transfer" };
+		$($("#urls").children()[0]).effect('transfer',options,500,function() { 
+			$($("#urls").children()[0]).effect( "blind",null, 100, function() { $(this).remove(); });
+		});
+	  	
 	  }
     };
     
