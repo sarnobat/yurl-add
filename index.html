@@ -67,6 +67,10 @@ $(document).ready(function() {
 	$("#rootColor").attr("style", "background-color: #" + rootColor);
 
 	var limit = $.url().param('limit')
+	if (limit == null) {
+		limit = 50;
+		window.history.pushState("object or string", "Title", document.URL + "&limit=50");
+	}
 
 	////
 	//// Uncategorized URLs
@@ -76,14 +80,8 @@ $(document).ready(function() {
 		$("#status").text("Populating")
 		$.each(result, function(resultRowNumber, field) {
 			console.debug("resultRowNumber:  "+ resultRowNumber + " of " + result.length);
-			if (limit == null) {
-				if (resultRowNumber > 50 && resultRowNumber < result.length - 10) {
-					return;
-				}
-			} else {
-				if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
-					return;
-				}
+			if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
+				return;
 			}
 			// Colors
 			var color = "";
@@ -161,8 +159,9 @@ $(document).ready(function() {
 				$("#" + field.id).append("<img src='"+productImageUrl+"' height='280'>");
 			}
 			$("#" + field.id).append("<br>");
-			$("#" + field.id).append("<input type=button value=Tag onClick='tagUrlWithSelections("+field.id+")'>");
-
+			$("#" + field.id).append("<input type=button value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");
+			$("#" + field.id).append("<img src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" width=500 />");
+			$("#" + field.id).append("<img src=\"http://images.shrinktheweb.com/xino.php?stwembed=1&stwaccesskeyid=82fb36a7ba73189&stwsize=xlg&stwurl="+encodeURIComponent(field.url)+"\" align=right width=200 />");
 			$("#urls").append("</font></li>");
 		});
 		$("#status").text("Done")
@@ -234,9 +233,16 @@ $(document).ready(function() {
 			})
 			.error(function() { alert("error occurred "); })
 			.complete(function() { });
-	  }			
+	  }
+
 	  function removeTop(parentId) {
-		var options = { to: "#list_"+parentId, className: "ui-effects-transfer" };
+	  	var target;
+	  	if (parentId == parentOfRootId) {
+	  		target = "#up";
+	  	} else {
+	  		target = "#list_"+parentId;
+	  	}
+		var options = { to: target, className: "ui-effects-transfer" };
 		$($("#urls").children()[0]).effect('transfer',options,500,function() { 
 			$($("#urls").children()[0]).effect( "blind",null, 100, function() { $(this).remove(); });
 		});

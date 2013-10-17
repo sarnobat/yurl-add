@@ -479,8 +479,11 @@ public class Server {
 			_1: {
 				theParams.put("parentId", iParentId);
 			}
+			// Unfortunately, we cannot insist on counting only the URL nodes - 
+			// it will prevent category nodes from being returned. See if there's
+			// a way to do this in Cypher. If there isn't, this is not a huge compromise.
 			JSONObject theQueryJsonResult = execute(
-					"START n=node(*) MATCH parent-[c:CONTAINS]->n -[c2:CONTAINS*]->n2 WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId}  and has(n2.url) RETURN ID(n),n.name,n.key?,count(n2) as c order by c desc",
+					"START n=node(*) MATCH parent-[c:CONTAINS]->n -[c2?:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key?,count(n2) as c order by c desc",
 					theParams);
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
