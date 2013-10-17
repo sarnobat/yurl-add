@@ -177,7 +177,8 @@ $(document).ready(function() {
         	// Don't remove the "null" otherwise we'll assign hash to this category
         }
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
-        $("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + "</a></li>");
+        $("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + " (<span id='count_"+binding.id+"'></span>)</a></li>");
+		$("#count_" + binding.id).text("Hello");
 
         $(window).keypress(function(event) {
 
