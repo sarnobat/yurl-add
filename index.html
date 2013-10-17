@@ -178,7 +178,7 @@ $(document).ready(function() {
         }
         $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
         $("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + " (<span id='count_"+binding.id+"'></span>)</a></li>");
-		$("#count_" + binding.id).text("Hello");
+		$("#count_" + binding.id).text(binding.count);
 
         $(window).keypress(function(event) {
 
@@ -219,6 +219,10 @@ $(document).ready(function() {
 			.success(function() { 
 				removeTop(parentId);
 				$("#list_"+parentId).effect("highlight", null, 4000, function() {});
+				//$("#list_"+parentId).css("font-weight","Bold");
+				var count = parseInt($("#count_"+parentId).text()) + 1;
+				$("#count_"+parentId).text(count);
+				$("#count_"+parentId).css("font-weight","Bold");
 			})
 			.error(function() { alert("error occurred "); })
 			.complete(function() { });

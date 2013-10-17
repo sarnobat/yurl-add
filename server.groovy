@@ -480,7 +480,7 @@ public class Server {
 				theParams.put("parentId", iParentId);
 			}
 			JSONObject theQueryJsonResult = execute(
-					"START n=node(*) MATCH parent-[c:CONTAINS]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN ID(n),n.name,n.key?",
+					"START n=node(*) MATCH parent-[c:CONTAINS]->n -[c2:CONTAINS*]->n2 WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId}  and has(n2.url) RETURN ID(n),n.name,n.key?,count(n2) as c order by c desc",
 					theParams);
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
@@ -492,8 +492,10 @@ public class Server {
 					aBindingObject.put("id", id);
 					String title = (String) aBindingArray.get(1);
 					String aUrl = (String) aBindingArray.get(2);
+					String aCount = (Integer)  aBindingArray.get(3);
 					aBindingObject.put("name", title);
 					aBindingObject.put("key", aUrl);// TODO: this could be null
+					aBindingObject.put("count", aCount);
 					oKeys.put(aBindingObject);
 				}
 			}
