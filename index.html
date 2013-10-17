@@ -146,6 +146,14 @@ $(document).ready(function() {
 					$("#" + field.id).append("");
 				}
 				
+			} else if (field.url.match("dailymotion.com/video")) {
+					var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+					$("#" + field.id).append("<br>");
+					$("#" + field.id).append("<img src='http://dailymotion.com/thumbnail/video/"+youtubeId +"'>");
+					$("#" + field.id).append("<br>");
+					$("#" + field.id).append("");
+					$("#" + field.id).append("");
+				
 			} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
 				$("#" + field.id).append("<br>");
 				var asin = field.url.replace(/.+dp\/([^\/]+)\/?.*/,'$1');
