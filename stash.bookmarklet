@@ -1,7 +1,10 @@
 javascript:(
 	function() {
+		document.getElementsByTagName("body")[0].innerHTML = "";
 		var x = new XMLHttpRequest();
-		x.open('GET','http://netgear.rohidekar.com:4447/yurl/stash?rootId=45&param1=' +  encodeURIComponent(location.href),true);
+		/* main: 45, product: 29196, video: 37658, tech: 46, other: 29172 */
+		x.open('GET','http://netgear.rohidekar.com:4447/yurl/stash?rootId=37658&param1='
+			+  encodeURIComponent(location.href),true);
 		x.onreadystatechange = 
 			function() {
 				if (x.readyState == 4) {
