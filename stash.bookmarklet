@@ -5,7 +5,7 @@ javascript:(
 		x.onreadystatechange = 
 			function() {
 				if (x.readyState == 4) {
-					if (x.status==200) {
+					if (x.status == 200) {
 						window.open('', '_self', ''); 
 						window.close(); 
 					} else {    
