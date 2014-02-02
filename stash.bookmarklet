@@ -1,17 +1,18 @@
-javascript:(function(){
-	var x = new XMLHttpRequest();
-	x.open('GET','http://netgear.rohidekar.com:4447/yurl/stash?rootId=45&param1=' +  encodeURIComponent(location.href),true);
-	x.onreadystatechange = function(){
-	
-		if(x.readyState==4) {
-			if(x.status==200) {
-                window.open('', '_self', ''); 
-				window.close(); 
-			} else {
-			    alert(x.status);
-			}
-		}
-		
-	};
-	x.send();
-})()
+javascript:(
+	function() {
+		var x = new XMLHttpRequest();
+		x.open('GET','http://netgear.rohidekar.com:4447/yurl/stash?rootId=45&param1=' +  encodeURIComponent(location.href),true);
+		x.onreadystatechange = 
+			function() {
+				if (x.readyState == 4) {
+					if (x.status==200) {
+						window.open('', '_self', ''); 
+						window.close(); 
+					} else {    
+						alert(x.status);
+					}
+				}
+			};
+		x.send();
+	}
+)()
