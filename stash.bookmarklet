@@ -8,7 +8,7 @@ javascript:(
 					if (x.status == 200) {
 						window.open('', '_self', ''); 
 						window.close(); 
-					} else {    
+					} else {
 						alert(x.status);
 					}
 				}
