@@ -1,5 +1,6 @@
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -41,12 +42,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.apache.commons.lang.*;
 
-import au.com.bytecode.opencsv.CSVReader;
 
+
+
+import com.github.axet.vget.VGet;
+import com.github.axet.vget.info.VideoInfo.VideoQuality;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.Client;
@@ -57,7 +61,7 @@ public class Server {
 	@Path("yurl")
 	public static class HelloWorldResource { // Must be public
 
-		final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
+		private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 
 		@GET
 		@Path("parent")
@@ -155,41 +159,7 @@ public class Server {
 
 					System.out.println("5");
 					System.out.println("5.25");
-					try {
-						CSVReader reader = new CSVReader(new StringReader(first));
-						System.out.println("5.5");
-						String[] segments = reader.readNext();
-						if (segments == null) {
-							System.out.println("5.75");
-							addToUnsuccessful(unsuccessfulLines, first, second);
-						} else {
-
-							System.out.println("6");
-							if (segments.length != 2) {
-								System.out.println("not 2 columns in csv entry");
-								i+=2;
-								addToUnsuccessful(unsuccessfulLines, first, second);
-								continue;
-							}
-							String title = segments[0];
-							System.out.println("6.1");
-							String url = segments[1];
-							System.out.println("6.2");
-							reader.close();
-							System.out.println("7");
-							if (!url.equals(second)) {
-								System.out.println("Not supported 3");
-								addToUnsuccessful(unsuccessfulLines, first, second);
-							} else {
-								JSONObject newNodeJsonObject = createNode(url, title, iRootId);
-							}
-						}
-					} catch (Exception e) {
-						System.out.println(e);
-						e.printStackTrace();
-						System.out.println("Problem 4");
-						throw e;
-					}
+					
 
 				} else {
 					System.out.println("10");
@@ -495,7 +465,11 @@ public class Server {
 					aBindingObject.put("id", id);
 					String title = (String) aBindingArray.get(1);
 					String aUrl = (String) aBindingArray.get(2);
-					String aCount = (Integer)  aBindingArray.get(3);
+					String aCount = ((Integer)  aBindingArray.get(3)).toString();
+					_11 : {
+						// remove this. Just checking that this is a valid number
+						Integer.parseInt(aCount);
+					}
 					aBindingObject.put("name", title);
 					aBindingObject.put("key", aUrl);// TODO: this could be null
 					aBindingObject.put("count", aCount);
@@ -513,17 +487,34 @@ public class Server {
 		@Path("stash")
 		@Produces("application/json")
 		public Response stash(@QueryParam("param1") String iUrl, @QueryParam("rootId") Integer iRoodId) throws JSONException, IOException {
+			System.out.println("stash() - begin");
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
+			System.out.println("stash() - url decoded: " + theHttpUrl);
 			String theTitle = getTitle(new URL(theHttpUrl));
+			try {
 			JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle, new Integer(iRoodId));
+			System.out.println("stash() - node created");
+			System.out.println("About to get id");
+			JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject.get("data")).get(0);
+			System.out.println("Got array: " + theNewNodeId);
+			System.out.println(theNewNodeId.get(0));
+			String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
+			String id = (String) theNewNodeId.get(0);
+			System.out.println(id);
+			downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
 			// TODO: check that it returned successfully (redundant?)
 			System.out.println(newNodeJsonObject.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(newNodeJsonObject.get("data").toString()).type("application/json")
 					.build();
+			} catch (Exception e) {
+			System.out.println("error");System.out.println(e);
+				e.printStackTrace();
+				return null;
+			}
 		}
 
-		public JSONObject createNode(String theHttpUrl, String theTitle, Integer rootId)
+		private JSONObject createNode(String theHttpUrl, String theTitle, Integer rootId)
 				throws IOException, JSONException {
 			Map<String, Object> theParamValues = new HashMap<String, Object>();
 			_1: {
@@ -541,7 +532,7 @@ public class Server {
 			System.out.println("New node: " + theNewNodeId.get(0));
 			// TODO: Do not hard-code the root ID
 			JSONObject newNodeJsonObject = relateHelper(rootId, (Integer) theNewNodeId.get(0));
-			return newNodeJsonObject;
+			return json;
 		}
 
 		private String getTitle(final URL iUrl) {
@@ -566,6 +557,50 @@ public class Server {
 				e.printStackTrace();
 			}
 			return title;
+		}
+		
+	
+		private static void downloadVideoInSeparateThread(final String iVideoUrl, final String TARGET_DIR_PATH, final String cypherUri, final String id) {
+			Runnable r = new Runnable() {
+	
+				@Override
+				public void run() {
+				try {
+						
+						System.out.println("downloadVideoInSeparateThread() - Begin");
+						
+						File theTargetDir = new File(TARGET_DIR_PATH);
+						if (!theTargetDir.exists()) {
+							throw new RuntimeException(
+									"Target directory doesn't exist");
+						}
+						VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
+						System.out.println("downloadVideoInSeparateThread() - About to start downloading");
+						v.getVideo().setVideoQuality(VideoQuality.p1080);
+	
+						System.out.println(v.getVideo().getWeb().toString());
+						System.out.println(v.getVideo().getVideoQuality());
+						v.download();
+						System.out.println("downloadVideoInSeparateThread() - Download successful. Updating database");
+	
+						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded = {date}",
+								ImmutableMap.<String, Object> of("id",Long.valueOf( id),"url", iVideoUrl,
+										"date", System.currentTimeMillis()));
+						System.out.println("downloadVideoInSeparateThread() - Download recorded in database");
+	
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					} catch (JSONException e) {
+						System.out.println("downloadVideoInSeparateThread() - ERROR recording download in database");
+						// Why won't the compiler let me throw this?
+						e.printStackTrace();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			new Thread(r).start();
+			System.out.println("End");
 		}
 
 		@GET
@@ -716,7 +751,8 @@ public class Server {
 			return theJson;
 		}
 
-		private JSONObject execute(String iCypherQuery, Map<String, Object> iParams)
+		// TODO: make this map immutable
+		private static JSONObject execute(String iCypherQuery, Map<String, Object> iParams)
 				throws IOException, JSONException {
 			WebResource theWebResource = Client.create().resource(CYPHER_URI);
 			Map<String, Object> thePostBody = new HashMap<String, Object>();
