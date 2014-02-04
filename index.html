@@ -20,6 +20,15 @@ body{
 	background-color:#fafafa
 }
 
+.screenshot {
+	padding:0px;
+	margin:0px;
+	border-radius: 15px;
+	box-shadow:
+		inset 0 0 9px #222222, 
+		0px 0px 0px #999999;// internal and external shadow
+	background-color:#fafafa
+}
 </style>
 <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"><script> -->
 
@@ -130,7 +139,7 @@ $(document).ready(function() {
 			if (urlElements != null) {
 				var site = urlElements[0];
 				//one.append("<br>");
-				two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\"> ");
+				two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
 			}
 			
 			var urlRoot = field.url.replace(/.*:(\/\/[^\/]+).*/ig,"$1");
@@ -139,55 +148,60 @@ $(document).ready(function() {
 			
 			var hasScreenshot = false;
 			var imageSize = 300;
+			var imageCell = three;
 			if (field.url.match(".jpg\??") || 
 				field.url.match(".gif$") || 
 				field.url.match(".png\??") || 
 				field.url.match("images.q=tbn:")) {
-				three.append("<br><img src="+field.url+" width="+imageSize+">");
+				imageCell.append("<br><img src="+field.url+" width="+imageSize+">");
 				hasScreenshot = true;
 			}
 			if (field.url.match("youtube.com")) {
 				if (field.url.match("youtube.com/watch")) {
 					var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
-					three.append("<br>");
-					three.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+">");
+					imageCell.append("<br>");
+					imageCell.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+">");
 					
-					three.append("<br>");
+					imageCell.append("<br>");
 					//three.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/1.jpg'>");
 					//three.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/2.jpg'>");
 					//three.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/3.jpg'>");
 					//three.append("<div id=\"youtube-"+field.id+"\"><span href='#' onclick='addEmbeddedVideo(\"youtube-"+field.id+"\",\""+field.url+"\")'>Expand</span></div>");
-					three.append("");
-					three.append("");
+					imageCell.append("");
+					imageCell.append("");
 					hasScreenshot = true;
 				}
 				
 			} else if (field.url.match("dailymotion.com/video")) {
 					var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
-					three.append("<br>");
-					three.append("<img src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+">");
-					three.append("<br>");
-					three.append("");
-					three.append("");
+					imageCell.append("<br>");
+					imageCell.append("<img src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+">");
+					imageCell.append("<br>");
+					imageCell.append("");
+					imageCell.append("");
 					hasScreenshot = true;
 				
 			} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
-				three.append("<br>");
+				imageCell.append("<br>");
 				var asin = field.url.replace(/.+dp\/([^\/]+)\/?.*/,'$1');
 				var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
-				three.append("<img src='"+productImageUrl+"' height='280'>");
+				imageCell.append("<img src='"+productImageUrl+"' height='280'>");
 				hasScreenshot = true;
 			}
 
-			three.append("<br>");
-			three.append("<input type=button value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");
 			
 						
 			if (!hasScreenshot) {
-				three.append("<img src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" width="+imageSize+" /><br>");
+				imageCell.append("<img src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" /><br>");
 				//three.append("<img src=\"http://images.shrinktheweb.com/xino.php?stwembed=1&stwaccesskeyid=82fb36a7ba73189&stwsize=xlg&stwurl="+encodeURIComponent(field.url)+"\" align=right width=200 />");
 			}
-			
+
+
+			four.append("<br>");
+			four.append("<input type=button value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
+			four.append("<br>");
+			four.append("<br>");
+			four.append("<br>");
 			four.append("<input type=button value='Top' onclick='moveToTop("+field.id+")'><br>");
 			four.append("<input type=button value='Move Up' onclick='moveUp("+field.id+")'><br>");
 			four.append("<input type=button value='Move Down' onclick='moveDown("+field.id+")'><br>");
