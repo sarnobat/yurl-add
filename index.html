@@ -6,7 +6,7 @@
 
 body{
 	font-family:Verdana; font-size: 12px;
-	text-shadow:4px 4px #eeeeee;
+	//text-shadow:4px 4px #eeeeee;
 }
 
 .buttonize {
@@ -92,7 +92,7 @@ $(document).ready(function() {
 
 			var one = $("<td style='background-color:red'>1");
 //			$("#" + field.id).append(one);
-			var two = $("<td style='background-color:green'>2");
+			var two = $("<td style='background-color:green' colspan=3>2");
 //			$("#" + field.id).append(two);
 			var three = $("<td style='background-color:blue'>3");
 //			$("#" + field.id).append(three);
@@ -105,16 +105,18 @@ $(document).ready(function() {
 		
 			//$("#" + field.id).wrapInner("<tr>");
 
-			var row2 = $("<tr/>");
-			var col21 = $("<td/>");
-			col21.text("My text");
-			row2.append(one);
-			row2.append(two);
-			row2.append(three);
-			row2.append(four);
 			var table = $("<table/>");
 			table.attr('width','100%');
-			table.append(row2);;
+			var row1 = $("<tr/>");
+			//var col1 = $("<td/>").attr('colspan',3);
+			table.append(row1);
+			row1.append(two);
+			var row2 = $("<tr/>");
+			table.append(row2);
+			row2.append(one);
+			//row2.append(two);
+			row2.append(three);
+			row2.append(four);
 
 
 			var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize');
@@ -130,7 +132,7 @@ $(document).ready(function() {
 			
 			var urlRoot = field.url.replace(/.*:(\/\/[^\/]+).*/ig,"$1");
 			var colorCode = MD5(urlRoot).substring(0,6);
-			two.append("<font style=\"color: #"+colorCode+"\">[" + field.id + "]: "+ field.title + " <br>(" + field.url + ") " + "<br><a href='" +field.url+"'>Open</a>");
+			two.append("<font style=\"color: #"+colorCode+"\">[" + field.id + "]: "+ field.title + " (" + "<a href='" +field.url+"'>"+field.url+")</a>");
 			
 			if (field.url.match(".jpg\??") || 
 				field.url.match(".gif$") || 
