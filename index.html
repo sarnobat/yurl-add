@@ -14,7 +14,7 @@ body{
 	margin:10px;
 	border-radius: 15px;
 	box-shadow:
-		//inset 0 0 15px #222222, 
+		inset 0 0 15px #222222, 
 		10px 10px 14px #999999;// internal and external shadow
 	background-color:#fafafa
 }
@@ -92,13 +92,13 @@ $(document).ready(function() {
 //			$("#urls").append("<li id="+field.id+" class='buttonize'>");
 
 
-			var one = $("<td style='background-color:red'>1");
+			var one = $("<td style='background-color:'>1");
 //			$("#" + field.id).append(one);
-			var two = $("<td style='background-color:green' colspan=3>2");
+			var two = $("<td style='background-color:' colspan=3>2");
 //			$("#" + field.id).append(two);
-			var three = $("<td style='background-color:blue'>3");
+			var three = $("<td style='background-color:'>3");
 //			$("#" + field.id).append(three);
-			var four = $("<td style='background-color:orange'>4");
+			var four = $("<td style='background-color:'>4");
 			
 
 //			$("#" + field.id).append(four);
@@ -133,8 +133,8 @@ $(document).ready(function() {
 			}
 			
 			var urlRoot = field.url.replace(/.*:(\/\/[^\/]+).*/ig,"$1");
-			var colorCode = MD5(urlRoot).substring(0,6);
-			two.append("<font style=\"color: #"+colorCode+"\">[" + field.id + "]: "+ field.title + " (" + "<a href='" +field.url+"'>"+field.url+")</a>");
+			//var colorCode = MD5(urlRoot).substring(0,6);
+			two.append("<font style=\"color: #002366\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font></sub>");
 			
 			var hasScreenshot = false;
 			var imageSize = 300;
@@ -191,6 +191,7 @@ $(document).ready(function() {
 			four.append("<input type=button value='Move Up' onclick='moveUp("+field.id+")'><br>");
 			four.append("<input type=button value='Move Down' onclick='moveDown("+field.id+")'><br>");
 			four.append("<input type=button value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
+			four.append("<sub>"+field.id+"</sub>");
 
 
 		});
