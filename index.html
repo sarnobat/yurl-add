@@ -10,6 +10,11 @@ body{
 	background-color:#eeeeee
 }
 
+.genericButton {
+	background-color: #FDFD96;
+}
+
+
 .buttonize {
 	padding:20px;
 	margin:25px;
@@ -104,7 +109,7 @@ $(document).ready(function() {
 
 			var one = $("<td style='background-color:'>1");
 //			$("#" + field.id).append(one);
-			var two = $("<td style='background-color:' colspan=3>2");
+			var two = $("<td style='background-color:' >2");
 //			$("#" + field.id).append(two);
 			var three = $("<td style='background-color:'>3");
 //			$("#" + field.id).append(three);
@@ -123,11 +128,11 @@ $(document).ready(function() {
 			//var col1 = $("<td/>").attr('colspan',3);
 			table.append(row1);
 			row1.append(two);
+			row1.append(three);
 			var row2 = $("<tr/>");
 			table.append(row2);
 			row2.append(one);
 			//row2.append(two);
-			row2.append(three);
 			row2.append(four);
 
 
@@ -196,17 +201,17 @@ $(document).ready(function() {
 				//three.append("<img src=\"http://images.shrinktheweb.com/xino.php?stwembed=1&stwaccesskeyid=82fb36a7ba73189&stwsize=xlg&stwurl="+encodeURIComponent(field.url)+"\" align=right width=200 />");
 			}
 
-
-			four.append("<br>");
-			four.append("<input type=button value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
-			four.append("<br>");
-			four.append("<br>");
-			four.append("<br>");
-			four.append("<input type=button value='Top' onclick='moveToTop("+field.id+")'><br>");
-			four.append("<input type=button value='Move Up' onclick='moveUp("+field.id+")'><br>");
-			four.append("<input type=button value='Move Down' onclick='moveDown("+field.id+")'><br>");
-			four.append("<input type=button value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
-			four.append("<sub>"+field.id+"</sub>");
+			var buttonCell = two;
+			buttonCell.append("<br>");
+			buttonCell.append("<br>");
+			buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
+			buttonCell.append("<br>");
+			buttonCell.append("<br>");
+			buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
+			buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
+			buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
+			buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
+			buttonCell.append("<sub>"+field.id+"</sub>");
 
 
 		});

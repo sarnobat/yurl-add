@@ -2,9 +2,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -14,7 +11,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,8 +20,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -43,15 +37,10 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-
-
-
 import com.github.axet.vget.VGet;
 import com.github.axet.vget.info.VideoInfo.VideoQuality;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -66,14 +55,15 @@ public class Server {
 		@GET
 		@Path("parent")
 		@Produces("application/json")
-		public Response parent(@QueryParam("nodeId") Integer iNodeId) throws JSONException,
-				IOException {
+		public Response parent(@QueryParam("nodeId") Integer iNodeId)
+				throws JSONException, IOException {
 			Map<String, Object> theParams = new HashMap<String, Object>();
 			theParams.put("nodeId", iNodeId);
 			// TODO: order these by most recent-first (so that they appear this
 			// way in the UI)
 			JSONObject theParentNodeJson = execute(
-					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)", theParams);
+					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)",
+					theParams);
 			JSONArray theData = (JSONArray) theParentNodeJson.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
@@ -83,8 +73,8 @@ public class Server {
 				o.put("id", id);
 				ret.put(o);
 			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
-					.type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(ret.toString()).type("application/json").build();
 		}
 
 		//
@@ -107,8 +97,8 @@ public class Server {
 			while (i < lines.length) {
 
 				System.out.println("1");
-				//System.out.println("lines 1");
-				//System.out.println("lines 2: " + lines);
+				// System.out.println("lines 1");
+				// System.out.println("lines 2: " + lines);
 				String first = lines[i];
 				System.out.println("first: " + first);
 				String theHttpUrl;
@@ -119,13 +109,13 @@ public class Server {
 					System.out.println("Could not decode");
 					System.out.println(e);
 					System.out.println(e.getStackTrace());
-					//i += lines.length();
+					// i += lines.length();
 					addToUnsuccessful(unsuccessfulLines, first, "");
 					++i;
-					//for (int j = 0; j < lines.length(); j++) {
-					//	addToUnsuccessful(unsuccessfulLines, lines[j], "");
-					//	++i;
-					//}
+					// for (int j = 0; j < lines.length(); j++) {
+					// addToUnsuccessful(unsuccessfulLines, lines[j], "");
+					// ++i;
+					// }
 					continue;
 				}
 				System.out.println("decoded: " + theHttpUrl);
@@ -159,7 +149,6 @@ public class Server {
 
 					System.out.println("5");
 					System.out.println("5.25");
-					
 
 				} else {
 					System.out.println("10");
@@ -174,7 +163,8 @@ public class Server {
 					.entity(entity.toString()).type("application/json").build();
 		}
 
-		public void addToUnsuccessful(StringBuffer unsuccessfulLines, String first, String second) {
+		public void addToUnsuccessful(StringBuffer unsuccessfulLines,
+				String first, String second) {
 			unsuccessfulLines.append(first);
 			unsuccessfulLines.append("\n");
 			unsuccessfulLines.append(second);
@@ -190,8 +180,8 @@ public class Server {
 		@GET
 		@Path("dumpurls")
 		@Produces("application/text")
-		public Response dumpUrls(@QueryParam("rootId") Integer iRootId) throws IOException,
-				JSONException {
+		public Response dumpUrls(@QueryParam("rootId") Integer iRootId)
+				throws IOException, JSONException {
 			Set<String> visitedInternalNodes = new HashSet<String>();
 			Integer startId = iRootId;
 			if (startId == null) {
@@ -206,17 +196,20 @@ public class Server {
 					.entity(plainText.toString()).type("text/plain").build();
 		}
 
-		private void printNode(Integer iRootId, StringBuffer json, StringBuffer plainText,
-				Set<String> visitedInternalNodes) throws IOException, JSONException {
+		private void printNode(Integer iRootId, StringBuffer json,
+				StringBuffer plainText, Set<String> visitedInternalNodes)
+				throws IOException, JSONException {
 			json.append("bar");
 			Map<String, Object> theParams = new HashMap<String, Object>();
 			theParams.put("nodeId", iRootId);
 			JSONObject theResponse = execute(
-					"start root=node({nodeId}) MATCH root--n RETURN distinct n, id(n)", theParams);
+					"start root=node({nodeId}) MATCH root--n RETURN distinct n, id(n)",
+					theParams);
 			JSONArray jsonArray = (JSONArray) theResponse.get("data");
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONArray aNode = (JSONArray) jsonArray.get(i);
-				JSONObject object = (JSONObject) ((JSONObject) aNode.get(0)).get("data");
+				JSONObject object = (JSONObject) ((JSONObject) aNode.get(0))
+						.get("data");
 
 				String id = (String) checkNotNull(aNode.get(1));
 				if (visitedInternalNodes.contains(id)) {
@@ -252,7 +245,8 @@ public class Server {
 				System.out.println("2");
 				visitedInternalNodes.add(id);
 
-				printNode(Integer.parseInt(id), json, plainText, visitedInternalNodes);
+				printNode(Integer.parseInt(id), json, plainText,
+						visitedInternalNodes);
 			}
 		}
 
@@ -263,8 +257,8 @@ public class Server {
 		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
-		public Response uncategorized(@QueryParam("rootId") Integer iRootId) throws JSONException,
-				IOException {
+		public Response uncategorized(@QueryParam("rootId") Integer iRootId)
+				throws JSONException, IOException {
 			checkNotNull(iRootId);
 			// TODO: the source is null clause should be obsoleted
 			Map<String, Object> theParams = new HashMap<String, Object>();
@@ -296,7 +290,8 @@ public class Server {
 				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
 			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(theUncategorizedNodesJson.toString()).type("application/json").build();
+					.entity(theUncategorizedNodesJson.toString())
+					.type("application/json").build();
 		}
 
 		// -----------------------------------------------------------------------------
@@ -312,19 +307,21 @@ public class Server {
 		// with child categories
 		public Response keysUpdate(@QueryParam("parentId") Integer iParentId,
 				@QueryParam("newKeyBindings") String iNewKeyBindings,
-				@QueryParam("oldKeyBindings") String iOldKeyBindings) throws JSONException,
-				IOException {
+				@QueryParam("oldKeyBindings") String iOldKeyBindings)
+				throws JSONException, IOException {
 			System.out.println("keysUpdate");
 
 			Set<String> theOldKeyBindingsSet = new HashSet<String>();
-			Collections.addAll(theOldKeyBindingsSet, iOldKeyBindings.trim().split("\n"));
+			Collections.addAll(theOldKeyBindingsSet, iOldKeyBindings.trim()
+					.split("\n"));
 			Set<String> theNewKeyBindingsSet = new HashSet<String>();
-			Collections.addAll(theNewKeyBindingsSet, iNewKeyBindings.trim().split("\n"));
+			Collections.addAll(theNewKeyBindingsSet, iNewKeyBindings.trim()
+					.split("\n"));
 
 			// NOTE: This is not symmetric (commutative?). If you want to
 			// support removal do that in a separate loop
-			Set<String> theNewKeyBindingLines = Sets.difference(theNewKeyBindingsSet,
-					theOldKeyBindingsSet);
+			Set<String> theNewKeyBindingLines = Sets.difference(
+					theNewKeyBindingsSet, theOldKeyBindingsSet);
 			_1: {
 				System.out.println("Old: " + theOldKeyBindingsSet);
 				System.out.println("New: " + theNewKeyBindingsSet);
@@ -345,11 +342,13 @@ public class Server {
 					// Ignore trailing comments
 					String[] aLineElements = aNewKeyBinding.split("=");
 					String aKeyCode = aLineElements[0].trim();
-					String[] aRightHandSideElements = aLineElements[1].trim().split("#");
+					String[] aRightHandSideElements = aLineElements[1].trim()
+							.split("#");
 					_2: {
 						String aName = aRightHandSideElements[0].trim();
-						System.out.println("Accepting proposal to create key binding for " + aName
-								+ "(" + aKeyCode + ")");
+						System.out
+								.println("Accepting proposal to create key binding for "
+										+ aName + "(" + aKeyCode + ")");
 						theKeyBindingsNoDuplicates.put(aKeyCode, aName);
 					}
 				}
@@ -364,7 +363,8 @@ public class Server {
 					aParamValues.put("parentId", iParentId);
 					aParamValues.put("key", aKeyCode);
 				}
-				System.out.println("About to remove keybinding for " + aKeyCode);
+				System.out
+						.println("About to remove keybinding for " + aKeyCode);
 				JSONObject json = execute(
 						"START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
 						aParamValues);
@@ -374,12 +374,12 @@ public class Server {
 				createNewKeyBinding(aName, aKeyCode, iParentId);
 			}
 			JSONArray ret = getKeys(iParentId);
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
-					.type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(ret.toString()).type("application/json").build();
 		}
 
-		private void createNewKeyBinding(String iCategoryName, String iKeyCode, Integer iParentId)
-				throws IOException, JSONException {
+		private void createNewKeyBinding(String iCategoryName, String iKeyCode,
+				Integer iParentId) throws IOException, JSONException {
 
 			// TODO: Also create a trash category for each new category key node
 
@@ -392,8 +392,8 @@ public class Server {
 				theParamValues.put("aKeyCode", iKeyCode);
 				String iCypherQuery = "START parent=node({parentId}) MATCH parent -[r:CONTAINS]-> existingCategory WHERE has(existingCategory.type) and existingCategory.type = 'categoryNode' and existingCategory.name = {aCategoryName} SET existingCategory.key = {aKeyCode} RETURN id(existingCategory)";
 				JSONObject theJson = execute(iCypherQuery, theParamValues);
-				System.out.println("restoring unassociated category: " + iCypherQuery + "\t"
-						+ theParamValues);
+				System.out.println("restoring unassociated category: "
+						+ iCypherQuery + "\t" + theParamValues);
 
 				System.out.println(theJson.get("data"));
 				JSONArray theCategoryNodes = (JSONArray) theJson.get("data");
@@ -404,8 +404,10 @@ public class Server {
 					}
 					String theNewCategoryNodeIdString = "-1";
 
-					theNewCategoryNodeIdString = (String) theCategoryNodes.get(0);
-					System.out.println("Category ID to reattach: " + theNewCategoryNodeIdString);
+					theNewCategoryNodeIdString = (String) theCategoryNodes
+							.get(0);
+					System.out.println("Category ID to reattach: "
+							+ theNewCategoryNodeIdString);
 				} else {
 					shouldCreateNewCategoryNode = true;
 				}
@@ -429,7 +431,8 @@ public class Server {
 				System.out.println(theNewKeyBindingResponseJson.toString());
 				String theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
 						.get("data")).get(0)).get(0);
-				Integer theNewCategoryNodeId = Integer.parseInt(theNewCategoryNodeIdString);
+				Integer theNewCategoryNodeId = Integer
+						.parseInt(theNewCategoryNodeIdString);
 				relateHelper(iParentId, theNewCategoryNodeId);
 			}
 		}
@@ -437,21 +440,24 @@ public class Server {
 		@GET
 		@Path("keys")
 		@Produces("application/json")
-		public Response keys(@QueryParam("parentId") Integer iParentId) throws JSONException,
-				IOException {
+		public Response keys(@QueryParam("parentId") Integer iParentId)
+				throws JSONException, IOException {
 			JSONArray ret = getKeys(iParentId);
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
-					.type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(ret.toString()).type("application/json").build();
 		}
 
-		public JSONArray getKeys(Integer iParentId) throws IOException, JSONException {
+		public JSONArray getKeys(Integer iParentId) throws IOException,
+				JSONException {
 			Map<String, Object> theParams = new HashMap<String, Object>();
 			_1: {
 				theParams.put("parentId", iParentId);
 			}
-			// Unfortunately, we cannot insist on counting only the URL nodes - 
-			// it will prevent category nodes from being returned. See if there's
-			// a way to do this in Cypher. If there isn't, this is not a huge compromise.
+			// Unfortunately, we cannot insist on counting only the URL nodes -
+			// it will prevent category nodes from being returned. See if
+			// there's
+			// a way to do this in Cypher. If there isn't, this is not a huge
+			// compromise.
 			JSONObject theQueryJsonResult = execute(
 					"START n=node(*) MATCH parent-[c:CONTAINS]->n -[c2?:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key?,count(n2) as c order by c desc",
 					theParams);
@@ -465,9 +471,10 @@ public class Server {
 					aBindingObject.put("id", id);
 					String title = (String) aBindingArray.get(1);
 					String aUrl = (String) aBindingArray.get(2);
-					String aCount = ((Integer)  aBindingArray.get(3)).toString();
-					_11 : {
-						// remove this. Just checking that this is a valid number
+					String aCount = ((Integer) aBindingArray.get(3)).toString();
+					_11: {
+						// remove this. Just checking that this is a valid
+						// number
 						Integer.parseInt(aCount);
 					}
 					aBindingObject.put("name", title);
@@ -486,36 +493,42 @@ public class Server {
 		@GET
 		@Path("stash")
 		@Produces("application/json")
-		public Response stash(@QueryParam("param1") String iUrl, @QueryParam("rootId") Integer iRoodId) throws JSONException, IOException {
+		public Response stash(@QueryParam("param1") String iUrl,
+				@QueryParam("rootId") Integer iRoodId) throws JSONException,
+				IOException {
 			System.out.println("stash() - begin");
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 			System.out.println("stash() - url decoded: " + theHttpUrl);
 			String theTitle = getTitle(new URL(theHttpUrl));
 			try {
-			JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle, new Integer(iRoodId));
-			System.out.println("stash() - node created");
-			System.out.println("About to get id");
-			JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject.get("data")).get(0);
-			System.out.println("Got array: " + theNewNodeId);
-			System.out.println(theNewNodeId.get(0));
-			String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
-			String id = (String) theNewNodeId.get(0);
-			System.out.println(id);
-			downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
-			// TODO: check that it returned successfully (redundant?)
-			System.out.println(newNodeJsonObject.toString());
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(newNodeJsonObject.get("data").toString()).type("application/json")
-					.build();
+				JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle,
+						new Integer(iRoodId));
+				System.out.println("stash() - node created");
+				System.out.println("About to get id");
+				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
+						.get("data")).get(0);
+				System.out.println("Got array: " + theNewNodeId);
+				System.out.println(theNewNodeId.get(0));
+				String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
+				String id = (String) theNewNodeId.get(0);
+				System.out.println(id);
+				downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH,
+						CYPHER_URI, id);
+				// TODO: check that it returned successfully (redundant?)
+				System.out.println(newNodeJsonObject.toString());
+				return Response.ok().header("Access-Control-Allow-Origin", "*")
+						.entity(newNodeJsonObject.get("data").toString())
+						.type("application/json").build();
 			} catch (Exception e) {
-			System.out.println("error");System.out.println(e);
+				System.out.println("error");
+				System.out.println(e);
 				e.printStackTrace();
 				return null;
 			}
 		}
 
-		private JSONObject createNode(String theHttpUrl, String theTitle, Integer rootId)
-				throws IOException, JSONException {
+		private JSONObject createNode(String theHttpUrl, String theTitle,
+				Integer rootId) throws IOException, JSONException {
 			Map<String, Object> theParamValues = new HashMap<String, Object>();
 			_1: {
 				theParamValues.put("url", theHttpUrl);
@@ -527,20 +540,21 @@ public class Server {
 			JSONObject json = execute(
 					"CREATE (n { title : {title} , url : {url}, created: {created}, ordinal: {ordinal} }) RETURN id(n)",
 					theParamValues);
-
-			JSONArray theNewNodeId = (JSONArray) ((JSONArray) json.get("data")).get(0);
-			System.out.println("New node: " + theNewNodeId.get(0));
-			// TODO: Do not hard-code the root ID
-			JSONObject newNodeJsonObject = relateHelper(rootId, (Integer) theNewNodeId.get(0));
+			{
+				JSONArray theNewNodeId = (JSONArray) ((JSONArray) json
+						.get("data")).get(0);
+				System.out.println("New node: " + theNewNodeId.get(0));
+				relateHelper(rootId, (Integer) theNewNodeId.get(0));
+			}
 			return json;
 		}
 
 		private String getTitle(final URL iUrl) {
 			String title = "";
-			ExecutorService theExecutorService = Executors.newFixedThreadPool(2);
+			ExecutorService theExecutorService = Executors
+					.newFixedThreadPool(2);
 			Collection<Callable<String>> tasks = new ArrayList<Callable<String>>();
 			Callable<String> callable = new Callable<String>() {
-				@Override
 				public String call() throws Exception {
 					Document doc = Jsoup.connect(iUrl.toString()).get();
 					return doc.title();
@@ -548,8 +562,8 @@ public class Server {
 			};
 			tasks.add(callable);
 			try {
-				List<Future<String>> taskFutures = theExecutorService.invokeAll(tasks, 3000L,
-						TimeUnit.SECONDS);
+				List<Future<String>> taskFutures = theExecutorService
+						.invokeAll(tasks, 3000L, TimeUnit.SECONDS);
 				title = taskFutures.get(0).get();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -558,47 +572,55 @@ public class Server {
 			}
 			return title;
 		}
-		
-	
-		private static void downloadVideoInSeparateThread(final String iVideoUrl, final String TARGET_DIR_PATH, final String cypherUri, final String id) {
+
+		private static void downloadVideoInSeparateThread(
+				final String iVideoUrl, final String TARGET_DIR_PATH,
+				final String cypherUri, final String id) {
 			Runnable r = new Runnable() {
-	
-				@Override
+
+				// @Override
 				public void run() {
-				try {
-						
-						System.out.println("downloadVideoInSeparateThread() - Begin");
-						
+					try {
+
+						System.out
+								.println("downloadVideoInSeparateThread() - Begin");
+
 						File theTargetDir = new File(TARGET_DIR_PATH);
 						if (!theTargetDir.exists()) {
 							throw new RuntimeException(
 									"Target directory doesn't exist");
 						}
 						VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
-						System.out.println("downloadVideoInSeparateThread() - About to start downloading");
+						System.out
+								.println("downloadVideoInSeparateThread() - About to start downloading");
 						v.getVideo().setVideoQuality(VideoQuality.p1080);
-	
+
 						System.out.println(v.getVideo().getWeb().toString());
 						System.out.println(v.getVideo().getVideoQuality());
 						v.download();
-						System.out.println("downloadVideoInSeparateThread() - Download successful. Updating database");
-	
+						System.out
+								.println("downloadVideoInSeparateThread() - Download successful. Updating database");
+
 						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded = {date}",
-								ImmutableMap.<String, Object> of("id",Long.valueOf( id),"url", iVideoUrl,
+								ImmutableMap.<String, Object> of("id",
+										Long.valueOf(id), "url", iVideoUrl,
 										"date", System.currentTimeMillis()));
-						System.out.println("downloadVideoInSeparateThread() - Download recorded in database");
-	
+						System.out
+								.println("downloadVideoInSeparateThread() - Download recorded in database");
+
 					} catch (IOException e) {
+						e.printStackTrace();
 						throw new RuntimeException(e);
 					} catch (JSONException e) {
-						System.out.println("downloadVideoInSeparateThread() - ERROR recording download in database");
+						System.out
+								.println("downloadVideoInSeparateThread() - ERROR recording download in database");
 						// Why won't the compiler let me throw this?
 						e.printStackTrace();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
-			}
+			};
 			new Thread(r).start();
 			System.out.println("End");
 		}
@@ -606,9 +628,10 @@ public class Server {
 		@GET
 		@Path("surpassOrdinal")
 		@Produces("application/json")
-		public Response surpassOrdinal(@QueryParam("nodeIdToChange") Integer nodeIdToChange,
-				@QueryParam("nodeIdToSurpass") Integer nodeIdToSurpass) throws IOException,
-				JSONException {
+		public Response surpassOrdinal(
+				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
+				@QueryParam("nodeIdToSurpass") Integer nodeIdToSurpass)
+				throws IOException, JSONException {
 
 			System.out.println("surpassOrdinals");
 
@@ -620,17 +643,18 @@ public class Server {
 					" start n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) set n.ordinal=n2.ordinal + 100 return n.ordinal,n2.ordinal",
 					theParams);
 
-			JSONObject ret = new JSONObject();
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
-					.type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(jsonObject.toString()).type("application/json")
+					.build();
 		}
 
 		@GET
 		@Path("undercutOrdinal")
 		@Produces("application/json")
-		public Response undercutOrdinal(@QueryParam("nodeIdToChange") Integer nodeIdToChange,
-				@QueryParam("nodeIdToUndercut") Integer nodeIdToUndercut) throws IOException,
-				JSONException {
+		public Response undercutOrdinal(
+				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
+				@QueryParam("nodeIdToUndercut") Integer nodeIdToUndercut)
+				throws IOException, JSONException {
 
 			System.out.println("undercutOrdinal");
 
@@ -642,9 +666,9 @@ public class Server {
 					" start n=node({nodeIdToChange}),n2=node({nodeIdToUndercut}) set n.ordinal=n2.ordinal - 100 return n.ordinal,n2.ordinal",
 					theParams);
 
-			JSONObject ret = new JSONObject();
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
-					.type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(jsonObject.toString()).type("application/json")
+					.build();
 
 		}
 
@@ -652,7 +676,8 @@ public class Server {
 		@Path("swapOrdinals")
 		@Produces("application/json")
 		public Response swapOrdinals(@QueryParam("firstId") Integer iFirstId,
-				@QueryParam("secondId") Integer iSecondId) throws IOException, JSONException {
+				@QueryParam("secondId") Integer iSecondId) throws IOException,
+				JSONException {
 			System.out.println("swapOrdinals");
 
 			Map<String, Object> theParams = new HashMap<String, Object>();
@@ -663,9 +688,9 @@ public class Server {
 					" start n=node({id1}),n2=node({id2}) set n.temp=n2.ordinal, n2.ordinal=n.ordinal,n.ordinal=n.temp  return n.ordinal,n2.ordinal",
 					theParams);
 
-			JSONObject ret = new JSONObject();
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
-					.type("application/json").build();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(jsonObject.toString()).type("application/json")
+					.build();
 		}
 
 		/**
@@ -674,7 +699,8 @@ public class Server {
 		@GET
 		@Path("relateCategoriesToItem")
 		@Produces("application/json")
-		public Response relateCategoriesToItem(@QueryParam("nodeId") Integer iNodeToBeTagged,
+		public Response relateCategoriesToItem(
+				@QueryParam("nodeId") Integer iNodeToBeTagged,
 				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo)
 				throws JSONException, IOException {
 			System.out.println("relateCategoriesToItem(): begin");
@@ -682,12 +708,15 @@ public class Server {
 			System.out.println(decode);
 			JSONArray theCategoryIdsToBeAddedTo = new JSONArray(decode);
 			for (int i = 0; i < theCategoryIdsToBeAddedTo.length(); i++) {
-				Integer aCategoryIdToBeAddedTo = theCategoryIdsToBeAddedTo.getInt(i);
-				System.out.println("relateCategoriesToItem(): " + aCategoryIdToBeAddedTo + " --> " + iNodeToBeTagged);
-				relateHelper(aCategoryIdToBeAddedTo,iNodeToBeTagged);
+				Integer aCategoryIdToBeAddedTo = theCategoryIdsToBeAddedTo
+						.getInt(i);
+				System.out.println("relateCategoriesToItem(): "
+						+ aCategoryIdToBeAddedTo + " --> " + iNodeToBeTagged);
+				relateHelper(aCategoryIdToBeAddedTo, iNodeToBeTagged);
 			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(new JSONObject().toString()).type("application/json").build();
+					.entity(new JSONObject().toString())
+					.type("application/json").build();
 		}
 
 		/**
@@ -699,8 +728,8 @@ public class Server {
 		@Produces("application/json")
 		public Response relate(@QueryParam("parentId") Integer iNewParentId,
 				@QueryParam("childId") Integer iChildId,
-				@QueryParam("currentParentId") Integer iCurrentParentId) throws JSONException,
-				IOException {
+				@QueryParam("currentParentId") Integer iCurrentParentId)
+				throws JSONException, IOException {
 			// first delete any existing contains relationship with the
 			// specified existing parent (but not with all parents since we
 			// could have a many-to-one contains)
@@ -711,21 +740,22 @@ public class Server {
 
 				execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
 						theParams);
-				System.out.println("Finished trying to delete relationship between "
-						+ iCurrentParentId + " and " + iChildId);
+				System.out
+						.println("Finished trying to delete relationship between "
+								+ iCurrentParentId + " and " + iChildId);
 			}
+			JSONObject theRelateOperationResponseJson;
 			_2: {
 				Map<String, Object> theParamValues = new HashMap<String, Object>();
 				theParamValues.put("childId", iChildId);
 
-				JSONObject theRelateOperationResponseJson = relateHelper(iNewParentId, iChildId);
+				theRelateOperationResponseJson = relateHelper(iNewParentId,
+						iChildId);
 				System.out.println("Finished relating to new category");
 			}
-			// TODO: I think this is pointless. If the relate operation fails an
-			// exception should get thrown so we never reach the below code
-			JSONObject ret = new JSONObject();
 
-			return Response.ok().header("Access-Control-Allow-Origin", "*").entity(ret.toString())
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(theRelateOperationResponseJson.toString())
 					.type("application/json").build();
 		}
 
@@ -737,8 +767,8 @@ public class Server {
 		 *             we try to relate to a newly created category if the
 		 *             system becomes non-deterministic.
 		 */
-		private JSONObject relateHelper(Integer iParentId, Integer iChildId) throws IOException,
-				JSONException {
+		private JSONObject relateHelper(Integer iParentId, Integer iChildId)
+				throws IOException, JSONException {
 			Map<String, Object> theParamValues = new HashMap<String, Object>();
 			_1: {
 				theParamValues.put("parentId", iParentId);
@@ -752,21 +782,24 @@ public class Server {
 		}
 
 		// TODO: make this map immutable
-		private static JSONObject execute(String iCypherQuery, Map<String, Object> iParams)
-				throws IOException, JSONException {
+		private static JSONObject execute(String iCypherQuery,
+				Map<String, Object> iParams) throws IOException, JSONException {
 			WebResource theWebResource = Client.create().resource(CYPHER_URI);
 			Map<String, Object> thePostBody = new HashMap<String, Object>();
 			thePostBody.put("query", iCypherQuery);
 			thePostBody.put("params", iParams);
 			// POST {} to the node entry point URI
-			ClientResponse theResponse = theWebResource.accept(MediaType.APPLICATION_JSON)
+			ClientResponse theResponse = theWebResource
+					.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }")
 					.post(ClientResponse.class, thePostBody);
 			if (theResponse.getStatus() != 200) {
-				System.out.println("failed: " + iCypherQuery + "\tparams: " + iParams);
+				System.out.println("failed: " + iCypherQuery + "\tparams: "
+						+ iParams);
 				throw new RuntimeException();
 			}
-			String theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream());
+			String theNeo4jResponse = IOUtils.toString(theResponse
+					.getEntityInputStream());
 			_1: {
 				System.out.println(theNeo4jResponse);
 				theResponse.getEntityInputStream().close();
@@ -783,7 +816,8 @@ public class Server {
 		@GET
 		@Path("categoriesRecursive")
 		@Produces("application/json")
-		public Response categoriesRecursive(@QueryParam("parentId") Integer iParentId)
+		public Response categoriesRecursive(
+				@QueryParam("parentId") Integer iParentId)
 				throws JSONException, IOException {
 			System.out.println("categoriesRecurisve() - begin");
 			Map<String, Object> theParams = new HashMap<String, Object>();
@@ -805,7 +839,8 @@ public class Server {
 					String title = (String) aBindingArray.get(1);
 					aBindingObject.put("name", title);
 					oKeys.put(aBindingObject);
-					System.out.println("categoriesRecurisve() - " + id + "\t::\t" + title);
+					System.out.println("categoriesRecurisve() - " + id
+							+ "\t::\t" + title);
 				}
 			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -814,7 +849,8 @@ public class Server {
 	}
 
 	public static void main(String[] args) throws URISyntaxException {
-		JdkHttpServerFactory.createHttpServer(new URI("http://localhost:4447/"),
-				new ResourceConfig(HelloWorldResource.class));
+		JdkHttpServerFactory.createHttpServer(
+				new URI("http://localhost:4447/"), new ResourceConfig(
+						HelloWorldResource.class));
 	}
 }
