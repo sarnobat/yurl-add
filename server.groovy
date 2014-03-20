@@ -597,7 +597,7 @@ public class Server {
 
 						System.out.println(v.getVideo().getWeb().toString());
 						System.out.println(v.getVideo().getVideoQuality());
-						v.download();
+						v.download();// If this hangs, make sure you are using vget 1.15. If you use 1.13 I know it hangs
 						System.out
 								.println("downloadVideoInSeparateThread() - Download successful. Updating database");
 
