@@ -51,6 +51,7 @@ public class Server {
 	public static class HelloWorldResource { // Must be public
 
 		private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
+		private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 
 		@GET
 		@Path("parent")
@@ -509,7 +510,6 @@ public class Server {
 						.get("data")).get(0);
 				System.out.println("Got array: " + theNewNodeId);
 				System.out.println(theNewNodeId.get(0));
-				String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 				String id = (String) theNewNodeId.get(0);
 				System.out.println(id);
 				downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH,
@@ -540,7 +540,7 @@ public class Server {
 			JSONObject json = execute(
 					"CREATE (n { title : {title} , url : {url}, created: {created}, ordinal: {ordinal} }) RETURN id(n)",
 					theParamValues);
-			{
+			_2: {
 				JSONArray theNewNodeId = (JSONArray) ((JSONArray) json
 						.get("data")).get(0);
 				System.out.println("New node: " + theNewNodeId.get(0));

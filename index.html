@@ -50,6 +50,8 @@ body{
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
 <script>
+console.debug("begin");
+
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var nodeIdZero = 0;
 var rootId;
@@ -57,31 +59,37 @@ var originalKeyBindings;
 var parentOfRootId;
 var orderedDescending = true;
 
-function tag(nodeId,tagName) {
-	alert(nodeId+"::"+tagName);
-}
-
 function addEmbeddedVideo(id, url) {
-//alert(id + "::" + url);
 	$("#" + id).children().last().append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
 }
 
 $(document).ready(function() {
 
+	console.debug("Determining root");
+
 	////
 	//// Determine the root ID
 	////
 	
-	rootId = $.url().param('rootId')
+	rootId = $.url().param('rootId');
+
+	console.debug("Found root: " + rootId);
+
 	if (rootId == null || rootId == '') {
 		rootId = 45;
 		history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
+		console.debug('added root ID');
 	}
 	parentOfRootId = getParentId(rootId);
 	$("#status").text("Loading")  			
-
-	var rootColor = MD5(rootId).substring(0,6);
+	
+	console.debug('Setting banner color to md5 of ' + rootId);
+	
+	var rootColor = MD5(rootId.toString()).substring(0,6);
+	console.debug('Got substring');
 	$("#rootColor").attr("style", "background-color: #" + rootColor);
+
+	console.debug('About to read limit');
 
 	var limit = $.url().param('limit')
 	if (limit == null) {
@@ -104,35 +112,20 @@ $(document).ready(function() {
 			var color = "";
 			var titlePlusUrl = field.title + field.url;
 			
-//			$("#urls").append("<li id="+field.id+" class='buttonize'>");
-
-
 			var one = $("<td style='background-color:'>1");
-//			$("#" + field.id).append(one);
 			var two = $("<td style='background-color:' >2");
-//			$("#" + field.id).append(two);
 			var three = $("<td style='background-color:'>3");
-//			$("#" + field.id).append(three);
 			var four = $("<td style='background-color:'>4");
 			
-
-//			$("#" + field.id).append(four);
-//			$("#" + field.id).wrapInner("<tr>");
-//			$("#" + field.id).append("<tr><td>Hello world</td></tr>");
-		
-			//$("#" + field.id).wrapInner("<tr>");
-
 			var table = $("<table/>");
 			table.attr('width','100%');
 			var row1 = $("<tr/>");
-			//var col1 = $("<td/>").attr('colspan',3);
 			table.append(row1);
 			row1.append(two);
 			row1.append(three);
 			var row2 = $("<tr/>");
 			table.append(row2);
 			row2.append(one);
-			//row2.append(two);
 			row2.append(four);
 
 
@@ -148,7 +141,6 @@ $(document).ready(function() {
 			}
 			
 			var urlRoot = field.url.replace(/.*:(\/\/[^\/]+).*/ig,"$1");
-			//var colorCode = MD5(urlRoot).substring(0,6);
 			two.append("<font style=\"color: #002366\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font></sub>");
 			
 			var hasScreenshot = false;
