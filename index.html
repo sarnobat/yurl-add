@@ -479,18 +479,22 @@ function tagUrlWithSelections(nodeId) {
 </script>
 </head>
 <body>
-	<a id="up">Up</a>
-	<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
-	<div id=rootColor class="buttonize">&nbsp;
-	</div>
+
 	<table style="width: 100%;table-layout: fixed;">
 		<tr>
 			<td width="25%" valign=top>
+				<a id="up">Up</a>
+				<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
+				<div id=rootColor class="buttonize">&nbsp;
+				<center>
 				<large>
 				<h1><span id="count"></span><br></h1>
 				<h2><span id="category"></span><br></h2>
 				</large>
+				</center>
+				</div>
 				<ol id="keyLinks"  class="buttonize"></ol>
+				<font color=grey><div id="status">Init</div></font>
 				<textarea id="keys" cols="30" rows="20px" class="buttonize"></textarea>
 				<br><br>
 				<div id="categoriesRecursive"  class="buttonize">
@@ -498,7 +502,6 @@ function tagUrlWithSelections(nodeId) {
 				
 			</td>
 			<td width="75%">
-				<font color=grey><div id="status">Init</div></font>
 				<ol id="urls"></ol>
 				<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
 				<div id="batchStatus"></div>
