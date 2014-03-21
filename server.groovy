@@ -934,30 +934,24 @@ public class Yurl {
 		// ----------------------------------------------------------------------------
 		// Read operations
 		// ----------------------------------------------------------------------------
-
-
-		@GET
-		@Path("categoriesRecursiveTree")
-		@Produces("application/json")
-		@Deprecated // This gives a flat list
-		public Response categoriesRecursiveTree(
-				@QueryParam("parentId") Integer iParentId)
-				throws JSONException, IOException {
-			System.out.println("categoriesRecurisveTree() - begin");
-			JSONArray oJsonObject = new JSONArray();
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(oJsonObject.toString()).type("application/json").build();
-			
-		}
 		
 		@GET
 		@Path("categoriesRecursive")
 		@Produces("application/json")
-		@Deprecated // This gives a flat list
 		public Response categoriesRecursive(
 				@QueryParam("parentId") Integer iParentId)
 				throws JSONException, IOException {
 			System.out.println("categoriesRecurisve() - begin");
+			JSONArray oKeys = getFlatListOfSubcategoriesRecursive(iParentId);
+			JSONObject ret = new JSONObject();
+			ret.put("flat", oKeys);
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(ret.toString()).type("application/json").build();
+		}
+
+		@Deprecated // This gives a flat list
+		private JSONArray getFlatListOfSubcategoriesRecursive(Integer iParentId)
+				throws IOException {
 			Map<String, Object> theParams = new HashMap<String, Object>();
 			_1: {
 				theParams.put("parentId", iParentId);
@@ -981,10 +975,7 @@ public class Yurl {
 							+ "\t::\t" + title);
 				}
 			}
-			JSONObject ret = new JSONObject();
-			ret.put("flat", oKeys);
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
+			return oKeys;
 		}
 	}
 
