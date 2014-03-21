@@ -274,7 +274,6 @@ $(document).ready(function() {
 			.success(function() { 
 				removeTop(parentId);
 				$("#list_"+parentId).effect("highlight", null, 4000, function() {});
-				//$("#list_"+parentId).css("font-weight","Bold");
 				var count = parseInt($("#count_"+parentId).text()) + 1;
 				$("#count_"+parentId).text(count);
 				$("#count_"+parentId).css("font-weight","Bold");
