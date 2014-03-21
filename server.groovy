@@ -981,8 +981,10 @@ public class Yurl {
 							+ "\t::\t" + title);
 				}
 			}
+			JSONObject ret = new JSONObject();
+			ret.put("flat", oKeys);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(oKeys.toString()).type("application/json").build();
+					.entity(ret.toString()).type("application/json").build();
 		}
 	}
 

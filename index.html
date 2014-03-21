@@ -310,12 +310,11 @@ $(document).ready(function() {
 	$.getJSON(url, function(result){})
 		.success(
 			function(data) { 
-				  console.debug(data);
-			      $.each(data, function(a,category,c){
+				  console.debug(data.flat);
+			      $.each(data.flat, function(a,category,c){
 						$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"' style='text-transform:capitalize;'>" + category.name + " (" + category.id + ")</a></input>");
 						$("#categoriesRecursive").append("<br>");
 					});
-				//categoriesRecursive
 			}
 		)
 		.error(function() {  })
