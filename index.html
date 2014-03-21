@@ -80,6 +80,11 @@ $(document).ready(function() {
 		history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
 		console.debug('added root ID');
 	}
+	$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
+		$("#count").text(result.count);
+		$("#category").text(result.name);
+	});
+
 	parentOfRootId = getParentId(rootId);
 	$("#status").text("Loading")  			
 	
@@ -273,6 +278,9 @@ $(document).ready(function() {
 				var count = parseInt($("#count_"+parentId).text()) + 1;
 				$("#count_"+parentId).text(count);
 				$("#count_"+parentId).css("font-weight","Bold");
+				var newCount = parseInt($("#count").text());
+				newCount -= 1;
+				$("#count").text(newCount);
 			})
 			.error(function() { alert("error occurred "); })
 			.complete(function() { });
@@ -475,12 +483,15 @@ function tagUrlWithSelections(nodeId) {
 <body>
 	<a id="up">Up</a>
 	<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
-	<div id=rootColor class="buttonize">&nbsp;</div>
-	
+	<div id=rootColor class="buttonize">&nbsp;
+	</div>
 	<table style="width: 100%;table-layout: fixed;">
 		<tr>
 			<td width="25%" valign=top>
-				Key bindings<br>
+				<large>
+				<h1><span id="count"></span><br></h1>
+				<h2><span id="category"></span><br></h2>
+				</large>
 				<ol id="keyLinks"  class="buttonize"></ol>
 				<textarea id="keys" cols="30" rows="20px" class="buttonize"></textarea>
 				<br><br>
