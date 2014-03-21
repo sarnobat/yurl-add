@@ -1,11 +1,15 @@
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.imageio.ImageIO;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -28,6 +33,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -52,6 +58,7 @@ public class Server {
 
 		private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 		private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
+		private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/Unsorted/images/";
 
 		@GET
 		@Path("parent")
@@ -512,8 +519,8 @@ public class Server {
 				System.out.println(theNewNodeId.get(0));
 				String id = (String) theNewNodeId.get(0);
 				System.out.println(id);
-				downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH,
-						CYPHER_URI, id);
+
+				launchAsynchronousTasks(iUrl, id);
 				// TODO: check that it returned successfully (redundant?)
 				System.out.println(newNodeJsonObject.toString());
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -525,6 +532,90 @@ public class Server {
 				e.printStackTrace();
 				return null;
 			}
+		}
+
+		private static void launchAsynchronousTasks(String iUrl, String id) {
+			downloadImageInSeparateThread(iUrl, TARGET_DIR_PATH_IMAGES,
+					CYPHER_URI, id);
+			downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
+		}
+
+		private static void downloadImageInSeparateThread(final String iUrl,
+				final String targetDirPath, final String cypherUri,
+				final String id) {
+
+			Runnable r = new Runnable() {
+				// @Override
+				public void run() {
+					System.out.println("downloadImageInSeparateThread() - "
+							+ iUrl + " :: " + targetDirPath);
+					if (iUrl.toLowerCase().contains(".jpg")) {
+
+					} else if (iUrl.toLowerCase().contains(".jpeg")) {
+
+					} else if (iUrl.toLowerCase().contains(".png")) {
+
+					} else if (iUrl.toLowerCase().contains(".gif")) {
+
+					} else if (iUrl.toLowerCase().contains("gstatic")) {
+
+					} else {
+						System.out
+								.println("downloadImageInSeparateThread() - not an image");
+						return;// not an image
+					}
+					try {
+						System.out
+								.println("downloadImageInSeparateThread() - about to save");
+						saveImage(iUrl, targetDirPath);
+						System.out
+								.println("downloadImageInSeparateThread() - success, updating DB");
+						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_image = {date}",
+								ImmutableMap.<String, Object> of("id",
+										Long.valueOf(id), "url", iUrl, "date",
+										System.currentTimeMillis()));
+						System.out
+								.println("downloadImageInSeparateThread() - DB updated");
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			new Thread(r).start();
+		}
+
+		private static void saveImage(String urlString, String targetDirPath)
+				throws IllegalAccessError, IOException {
+
+			URL url = new URL(urlString);
+			BufferedImage image = ImageIO.read(url);
+			String extension = FilenameUtils.getExtension(urlString);
+			String baseName = FilenameUtils.getBaseName(urlString);
+			System.out.println(baseName);
+			String outputFilename = determineDestinationPathAvoidingExisting(
+					targetDirPath + "/" + baseName + "." + extension)
+					.toString();
+			ImageIO.write(image, extension, new File(outputFilename));
+
+		}
+
+		private static java.nio.file.Path determineDestinationPathAvoidingExisting(
+				String destinationFilePath) throws IllegalAccessError {
+			String destinationFilePathWithoutExtension = destinationFilePath
+					.substring(0, destinationFilePath.lastIndexOf('.'));
+			String extension = FilenameUtils.getExtension(destinationFilePath);
+			java.nio.file.Path destinationFile = Paths.get(destinationFilePath);
+			while (Files.exists(destinationFile)) {
+				destinationFilePathWithoutExtension += "1";
+				destinationFilePath = destinationFilePathWithoutExtension + "."
+						+ extension;
+				destinationFile = Paths.get(destinationFilePath);
+			}
+			if (Files.exists(destinationFile)) {
+				throw new IllegalAccessError(
+						"an existing file will get overwritten");
+			}
+			return destinationFile;
 		}
 
 		private JSONObject createNode(String theHttpUrl, String theTitle,
@@ -597,11 +688,13 @@ public class Server {
 
 						System.out.println(v.getVideo().getWeb().toString());
 						System.out.println(v.getVideo().getVideoQuality());
-						v.download();// If this hangs, make sure you are using vget 1.15. If you use 1.13 I know it hangs
+						v.download();// If this hangs, make sure you are using
+										// vget 1.15. If you use 1.13 I know it
+										// hangs
 						System.out
 								.println("downloadVideoInSeparateThread() - Download successful. Updating database");
 
-						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded = {date}",
+						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
 								ImmutableMap.<String, Object> of("id",
 										Long.valueOf(id), "url", iVideoUrl,
 										"date", System.currentTimeMillis()));
