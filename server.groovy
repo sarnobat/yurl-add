@@ -935,9 +935,25 @@ public class Yurl {
 		// Read operations
 		// ----------------------------------------------------------------------------
 
+
+		@GET
+		@Path("categoriesRecursiveTree")
+		@Produces("application/json")
+		@Deprecated // This gives a flat list
+		public Response categoriesRecursiveTree(
+				@QueryParam("parentId") Integer iParentId)
+				throws JSONException, IOException {
+			System.out.println("categoriesRecurisveTree() - begin");
+			JSONArray oJsonObject = new JSONArray();
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(oJsonObject.toString()).type("application/json").build();
+			
+		}
+		
 		@GET
 		@Path("categoriesRecursive")
 		@Produces("application/json")
+		@Deprecated // This gives a flat list
 		public Response categoriesRecursive(
 				@QueryParam("parentId") Integer iParentId)
 				throws JSONException, IOException {
