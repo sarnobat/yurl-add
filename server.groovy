@@ -33,6 +33,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
@@ -51,6 +52,9 @@ import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.ClientConfig;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.json.JSONConfiguration;
 
 public class Yurl {
 	@Path("yurl")
@@ -908,10 +912,16 @@ public class Yurl {
 		// TODO: make this map immutable
 		private static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams) throws IOException, JSONException {
-			WebResource theWebResource = Client.create().resource(CYPHER_URI);
+			ClientConfig clientConfig = new DefaultClientConfig();
+			clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
+					Boolean.TRUE);
+	
+			WebResource theWebResource = Client.create(clientConfig).resource(
+					CYPHER_URI);
 			Map<String, Object> thePostBody = new HashMap<String, Object>();
 			thePostBody.put("query", iCypherQuery);
 			thePostBody.put("params", iParams);
+	
 			// POST {} to the node entry point URI
 			ClientResponse theResponse = theWebResource
 					.accept(MediaType.APPLICATION_JSON)
@@ -953,9 +963,82 @@ public class Yurl {
 					.entity(ret.toString()).type("application/json").build();
 		}
 
-		private JSONObject getCategoriesTree(Integer rootId) {
-			JSONObject categoriesTree = new JSONObject();
+		private static JSONObject getCategoriesTree(Integer rootId)
+				throws JSONException, IOException {
+			Map<String, Object> theParams = new HashMap<String, Object>();
+			_1: {
+				theParams.put("parentId", rootId);
+			}
+			JSONObject theQueryJsonResult = execute(
+					"start n=node({parentId}) match path=n-[r:CONTAINS*]->c WHERE has(c.name) return extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\"}')",
+					theParams);
+			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult);
 			return categoriesTree;
+		}
+	
+		private static JSONObject createCategoryTreeFromCypherResultPaths(
+				JSONObject theQueryJsonResult) {
+			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
+			MultiValueMap parentToChildren = new MultiValueMap();
+			getParentChildrenMap: {
+				for (int i = 0; i < cypherRawResults.length(); i++) {
+					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
+					for (int j = 0; j < a2.length(); j++) {
+						JSONObject parent = new JSONObject(a2.getString(j));
+						if (j < a2.length() - 1) {
+							JSONObject child = new JSONObject(a2.getString(j + 1));
+							int childId = child.getInt("id");
+							int parentId = checkNotNull(parent.getInt("id"));
+							Object childrenObj = parentToChildren.get(parentId);
+							if (childrenObj != null) {
+								List<?> children = (List<?>) childrenObj;
+								if (!children.contains(childId)) {
+									parentToChildren.put(parentId, childId);
+								}
+							} else {
+								parentToChildren.put(parentId, childId);
+							}
+						}
+					}
+				}
+			}
+			Map<Integer, JSONObject> idToJson = new HashMap<Integer, JSONObject>();
+			getIdToJsonNodeMap: {
+				for (int i = 0; i < cypherRawResults.length(); i++) {
+					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
+					for (int j = 0; j < a2.length(); j++) {
+						JSONObject parent = new JSONObject(a2.getString(j));
+						idToJson.put(parent.getInt("id"), parent);
+					}
+				}
+			}
+	
+			addChildArrayToEachJsonNode: {
+	
+				for (Object parentIdObj : parentToChildren.keySet()) {
+					Integer parentId = (Integer) parentIdObj;
+					JSONObject parentJson = idToJson.get(parentId);
+					parentJson.put("children", new JSONArray());
+				}
+	
+			}
+	
+			connectJsonNodes: {
+				for (Object parentIdObj : parentToChildren.keySet()) {
+					Integer parentId = (Integer) parentIdObj;
+					JSONObject parentJson = idToJson.get(parentId);
+					@SuppressWarnings("unchecked")
+					List<Integer> childrenIds = (List<Integer>) parentToChildren
+							.get(parentId);
+					for (Integer childId : childrenIds) {
+						JSONObject childJson = idToJson.get(childId);
+						parentJson.getJSONArray("children").put(childJson);
+					}
+				}
+			}
+			JSONObject json = idToJson.get(45);
+			System.out.println(json.toString(4));
+			return json;
 		}
 
 		@Deprecated
