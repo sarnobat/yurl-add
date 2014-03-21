@@ -56,6 +56,8 @@ public class Yurl {
 	@Path("yurl")
 	public static class HelloWorldResource { // Must be public
 
+		@Deprecated
+		private static final Integer ROOT_ID = 45;
 		private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 		private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 		private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/Unsorted/images/";
@@ -934,7 +936,7 @@ public class Yurl {
 		// ----------------------------------------------------------------------------
 		// Read operations
 		// ----------------------------------------------------------------------------
-		
+
 		@GET
 		@Path("categoriesRecursive")
 		@Produces("application/json")
@@ -945,11 +947,19 @@ public class Yurl {
 			JSONArray oKeys = getFlatListOfSubcategoriesRecursive(iParentId);
 			JSONObject ret = new JSONObject();
 			ret.put("flat", oKeys);
+			JSONObject categoriesTreeJson = getCategoriesTree(ROOT_ID);
+			ret.put("categoriesTree", categoriesTreeJson);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
 		}
 
-		@Deprecated // This gives a flat list
+		private JSONObject getCategoriesTree(Integer rootId) {
+			JSONObject categoriesTree = new JSONObject();
+			return categoriesTree;
+		}
+
+		@Deprecated
+		// This gives a flat list
 		private JSONArray getFlatListOfSubcategoriesRecursive(Integer iParentId)
 				throws IOException {
 			Map<String, Object> theParams = new HashMap<String, Object>();
