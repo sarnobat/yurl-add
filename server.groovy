@@ -52,7 +52,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
-public class Server {
+public class Yurl {
 	@Path("yurl")
 	public static class HelloWorldResource { // Must be public
 
@@ -258,8 +258,6 @@ public class Server {
 			}
 		}
 
-
-
 		// ------------------------------------------------------------------------------------
 		// Page operations
 		// ------------------------------------------------------------------------------------
@@ -267,31 +265,32 @@ public class Server {
 		@GET
 		@Path("count_non_recursive")
 		@Produces("application/json")
-		public Response countNonRecursive(@QueryParam("rootId") Integer iRootId) {
+		public Response countNonRecursive(@QueryParam("rootId") Integer iRootId)
+				throws Exception {
 			checkNotNull(iRootId);
 			try {
-			Map<String, Object> theParams = new HashMap<String, Object>();
-			theParams.put("rootId", iRootId);
-			JSONObject theQueryResultJson = execute(
-					"start n=node({rootId}) match n-[CONTAINS]->u return n.name, count(u) as cnt",
-					theParams);
-			JSONArray outerArray = (JSONArray)theQueryResultJson.get("data");
-			JSONArray innerArray = (JSONArray)outerArray.get(0);
-			String name = (String)innerArray.get(0);
-			Integer count = (Integer) innerArray.get(1);
-			JSONObject result = new JSONObject();
-			result.put("count", count);
-			result.put("name", name);
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(result.toString())
-					.type("application/json").build();
+				Map<String, Object> theParams = new HashMap<String, Object>();
+				theParams.put("rootId", iRootId);
+				JSONObject theQueryResultJson = execute(
+						"start n=node({rootId}) match n-[CONTAINS]->u return n.name, count(u) as cnt",
+						theParams);
+				JSONArray outerArray = (JSONArray) theQueryResultJson
+						.get("data");
+				JSONArray innerArray = (JSONArray) outerArray.get(0);
+				String name = (String) innerArray.get(0);
+				Integer count = (Integer) innerArray.get(1);
+				JSONObject result = new JSONObject();
+				result.put("count", count);
+				result.put("name", name);
+				return Response.ok().header("Access-Control-Allow-Origin", "*")
+						.entity(result.toString()).type("application/json")
+						.build();
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw e;
 			}
 		}
 
- 
 		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
