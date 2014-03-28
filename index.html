@@ -50,7 +50,6 @@ body{
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
 <script>
-console.debug("begin");
 
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var nodeIdZero = 0;
@@ -65,20 +64,15 @@ function addEmbeddedVideo(id, url) {
 
 $(document).ready(function() {
 
-	console.debug("Determining root");
-
 	////
 	//// Determine the root ID
 	////
 	
 	rootId = $.url().param('rootId');
 
-	console.debug("Found root: " + rootId);
-
 	if (rootId == null || rootId == '') {
 		rootId = 45;
 		history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
-		console.debug('added root ID');
 	}
 	$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
 		$("#count").text(result.count);
@@ -88,13 +82,8 @@ $(document).ready(function() {
 	parentOfRootId = getParentId(rootId);
 	$("#status").text("Loading")  			
 	
-	console.debug('Setting banner color to md5 of ' + rootId);
-	
 	var rootColor = MD5(rootId.toString()).substring(0,6);
-	console.debug('Got substring');
 	$("#rootColor").attr("style", "background-color: #" + rootColor);
-
-	console.debug('About to read limit');
 
 	var limit = $.url().param('limit')
 	if (limit == null) {
@@ -255,7 +244,6 @@ $(document).ready(function() {
 				moveToBottom(idOfTop);
 			}
 			if (String.fromCharCode(event.which) == '<') {
-				console.debug("put back in parent");
 				var parentId = parentOfRootId;
 				var childId = $("#urls").children()[0].id;
 				var currentRootId = rootId;
@@ -311,6 +299,7 @@ $(document).ready(function() {
 		.success(
 			function(data) { 
 				  console.debug(data.categoriesTree);
+				  writeCategoryTree(data.categoriesTree, 0);
 			      $.each(data.flat, function(a,category,c){
 						$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"' style='text-transform:capitalize;'>" + category.name + " (" + category.id + ")</a></input>");
 						$("#categoriesRecursive").append("<br>");
@@ -364,6 +353,24 @@ $(document).ready(function() {
     }
     
 });
+
+function writeCategoryTree(root, level) {
+
+	var indent = "";
+	for (var i = 0; i < level; i++) {
+		indent = indent + "&nbsp;&nbsp;&nbsp;&nbsp;";
+	}
+	$("#categoriesTree").append(indent + "<a href='/yurl/?rootId="+root.id+"' style='text-transform:capitalize;'>"+root.name + "</a>");
+	$("#categoriesTree").append("<br>");
+	
+	if (root.children != null) {
+		$.each(root.children, function(a,b){
+			
+			writeCategoryTree(b, level + 1);
+		});
+	}
+
+}
 
 function moveToTop(source) {
 	var idToMove = source;
@@ -495,6 +502,8 @@ function tagUrlWithSelections(nodeId) {
 				<ol id="keyLinks"  class="buttonize" style="" ></ol>
 				<font color=grey><div id="status">Init</div></font>
 				<textarea id="keys" cols="34" rows="20px" class="buttonize"></textarea>
+				<br><br>
+				<div id="categoriesTree"  class="buttonize">
 				<br><br>
 				<div id="categoriesRecursive"  class="buttonize">
 				</div>
