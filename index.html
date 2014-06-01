@@ -64,6 +64,7 @@ $(document).ready(function() {
 			var two = $("<td style='background-color:' >2");
 			var three = $("<td style='background-color:'>3");
 			var four = $("<td style='background-color:'>4");
+			var five = $("<td style='background-color:'>5");
 			
 			var table = $("<table/>");
 			{
@@ -79,10 +80,9 @@ $(document).ready(function() {
 				{
 					var row2 = $("<tr/>");
 					table.append(row2);
-					row2.append(one);
 					row2.append(four);
+					row2.append(five);
 				}
-	
 	
 				{
 					var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
@@ -160,6 +160,10 @@ $(document).ready(function() {
 				buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
 				buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
 				buttonCell.append("<sub>"+field.id+"</sub>");
+			}
+			
+			{
+				five.append("<input type=button class='genericButton' value='I own this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37373+"), this)'><br>");
 			}
 			
 		});
@@ -429,6 +433,13 @@ function sendBatch() {
 		.complete( function() {} );
 }
 
+function createArrayWithId(id) {
+	var selected = new Array();
+	selected.push(id);
+	return JSON.stringify(selected);
+}
+
+
 function getTagSelections() {
 	var selected = new Array();
 	$('#categoriesRecursive input:checked').each(function() {
@@ -439,13 +450,17 @@ function getTagSelections() {
 
 function tagUrlWithSelections(nodeId) {
 	var selections = getTagSelections();
+	tagUrlWithCategoryIds(nodeId, selections);
+}
+
+function tagUrlWithCategoryIds(nodeId, selections, button) {
 	var url = urlBase + "/relateCategoriesToItem?nodeId=" + nodeId + "&newCategoryIds=" + encodeURIComponent(selections);
 	$.getJSON(url, 
 		function(result){
 		})
 		.success(function(data) {  
-			//alert("success");
-			$("#"+nodeId).remove();
+			//$("#"+nodeId).remove();
+			button.style.cssText = "background-color : green";
 		})
 		.error(function() { 
 			alert("error occurred "); 
@@ -454,6 +469,8 @@ function tagUrlWithSelections(nodeId) {
 		}
 	);
 }
+
+
 
 // TODO: Remove. Unused
 function addEmbeddedVideo(id, url) {
