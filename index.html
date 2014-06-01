@@ -116,7 +116,7 @@ $(document).ready(function() {
 	//// Uncategorized URLs (main part)
 	////
     
-    {
+    getUrls : {
 		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
 			$("#status").text("Populating")
 			$.each(result, function(resultRowNumber, field) {
@@ -255,7 +255,7 @@ $(document).ready(function() {
     // Unfortunately, there is no easy way to get a tree of all category nodes.
     // If this were an enterprise app, I'd go through the extra effort but for a 
     // toy app like this it's not worth the effort.
-    {
+    getCategoriesTree : {
 		var url = urlBase + "/categoriesRecursive?parentId=" + nodeIdZero;
 		$.getJSON(url, function(result){})
 			.success(
@@ -278,31 +278,27 @@ $(document).ready(function() {
     //// Update the key bindings
     ////
     
-    {
+    addKeyBindingsUpdateHandler : {
 		var oldKeyBindings;
 		$("#keys").focus(function() {
 			oldKeyBindings = $.trim($("#keys").val());
 		}).blur(function() {
 			var newKeyBindings = $.trim($("#keys").val());
 			var i = 1;
+			var url;
 			if (oldKeyBindings === newKeyBindings) {
-				//alert("not changed");
 			} else {
-				var url = urlBase + "/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
-				//alert(url);
+				url = urlBase + "/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
 			}
 	
 			$.getJSON(url, function(result){})
 				.success(function(data) {  
-					//alert(data);
 					configureKeyBindings(data);
 				})
-				.error(function() { //alert("error occurred "); 
-				})
+				.error(function() { })
 				.complete(function() { });
 		});
     }
-    
     
 });
 
