@@ -24,7 +24,9 @@ $(document).ready(function() {
 	//// Determine the root ID
 	////
 	{
-		rootId = $.url().param('rootId');
+		{
+			rootId = $.url().param('rootId');
+		}
 	
 		if (rootId == null || rootId == '') {
 			rootId = 45;
@@ -55,12 +57,10 @@ $(document).ready(function() {
 	
 	{
 		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
-		  originalKeyBindings = $.extend(true, {}, result);
-		  configureKeyBindings(result);
-		  categories = result;
-				  
+			originalKeyBindings = $.extend(true, {}, result);
+			configureKeyBindings(result);
+			categories = result;	  
 		});
-	
 	
 		function configureKeyBindings(result) {
 			$.each(result, function(a,binding,c){
