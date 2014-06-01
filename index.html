@@ -55,12 +55,10 @@ $(document).ready(function() {
 	$.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
 		$("#status").text("Populating")
 		$.each(result, function(resultRowNumber, field) {
+		
 			if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
 				return;
 			}
-			// Colors
-			var color = "";
-			var titlePlusUrl = field.title + field.url;
 			
 			var one = $("<td style='background-color:'>1");
 			var two = $("<td style='background-color:' >2");
@@ -68,34 +66,36 @@ $(document).ready(function() {
 			var four = $("<td style='background-color:'>4");
 			
 			var table = $("<table/>");
-			table.attr('width','100%');
-
 			{
-				var row1 = $("<tr/>");
-				table.append(row1);
-				row1.append(two);
-				row1.append(three);
-			}
-
-			{
-				var row2 = $("<tr/>");
-				table.append(row2);
-				row2.append(one);
-				row2.append(four);
-			}
-
-
-			{
-				var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
-				listItem.append(table);
-				$("#urls").append(listItem);
-			}
-
-			{
-				var urlElements = field.url.match(/^http:\/\/[^/]+/);
-				if (urlElements != null) {
-					var site = urlElements[0];
-					two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
+				table.attr('width','100%');
+	
+				{
+					var row1 = $("<tr/>");
+					table.append(row1);
+					row1.append(two);
+					row1.append(three);
+				}
+	
+				{
+					var row2 = $("<tr/>");
+					table.append(row2);
+					row2.append(one);
+					row2.append(four);
+				}
+	
+	
+				{
+					var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
+					listItem.append(table);
+					$("#urls").append(listItem);
+				}
+	
+				{
+					var urlElements = field.url.match(/^http:\/\/[^/]+/);
+					if (urlElements != null) {
+						var site = urlElements[0];
+						two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
+					}
 				}
 			}
 			
@@ -106,40 +106,42 @@ $(document).ready(function() {
 				var hasScreenshot = false;
 				var imageSize = 300;
 				var imageCell = three;
-				if (field.url.match(".jpg\??") || 
-					field.url.match(".gif$") || 
-					field.url.match(".png\??") || 
-					field.url.match("images.q=tbn:")) {
-					imageCell.append("<br><img src="+field.url+" width="+imageSize+">");
-					hasScreenshot = true;
-				}
-				if (field.url.match("youtube.com")) {
-					if (field.url.match("youtube.com/watch")) {
-						var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
-						imageCell.append("<br>");
-						imageCell.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+">");
-						
-						imageCell.append("<br>");
-						imageCell.append("");
-						imageCell.append("");
+				{
+					if (field.url.match(".jpg\??") || 
+						field.url.match(".gif$") || 
+						field.url.match(".png\??") || 
+						field.url.match("images.q=tbn:")) {
+						imageCell.append("<br><img src="+field.url+" width="+imageSize+">");
 						hasScreenshot = true;
 					}
-					
-				} else if (field.url.match("dailymotion.com/video")) {
-						var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+					if (field.url.match("youtube.com")) {
+						if (field.url.match("youtube.com/watch")) {
+							var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
+							imageCell.append("<br>");
+							imageCell.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+">");
+							
+							imageCell.append("<br>");
+							imageCell.append("");
+							imageCell.append("");
+							hasScreenshot = true;
+						}
+						
+					} else if (field.url.match("dailymotion.com/video")) {
+							var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+							imageCell.append("<br>");
+							imageCell.append("<img src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+">");
+							imageCell.append("<br>");
+							imageCell.append("");
+							imageCell.append("");
+							hasScreenshot = true;
+						
+					} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
 						imageCell.append("<br>");
-						imageCell.append("<img src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+">");
-						imageCell.append("<br>");
-						imageCell.append("");
-						imageCell.append("");
+						var asin = field.url.replace(/.+dp\/([^\/]+)\/?.*/,'$1');
+						var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+						imageCell.append("<img src='"+productImageUrl+"' height='280'>");
 						hasScreenshot = true;
-					
-				} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
-					imageCell.append("<br>");
-					var asin = field.url.replace(/.+dp\/([^\/]+)\/?.*/,'$1');
-					var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
-					imageCell.append("<img src='"+productImageUrl+"' height='280'>");
-					hasScreenshot = true;
+					}
 				}
 				
 				if (!hasScreenshot) {
