@@ -102,47 +102,49 @@ $(document).ready(function() {
 			var urlRoot = field.url.replace(/.*:(\/\/[^\/]+).*/ig,"$1");
 			two.append("<font style=\"color: #002366\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font></sub>");
 			
-			var hasScreenshot = false;
-			var imageSize = 300;
-			var imageCell = three;
-			if (field.url.match(".jpg\??") || 
-				field.url.match(".gif$") || 
-				field.url.match(".png\??") || 
-				field.url.match("images.q=tbn:")) {
-				imageCell.append("<br><img src="+field.url+" width="+imageSize+">");
-				hasScreenshot = true;
-			}
-			if (field.url.match("youtube.com")) {
-				if (field.url.match("youtube.com/watch")) {
-					var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
-					imageCell.append("<br>");
-					imageCell.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+">");
+			{
+				var hasScreenshot = false;
+				var imageSize = 300;
+				var imageCell = three;
+				if (field.url.match(".jpg\??") || 
+					field.url.match(".gif$") || 
+					field.url.match(".png\??") || 
+					field.url.match("images.q=tbn:")) {
+					imageCell.append("<br><img src="+field.url+" width="+imageSize+">");
+					hasScreenshot = true;
+				}
+				if (field.url.match("youtube.com")) {
+					if (field.url.match("youtube.com/watch")) {
+						var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
+						imageCell.append("<br>");
+						imageCell.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+">");
+						
+						imageCell.append("<br>");
+						imageCell.append("");
+						imageCell.append("");
+						hasScreenshot = true;
+					}
 					
+				} else if (field.url.match("dailymotion.com/video")) {
+						var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+						imageCell.append("<br>");
+						imageCell.append("<img src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+">");
+						imageCell.append("<br>");
+						imageCell.append("");
+						imageCell.append("");
+						hasScreenshot = true;
+					
+				} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
 					imageCell.append("<br>");
-					imageCell.append("");
-					imageCell.append("");
+					var asin = field.url.replace(/.+dp\/([^\/]+)\/?.*/,'$1');
+					var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+					imageCell.append("<img src='"+productImageUrl+"' height='280'>");
 					hasScreenshot = true;
 				}
 				
-			} else if (field.url.match("dailymotion.com/video")) {
-					var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
-					imageCell.append("<br>");
-					imageCell.append("<img src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+">");
-					imageCell.append("<br>");
-					imageCell.append("");
-					imageCell.append("");
-					hasScreenshot = true;
-				
-			} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
-				imageCell.append("<br>");
-				var asin = field.url.replace(/.+dp\/([^\/]+)\/?.*/,'$1');
-				var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
-				imageCell.append("<img src='"+productImageUrl+"' height='280'>");
-				hasScreenshot = true;
-			}
-			
-			if (!hasScreenshot) {
-				imageCell.append("<img src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" /><br>");
+				if (!hasScreenshot) {
+					imageCell.append("<img src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" /><br>");
+				}
 			}
 
 			var buttonCell = two;
