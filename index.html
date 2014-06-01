@@ -508,6 +508,11 @@ function drawVisualization(data) {
 		Edge: {
 			overridable: true,
 		},
+		Label: {  
+			type: 'Native', //Native or HTML  
+			size: 10,  
+			style: 'bold'  
+		  },
 	});
 
 	var listOfNodes =
@@ -587,10 +592,11 @@ function addNodes(data, listOfNodes) {
 		var category = data.children[i];
 		listOfNodes.push({ 
 			id : category.id,
+			name : category.name,
 			data : {
-			"$color"		:	"#C74243",
+			"$color"		:	"yellow",
 			"$type"			:	"square",
-			"$dim"			: 	7
+			"$dim"			: 	4
 			},
 			adjacencies : getAdjacencies(category),
 		});
