@@ -253,22 +253,23 @@ $(document).ready(function() {
     // Unfortunately, there is no easy way to get a tree of all category nodes.
     // If this were an enterprise app, I'd go through the extra effort but for a 
     // toy app like this it's not worth the effort.
-    
-	var url = urlBase + "/categoriesRecursive?parentId=" + nodeIdZero;
-	$.getJSON(url, function(result){})
-		.success(
-			function(data) { 
-				  console.debug(data.categoriesTree);
-				  writeCategoryTree(data.categoriesTree, 0);
-			      $.each(data.flat, function(a,category,c){
-						$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"' style='text-transform:capitalize;'>" + category.name + " (" + category.id + ")</a></input>");
-						$("#categoriesRecursive").append("<br>");
-					});
-			}
-		)
-		.error(function() {  })
-		.complete(function() {  }
-	);
+    {
+		var url = urlBase + "/categoriesRecursive?parentId=" + nodeIdZero;
+		$.getJSON(url, function(result){})
+			.success(
+				function(data) { 
+					  console.debug(data.categoriesTree);
+					  writeCategoryTree(data.categoriesTree, 0);
+					  $.each(data.flat, function(a,category,c){
+							$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"' style='text-transform:capitalize;'>" + category.name + " (" + category.id + ")</a></input>");
+							$("#categoriesRecursive").append("<br>");
+						});
+				}
+			)
+			.error(function() {  })
+			.complete(function() {  }
+		);
+	}
 
 
 	////
