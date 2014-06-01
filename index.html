@@ -41,7 +41,7 @@ $(document).ready(function() {
 			});
 		}
 	
-		parentOfRootId = getParentId(rootId);
+		setParentOfRootId(rootId);
 		
 		showLoading : {
 			$("#status").text("Loading")  			
@@ -479,7 +479,7 @@ function tagUrlWithCategoryIds(nodeId, selections, button) {
 	);
 }
 
-function getParentId(nodeId) {    	
+function setParentOfRootId(nodeId) {    	
 	$.getJSON(urlBase + "/parent?nodeId=" + nodeId, function(result){
 	})
 	.success(function(data) {  
