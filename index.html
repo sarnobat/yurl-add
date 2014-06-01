@@ -549,7 +549,7 @@ function drawVisualization(data) {
 		}
 		
 		
-		listOfNodes = [{
+		lon = [{
 		
 			id:45,
 			data : {
@@ -560,21 +560,9 @@ function drawVisualization(data) {
 			adjacencies : adjacenciesList
 		}];
 		
-		var children = data.children;
-		{
-			for (var i = 1; i < children.length; i++) {
-				var category = children[i];
-				listOfNodes.push({ 
-					id : category.id,
-					data : {
-					"$color"		:	"#C74243",
-					"$type"			:	"square",
-					"$dim"			: 	7
-					},
-					adjacencies : getAdjacencies(category),
-				});
-			}
-		}
+		var listOfNodes = lon;
+		addNodes(data, listOfNodes);
+		
 		
 	}
 
@@ -589,6 +577,26 @@ function drawVisualization(data) {
 			});
 		}
 	});
+}
+
+function addNodes(data, listOfNodes) {
+	if (data.children == null) {
+		return;
+	}
+	for (var i = 1; i < data.children.length; i++) {
+		var category = data.children[i];
+		listOfNodes.push({ 
+			id : category.id,
+			data : {
+			"$color"		:	"#C74243",
+			"$type"			:	"square",
+			"$dim"			: 	7
+			},
+			adjacencies : getAdjacencies(category),
+		});
+		
+		addNodes(category, listOfNodes);
+	}
 }
 
 function getAdjacencies(category) {
