@@ -212,9 +212,13 @@ $(document).ready(function() {
 			.success(function() { 
 				removeTop(parentId);
 				$("#list_"+parentId).effect("highlight", null, 4000, function() {});
+				
+				// Change the destination category count
 				var count = parseInt($("#count_"+parentId).text()) + 1;
 				$("#count_"+parentId).text(count);
 				$("#count_"+parentId).css("font-weight","Bold");
+				
+				// Decrement the number of items in this category that is displayed
 				var newCount = parseInt($("#count").text());
 				newCount -= 1;
 				$("#count").text(newCount);
@@ -223,6 +227,7 @@ $(document).ready(function() {
 			.complete(function() { });
 	  }
 
+	  // This part just performs frontend changes, nothing backend
 	  function removeTop(parentId) {
 	  	var target;
 	  	if (parentId == parentOfRootId) {
@@ -231,8 +236,8 @@ $(document).ready(function() {
 	  		target = "#list_"+parentId;
 	  	}
 		var options = { to: target, className: "ui-effects-transfer" };
-		$($("#urls").children()[0]).effect('transfer',options,500,function() { 
-			$($("#urls").children()[0]).effect( "blind",null, 100, function() { $(this).remove(); });
+		$($("#urls").children()[0]).effect('transfer',options,50,function() { 
+			$($("#urls").children()[0]).effect( "blind",null, 10, function() { $(this).remove(); });
 		});
 	  	
 	  }
