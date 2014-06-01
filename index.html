@@ -63,7 +63,7 @@ $(document).ready(function() {
 	////
 	var categories;
 	
-	getCategoriesAndConfigureKeyBindings : {
+	setCategoriesAndConfigureKeyBindings : {
 		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
 			var originalKeyBindings = $.extend(true, {}, result);// TODO: what does this do?
 			categories = result;	  
@@ -228,6 +228,7 @@ $(document).ready(function() {
 				{
 					var categoryButtons = four;
 					
+					// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set.
 					$.each(categories, function(a,binding,c){
 						four.append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
 					});
