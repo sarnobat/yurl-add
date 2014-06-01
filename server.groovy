@@ -628,11 +628,14 @@ public class Yurl {
 			String extension = FilenameUtils.getExtension(urlString);
 			String baseName = FilenameUtils.getBaseName(urlString);
 			System.out.println(baseName);
+			String decoded = URLDecoder.decode(baseName, "UTF-8");
 			String outputFilename = determineDestinationPathAvoidingExisting(
-					targetDirPath + "/" + baseName + "." + extension)
+					targetDirPath + "/" + decoded + "." + extension)
 					.toString();
-String outputFilenameDecoded = java.net.URLDecoder.decode(outputFilename, "UTF-8");
-			ImageIO.write(image, extension, new File(outputFilenameDecoded));
+System.out.println("saveImage() About to decode");
+//String outputFilenameDecoded = java.net.URLDecoder.decode(outputFilename, "UTF-8");
+System.out.println(outputFilename);
+			ImageIO.write(image, extension, new File(outputFilename));
 
 		}
 
