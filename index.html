@@ -309,7 +309,7 @@ function relate(parentId, childId, currentRootId) {
 	//
 	$.getJSON(url, function(result){})
 		.success(function() { 
-			removeTop(parentId);
+			removeTop(parentId, childId);
 			$("#list_"+parentId).effect("highlight", null, 4000, function() {});
 			
 			// Change the destination category count
@@ -327,7 +327,7 @@ function relate(parentId, childId, currentRootId) {
 }
 
 // This part just performs frontend changes, nothing backend
-function removeTop(parentId) {
+function removeTop(parentId, childId) {
 	var target;
 	if (parentId == parentOfRootId) {
 		target = "#up";
@@ -335,8 +335,8 @@ function removeTop(parentId) {
 		target = "#list_"+parentId;
 	}
 	var options = { to: target, className: "ui-effects-transfer" };
-	$($("#urls").children()[0]).effect('transfer',options,50,function() { 
-		$($("#urls").children()[0]).effect( "blind",null, 10, function() { $(this).remove(); });
+	$($("#" + childId)).effect('transfer',options,50,function() { // !!!!!!!! TODO : Wrong. remove the one specified by child ID
+		$($("#" + childId)).effect( "blind",null, 10, function() { $(this).remove(); });
 	});	
 }
   
