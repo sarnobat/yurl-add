@@ -510,7 +510,7 @@ function drawVisualization(data) {
 		},
 		Label: {  
 			type: 'Native', //Native or HTML  
-			size: 10,  
+			size: 5,  
 			style: 'bold'  
 		  },
 		Navigation: {  
@@ -543,7 +543,7 @@ function drawVisualization(data) {
 		}];
 		
 		var listOfNodes = lon;
-		addNodes(data, listOfNodes);
+		addNodes(data, listOfNodes, 0);
 		
 		
 	}
@@ -559,27 +559,59 @@ function drawVisualization(data) {
 			});
 		}
 	});
+	 
 }
 
-function addNodes(data, listOfNodes) {
+function addNodes(data, listOfNodes, level1) {
 	if (data.children == null) {
 		return;
 	}
-	for (var i = 1; i < data.children.length; i++) {
+	++level1;
+	for (var i = 0; i < data.children.length; i++) {
 		var category = data.children[i];
 		listOfNodes.push({ 
 			id : category.id,
 			name : category.name,
+			"level" : level1,
 			data : {
-			"$color"		:	"yellow",
-			"$type"			:	"square",
-			"$dim"			: 	4
+				"$color"		:	getColorForLevel(level1),
+				"$type"			:	getShapeForLevel(level1),
+				"$dim"			: 	4
 			},
 			adjacencies : getAdjacencies(category),
 		});
 		
-		addNodes(category, listOfNodes);
+		addNodes(category, listOfNodes, level1);
 	}
+}
+
+
+function getColorForLevel(level) {
+	if (level == 1) {
+		return "red";
+	}
+	if (level == 2) {
+		return "green";
+	}
+	if (level == 3) {
+		return "blue";
+	}
+	return "yellow";
+	
+}
+
+function getShapeForLevel(level) {
+	if (level == 1) {
+		return "star";
+	}
+	if (level == 2) {
+		return "square";
+	}
+	if (level == 3) {
+		return "triangle";
+	}
+	return "circle";
+	
 }
 
 function getAdjacencies(category) {
