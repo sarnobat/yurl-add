@@ -17,7 +17,16 @@ var rootId;
 var parentOfRootId;
 var orderedDescending = true;
 
-$(document).ready(function() {
+$(document).ready(showLinks({}));
+
+function getBiggestImages() {
+	$.getJSON("http://localhost:3000/biggestImages", function(result){
+				//alert(JSON.stringify(result));
+				showLinks(result);
+			});
+}
+
+function showLinks(biggestImages) {
 
 	////
 	//// Determine the root ID
@@ -209,6 +218,7 @@ $(document).ready(function() {
 					
 					if (!hasScreenshot) {
 						imageCell.append("<img src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" /><br>");
+						imageCell.append("<img src=\""+ biggestImages[field.url] +"\" class='screenshot' width="+imageSize+" /><br>");
 					}
 				}
 	
@@ -305,7 +315,7 @@ $(document).ready(function() {
 		});
     }
     
-});
+}
 
 function relate(parentId, childId, currentRootId) {
 	var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;	
