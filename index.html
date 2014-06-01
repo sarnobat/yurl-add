@@ -1,50 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<style>
-    .ui-effects-transfer { border: 2px dotted gray; }
-
-body{
-	font-family:Verdana; font-size: 12px;
-	//text-shadow:4px 4px #eeeeee;
-	background-color:#eeeeee
-}
-
-.genericButton {
-	background-color: #FDFD96;
-}
-
-
-.buttonize {
-	//padding:20px;
-	margin:25px;
-	border-radius: 15px;
-	box-shadow:
-		inset 0 0 9px #222222, 
-		10px 10px 14px #999999;// internal and external shadow
-	background-color:#fafafa
-}
-
-.screenshot {
-	padding:0px;
-	margin:0px;
-	border-radius: 15px;
-	box-shadow:
-		inset 0 0 9px #222222, 
-		0px 0px 0px #999999;// internal and external shadow
-	background-color:#fafafa
-}
-</style>
-<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"><script> -->
-
-
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
-<!--
-<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>-->
 <script src="jquery/jquery-1.9.1.js"></script>
 <script src="jquery/jquery-ui.js"></script>
-
 
 <script type="text/javascript" src="jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
@@ -57,10 +17,6 @@ var rootId;
 var originalKeyBindings;
 var parentOfRootId;
 var orderedDescending = true;
-
-function addEmbeddedVideo(id, url) {
-	$("#" + id).children().last().append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
-}
 
 $(document).ready(function() {
 
@@ -178,12 +134,9 @@ $(document).ready(function() {
 				imageCell.append("<img src='"+productImageUrl+"' height='280'>");
 				hasScreenshot = true;
 			}
-
 			
-						
 			if (!hasScreenshot) {
 				imageCell.append("<img src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" /><br>");
-				//three.append("<img src=\"http://images.shrinktheweb.com/xino.php?stwembed=1&stwaccesskeyid=82fb36a7ba73189&stwsize=xlg&stwurl="+encodeURIComponent(field.url)+"\" align=right width=200 />");
 			}
 
 			var buttonCell = two;
@@ -197,8 +150,7 @@ $(document).ready(function() {
 			buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
 			buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
 			buttonCell.append("<sub>"+field.id+"</sub>");
-
-
+			
 		});
 		$("#status").text("Done")
 	});
@@ -291,7 +243,7 @@ $(document).ready(function() {
     //// Get all recursive categories bindings
     ////
     
-    // unfortunately, there is no easy way to get a tree of all category nodes.
+    // Unfortunately, there is no easy way to get a tree of all category nodes.
     // If this were an enterprise app, I'd go through the extra effort but for a 
     // toy app like this it's not worth the effort.
     
@@ -356,7 +308,6 @@ $(document).ready(function() {
 });
 
 function writeCategoryTree(root, level) {
-
 	var indent = "";
 	for (var i = 0; i < level; i++) {
 		indent = indent + "&nbsp;&nbsp;&nbsp;&nbsp;";
@@ -370,7 +321,6 @@ function writeCategoryTree(root, level) {
 			writeCategoryTree(b, level + 1);
 		});
 	}
-
 }
 
 function moveToTop(source) {
@@ -486,42 +436,88 @@ function tagUrlWithSelections(nodeId) {
 	);
 }
 
+// TODO: Remove. Unused
+function addEmbeddedVideo(id, url) {
+	$("#" + id).children().last().append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
+}
+
+
 </script>
+<style>
+.ui-effects-transfer { border: 2px dotted gray; }
+
+body{
+	font-family:Verdana; font-size: 12px;
+	//text-shadow:4px 4px #eeeeee;
+	background-color:#eeeeee
+}
+
+.genericButton {
+	background-color: #FDFD96;
+}
+
+
+.buttonize {
+	//padding:20px;
+	margin:25px;
+	border-radius: 15px;
+	box-shadow:
+		inset 0 0 9px #222222, 
+		10px 10px 14px #999999;// internal and external shadow
+	background-color:#fafafa
+}
+
+.screenshot {
+	padding:0px;
+	margin:0px;
+	border-radius: 15px;
+	box-shadow:
+		inset 0 0 9px #222222, 
+		0px 0px 0px #999999;// internal and external shadow
+	background-color:#fafafa
+}
+</style>
 </head>
 <body>
 
-	<table style="width: 100%;table-layout: fixed;">
-		<tr>
-			<td width="25%" valign=top>
-				<a id="up">Up</a>
-				<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
-				<div id=rootColor class="buttonize">
-					<center>
-						<br><h2><span id="category"></span>(<span id="count"></span>)<br></h2><br>
-					</center>
-				</div>
-				<ol id="keyLinks"  class="buttonize" style="" ></ol>
-				<font color=grey><div id="status">Init</div></font>
-				<textarea id="keys" cols="34" rows="20px" class="buttonize"></textarea>
-				<br><br>
-				<div id="categoriesTree"  class="buttonize">
-				<br><br>
-				<div id="categoriesRecursive"  class="buttonize">
-				</div>
-				
-			</td>
-			<td width="75%">
-				<ol id="urls"></ol>
-				<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
-				<div id="batchStatus"></div>
-				<textarea id="urlBatchToSend" rows="20" cols="100"></textarea>
-			</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td>
-			</td>
+	<table>
+		<tr><td>
+			<div id="queue"></div>
 		</td>
-	</table>
+			<table style="width: 100%;table-layout: fixed;">
+				<tr>
+					<td width="25%" valign=top>
+						<a id="up">Up</a>
+						<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
+						<div id=rootColor class="buttonize">
+							<center>
+								<br><h2><span id="category"></span>(<span id="count"></span>)<br></h2><br>
+							</center>
+						</div>
+						<ol id="keyLinks"  class="buttonize" style="" ></ol>
+						<font color=grey><div id="status">Init</div></font>
+						<textarea id="keys" cols="34" rows="20px" class="buttonize"></textarea>
+						<br><br>
+						<div id="categoriesTree"  class="buttonize">
+						<br><br>
+						<div id="categoriesRecursive"  class="buttonize">
+						</div>
+						
+					</td>
+					<td width="75%">
+						<ol id="urls"></ol>
+						<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
+						<div id="batchStatus"></div>
+						<textarea id="urlBatchToSend" rows="20" cols="100"></textarea>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+					</td>
+				</td>
+			</table>	
+		</td></tr>
+	<table>
 </body>
 </html>
