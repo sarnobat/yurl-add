@@ -69,24 +69,34 @@ $(document).ready(function() {
 			
 			var table = $("<table/>");
 			table.attr('width','100%');
-			var row1 = $("<tr/>");
-			table.append(row1);
-			row1.append(two);
-			row1.append(three);
-			var row2 = $("<tr/>");
-			table.append(row2);
-			row2.append(one);
-			row2.append(four);
+
+			{
+				var row1 = $("<tr/>");
+				table.append(row1);
+				row1.append(two);
+				row1.append(three);
+			}
+
+			{
+				var row2 = $("<tr/>");
+				table.append(row2);
+				row2.append(one);
+				row2.append(four);
+			}
 
 
-			var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
-			listItem.append(table);
-			$("#urls").append(listItem);
+			{
+				var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
+				listItem.append(table);
+				$("#urls").append(listItem);
+			}
 
-			var urlElements = field.url.match(/^http:\/\/[^/]+/);
-			if (urlElements != null) {
-				var site = urlElements[0];
-				two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
+			{
+				var urlElements = field.url.match(/^http:\/\/[^/]+/);
+				if (urlElements != null) {
+					var site = urlElements[0];
+					two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
+				}
 			}
 			
 			var urlRoot = field.url.replace(/.*:(\/\/[^\/]+).*/ig,"$1");
