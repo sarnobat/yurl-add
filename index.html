@@ -65,7 +65,7 @@ $(document).ready(function() {
 	////
 	var categories;
 	
-	{
+	getCategoriesAndConfigureKeyBindings : {
 		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
 			originalKeyBindings = $.extend(true, {}, result);
 			categories = result;	  
