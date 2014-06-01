@@ -90,21 +90,21 @@ $(document).ready(function() {
 					$("#urls").append(listItem);
 				}
 	
-				{
-					var urlElements = field.url.match(/^http:\/\/[^/]+/);
-					if (urlElements != null) {
-						var site = urlElements[0];
-						two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
-					}
-				}
 			}
 			
-			two.append("<font style=\"color: #002366\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font></sub>");
+			{
+				var urlElements = field.url.match(/^http:\/\/[^/]+/);
+				if (urlElements != null) {
+					var site = urlElements[0];
+					two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
+				}
+				two.append("<font style=\"color: #002366\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font></sub>");
+			}
 			
 			{
+				var imageCell = three;
 				var hasScreenshot = false;
 				var imageSize = 300;
-				var imageCell = three;
 				{
 					if (field.url.match(".jpg\??") || 
 						field.url.match(".gif$") || 
