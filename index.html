@@ -68,8 +68,8 @@ $(document).ready(function() {
 	{
 		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
 			originalKeyBindings = $.extend(true, {}, result);
-			configureKeyBindings(result);
 			categories = result;	  
+			configureKeyBindings(categories);
 		});
 	
 		function configureKeyBindings(result) {
