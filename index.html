@@ -9,6 +9,7 @@
 <script type="text/javascript" src="jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
+
 <script>
 
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
@@ -260,7 +261,11 @@ $(document).ready(function() {
 		$.getJSON(url, function(result){})
 			.success(
 				function(data) { 
+					  
 					  console.debug(data.categoriesTree);
+					  
+					  drawVisualization(data.categoriesTree);
+					  
 					  writeCategoryTree(data.categoriesTree, 0);
 					  $.each(data.flat, function(a,category,c){
 							$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"' style='text-transform:capitalize;'>" + category.name + " (" + category.id + ")</a></input>");
@@ -493,6 +498,109 @@ function setParentOfRootId(nodeId) {
 	.complete(function() { });
 }
 
+function drawVisualization(data) {
+	var ua = navigator.userAgent;
+	var forceDirectedGraph = new $jit.ForceDirected({
+		injectInto: 'infovis',
+		Node: {
+			overridable: true
+		},
+		Edge: {
+			overridable: true,
+		},
+	});
+
+	var listOfNodes =
+	[
+
+
+		{
+			"id"			: 	"graphnode16",
+			"data"			:	{
+									"$color"		:	"#C74243",
+									"$type"			:	"star",
+									"$dim"			: 	17
+								},
+			"adjacencies"	:	[
+									{
+										"nodeTo"	:	"graphnode17",
+									},
+									{
+										"nodeTo"	:	"graphnode18",
+									}
+								],
+		},
+
+		{
+			"id"			: 	"graphnode18",
+			"data"			:	{
+									"$color"		:	"blue",
+									"$type"			:	"square",
+									"$dim"			: 	7
+								},
+		}
+
+  ];
+  
+	{
+		var adjacenciesList = [];
+		for (var i = 0; i < data.children.length; i++) {
+			adjacenciesList[i] = { "nodeTo" : data.children[i].id };
+		}
+		
+		
+		listOfNodes = [{
+		
+			id:45,
+			data : {
+				"$color"		:	"#C74243",
+				"$type"			:	"star",
+				"$dim"			: 	17
+			},
+			adjacencies : adjacenciesList
+		}];
+		
+		var children = data.children;
+		{
+			for (var i = 1; i < children.length; i++) {
+				var category = children[i];
+				listOfNodes.push({ 
+					id : category.id,
+					data : {
+					"$color"		:	"#C74243",
+					"$type"			:	"square",
+					"$dim"			: 	7
+					},
+					adjacencies : getAdjacencies(category),
+				});
+			}
+		}
+		
+	}
+
+	console.debug("List of nodes...");
+	console.debug(listOfNodes);
+	
+	forceDirectedGraph.loadJSON(listOfNodes); 
+
+	forceDirectedGraph.computeIncremental({
+		onComplete: function(){
+			forceDirectedGraph.animate({
+			});
+		}
+	});
+}
+
+function getAdjacencies(category) {
+	var adjacenciesList = [];
+	
+	if (category.children !=null) {
+		for (var i = 0; i < category.children.length; i++) {
+			adjacenciesList[i] = { "nodeTo" : category.children[i].id };
+		}
+	}
+	return adjacenciesList;
+}
 
 // TODO: Remove. Unused
 function addEmbeddedVideo(id, url) {
@@ -535,13 +643,17 @@ body{
 	background-color:#fafafa
 }
 </style>
+
+<script language="javascript" type="text/javascript" src="http://philogb.github.io/jit/static/v20/Jit//jit-yc.js"></script>
+<link type="text/css" href="http://philogb.github.io/jit/static/v20/Jit/Examples/css/base.css" rel="stylesheet" />
+
 </head>
 <body>
 
 	<table>
 		<tr><td>
 			<div id="queue"></div>
-		</td>
+		</td><td>
 			<table style="width: 100%;table-layout: fixed;">
 				<tr>
 					<td width="25%" valign=top>
@@ -563,6 +675,7 @@ body{
 						
 					</td>
 					<td width="75%">
+						<div id="infovis" style="background-color : black"></div>    
 						<ol id="urls"></ol>
 						<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
 						<div id="batchStatus"></div>
