@@ -28,21 +28,31 @@ $(document).ready(function() {
 			rootId = $.url().param('rootId');
 		}
 	
-		if (rootId == null || rootId == '') {
-			rootId = 45;
-			history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
+		updateURL: {
+			if (rootId == null || rootId == '') {
+				rootId = 45;
+				history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
+			}
 		}
-		$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
-			$("#count").text(result.count);
-			$("#category").text(result.name);
-			document.title = result.name + " (yurl)";
-		});
+		
+		setCountAndTitle: {
+			$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
+				$("#count").text(result.count);
+				$("#category").text(result.name);
+				document.title = result.name + " (yurl)";
+			});
+		}
 	
 		parentOfRootId = getParentId(rootId);
-		$("#status").text("Loading")  			
 		
-		var rootColor = MD5(rootId.toString()).substring(0,6);
-		$("#rootColor").attr("style", "background-color: #" + rootColor);
+		showLoading : {
+			$("#status").text("Loading")  			
+		}
+
+		setColorForCategory : {		
+			var rootColor = MD5(rootId.toString()).substring(0,6);
+			$("#rootColor").attr("style", "background-color: #" + rootColor);
+		}
 	
 		var limit = $.url().param('limit')
 		if (limit == null) {
