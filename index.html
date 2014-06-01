@@ -12,9 +12,8 @@
 <script>
 
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
-var nodeIdZero = 0;
 var rootId;
-var originalKeyBindings;
+
 var parentOfRootId;
 var orderedDescending = true;
 
@@ -67,7 +66,7 @@ $(document).ready(function() {
 	
 	getCategoriesAndConfigureKeyBindings : {
 		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
-			originalKeyBindings = $.extend(true, {}, result);
+			var originalKeyBindings = $.extend(true, {}, result);// TODO: what does this do?
 			categories = result;	  
 			configureKeyBindings(categories);
 		});
@@ -255,6 +254,7 @@ $(document).ready(function() {
     // Unfortunately, there is no easy way to get a tree of all category nodes.
     // If this were an enterprise app, I'd go through the extra effort but for a 
     // toy app like this it's not worth the effort.
+    var nodeIdZero = 0;
     getCategoriesTree : {
 		var url = urlBase + "/categoriesRecursive?parentId=" + nodeIdZero;
 		$.getJSON(url, function(result){})
