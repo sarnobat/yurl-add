@@ -52,6 +52,7 @@ $(document).ready(function() {
 	//// Get the key bindings and categories (non-recursive)
 	////
 	var categories;
+	
   	$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
   	  originalKeyBindings = $.extend(true, {}, result);
   	  configureKeyBindings(result);
@@ -274,28 +275,30 @@ $(document).ready(function() {
     //// Update the key bindings
     ////
     
-    var oldKeyBindings;
-    $("#keys").focus(function() {
-    	oldKeyBindings = $.trim($("#keys").val());
-    }).blur(function() {
-    	var newKeyBindings = $.trim($("#keys").val());
-    	var i = 1;
-    	if (oldKeyBindings === newKeyBindings) {
-    		//alert("not changed");
-    	} else {
-			var url = urlBase + "/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
-    		//alert(url);
-    	}
-
-		$.getJSON(url, function(result){})
-			.success(function(data) {  
-				//alert(data);
-				configureKeyBindings(data);
-			})
-			.error(function() { //alert("error occurred "); 
-			})
-			.complete(function() { });
-    });
+    {
+		var oldKeyBindings;
+		$("#keys").focus(function() {
+			oldKeyBindings = $.trim($("#keys").val());
+		}).blur(function() {
+			var newKeyBindings = $.trim($("#keys").val());
+			var i = 1;
+			if (oldKeyBindings === newKeyBindings) {
+				//alert("not changed");
+			} else {
+				var url = urlBase + "/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
+				//alert(url);
+			}
+	
+			$.getJSON(url, function(result){})
+				.success(function(data) {  
+					//alert(data);
+					configureKeyBindings(data);
+				})
+				.error(function() { //alert("error occurred "); 
+				})
+				.complete(function() { });
+		});
+    }
     
     function getParentId(nodeId) {    	
 		$.getJSON(urlBase + "/parent?nodeId=" + nodeId, function(result){
@@ -313,7 +316,7 @@ $(document).ready(function() {
     
 });
 
- function relate(parentId, childId, currentRootId) {
+function relate(parentId, childId, currentRootId) {
 	var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;	
 	//
 	// The main part
@@ -335,10 +338,10 @@ $(document).ready(function() {
 		})
 		.error(function() { alert("error occurred "); })
 		.complete(function() { });
-  }
+}
 
-  // This part just performs frontend changes, nothing backend
-  function removeTop(parentId) {
+// This part just performs frontend changes, nothing backend
+function removeTop(parentId) {
 	var target;
 	if (parentId == parentOfRootId) {
 		target = "#up";
@@ -348,9 +351,8 @@ $(document).ready(function() {
 	var options = { to: target, className: "ui-effects-transfer" };
 	$($("#urls").children()[0]).effect('transfer',options,50,function() { 
 		$($("#urls").children()[0]).effect( "blind",null, 10, function() { $(this).remove(); });
-	});
-	
-  }
+	});	
+}
   
 function writeCategoryTree(root, level) {
 	var indent = "";
