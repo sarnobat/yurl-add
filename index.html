@@ -204,7 +204,10 @@ $(document).ready(function() {
 	  });
 	  
 	  function relate(parentId, childId, currentRootId) {
-	    var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;
+	    var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;	
+		//
+		// The main part
+		//
 		$.getJSON(url, function(result){})
 			.success(function() { 
 				removeTop(parentId);
