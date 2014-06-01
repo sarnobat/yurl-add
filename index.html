@@ -513,6 +513,13 @@ function drawVisualization(data) {
 			size: 10,  
 			style: 'bold'  
 		  },
+		Navigation: {  
+			enable: true,  
+			//Enable panning events only if we're dragging the empty  
+			//canvas (and not a node).  
+			panning: 'avoid nodes',  
+			zooming: 10 //zoom speed. higher is more sensible  
+		},
 	});
 
 	var listOfNodes;
