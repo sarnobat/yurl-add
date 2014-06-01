@@ -13,7 +13,6 @@
 
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
-
 var parentOfRootId;
 var orderedDescending = true;
 
@@ -489,8 +488,7 @@ function getParentId(nodeId) {
 			$("#up").attr("href", "/yurl/?rootId=" + parentOfRootId);
 		}
 	})
-	.error(function() { //alert("error occurred "); 
-	})
+	.error(function() { })
 	.complete(function() { });
 }
 
