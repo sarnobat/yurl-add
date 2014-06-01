@@ -271,6 +271,7 @@ public class Yurl {
 		@GET
 		@Path("count_non_recursive")
 		@Produces("application/json")
+		@Deprecated // Use categoriesRecursive
 		public Response countNonRecursive(@QueryParam("rootId") Integer iRootId)
 				throws Exception {
 			checkNotNull(iRootId);
@@ -630,7 +631,8 @@ public class Yurl {
 			String outputFilename = determineDestinationPathAvoidingExisting(
 					targetDirPath + "/" + baseName + "." + extension)
 					.toString();
-			ImageIO.write(image, extension, new File(outputFilename));
+String outputFilenameDecoded = java.net.URLDecoder.decode(outputFilename, "UTF-8");
+			ImageIO.write(image, extension, new File(outputFilenameDecoded));
 
 		}
 
@@ -973,9 +975,42 @@ public class Yurl {
 					"start n=node({parentId}) match path=n-[r:CONTAINS*]->c WHERE has(c.name) return extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\"}')",
 					theParams);
 			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult);
+			
+			// Get the number of urls in each category
+			getCounts : {
+				JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
+				Map<Integer, Integer> categorySizes = getCategorySizes(counts.getJSONArray("data"));
+				System.out.println(categorySizes);
+				addSizes(categoriesTree,categorySizes);
+				System.out.println(categoriesTree);
+				
+				
+			}
 			return categoriesTree;
 		}
 	
+		private static Map<Integer, Integer> getCategorySizes(JSONArray counts) {
+
+			Map<Integer,Integer> sizesMap = new HashMap<Integer,Integer>();
+			for (int i = 0 ; i < counts.length(); i++) {
+				JSONArray row = counts.getJSONArray(i);
+				sizesMap.put(row.getInt(0), row.getInt(1));
+			}
+			return sizesMap;
+		}
+
+		private static void addSizes(JSONObject categoriesTree,
+				Map<Integer, Integer> categorySizes) {
+			Integer id = categoriesTree.getInt("id");
+			categoriesTree.put("size", categorySizes.get(id));
+			if (categoriesTree.has("children")) {
+				JSONArray children = categoriesTree.getJSONArray("children");
+				for (int i = 0; i < children.length(); i++) {
+					addSizes(children.getJSONObject(i), categorySizes);
+				}
+			}
+		}
+
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
 				JSONObject theQueryJsonResult) {
 			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
@@ -1070,9 +1105,19 @@ public class Yurl {
 			}
 			return oKeys;
 		}
+		
+//		@Deprecated
+//		public static Map<Integer, Integer> test(JSONObject categoriesTree ) throws JSONException, IOException {
+//			JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
+//			Map<Integer, Integer> categorySizes = getCategorySizes(counts.getJSONArray("data"));
+//			
+//			addSizes(categoriesTree,categorySizes);
+//			System.out.println(categoriesTree);
+//			return categorySizes;
+//		}
 	}
 
-	public static void main(String[] args) throws URISyntaxException {
+	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 		JdkHttpServerFactory.createHttpServer(
 				new URI("http://localhost:4447/"), new ResourceConfig(
 						HelloWorldResource.class));

@@ -499,6 +499,8 @@ function setParentOfRootId(nodeId) {
 }
 
 function drawVisualization(data) {
+	console.debug(data);
+	//alert(JSON.stringify(data));
 	var ua = navigator.userAgent;
 	var forceDirectedGraph = new $jit.ForceDirected({
 		injectInto: 'infovis',
@@ -531,7 +533,7 @@ function drawVisualization(data) {
 		}
 		
 		
-		lon = [{
+		listOfNodes = [{
 		
 			id:45,
 			data : {
@@ -542,21 +544,17 @@ function drawVisualization(data) {
 			adjacencies : adjacenciesList
 		}];
 		
-		var listOfNodes = lon;
 		addNodes(data, listOfNodes, 0);
-		
-		
 	}
 
-	console.debug("List of nodes...");
-	console.debug(listOfNodes);
+	//console.debug("List of nodes...");
+	//console.debug(listOfNodes);
 	
 	forceDirectedGraph.loadJSON(listOfNodes); 
 
 	forceDirectedGraph.computeIncremental({
 		onComplete: function(){
-			forceDirectedGraph.animate({
-			});
+			forceDirectedGraph.animate(function(){ });
 		}
 	});
 	 
