@@ -147,17 +147,19 @@ $(document).ready(function() {
 				}
 			}
 
-			var buttonCell = two;
-			buttonCell.append("<br>");
-			buttonCell.append("<br>");
-			buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
-			buttonCell.append("<br>");
-			buttonCell.append("<br>");
-			buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
-			buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
-			buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
-			buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
-			buttonCell.append("<sub>"+field.id+"</sub>");
+			{
+				var buttonCell = two;
+				buttonCell.append("<br>");
+				buttonCell.append("<br>");
+				buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
+				buttonCell.append("<br>");
+				buttonCell.append("<br>");
+				buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
+				buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
+				buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
+				buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
+				buttonCell.append("<sub>"+field.id+"</sub>");
+			}
 			
 		});
 		$("#status").text("Done")
