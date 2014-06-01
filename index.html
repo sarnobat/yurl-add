@@ -53,59 +53,61 @@ $(document).ready(function() {
 	////
 	var categories;
 	
-  	$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
-  	  originalKeyBindings = $.extend(true, {}, result);
-  	  configureKeyBindings(result);
-  	  categories = result;
-  	    	  
-    });
-
-    function configureKeyBindings(result) {
-
-      $.each(result, function(a,binding,c){
-        if (binding.key == 'null') {
-        	$("#keys").append("#");
-        	// Don't remove the "null" otherwise we'll assign hash to this category
-        }
-        $("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
-        $("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + " (<span id='count_"+binding.id+"'></span>)</a></li>");
-		$("#count_" + binding.id).text(binding.count);
-
-        $(window).keypress(function(event) {
-
-        	if ($("#keys").is(":focus")) {
-        		return;
-        	}
-        	if (binding.key == String.fromCharCode(event.which)) {
-        		var parentId = binding.id;
-        		var childId = $("#urls").children()[0].id;
-        		var currentRootId = rootId;
-        		relate(parentId, childId, currentRootId);
-			}
+	{
+		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
+		  originalKeyBindings = $.extend(true, {}, result);
+		  configureKeyBindings(result);
+		  categories = result;
+				  
 		});
-		
-      });
-      
-	  $(window).keypress(function(event) {
-	  		var key = String.fromCharCode(event.which);
-			if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
-				var idOfTop = $("#urls").children()[0].id;
-				moveToBottom(idOfTop);
+	
+	
+		function configureKeyBindings(result) {
+	
+		  $.each(result, function(a,binding,c){
+			if (binding.key == 'null') {
+				$("#keys").append("#");
+				// Don't remove the "null" otherwise we'll assign hash to this category
 			}
-			if (String.fromCharCode(event.which) == '<') {
-				var parentId = parentOfRootId;
-				var childId = $("#urls").children()[0].id;
-				var currentRootId = rootId;
-				relate(parentId, childId, currentRootId);
-			}
-			if (String.fromCharCode(event.which) == '>') {
-				console.debug("remove from list (deal with it later)");
-			}
-	  });
-	  
-	 
-    };
-
+			$("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
+			$("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + " (<span id='count_"+binding.id+"'></span>)</a></li>");
+			$("#count_" + binding.id).text(binding.count);
+	
+			$(window).keypress(function(event) {
+	
+				if ($("#keys").is(":focus")) {
+					return;
+				}
+				if (binding.key == String.fromCharCode(event.which)) {
+					var parentId = binding.id;
+					var childId = $("#urls").children()[0].id;
+					var currentRootId = rootId;
+					relate(parentId, childId, currentRootId);
+				}
+			});
+			
+		  });
+		  
+		  $(window).keypress(function(event) {
+				var key = String.fromCharCode(event.which);
+				if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
+					var idOfTop = $("#urls").children()[0].id;
+					moveToBottom(idOfTop);
+				}
+				if (String.fromCharCode(event.which) == '<') {
+					var parentId = parentOfRootId;
+					var childId = $("#urls").children()[0].id;
+					var currentRootId = rootId;
+					relate(parentId, childId, currentRootId);
+				}
+				if (String.fromCharCode(event.which) == '>') {
+					console.debug("remove from list (deal with it later)");
+				}
+		  });
+		  
+		 
+		};
+	}
 	////
 	//// Uncategorized URLs (main part)
 	////
