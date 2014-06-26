@@ -218,7 +218,12 @@ function showLinks(biggestImages) {
 					
 					if (!hasScreenshot) {
 						imageCell.append("<img src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" /><br>");
-						imageCell.append("<img src=\""+ biggestImages[field.url] +"\" class='screenshot' width="+imageSize+" /><br>");
+						// Check if the biggest image server is up
+						if (biggestImages != null) {
+							if (biggestImages[field.url] != null) {
+								imageCell.append("<img src=\""+ biggestImages[field.url] +"\" class='screenshot' width="+imageSize+" /><br>");
+							}
+						}
 					}
 				}
 	
