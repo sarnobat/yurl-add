@@ -424,7 +424,8 @@ public class Yurl {
 
 		private void createNewKeyBinding(String iCategoryName, String iKeyCode,
 				Integer iParentId) throws IOException, JSONException {
-
+			
+			System.out.println("createNewKeyBinding() - begin()");
 			// TODO: Also create a trash category for each new category key node
 
 			boolean shouldCreateNewCategoryNode = false;

@@ -298,11 +298,19 @@ function showLinks(biggestImages) {
     //// Update the key bindings
     ////
     
+    console.debug('declaring addKeyBindingsUpdateHandler function...');
+    
     addKeyBindingsUpdateHandler : {
 		var oldKeyBindings;
+		console.debug('inside addKeyBindingsUpdateHandler function...');
 		$("#keys").focus(function() {
-			oldKeyBindings = $.trim($("#keys").val());
+			alert('hello');
+			console.debug('focus callback begin');
+//			oldKeyBindings = $.trim($("#keys").val());
+			console.debug('focus callback');
 		}).blur(function() {
+			console.debug('blur callback');
+/*
 			var newKeyBindings = $.trim($("#keys").val());
 			var i = 1;
 			var url;
@@ -310,15 +318,19 @@ function showLinks(biggestImages) {
 			} else {
 				url = urlBase + "/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
 			}
-	
+			console.debug('sending ' + url);
 			$.getJSON(url, function(result){})
 				.success(function(data) {  
+					console.debug('server completed successfully, configuring new bindings...');
 					configureKeyBindings(data);
+					console.debug('new bindings configured');
 				})
 				.error(function() { })
-				.complete(function() { });
+				.complete(function() { });*/
 		});
+		console.debug('inside addKeyBindingsUpdateHandler function end...');
     }
+	console.debug('finished declaring addKeyBindingsUpdateHandler function.');
     
 }
 
