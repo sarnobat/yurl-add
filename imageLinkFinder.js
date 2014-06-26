@@ -1,9 +1,13 @@
 var request = require('request')
+<<<<<<< HEAD
 var $ = require('cheerio')
+=======
+>>>>>>> 85aced643fcc9b317f01039680722ec6cae072bd
 var url=require('url');
 var sleep = require('sleep');
 expect = require('expect.js')
 var neo4j = require('neo4j')
+<<<<<<< HEAD
 
 	var biggestImages = {};
 var targetUrl = 'http://www.teamtalk.com/liverpool'
@@ -15,6 +19,19 @@ var app = express();
 
 getBiggestImage("http://lifehacker.com/5330687/items-you-can-get-great-deals-on-in-a-recession");
 
+=======
+
+	var biggestImages = {};
+var targetUrl = 'http://www.teamtalk.com/liverpool'
+
+
+var express = require('express');
+
+var app = express();
+
+getBiggestImage("http://lifehacker.com/5330687/items-you-can-get-great-deals-on-in-a-recession");
+
+>>>>>>> 85aced643fcc9b317f01039680722ec6cae072bd
 app.get('/setUrls', function(req, res) {
 	//getBiggestImage(targetUrl)
     res.send({"status" : "success" });
