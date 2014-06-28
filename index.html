@@ -17,7 +17,7 @@ var rootId;
 var parentOfRootId;
 var orderedDescending = true;
 
-$(document).ready(showLinks({}));
+//$(document).ready(showLinks({}));
 
 function getBiggestImages() {
 	$.getJSON("http://localhost:3000/biggestImages", function(result){
@@ -694,7 +694,7 @@ body{
 <link type="text/css" href="http://philogb.github.io/jit/static/v20/Jit/Examples/css/base.css" rel="stylesheet" />
 
 </head>
-<body>
+<body onload='showLinks({})'>
 
 	<table>
 		<tr><td>
