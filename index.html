@@ -297,7 +297,8 @@ function showLinks(biggestImages) {
 					  
 					  console.debug(data.categoriesTree);
 					  
-					  renderVisualization(getData());
+					  renderVisualization(data.categoriesTree);
+					  //renderVisualization(getData());
 					  //drawVisualization(data.categoriesTree);
 					  
 					  writeCategoryTree(data.categoriesTree, 0);
@@ -677,8 +678,8 @@ function getData() {
 }
 
 function renderVisualization(flareJson) {
-	var w = 1280,
-		h = 800,
+	var w = 680,
+		h = 700,
 		node,
 		link,
 		root;
@@ -875,7 +876,7 @@ body{
 					
 					<td width="75%">
 						
-						<div id="d3" style="background-color:black"></div>
+						<div id="d3" style="background-color:grey"></div>
 						<!--<div id="infovis" style="background-color : black"></div>    -->
 						<ol id="urls"></ol>
 						<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
