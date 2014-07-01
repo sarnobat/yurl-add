@@ -1,92 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 
-<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css">
-<style>
-html, body {
-    height : 100%;
-}
-#map-page {
-    height : 100%;
-}
-#map-page .ui-header {
-/*    height : 40px; */
-    visibility	: hidden;
-}
-#map-page .ui-content {
-    position : absolute;
-    top      : 0px;
-    right    : 0;
-    bottom   : 0px;
-    left     : 0;
-}
-#map-page .ui-footer {
-/*    position : absolute;
-    bottom   : 0;
-    left     : 0;
-    width    : 100%;
-    height   : 30px;*/
-}
 
-span {
-white-space:nowrap;
-}
-div {
-	border : 1;
-}
-</style>
-<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-<script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
 </head>
 <body>
 
-<div data-role="page" id="map-page">
-    <!--<div data-role="header"></div>-->
-    <div data-role="content" style="background-color : gold; ">
-		<div style="height: 60%; width : 62%; background-color : purple; display: inline-block;">
-			<div id="title" style="height: 50%; background-color : lightpink; font-size : x-large">Title</div>
-			<div id="url" style="height: 50%; background-color : bisque;word-wrap:break-word;">URL</div>
-		</div>
+<h1>Only on 768px+</h1>
 
-        <div style="height : 60% ; width : 34%; background-color : transparent; display: inline-block;">
-			<div id="button1" class="categoryButton" style="height : 33% ; background-color : yellow">button 1</div>
-			<div id="button2" class="categoryButton" style="height : 33% ; background-color : transparent">button 2</div>
-			<div id="button3" class="categoryButton" style="height : 33% ; background-color : orange">button 3</div>
-		</div>
-        <div id="image" style="height : 40% ;  width : 99%; background-color : lightblue">Image</div>
+<div class="container container-sm-height">
+    <div class="row row-sm-height">
+        <div class="col-xs-12 col-sm-6 col-sm-height"><div class="item"><div class="content"><br><br><br><br><br><br><br></div></div></div>
+        <div class="col-xs-6 col-sm-3 col-sm-height col-top"><div class="item"><div class="content"></div></div></div>
+        <div class="col-xs-6 col-sm-2 col-sm-height col-middle"><div class="item"><div class="content"></div></div></div>
+        <div class="col-xs-6 col-sm-1 col-sm-height col-bottom"><div class="item"><div class="content"></div></div></div>
     </div>
-    <div data-role="footer"> </div>
-    <script>
-var rootId = 45;
-var urlBase = "http://netgear.rohidekar.com:4447/yurl";    
-var items;
-$.getJSON(urlBase + "/uncategorized?rootId=" + rootId,function(results){
-	items = results;
-	populateItem(items[0]);
-});
-
-function populateItem(item) {
-	$("#title").text(item.title);
-	$("#url").text(item.url);
-}
-
-$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
-	populateButton(0);
-	populateButton(1);
-	populateButton(2);
-});
-
-function populateButton(i, category) {
-	$("#button" + i).text(i);
-}
-    		
-$('.categoryButton').on('tap', function() {
-	items.shift();
-	populateItem(items[0]);
-});
-    </script>
 </div>
+
+<script>
+</script>
 </body>
 </html>

@@ -71,13 +71,13 @@ public class Yurl {
 		@Produces("application/json")
 		public Response parent(@QueryParam("nodeId") Integer iNodeId)
 				throws JSONException, IOException {
-			Map<String, Object> theParams = new HashMap<String, Object>();
+			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("nodeId", iNodeId);
 			// TODO: order these by most recent-first (so that they appear this
 			// way in the UI)
 			JSONObject theParentNodeJson = execute(
 					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)",
-					theParams);
+					theParams.build());
 			JSONArray theData = (JSONArray) theParentNodeJson.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
@@ -214,11 +214,11 @@ public class Yurl {
 				StringBuffer plainText, Set<String> visitedInternalNodes)
 				throws IOException, JSONException {
 			json.append("bar");
-			Map<String, Object> theParams = new HashMap<String, Object>();
+			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("nodeId", iRootId);
 			JSONObject theResponse = execute(
 					"start root=node({nodeId}) MATCH root--n RETURN distinct n, id(n)",
-					theParams);
+					theParams.build());
 			JSONArray jsonArray = (JSONArray) theResponse.get("data");
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONArray aNode = (JSONArray) jsonArray.get(i);
@@ -276,11 +276,11 @@ public class Yurl {
 				throws Exception {
 			checkNotNull(iRootId);
 			try {
-				Map<String, Object> theParams = new HashMap<String, Object>();
+				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 				theParams.put("rootId", iRootId);
 				JSONObject theQueryResultJson = execute(
 						"start n=node({rootId}) match n-[CONTAINS]->u where has(u.title) return n.name, count(u) as cnt",
-						theParams);
+						theParams.build());
 				JSONArray outerArray = (JSONArray) theQueryResultJson
 						.get("data");
 				JSONArray innerArray = (JSONArray) outerArray.get(0);
@@ -305,13 +305,13 @@ public class Yurl {
 				throws JSONException, IOException {
 			checkNotNull(iRootId);
 			// TODO: the source is null clause should be obsoleted
-			Map<String, Object> theParams = new HashMap<String, Object>();
+			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("rootId", iRootId);
 			// TODO: order these by most recent-first (so that they appear this
 			// way in the UI)
 			JSONObject theQueryResultJson = execute(
 					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?,n.created?,n.ordinal? ORDER BY n.ordinal? DESC",
-					theParams);
+					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
 			for (int i = 0; i < theDataJson.length(); i++) {
@@ -494,7 +494,7 @@ public class Yurl {
 
 		public JSONArray getKeys(Integer iParentId) throws IOException,
 				JSONException {
-			Map<String, Object> theParams = new HashMap<String, Object>();
+			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			_1: {
 				theParams.put("parentId", iParentId);
 			}
@@ -505,7 +505,7 @@ public class Yurl {
 			// compromise.
 			JSONObject theQueryJsonResult = execute(
 					"START n=node(*) MATCH parent-[c:CONTAINS]->n -[c2?:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key?,count(n2) as c order by c desc",
-					theParams);
+					theParams.build());
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
@@ -769,13 +769,13 @@ System.out.println(outputFilename);
 
 			System.out.println("surpassOrdinals");
 
-			Map<String, Object> theParams = new HashMap<String, Object>();
+			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("nodeIdToChange", nodeIdToChange);
 			theParams.put("nodeIdToSurpass", nodeIdToSurpass);
 
 			JSONObject jsonObject = execute(
 					" start n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) set n.ordinal=n2.ordinal + 100 return n.ordinal,n2.ordinal",
-					theParams);
+					theParams.build());
 
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(jsonObject.toString()).type("application/json")
@@ -792,13 +792,13 @@ System.out.println(outputFilename);
 
 			System.out.println("undercutOrdinal");
 
-			Map<String, Object> theParams = new HashMap<String, Object>();
+			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("nodeIdToChange", nodeIdToChange);
 			theParams.put("nodeIdToUndercut", nodeIdToUndercut);
 
 			JSONObject jsonObject = execute(
 					" start n=node({nodeIdToChange}),n2=node({nodeIdToUndercut}) set n.ordinal=n2.ordinal - 100 return n.ordinal,n2.ordinal",
-					theParams);
+					theParams.build());
 
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(jsonObject.toString()).type("application/json")
@@ -814,13 +814,13 @@ System.out.println(outputFilename);
 				JSONException {
 			System.out.println("swapOrdinals");
 
-			Map<String, Object> theParams = new HashMap<String, Object>();
+			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("id1", iFirstId);
 			theParams.put("id2", iSecondId);
 
 			JSONObject jsonObject = execute(
 					" start n=node({id1}),n2=node({id2}) set n.temp=n2.ordinal, n2.ordinal=n.ordinal,n.ordinal=n.temp  return n.ordinal,n2.ordinal",
-					theParams);
+					theParams.build());
 
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(jsonObject.toString()).type("application/json")
@@ -868,12 +868,12 @@ System.out.println(outputFilename);
 			// specified existing parent (but not with all parents since we
 			// could have a many-to-one contains)
 			_1: {
-				Map<String, Object> theParams = new HashMap<String, Object>();
+				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 				theParams.put("currentParentId", iCurrentParentId);
 				theParams.put("childId", iChildId);
 
 				execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
-						theParams);
+						theParams.build());
 				System.out
 						.println("Finished trying to delete relationship between "
 								+ iCurrentParentId + " and " + iChildId);
@@ -976,16 +976,14 @@ System.out.println(outputFilename);
 
 		private static JSONObject getCategoriesTree(Integer rootId)
 				throws JSONException, IOException {
-			Map<String, Object> theParams = new HashMap<String, Object>();
+			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			_1: {
 				theParams.put("parentId", rootId);
 			}
 			JSONObject theQueryJsonResult = execute(
 					"start n=node({parentId}) match path=n-[r:CONTAINS*]->c WHERE has(c.name) return extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\"}')",
-					theParams);
-System.out.println('getCategoriesTree() - about to create tree');
+					theParams.build());
 			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult);
-System.out.println('getCategoriesTree() - created tree');
 			// Get the number of urls in each category
 			getCounts : {
 				JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
@@ -1024,7 +1022,7 @@ System.out.println('getCategoriesTree() - created tree');
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
 				JSONObject theQueryJsonResult) {
 			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
-System.out.println('getCategoriesTree() - cypherRawResults - ' + cypherRawResults.toString(2));
+
 			MultiValueMap parentToChildren = new MultiValueMap();
 			getParentChildrenMap: {
 				for (int i = 0; i < cypherRawResults.length(); i++) {
@@ -1092,13 +1090,13 @@ System.out.println('getCategoriesTree() - cypherRawResults - ' + cypherRawResult
 		// This gives a flat list
 		private JSONArray getFlatListOfSubcategoriesRecursive(Integer iParentId)
 				throws IOException {
-			Map<String, Object> theParams = new HashMap<String, Object>();
+			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			_1: {
 				theParams.put("parentId", iParentId);
 			}
 			JSONObject theQueryJsonResult = execute(
 					"START n=node(*) MATCH parent-[c:CONTAINS*]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN distinct ID(n),n.name",
-					theParams);
+					theParams.build());
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
