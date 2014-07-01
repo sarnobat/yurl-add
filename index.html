@@ -125,7 +125,7 @@ function showLinks(biggestImages) {
 					}
 					if (binding.key == String.fromCharCode(event.which)) {
 						var parentId = binding.id;
-						var childId = $("#urls").children()[0].id;
+						var childId = $("#urls-cards").children()[0].id;
 						var currentRootId = rootId;
 						relate(parentId, childId, currentRootId);
 					}
@@ -134,12 +134,12 @@ function showLinks(biggestImages) {
 			$(window).keypress(function(event) {
 				var key = String.fromCharCode(event.which);
 				if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
-					var idOfTop = $("#urls").children()[0].id;
+					var idOfTop = $("#url_cards").children()[0].id;
 					moveToBottom(idOfTop);
 				}
 				if (String.fromCharCode(event.which) == '<') {
 					var parentId = parentOfRootId;
-					var childId = $("#urls").children()[0].id;
+					var childId = $("#url_cards").children()[0].id;
 					var currentRootId = rootId;
 					relate(parentId, childId, currentRootId);
 				}
@@ -159,133 +159,7 @@ function showLinks(biggestImages) {
 			$("#status").text("Populating")
 			$.each(result, function(resultRowNumber, field) {
 			
-				if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
-					return;
-				}
-				
-				var one = $("<td style='background-color:'>1");
-				var two = $("<td style='background-color:' >2");
-				var three = $("<td style='background-color:'>3");
-				var four = $("<td id='categoryButtonsCell' style='background-color:'>4");
-				var five = $("<td style='background-color:'>5");
-				
-				var table = $("<table/>");
-				{
-					table.attr('width','100%');
-		
-					{
-						var row1 = $("<tr/>");
-						table.append(row1);
-						row1.append(two);
-						row1.append(three);
-					}
-		
-					{
-						var row2 = $("<tr/>");
-						table.append(row2);
-						row2.append(four);
-						row2.append(five);
-					}
-		
-					{
-						var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
-						listItem.append(table);
-						$("#urls").append(listItem);
-					}
-		
-				}
-				
-				{
-					var urlElements = field.url.match(/^http:\/\/[^/]+/);
-					if (urlElements != null) {
-						var site = urlElements[0];
-						two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
-					}
-					two.append("<font style=\"color: #002366\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font></sub>");
-				}
-				
-				{
-					var imageCell = three;
-					var hasScreenshot = false;
-					var imageSize = 300;
-					{
-						if (field.url.match(".jpg\??") || 
-							field.url.match(".gif$") || 
-							field.url.match(".png\??") || 
-							field.url.match("images.q=tbn:")) {
-							imageCell.append("<br><img src="+field.url+" width="+imageSize+">");
-							hasScreenshot = true;
-						}
-						if (field.url.match("youtube.com")) {
-							if (field.url.match("youtube.com/watch")) {
-								var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
-								imageCell.append("<br>");
-								imageCell.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+">");
-								
-								imageCell.append("<br>");
-								imageCell.append("");
-								imageCell.append("");
-								hasScreenshot = true;
-							}
-							
-						} else if (field.url.match("dailymotion.com/video")) {
-								var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
-								imageCell.append("<br>");
-								imageCell.append("<img src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+">");
-								imageCell.append("<br>");
-								imageCell.append("");
-								imageCell.append("");
-								hasScreenshot = true;
-							
-						} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
-							imageCell.append("<br>");
-							var asin = field.url.replace(/.+dp\/([^\/]+)\/?.*/,'$1');
-							var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
-							imageCell.append("<img src='"+productImageUrl+"' height='280'>");
-							hasScreenshot = true;
-						}
-					}
-					
-					if (!hasScreenshot) {
-						imageCell.append("<img src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" /><br>");
-						// Check if the biggest image server is up
-						if (biggestImages != null) {
-							if (biggestImages[field.url] != null) {
-								imageCell.append("<img src=\""+ biggestImages[field.url] +"\" class='screenshot' width="+imageSize+" /><br>");
-							}
-						}
-					}
-				}
-	
-				{
-					var buttonCell = two;
-					buttonCell.append("<br>");
-					buttonCell.append("<br>");
-					buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
-					buttonCell.append("<br>");
-					buttonCell.append("<br>");
-					buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
-					buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
-					buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
-					buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
-					buttonCell.append("<sub>"+field.id+"</sub>");
-				}
-				
-				{
-					var categoryButtons = four;
-					// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
-					$.each(categories, function(a,binding,c){
-						categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
-					});						
-				}
-				
-				{
-					five.append("<input type=button class='genericButton' value='I own this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37373+"), this)'><br>");
-					five.append("<input type=button class='genericButton' value='Buy this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221013+"), this)'><br>");
-					five.append("<input type=button class='genericButton' value='Download this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221026+"), this)'><br>");
-					five.append("<input type=button class='genericButton' value='Watched' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'><br>");
-					five.append("<input type=button class='genericButton' value='Watch this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'><br>");
-				}	
+				fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories);
 			});
 			$("#status").text("Done")
 		});
@@ -355,6 +229,136 @@ function showLinks(biggestImages) {
     
 }
 
+function fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories) {
+	if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
+		return;
+	}
+	
+	var one = $("<td style='background-color:'>1");
+	var two = $("<td style='background-color:' >2");
+	var three = $("<td style='background-color:'>3");
+	var four = $("<td id='categoryButtonsCell' style='background-color:'>4");
+	var five = $("<td style='background-color:'>5");
+	
+	var table = $("<table/>");
+	{
+		table.attr('width','100%');
+	
+		{
+			var row1 = $("<tr/>");
+			table.append(row1);
+			row1.append(two);
+			row1.append(three);
+		}
+	
+		{
+			var row2 = $("<tr/>");
+			table.append(row2);
+			row2.append(four);
+			row2.append(five);
+		}
+	
+		{
+			var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
+			listItem.append(table);
+			$("#url_cards").append(listItem);
+		}
+	
+	}
+	
+	{
+		var urlElements = field.url.match(/^http:\/\/[^/]+/);
+		if (urlElements != null) {
+			var site = urlElements[0];
+			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
+		}
+		two.append("<font style=\"color: #002366\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font></sub>");
+	}
+	
+	{
+		var imageCell = three;
+		var hasScreenshot = false;
+		var imageSize = 300;
+		{
+			if (field.url.match(".jpg\??") || 
+				field.url.match(".gif$") || 
+				field.url.match(".png\??") || 
+				field.url.match("images.q=tbn:")) {
+				imageCell.append("<br><img src="+field.url+" width="+imageSize+">");
+				hasScreenshot = true;
+			}
+			if (field.url.match("youtube.com")) {
+				if (field.url.match("youtube.com/watch")) {
+					var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
+					imageCell.append("<br>");
+					imageCell.append("<img src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+">");
+					
+					imageCell.append("<br>");
+					imageCell.append("");
+					imageCell.append("");
+					hasScreenshot = true;
+				}
+				
+			} else if (field.url.match("dailymotion.com/video")) {
+					var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+					imageCell.append("<br>");
+					imageCell.append("<img src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+">");
+					imageCell.append("<br>");
+					imageCell.append("");
+					imageCell.append("");
+					hasScreenshot = true;
+				
+			} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
+				imageCell.append("<br>");
+				var asin = field.url.replace(/.+dp\/([^\/]+)\/?.*/,'$1');
+				var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+				imageCell.append("<img src='"+productImageUrl+"' height='280'>");
+				hasScreenshot = true;
+			}
+		}
+		
+		if (!hasScreenshot) {
+			imageCell.append("<img src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" /><br>");
+			// Check if the biggest image server is up
+			if (biggestImages != null) {
+				if (biggestImages[field.url] != null) {
+					imageCell.append("<img src=\""+ biggestImages[field.url] +"\" class='screenshot' width="+imageSize+" /><br>");
+				}
+			}
+		}
+	}
+	
+	{
+		var buttonCell = two;
+		buttonCell.append("<br>");
+		buttonCell.append("<br>");
+		buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
+		buttonCell.append("<br>");
+		buttonCell.append("<br>");
+		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
+		buttonCell.append("<sub>"+field.id+"</sub>");
+	}
+	
+	{
+		var categoryButtons = four;
+		// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
+		$.each(categories, function(a,binding,c){
+			categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
+		});						
+	}
+	
+	{
+		five.append("<input type=button class='genericButton' value='I own this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37373+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Buy this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221013+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Download this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221026+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Watched' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Watch this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'><br>");
+	}	
+}
+
 function relate(parentId, childId, currentRootId) {
 	removeTop(parentId, childId);
 	var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;	
@@ -412,12 +416,12 @@ function writeCategoryTree(root, level) {
 
 function moveToTop(source) {
 	var idToMove = source;
-	var firstId = $("#urls").children().first().attr("id");
+	var firstId = $("#url_cards").children().first().attr("id");
 
 
 	if (orderedDescending) {
 		var elem = $("#" + idToMove).remove();
-		$("#urls").prepend(elem);
+		$("#url_cards").prepend(elem);
 		// 1 more than latest timestamp
 		$.getJSON(urlBase + "/surpassOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToSurpass=" + firstId,
 			function(result){
@@ -436,11 +440,11 @@ function moveToTop(source) {
 
 function moveToBottom(source) {
 	var idToMove = source;
-	var lastId = $("#urls").children().last().attr("id");
+	var lastId = $("#url_cards").children().last().attr("id");
 
 	if (orderedDescending) {
 		var elem = $("#" + idToMove).remove();
-		$("#urls").append(elem);
+		$("#url_cards").append(elem);
 		$.getJSON(urlBase + "/undercutOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToUndercut=" + lastId, 
 			function(result){
 			})
@@ -889,9 +893,10 @@ body{
 								<li><a href="#tabs-3">List</a></li>
 							  </ul>
 							  <div id="tabs-1">
-								  <ol id="urls"></ol>
+								  <ol id="url_cards"></ol>
 							  </div>
 							  <div id="tabs-2">
+								  <ol id="url_thumbnails"></ol>
 							  </div>
 							  <div id="tabs-3">
 							  </div>
