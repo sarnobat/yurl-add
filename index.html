@@ -170,7 +170,7 @@ function showLinks(biggestImages) {
 				fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
 				++resultRowNumber;
 			});
-			$.getScript("jquery/hover_zoom.min.js", function() {alert("Ready to zoom images"); });
+			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
 			$("#status").text("Done")
 		});
 	}
