@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css">
 <style>
@@ -27,6 +28,13 @@ html, body {
     width    : 100%;
     height   : 30px;
 }
+
+span {
+white-space:nowrap;
+}
+div {
+	border : 1;
+}
 </style>
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
@@ -35,10 +43,24 @@ html, body {
 
 <div data-role="page" id="map-page">
     <div data-role="header"></div>
-    <div data-role="content" style="background-color : gold;">
-        
+    <div data-role="content" style="background-color : gold; ">
+        <div style="height : 40% ;  width : 99%; background-color : blue">Image</div>
+        <div style="height : 60% ; width : 34%; background-color : red; display: inline-block;">
+			<div id="button1" class="categoryButton" style="height : 33% ; background-color : yellow">button 1</div>
+			<div id="button2" class="categoryButton" style="height : 33% ; background-color : green">button 2</div>
+			<div id="button3" class="categoryButton" style="height : 33% ; background-color : orange">button 3</div>
+		</div>
+		<div style="height: 60%; width : 62%; background-color : purple; display: inline-block;">
+			<div id="title" style="height: 50%; background-color : brown;">Title</div>
+			<div id="url" style="height: 50%; background-color : olive;">URL</div>
+		</div>
     </div>
     <div data-role="footer"> </div>
+    <script>
+$('.categoryButton').on('tap', function() {
+	$("#title").text($(this).attr('id'));
+});
+    </script>
 </div>
 </body>
 </html>
