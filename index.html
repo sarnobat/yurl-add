@@ -687,7 +687,7 @@ function renderVisualization(flareJson) {
 	var vis = d3.select("#d3").append("svg:svg")
 		.attr("width", w)
 		.attr("height", h);
-	
+	$("#d3").hide();
 	
 	
 	// populate the graph with our input data
@@ -840,7 +840,8 @@ body{
 
 </head>
 <body onload='showLinks({})'>
-
+	<br>
+	<br>
 	<table>
 		<tr><td>
 			<div id="queue"></div>
@@ -868,6 +869,7 @@ body{
 					
 					<td width="75%">
 						
+						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
 						<div id="d3" style="background-color:grey"></div>
 						<!--<div id="infovis" style="background-color : black"></div>    -->
 						<ol id="urls"></ol>

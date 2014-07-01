@@ -56,6 +56,7 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
+// TODO: Use javax.json.* for immutability
 public class Yurl {
 	@Path("yurl")
 	public static class HelloWorldResource { // Must be public
@@ -100,6 +101,9 @@ public class Yurl {
 		@Produces("application/json")
 		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
 				@QueryParam("urls") String iUrls) throws Exception {
+//			if (true){
+//				throw new RuntimeException("batchInsert() - looks like we never actually implemented this");
+//			}
 			Preconditions.checkArgument(iRootId != null);
 			System.out.println("batchInsert - " + iRootId);
 			// System.out.println("batchInsert - " + URLDecoder.decode(iUrls,
@@ -161,6 +165,7 @@ public class Yurl {
 					System.out.println("to be processed: " + first);
 					System.out.println("to be processed: " + second);
 
+					stash(second, iRootId);
 					System.out.println("5");
 					System.out.println("5.25");
 
@@ -750,7 +755,10 @@ System.out.println(outputFilename);
 								.println("downloadVideoInSeparateThread() - ERROR recording download in database");
 						// Why won't the compiler let me throw this?
 						e.printStackTrace();
-					} catch (Exception e) {
+					} catch (RuntimeException e) {
+						System.out.println(e.getMessage());
+					}
+					catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
