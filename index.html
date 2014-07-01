@@ -95,6 +95,12 @@ function showLinks(biggestImages) {
 		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
 			var originalKeyBindings = $.extend(true, {}, result);// TODO: what does this do?
 			categories = result;	  
+			{			
+				// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set.
+				$.each(categories, function(a,binding,c){
+					$("#categoryButtonsCell").append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
+				});
+			}
 			configureKeyBindings(categories);
 		});
 	
@@ -154,7 +160,7 @@ function showLinks(biggestImages) {
 				var one = $("<td style='background-color:'>1");
 				var two = $("<td style='background-color:' >2");
 				var three = $("<td style='background-color:'>3");
-				var four = $("<td style='background-color:'>4");
+				var four = $("<td id='categoryButtonsCell' style='background-color:'>4");
 				var five = $("<td style='background-color:'>5");
 				
 				var table = $("<table/>");
@@ -262,10 +268,6 @@ function showLinks(biggestImages) {
 				{
 					var categoryButtons = four;
 					
-					// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set.
-					$.each(categories, function(a,binding,c){
-						four.append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
-					});
 	
 				}
 				
@@ -413,13 +415,13 @@ function moveToTop(source) {
 
 
 	if (orderedDescending) {
+		var elem = $("#" + idToMove).remove();
+		$("#urls").prepend(elem);
 		// 1 more than latest timestamp
 		$.getJSON(urlBase + "/surpassOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToSurpass=" + firstId,
 			function(result){
 			})
 			.success(function(data) {  
-				var elem = $("#" + idToMove).remove();
-				$("#urls").prepend(elem);
 			})
 			.error(function() {
 				alert("error occurred "); 
@@ -436,12 +438,12 @@ function moveToBottom(source) {
 	var lastId = $("#urls").children().last().attr("id");
 
 	if (orderedDescending) {
+		var elem = $("#" + idToMove).remove();
+		$("#urls").append(elem);
 		$.getJSON(urlBase + "/undercutOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToUndercut=" + lastId, 
 			function(result){
 			})
 			.success(function(data) {  
-				var elem = $("#" + idToMove).remove();
-				$("#urls").append(elem);
 			})
 			.error(function() {
 				alert("error occurred "); 
