@@ -927,6 +927,9 @@ System.out.println(outputFilename);
 			Map<String, Object> thePostBody = new HashMap<String, Object>();
 			thePostBody.put("query", iCypherQuery);
 			thePostBody.put("params", iParams);
+			
+			System.out.println("execute() - query - " + iCypherQuery);
+			System.out.println("execute() - params - " + iParams);
 	
 			// POST {} to the node entry point URI
 			ClientResponse theResponse = theWebResource
@@ -941,7 +944,9 @@ System.out.println(outputFilename);
 			String theNeo4jResponse = IOUtils.toString(theResponse
 					.getEntityInputStream());
 			_1: {
-				System.out.println(theNeo4jResponse);
+				System.out.println("BEGINNING OF RESPONSE");
+				System.out.println("RESPONSE" + theNeo4jResponse);
+				System.out.println("END OF RESPONSE");
 				theResponse.getEntityInputStream().close();
 				theResponse.close();
 			}
@@ -978,8 +983,9 @@ System.out.println(outputFilename);
 			JSONObject theQueryJsonResult = execute(
 					"start n=node({parentId}) match path=n-[r:CONTAINS*]->c WHERE has(c.name) return extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\"}')",
 					theParams);
+System.out.println('getCategoriesTree() - about to create tree');
 			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult);
-			
+System.out.println('getCategoriesTree() - created tree');
 			// Get the number of urls in each category
 			getCounts : {
 				JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
@@ -1018,9 +1024,11 @@ System.out.println(outputFilename);
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
 				JSONObject theQueryJsonResult) {
 			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
+System.out.println('getCategoriesTree() - cypherRawResults - ' + cypherRawResults.toString(2));
 			MultiValueMap parentToChildren = new MultiValueMap();
 			getParentChildrenMap: {
 				for (int i = 0; i < cypherRawResults.length(); i++) {
+	//System.out.println('getCategoriesTree() - cypherRawResults - ' + i + '  ' + cypherRawResults.getJSONArray(i));
 					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
 					for (int j = 0; j < a2.length(); j++) {
 						JSONObject parent = new JSONObject(a2.getString(j));
@@ -1094,7 +1102,7 @@ System.out.println(outputFilename);
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
-				System.out.println("categoriesRecurisve() - " + i);
+				System.out.println("getFlatListOfSubcategoriesRecursive() - " + i);
 				JSONObject aBindingObject = new JSONObject();
 				_1: {
 					JSONArray aBindingArray = theData.getJSONArray(i);
@@ -1103,7 +1111,7 @@ System.out.println(outputFilename);
 					String title = (String) aBindingArray.get(1);
 					aBindingObject.put("name", title);
 					oKeys.put(aBindingObject);
-					System.out.println("categoriesRecurisve() - " + id
+					System.out.println("getFlatListOfSubcategoriesRecursive() - " + id
 							+ "\t::\t" + title);
 				}
 			}
