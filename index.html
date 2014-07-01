@@ -353,13 +353,14 @@ function showLinks(biggestImages) {
 }
 
 function relate(parentId, childId, currentRootId) {
+	removeTop(parentId, childId);
 	var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;	
 	//
 	// The main part
 	//
 	$.getJSON(url, function(result){})
 		.success(function() { 
-			removeTop(parentId, childId);
+
 			$("#list_"+parentId).effect("highlight", null, 4000, function() {});
 			
 			// Change the destination category count
@@ -386,7 +387,7 @@ function removeTop(parentId, childId) {
 	}
 	var options = { to: target, className: "ui-effects-transfer" };
 	$($("#" + childId)).effect('transfer',options,50,function() { // !!!!!!!! TODO : Wrong. remove the one specified by child ID
-		$($("#" + childId)).effect( "blind",null, 10, function() { $(this).remove(); });
+		$($("#" + childId)).effect( "blind",null, 5, function() { $(this).remove(); });
 	});	
 }
   
