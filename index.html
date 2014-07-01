@@ -9,6 +9,9 @@
 <script src="jquery/jquery-1.9.1.js"></script>
 <script src="jquery/jquery-ui.js"></script>
 
+
+<script src="jquery/hover_zoom.min.js"></script>
+
 <script type="text/javascript" src="jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
@@ -167,6 +170,7 @@ function showLinks(biggestImages) {
 				fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
 				++resultRowNumber;
 			});
+			$.getScript("jquery/hover_zoom.min.js", function() {alert("Ready to zoom images"); });
 			$("#status").text("Done")
 		});
 	}
