@@ -9,7 +9,25 @@
 <script type="text/javascript" src="jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
+    <style type="text/css">
 
+circle.node {
+  cursor: pointer;
+  stroke: #000;
+  stroke-width: .5px;
+}
+
+line.link {
+  fill: none;
+  stroke: #9ecae1;
+  stroke-width: 1.5px;
+}
+
+    </style>
+        <script type="text/javascript" src="d3/d3.js"></script>
+    <script type="text/javascript" src="d3/d3.geom.js"></script>
+    <script type="text/javascript" src="d3/d3.layout.js"></script>
+    
 <script>
 
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
@@ -279,7 +297,8 @@ function showLinks(biggestImages) {
 					  
 					  console.debug(data.categoriesTree);
 					  
-					  drawVisualization(data.categoriesTree);
+					  renderVisualization(getData());
+					  //drawVisualization(data.categoriesTree);
 					  
 					  writeCategoryTree(data.categoriesTree, 0);
 					  $.each(data.flat, function(a,category,c){
@@ -653,6 +672,139 @@ function addEmbeddedVideo(id, url) {
 	$("#" + id).children().last().append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
 }
 
+function getData() {
+	return {"id":45,"name":"root","children":[{"id":46440,"name":"art, graphics and design","size":92},{"id":38907,"name":"priority 3","size":1},{"id":37658,"name":"youtube playlists","children":[{"id":138633,"name":"productivity","size":5},{"id":138632,"name":"health","size":10},{"id":138631,"name":"science","size":18},{"id":138630,"name":"food"},{"id":109186,"name":"animals","size":71},{"id":106716,"name":"other","size":142},{"id":106044,"name":"Self Help","size":37},{"id":106043,"name":"Home","size":22},{"id":105985,"name":"Products & Services","size":4},{"id":105984,"name":"Entertainment","size":296},{"id":95704,"name":"non-youtube","size":20},{"id":95702,"name":"Travel","size":86},{"id":95701,"name":"history","size":9},{"id":95700,"name":"technology","size":108},{"id":83074,"name":"business","size":37},{"id":37817,"name":"wrestling","children":[{"id":129025,"name":"matches"},{"id":129024,"name":"vignettes","size":16},{"id":129023,"name":"PPV","size":12},{"id":129021,"name":"documentary","size":17},{"id":129020,"name":"broadcasts","size":28},{"id":129019,"name":"interviews","size":81},{"id":129018,"name":"songs","size":20},{"id":129017,"name":"divas","size":34},{"id":37818,"name":"volumes","size":6}],"size":410},{"id":37761,"name":"soccer","children":[{"id":95564,"name":"youth","size":1},{"id":95562,"name":"music","size":6},{"id":95560,"name":"International","size":15},{"id":95559,"name":"Nostalgia","size":15},{"id":95558,"name":"European","size":14},{"id":95530,"name":"Liverpool","size":25},{"id":85980,"name":"documentaries","children":[{"id":37814,"name":"managers","size":3},{"id":37816,"name":"owners","size":3},{"id":37815,"name":"clubs","size":4},{"id":37812,"name":"players","size":13},{"id":37813,"name":"rivalries","size":15}],"size":15},{"id":83607,"name":"Atletico Madrid","children":[{"id":105300,"name":"1950s","size":1},{"id":105299,"name":"1940s","size":2},{"id":105298,"name":"1970s","size":5},{"id":95541,"name":"2010s","size":16},{"id":95540,"name":"2000s","size":17},{"id":95539,"name":"1980s","size":10},{"id":95538,"name":"1960s","size":10},{"id":84404,"name":"1990s","children":[{"id":105307,"name":"1996-1997","size":5},{"id":105306,"name":"1993-1994","size":9},{"id":105305,"name":"1998-1999","size":1},{"id":105304,"name":"1990","size":1},{"id":105303,"name":"1992-1993","size":7},{"id":105302,"name":"1991-1992","size":5},{"id":105301,"name":"1990-1991","size":6}],"size":15},{"id":83610,"name":"friendly","size":92},{"id":83609,"name":"Copa del Rey","size":57},{"id":83608,"name":"Europe","children":[{"id":95537,"name":"2010s","size":2},{"id":95536,"name":"1960s","size":3},{"id":95535,"name":"1980s","size":15},{"id":95534,"name":"2000s","size":2},{"id":95533,"name":"1990s","size":35},{"id":95532,"name":"1970s","size":23}],"size":11}],"size":163},{"id":83218,"name":"tournaments","children":[{"id":83222,"name":"1994 USA","size":28},{"id":83219,"name":"1990 Italy","size":47}],"size":21}],"size":1166},{"id":37700,"name":"favorites","children":[{"id":37740,"name":"trash","size":8}],"size":10},{"id":37659,"name":"documentaries","children":[{"id":37833,"name":"technology","size":9},{"id":37832,"name":"self","size":6},{"id":37831,"name":"business","size":4},{"id":37830,"name":"health","size":11},{"id":37829,"name":"travel","size":7}],"size":22}],"size":126},{"id":37581,"name":"download these","children":[{"id":37628,"name":"trash","size":1}],"size":57},{"id":37568,"name":"watched","size":5},{"id":37567,"name":"watch these","children":[{"id":37652,"name":"watched","size":12},{"id":37651,"name":"trash","size":4}],"size":40},{"id":32881,"name":"legal","size":2},{"id":30281,"name":"animals and nature","children":[{"id":32805,"name":"dogs","size":2},{"id":32804,"name":"cats","size":9}],"size":58},{"id":30254,"name":"humor","size":113},{"id":30253,"name":"Humor"},{"id":30196,"name":"career","children":[{"id":101457,"name":"academic","children":[{"id":101458,"name":"disciplines","children":[{"id":101459,"name":"history of world in 2 hours","size":52}],"size":1}],"size":1}],"size":94},{"id":29196,"name":"products and services","children":[{"id":221121,"name":"services"},{"id":221120,"name":"food","size":4},{"id":221018,"name":"video","children":[{"id":221119,"name":"soccer","size":3},{"id":37905,"name":"wrestling","children":[{"id":37906,"name":"DVDs","children":[{"id":37981,"name":"divas","size":7},{"id":37978,"name":"anthologies","size":15},{"id":37977,"name":"lists","size":8},{"id":37907,"name":"documentaries","children":[{"id":38002,"name":"watched","size":37}],"size":48}],"size":41}],"size":18}],"size":63},{"id":221118,"name":"productivity","size":27},{"id":221117,"name":"housewares","size":43},{"id":221089,"name":"stores","size":6},{"id":221028,"name":"clothing","size":18},{"id":221027,"name":"toys","size":19},{"id":221026,"name":"download","size":14},{"id":221016,"name":"audio","size":59},{"id":221015,"name":"cosmetics","size":50},{"id":221014,"name":"Soccer","size":4},{"id":221013,"name":"buy these","size":21},{"id":38044,"name":"books","children":[{"id":221113,"name":"productivity and learning","size":15},{"id":221025,"name":"fashion","size":2},{"id":221024,"name":"wrestling","size":6},{"id":221023,"name":"travel","size":7},{"id":221022,"name":"self","size":33},{"id":221020,"name":"soccer","size":19},{"id":102854,"name":"other","size":3},{"id":38114,"name":"business","size":83},{"id":38045,"name":"technology","size":150}],"size":274},{"id":37452,"name":"stationery","size":41},{"id":37375,"name":"electronics","size":137},{"id":37373,"name":"owned","children":[{"id":83004,"name":"design, graphics","size":1},{"id":83003,"name":"technology","size":1},{"id":83002,"name":"business","size":4}],"size":106},{"id":37248,"name":"trash","size":46}],"size":53},{"id":29172,"name":"other","children":[{"id":101353,"name":"videos","size":60},{"id":36967,"name":"trash","size":126},{"id":30363,"name":"indian","size":49},{"id":30279,"name":"teen","size":127}],"size":5723},{"id":29171,"name":"productivity","size":90},{"id":28975,"name":"entertainment","children":[{"id":46172,"name":"Indian","children":[{"id":46173,"name":"home video","children":[{"id":46174,"name":"Mona Khan","size":9}],"size":1}],"size":1},{"id":37556,"name":"transformers","size":43},{"id":30274,"name":"stock music","children":[{"id":37130,"name":"mitja mithans","size":3}],"size":9},{"id":30273,"name":"computer games","size":3},{"id":30272,"name":"movies","size":1},{"id":13335,"name":"wrestling","children":[{"id":37559,"name":"videos","children":[{"id":55225,"name":"Saturday Nights Main Event","children":[{"id":64434,"name":"trash","size":2}],"size":28},{"id":46124,"name":"famous segments","size":14},{"id":37655,"name":"Main Event","size":1},{"id":37653,"name":"prime time wrestling","size":1},{"id":37565,"name":"pre-shows","children":[{"id":46815,"name":"1992","size":4},{"id":46814,"name":"1990","size":4},{"id":46812,"name":"1991","size":5},{"id":46811,"name":"1993","size":5},{"id":46810,"name":"1994","children":[{"id":46813,"name":"trash","size":1}],"size":6},{"id":46809,"name":"1997","size":8},{"id":46808,"name":"1996","size":12},{"id":46807,"name":"1995","size":8},{"id":46806,"name":"1998","size":3},{"id":37656,"name":"downloaded"}],"size":14}],"size":171},{"id":37189,"name":"products and services","children":[{"id":37444,"name":"VHS","size":7}],"size":13}],"size":63}],"size":566},{"id":28974,"name":"health","size":129},{"id":28973,"name":"sports","children":[{"id":30441,"name":"soccer","children":[{"id":37644,"name":"atletico madrid","children":[{"id":46270,"name":"2013-2014","children":[{"id":46349,"name":"staff","size":15},{"id":46348,"name":"angled","size":26}],"size":27}],"size":29},{"id":37640,"name":"domestic","children":[{"id":37641,"name":"italy","children":[{"id":37642,"name":"coppa italia","size":1}],"size":1}],"size":1},{"id":37637,"name":"europe","children":[{"id":37638,"name":"cup winners cup","size":1}],"size":1},{"id":37634,"name":"liverpool","size":6},{"id":37629,"name":"confederations cup","children":[{"id":37630,"name":"finals","size":3}],"size":1}],"size":75}],"size":645},{"id":28972,"name":"friends","children":[{"id":102980,"name":"other","size":1},{"id":46350,"name":"personal","children":[{"id":46351,"name":"my photos","children":[{"id":46352,"name":"print these","children":[{"id":46383,"name":"files","size":30}],"size":31}],"size":1}],"size":4},{"id":30258,"name":"girls","size":76},{"id":30257,"name":"relatives","size":2},{"id":30256,"name":"personal development","size":14},{"id":30255,"name":"humor","size":28}],"size":323},{"id":28783,"name":"personal development","size":1074},{"id":48,"name":"trash","size":398},{"id":47,"name":"business","children":[{"id":38167,"name":"non-profit","size":4},{"id":38166,"name":"clean tech","size":12},{"id":38165,"name":"structure","size":6},{"id":38164,"name":"manufacturing, distribution & supply chain","size":16},{"id":38163,"name":"strategy","size":2},{"id":38162,"name":"management and leadership","size":3},{"id":38161,"name":"management"},{"id":38160,"name":"negotiations","size":1},{"id":38159,"name":"decisions","size":3},{"id":38158,"name":"innovation","size":21},{"id":38157,"name":"industries"},{"id":38156,"name":"companies","size":6},{"id":38155,"name":"finance","size":13},{"id":37987,"name":"HBS cases","size":14},{"id":28781,"name":"branding","size":17},{"id":28780,"name":"marketing","size":18}],"size":997},{"id":46,"name":"technology","children":[{"id":83620,"name":"design","size":14},{"id":46585,"name":"building","size":1},{"id":30199,"name":"hardware","size":3},{"id":30198,"name":"websites (internet)","size":2},{"id":30197,"name":"products and services","size":7},{"id":28976,"name":"science","size":31},{"id":28802,"name":"code reading","size":2},{"id":28793,"name":"c programming","size":6},{"id":28786,"name":"web programming and design","size":7},{"id":28785,"name":"applications","children":[{"id":84062,"name":"video editing"}],"size":40},{"id":28784,"name":"trash","size":1},{"id":28776,"name":"source control","size":8},{"id":28767,"name":"mac","size":12},{"id":28766,"name":"visualization","size":9},{"id":28765,"name":"linux","size":23},{"id":28764,"name":"databases","children":[{"id":28804,"name":"data sets","size":11},{"id":28803,"name":"graph databases","size":52}],"size":69},{"id":28763,"name":"concepts","children":[{"id":28797,"name":"operating systems","size":6}],"size":20},{"id":28762,"name":"java","children":[{"id":28809,"name":"code samples","size":9},{"id":28808,"name":"apis","size":12}],"size":66},{"id":28761,"name":"javascript","size":39}],"size":5468},{"id":28754,"name":"travel","children":[{"id":30362,"name":"language","size":1}],"size":380}],"size":3786};
+}
+
+function renderVisualization(flareJson) {
+	var w = 1280,
+		h = 800,
+		node,
+		link,
+		root;
+	
+	
+	var force = d3.layout.force()
+		.on("tick", tick) // Without this there is no recursive layout, and the graph just stays in one disorganized mess
+	//    .charge(function(d) { return d._children ? -d.size / 100 : -30; })
+	//    .linkDistance(function(d) { return d.target._children ? 80 : 30; })
+		.size([w, h - 160])
+		;
+	
+	var vis = d3.select("#d3").append("svg:svg")
+		.attr("width", w)
+		.attr("height", h);
+	
+	
+	
+	// populate the graph with our input data
+	{
+	  root = flareJson;
+	  root.fixed = true;
+	  root.x = w / 2;
+	  root.y = h / 2 - 80;
+	  update();
+	}
+	
+	// When an internal node is clicked to collapse the children, or initial load
+	function update() {
+	  var nodes = flatten(root),
+		  links = d3.layout.tree().links(nodes);
+	
+	  // Restart the force layout.
+	  force
+		  .nodes(nodes)
+		  .links(links)
+		  .start();
+	
+	  // Update the links…
+	  link = vis.selectAll("line.link")
+		  .data(links, function(d) { return d.target.id; });
+	
+	  // Enter any new links.
+	  link.enter().insert("svg:line", ".node")
+		  .attr("class", "link")
+		  .attr("x1", function(d) { return d.source.x; })
+		  .attr("y1", function(d) { return d.source.y; })
+		  .attr("x2", function(d) { return d.target.x; })
+		  .attr("y2", function(d) { return d.target.y; });
+	
+	  // Exit any old links.
+	  link.exit().remove();
+	
+	  // Update the nodes…
+	  node = vis.selectAll("circle.node")
+		  .data(nodes, function(d) { return d.id; })
+		  .style("fill", color);
+	
+	  node.transition()
+		  .attr("r", function(d) { 
+			return d.size > 0 ? Math.max(Math.sqrt(d.size), 4.5) : 4.5;
+		  });
+	
+	  // Enter any new nodes.
+	  node.enter().append("svg:circle")
+		  .attr("class", "node")
+		  .attr("cx", function(d) { return d.x; })
+		  .attr("cy", function(d) { return d.y; })
+		  .attr("r", function(d) { 
+			return d.size > 0 ? Math.max(Math.sqrt(d.size), 4.5) : 4.5;
+		  })
+		  .style("fill", color)
+		  .on("click", click)
+		  .call(force.drag);      
+	
+	  // Exit any old nodes.
+	  node.exit().remove();
+	}
+	
+	function tick() {
+	  link.attr("x1", function(d) { return d.source.x; })
+		  .attr("y1", function(d) { return d.source.y; })
+		  .attr("x2", function(d) { return d.target.x; })
+		  .attr("y2", function(d) { return d.target.y; });
+	
+	  node.attr("cx", function(d) { return d.x; })
+		  .attr("cy", function(d) { return d.y; });
+	}
+	
+	// Color leaf nodes orange, and packages white or blue.
+	function color(d) {
+	  return d._children ? "red" : d.children ? "green" : "yellow";
+	}
+	
+	// Toggle children on click.
+	function click(d) {
+	 console.debug(d.name);
+	  if (d.children) {
+		d._children = d.children;
+		d.children = null;
+	  } else {
+		d.children = d._children;
+		d._children = null;
+	  }
+	  update();
+	}
+	
+	// Returns a list of all nodes under the root.
+	function flatten(root) {
+	  var nodes = [], i = 0;
+	
+	  function recurse(node) {
+		if (node.children) node.size = node.children.reduce(function(p, v) { return p + recurse(v); }, 0);
+		if (!node.id) node.id = ++i;
+		nodes.push(node);
+		return node.size;
+	  }
+	
+	  root.size = recurse(root);
+	  return nodes;
+	}
+}
+
+
+
+
 
 </script>
 <style>
@@ -724,7 +876,7 @@ body{
 					<td width="75%">
 						
 						<div id="d3"></div>
-						<div id="infovis" style="background-color : black"></div>    
+						<!--<div id="infovis" style="background-color : black"></div>    -->
 						<ol id="urls"></ol>
 						<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
 						<div id="batchStatus"></div>
