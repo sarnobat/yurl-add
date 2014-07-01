@@ -96,11 +96,6 @@ function showLinks(biggestImages) {
 			var originalKeyBindings = $.extend(true, {}, result);// TODO: what does this do?
 			categories = result;	  
 			configureKeyBindings(categories);
-			{
-				$.each(categories, function(a,binding,c){
-					$("#categoryButtonsCell").append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
-				});
-			}
 		});
 	
 		function configureKeyBindings(result) {
@@ -266,8 +261,10 @@ function showLinks(biggestImages) {
 				
 				{
 					var categoryButtons = four;
-					
-	
+					// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
+					$.each(categories, function(a,binding,c){
+						categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
+					});						
 				}
 				
 				{
@@ -296,8 +293,6 @@ function showLinks(biggestImages) {
 			.success(
 				function(data) { 
 					  
-					  console.debug(data.categoriesTree);
-					  
 					  renderVisualization(data.categoriesTree);
 					  //renderVisualization(getData());
 					  //drawVisualization(data.categoriesTree);
@@ -319,11 +314,8 @@ function showLinks(biggestImages) {
     //// Update the key bindings
     ////
     
-    console.debug('declaring addKeyBindingsUpdateHandler function...');
-    
     addKeyBindingsUpdateHandler : {
 		var oldKeyBindings;
-		console.debug('inside addKeyBindingsUpdateHandler function...');
 		$("#keys").focus(function() {
 			console.debug('focus callback begin');
 			oldKeyBindings = $.trim($("#keys").val());
@@ -340,9 +332,7 @@ function showLinks(biggestImages) {
 			console.debug('sending ' + url);
 			$.getJSON(url, function(result){})
 				.success(function(data) {  
-					console.debug('server completed successfully, configuring new bindings...');
 					configureKeyBindings(data);
-					console.debug('new bindings configured');
 				})
 				.error(function() { })
 				.complete(function() { });
@@ -681,7 +671,7 @@ function getData() {
 
 function renderVisualization(flareJson) {
 	var w = 680,
-		h = 700,
+		h = 500,
 		node,
 		link,
 		root;
@@ -868,10 +858,10 @@ body{
 						<ol id="keyLinks"  class="buttonize" style="" ></ol>
 						<font color=grey><div id="status">Init</div></font>
 						<textarea id="keys" cols="34" rows="20px" class="buttonize"></textarea>
-						<br><br>
-						<div id="categoriesTree"  class="buttonize">
-						<br><br>
 						<div id="categoriesRecursive"  class="buttonize">
+						<br><br>
+						<div id="categoriesTree"  class="buttonize"></div>
+						<br><br>
 						</div>
 						
 					</td>

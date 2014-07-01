@@ -279,7 +279,7 @@ public class Yurl {
 				Map<String, Object> theParams = new HashMap<String, Object>();
 				theParams.put("rootId", iRootId);
 				JSONObject theQueryResultJson = execute(
-						"start n=node({rootId}) match n-[CONTAINS]->u return n.name, count(u) as cnt",
+						"start n=node({rootId}) match n-[CONTAINS]->u where has(u.title) return n.name, count(u) as cnt",
 						theParams);
 				JSONArray outerArray = (JSONArray) theQueryResultJson
 						.get("data");
