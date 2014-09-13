@@ -324,6 +324,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		five.append("<input type=button class='genericButton' value='I own this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37373+"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Buy this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221013+"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Download this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221026+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Downloaded this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 322410 +"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Watched' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Watch this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'><br>");
 	}	
@@ -382,7 +383,7 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 	}
 
 	// Tooltip
-	var img = $($.parseHTML(imageCell));
+	var img = $($.parseHTML("<a href='"+field.url+"'>" + imageCell + "</a>"));
 	img.tooltip({
 		items: "img",
 		content:  field.title + "<br><font style=\"font-size : xx-small \">"+field.url+"</font>",
@@ -924,9 +925,26 @@ body{
 					<td width="75%" style="vertical-align: top">
 						<div id="tabs">
 							  <ul>
+							  <!--
+							  * thumbnails
+** to identify and open what you're looking for most (e.g. videos)
+* cards
+** sorting into subcategory
+* table view
+** deciding whether to buy a product before others you already want
+** as compact as Google Reader/Feedly (so you don't feel like creating RSS feeds so that you can view in Feedly)
+* plaintext
+** for future-proofing, platform independent portability
+* pdf (compact)
+** for a simple list to take when travelling
+* pdf (argos catalog view)
+** printed summary for browsing in bedroom when bookshelf isn't big enough
+ -->
 								<li><a href="#tabs-1">Cards</a></li>
 								<li><a href="#tabs-2">Grid</a></li>
-								<li><a href="#tabs-3">List</a></li>
+								<li><a href="#tabs-3">Table/List</a></li>
+								<li><a href="#tabs-4">Printable</a></li>
+								<li><a href="#tabs-5">Plaintext/Export</a></li>
 							  </ul>
 							  <div id="tabs-1">
 								  <ol id="url_thumbnails"></ol>
@@ -936,6 +954,11 @@ body{
 							  </div>
 							  <div id="tabs-3">
 							  </div>
+                                                          <div id="tabs-4">
+                                                          </div>
+							  <div ide="tabs-5">
+							  </div>
+
 						</div>
 						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
 						<div id="d3" style="background-color:grey"></div>

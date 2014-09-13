@@ -1136,8 +1136,12 @@ System.out.println(outputFilename);
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
-		JdkHttpServerFactory.createHttpServer(
-				new URI("http://localhost:4447/"), new ResourceConfig(
-						HelloWorldResource.class));
+		try {
+			JdkHttpServerFactory.createHttpServer(
+					new URI("http://localhost:4447/"), new ResourceConfig(
+							HelloWorldResource.class));
+		} catch (IOException e) {
+			System.out.println("Not creating server instance");
+		}
 	}
 }
