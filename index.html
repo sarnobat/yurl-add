@@ -132,7 +132,7 @@ function showLinks(biggestImages) {
 					}
 					if (binding.key == String.fromCharCode(event.which)) {
 						var parentId = binding.id;
-						var childId = $("#urls-cards").children()[0].id;
+						var childId = $("#url_cards").children()[0].id;
 						var currentRootId = rootId;
 						relate(parentId, childId, currentRootId);
 					}
@@ -303,6 +303,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		buttonCell.append("<br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
+		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'><br>");			
 		buttonCell.append("<br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
@@ -327,6 +328,9 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		five.append("<input type=button class='genericButton' value='Downloaded this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 322410 +"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Watched' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Watch this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Documentary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37659+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Priority 3' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'><br>");
+		
 	}	
 }
 
@@ -901,6 +905,7 @@ body{
 					<td width="25%" valign=top>
 						<a id="up">Up</a>
 						<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
+						<a href="http://netgear.rohidekar.com/launcher">Netcat Query</a>
 						<div id=rootColor class="buttonize">
 							<center>
 								<br><h2><span id="category"></span>(<span id="count"></span>)<br></h2><br>
@@ -925,8 +930,8 @@ body{
 					<td width="75%" style="vertical-align: top">
 						<div id="tabs">
 							  <ul>
-							  <!--
-							  * thumbnails
+<!--
+* thumbnails
 ** to identify and open what you're looking for most (e.g. videos)
 * cards
 ** sorting into subcategory
@@ -935,13 +940,17 @@ body{
 ** as compact as Google Reader/Feedly (so you don't feel like creating RSS feeds so that you can view in Feedly)
 * plaintext
 ** for future-proofing, platform independent portability
+** must contain urls and titles
 * pdf (compact)
-** for a simple list to take when travelling
+** for a simple list to take when travelling to a bookstore
+** doesn't need to have URLs
 * pdf (argos catalog view)
 ** printed summary for browsing in bedroom when bookshelf isn't big enough
- -->
-								<li><a href="#tabs-1">Cards</a></li>
-								<li><a href="#tabs-2">Grid</a></li>
+** for seeing what you own
+** for seeing what you could buy when you're passively shopping
+-->
+								<li><a href="#tabs-1">Grid</a></li>
+								<li><a href="#tabs-2">Cards</a></li>
 								<li><a href="#tabs-3">Table/List</a></li>
 								<li><a href="#tabs-4">Printable</a></li>
 								<li><a href="#tabs-5">Plaintext/Export</a></li>

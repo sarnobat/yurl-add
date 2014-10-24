@@ -101,9 +101,6 @@ public class Yurl {
 		@Produces("application/json")
 		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
 				@QueryParam("urls") String iUrls) throws Exception {
-//			if (true){
-//				throw new RuntimeException("batchInsert() - looks like we never actually implemented this");
-//			}
 			Preconditions.checkArgument(iRootId != null);
 			System.out.println("batchInsert - " + iRootId);
 			// System.out.println("batchInsert - " + URLDecoder.decode(iUrls,
@@ -118,14 +115,21 @@ public class Yurl {
 				// System.out.println("lines 1");
 				// System.out.println("lines 2: " + lines);
 				String first = lines[i];
-				System.out.println("first: " + first);
+				
+				if (first.startsWith("http")) {
+					stash(first, iRootId);
+					++i;
+					continue;
+				}
+				
+				//System.out.println("first: " + first);
 				String theHttpUrl;
 				try {
 					// Fails if it sees the string "%)"
 					theHttpUrl = URLDecoder.decode(first, "UTF-8");
 				} catch (Exception e) {
-					System.out.println("Could not decode");
-					System.out.println(e);
+					//System.out.println("Could not decode");
+					//System.out.println(e);
 					System.out.println(e.getStackTrace());
 					// i += lines.length();
 					addToUnsuccessful(unsuccessfulLines, first, "");
@@ -140,10 +144,10 @@ public class Yurl {
 				if (first.startsWith("=")) {
 					++i;
 					addToUnsuccessful(unsuccessfulLines, first, "");
-					System.out.println("1.1");
+					//System.out.println("1.1");
 					continue;
 				}
-				System.out.println("2");
+				//System.out.println("2");
 				if (first.startsWith("http")) {
 					++i;
 					addToUnsuccessful(unsuccessfulLines, first, "");
@@ -152,7 +156,6 @@ public class Yurl {
 				}
 				System.out.println("3");
 				if (first.matches("^\\s*" + '$')) {
-
 					System.out.println("whitespace: " + first);
 					++i;
 					continue;
@@ -1034,7 +1037,7 @@ System.out.println(outputFilename);
 			MultiValueMap parentToChildren = new MultiValueMap();
 			getParentChildrenMap: {
 				for (int i = 0; i < cypherRawResults.length(); i++) {
-	//System.out.println('getCategoriesTree() - cypherRawResults - ' + i + '  ' + cypherRawResults.getJSONArray(i));
+					//System.out.println('getCategoriesTree() - cypherRawResults - ' + i + '  ' + cypherRawResults.getJSONArray(i));
 					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
 					for (int j = 0; j < a2.length(); j++) {
 						JSONObject parent = new JSONObject(a2.getString(j));
@@ -1140,7 +1143,7 @@ System.out.println(outputFilename);
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:4447/"), new ResourceConfig(
 							HelloWorldResource.class));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.out.println("Not creating server instance");
 		}
 	}
