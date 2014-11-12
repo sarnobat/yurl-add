@@ -1139,6 +1139,7 @@ System.out.println(outputFilename);
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
+		System.err.println("main() - begin");
 		try {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:4447/"), new ResourceConfig(
