@@ -2,6 +2,8 @@
 <html>
 <head>
 
+<link rel="shortcut icon" href="http://netgear.rohidekar.com/static/icons/Orb_Icons_005.png" type="image/x-icon" />
+
 <link rel="stylesheet" href="http://jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 
@@ -292,7 +294,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 			var site = urlElements[0];
 			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
 		}
-		two.append("<font style=\"color: #002366\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font></sub>");
+		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font></sub>");
 	}
 	
 	var imageCell = createImageCell(field, biggestImages, 300, resultRowNumber);
@@ -865,8 +867,11 @@ body{
 
 .genericButton {
 	background-color: #FDFD96;
+	border-radius: 28px;
 }
-
+.genericButton:hover {
+	border-radius: 1px;
+}
 
 .buttonize {
 	//padding:20px;
