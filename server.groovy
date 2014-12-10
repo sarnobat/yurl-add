@@ -975,7 +975,7 @@ System.out.println(outputFilename);
 		public Response categoriesRecursive(
 				@QueryParam("parentId") Integer iParentId)
 				throws JSONException, IOException {
-			System.out.println("categoriesRecurisve() - begin");
+			System.out.println("categoriesRecursive() - begin");
 			JSONArray oKeys = getFlatListOfSubcategoriesRecursive(iParentId);
 			JSONObject ret = new JSONObject();
 			ret.put("flat", oKeys);

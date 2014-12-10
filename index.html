@@ -342,10 +342,11 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 	var hasScreenshot = false;
 	{
 		if (field.url.match(".jpg\??") || 
+			field.url.match(/.*jpg/i) ||
 			field.url.match(".gif$") || 
 			field.url.match(".png\??") || 
 			field.url.match("images.q=tbn:")) {
-			imageCell += ("<img class=itemImage src="+field.url+" width="+imageSize+">");
+			imageCell += ("<img class=itemImage src='"+field.url+"' width="+imageSize+">");
 			hasScreenshot = true;
 		}
 		if (field.url.match("youtube.com")) {
@@ -526,6 +527,7 @@ function swap(firstId, secondId) {
 
 function sendBatch() {
 	var urls = encodeURIComponent($("#urlBatchToSend").val());
+	alert(urls);
 	$("#batchStatus").text("Sending new batch");	
 	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + urls, function(result){})
 		.success(function(data) {
