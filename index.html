@@ -12,8 +12,8 @@
 <script src="jquery/jquery-ui.js"></script>
 
 
-<script src="jquery/hover_zoom.min.js"></script>
-
+<!-- WORKS BETTER THAN OTHERS BUT STILL NOT IDEAL <script src="jquery/hover_zoom.min.js"></script> -->
+<script src="http://netgear.rohidekar.com/yurl/js/imagezoom.ssarnobat.js"></script>
 <script type="text/javascript" src="jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
@@ -172,7 +172,7 @@ function showLinks(biggestImages) {
 				fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
 				++resultRowNumber;
 			});
-			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
+//			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
 			$("#status").text("Done")
 		});
 	}
@@ -346,7 +346,7 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 			field.url.match(".gif$") || 
 			field.url.match(".png\??") || 
 			field.url.match("images.q=tbn:")) {
-			imageCell += ("<img class=itemImage src='"+field.url+"' width="+imageSize+">");
+			imageCell += ("<img class=itemImage src='"+field.url+"' width="+imageSize+" onmouseenter='zoom(this)'>");
 			hasScreenshot = true;
 		}
 		if (field.url.match("youtube.com")) {
@@ -391,10 +391,10 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 
 	// Tooltip
 	var img = $($.parseHTML("<a href='"+field.url+"'>" + imageCell + "</a>"));
-	img.tooltip({
+/*	img.tooltip({
 		items: "img",
 		content:  field.title + "<br><font style=\"font-size : xx-small \">"+field.url+"</font>",
-	});	
+	});	*/
 	return img;
 }
 
