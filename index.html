@@ -527,7 +527,6 @@ function swap(firstId, secondId) {
 
 function sendBatch() {
 	var urls = encodeURIComponent($("#urlBatchToSend").val());
-	alert(urls);
 	$("#batchStatus").text("Sending new batch");	
 	$.getJSON(urlBase + "/batchInsert?rootId=" + rootId + "&urls=" + urls, function(result){})
 		.success(function(data) {
@@ -920,6 +919,7 @@ body{
 						</div>
 						<!--Favorites-->
                                                 <div id='favorites' class='buttonize'>
+                                                <a href='/yurl/?rootId=469990' >Home</a><br>
                                                 <a href='/yurl/?rootId=37658' >Youtube Playlists (videos)</a><br>
                                                 <a href='/yurl/?rootId=37567'>Watch these</a><br>
 						<a href='/yurl/?rootId=37652'>Watched</a><br><br>

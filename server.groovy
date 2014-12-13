@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -117,7 +118,7 @@ public class Yurl {
 				String first = lines[i];
 				
 				if (first.startsWith("http")) {
-					stash(first, iRootId);
+					stash(URLEncoder.encode(first, "UTF-8"), iRootId);
 					++i;
 					continue;
 				}
@@ -550,6 +551,7 @@ public class Yurl {
 				@QueryParam("rootId") Integer iRoodId) throws JSONException,
 				IOException {
 			System.out.println("stash() - begin");
+			// This will convert
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 			System.out.println("stash() - url decoded: " + theHttpUrl);
 			String theTitle = getTitle(new URL(theHttpUrl));
@@ -565,7 +567,7 @@ public class Yurl {
 				String id = (String) theNewNodeId.get(0);
 				System.out.println(id);
 
-				launchAsynchronousTasks(iUrl, id);
+				launchAsynchronousTasks(theHttpUrl, id);
 				// TODO: check that it returned successfully (redundant?)
 				System.out.println(newNodeJsonObject.toString());
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
