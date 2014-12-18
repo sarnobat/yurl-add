@@ -57,11 +57,8 @@ var rootId;
 var parentOfRootId;
 var orderedDescending = true;
 
-//$(document).ready(showLinks({}));
-
 function getBiggestImages() {
 	$.getJSON("http://localhost:3000/biggestImages", function(result){
-				//alert(JSON.stringify(result));
 				showLinks(result);
 			});
 }
@@ -246,7 +243,6 @@ function fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages,
 	if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
 		return;
 	}
-	//console.debug(resultRowNumber);
 	var toBeAppended = createImageCell(field, biggestImages, 100, resultRowNumber);
 	$("#url_thumbnails").append(toBeAppended);
 	
@@ -434,7 +430,7 @@ function removeTop(parentId, childId) {
 		target = "#list_"+parentId;
 	}
 	var options = { to: target, className: "ui-effects-transfer" };
-	$($("#" + childId)).effect('transfer',options,50,function() { // !!!!!!!! TODO : Wrong. remove the one specified by child ID
+	$($("#" + childId)).effect('transfer', options, 50, function() { // !!!!!!!! TODO : Wrong. remove the one specified by child ID
 		$($("#" + childId)).effect( "blind",null, 5, function() { $(this).remove(); });
 	});	
 }
@@ -567,8 +563,7 @@ function tagUrlWithCategoryIds(nodeId, selections, button) {
 	$.getJSON(url, 
 		function(result){
 		})
-		.success(function(data) {  
-			//$("#"+nodeId).remove();
+		.success(function(data) {
 			button.style.cssText = "background-color : green";
 		})
 		.error(function() { 
@@ -592,9 +587,21 @@ function setParentOfRootId(nodeId) {
 	.complete(function() { });
 }
 
+$(function() {
+	$( "#tabs" ).tabs();
+});
+
+// TODO: Remove. Unused
+function addEmbeddedVideo(id, url) {
+	$("#" + id).children().last().append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
+}
+
+//----------------------------------------------------------------------------------------
+// D3 Visualization
+//----------------------------------------------------------------------------------------
+
 function drawVisualization(data) {
 	console.debug(data);
-	//alert(JSON.stringify(data));
 	var ua = navigator.userAgent;
 	var forceDirectedGraph = new $jit.ForceDirected({
 		injectInto: 'infovis',
@@ -641,9 +648,6 @@ function drawVisualization(data) {
 		addNodes(data, listOfNodes, 0);
 	}
 
-	//console.debug("List of nodes...");
-	//console.debug(listOfNodes);
-	
 	forceDirectedGraph.loadJSON(listOfNodes); 
 
 	forceDirectedGraph.computeIncremental({
@@ -689,7 +693,6 @@ function getColorForLevel(level) {
 		return "blue";
 	}
 	return "yellow";
-	
 }
 
 function getShapeForLevel(level) {
@@ -703,7 +706,6 @@ function getShapeForLevel(level) {
 		return "triangle";
 	}
 	return "circle";
-	
 }
 
 function getAdjacencies(category) {
@@ -715,11 +717,6 @@ function getAdjacencies(category) {
 		}
 	}
 	return adjacenciesList;
-}
-
-// TODO: Remove. Unused
-function addEmbeddedVideo(id, url) {
-	$("#" + id).children().last().append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
 }
 
 function getData() {
@@ -851,12 +848,6 @@ function renderVisualization(flareJson) {
 	  return nodes;
 	}
 }
-
-$(function() {
-	$( "#tabs" ).tabs();
-});
-
-
 
 </script>
 <style>
