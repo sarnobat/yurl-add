@@ -735,16 +735,17 @@ function renderD3Visualization(flareJson) {
 	var vis = d3.select("#d3").append("svg:svg")
 		.attr("width", w)
 		.attr("height", h);
-		
-		var tooltip = d3.select("#d3")
-	.append("div")
-	.style("position", "absolute")
-	.style("z-index", "10")
-	.style("visibility", "hidden")
-	.text("a simple tooltip");
+
+	// I find this ridiculously complicated for adding hover text to a circle, but it 
+	// works		
+	var tooltip = d3.select("#d3")
+		.append("div")
+		.style("position", "absolute")
+		.style("z-index", "10")
+		.style("visibility", "hidden")
+		.text("a simple tooltip");
 		
 	$("#d3").hide();
-	
 	
 	// populate the graph with our input data
 	{
@@ -791,15 +792,15 @@ function renderD3Visualization(flareJson) {
 			return d.size > 0 ? Math.max(Math.sqrt(d.size), 4.5) : 4.5;
 		  });
 	
-	  // Enter any new nodes.
-	  // You can’t add text elements to circle elements because circle elements are not containers; 
-	  var whatisthis = node.enter().append("svg:circle")
-		  .attr("class", "node")
-		  .attr("cx", function(d) { return d.x; })
-		  .attr("cy", function(d) { return d.y; })
-		  .attr("r", function(d) { 
-			return d.size > 0 ? Math.max(Math.sqrt(d.size), 4.5) : 4.5;
-		  });
+		// Enter any new nodes.
+		// You can’t add text elements to circle elements because circle elements are not containers; 
+		var whatisthis = node.enter().append("svg:circle")
+			.attr("class", "node")
+			.attr("cx", function(d) { return d.x; })
+			.attr("cy", function(d) { return d.y; })
+			.attr("r", function(d) { 
+				return d.size > 0 ? Math.max(Math.sqrt(d.size), 4.5) : 4.5;
+			});
 		  	
 		whatisthis
 			.on("mouseover", function(){return tooltip.style("visibility", "visible");})
