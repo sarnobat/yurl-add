@@ -346,7 +346,7 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 			field.url.match(".gif$") || 
 			field.url.match(".png\??") || 
 			field.url.match("images.q=tbn:")) {
-			imageCell += ("<img class=itemImage src='"+field.url+"' width="+imageSize+" onmouseenter='zoom(this)'>");
+			imageCell += ("<img class=itemImage src='"+field.url+"' height="+imageSize+" onmouseenter='zoom(this)'>");
 			hasScreenshot = true;
 		}
 		if (field.url.match("youtube.com")) {
@@ -372,7 +372,8 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 			
 		} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
 			imageCell += ("");
-			var asin = field.url.replace(/.+dp\/([^\/]+)\/?.*/,'$1');
+			var asin = field.url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+			console.debug("ASIN = " + asin);
 			var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
 			imageCell += ("<img class=itemImage src='"+productImageUrl+"' height='280'>");
 			hasScreenshot = true;
