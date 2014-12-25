@@ -28,8 +28,12 @@
     font-size: 90%;
 }
 
+body {
+        background-color : #E7EDE1;
+}
+
 .ui-tabs .ui-tabs-panel {
-	background-color : #EEEEEE;
+	background-color : #E7EDE1;
 }
 
 circle.node {
@@ -368,6 +372,10 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 		} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
 			imageCell += ("");
 			var asin = field.url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+			asin = asin.replace(/.*dp./,'');
+			asin = asin.replace(/.*gp.aw.d./, '');
+			asin = asin.replace(/.ref_?=.*/, '');
+			asin = asin.replace(/.*offer-listing./, '');
 			console.debug("ASIN = " + asin);
 			var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
 			imageCell += ("<img class=itemImage src='"+productImageUrl+"' height='280'>");
@@ -866,7 +874,6 @@ function renderD3Visualization(flareJson) {
 body{
 	font-family:Verdana; font-size: 12px;
 	//text-shadow:4px 4px #eeeeee;
-	background-color:#eeeeee
 }
 
 .genericButton {
@@ -884,7 +891,7 @@ body{
 	box-shadow:
 		inset 0 0 9px #222222, 
 		10px 10px 14px #999999;// internal and external shadow
-	background-color:#fafafa
+	background-color:#E6FAD2
 }
 
 .screenshot {
@@ -894,7 +901,7 @@ body{
 	box-shadow:
 		inset 0 0 9px #222222, 
 		0px 0px 0px #999999;// internal and external shadow
-	background-color:#fafafa
+	/* background-color:#E6FAD2*/
 }
 </style>
 
@@ -902,7 +909,7 @@ body{
 <link type="text/css" href="http://philogb.github.io/jit/static/v20/Jit/Examples/css/base.css" rel="stylesheet" />
 
 </head>
-<body onload='showLinks({})'>
+<body onload='showLinks({})' style="background-color : #E7EDE1;">
 	<br>
 	<br>
 	<table>
@@ -922,13 +929,16 @@ body{
 						</div>
 						<!--Favorites-->
                                                 <div id='favorites' class='buttonize'>
-                                                <a href='/yurl/?rootId=469990' >Home</a><br>
-                                                <a href='/yurl/?rootId=37658' >Youtube Playlists (videos)</a><br>
-                                                <a href='/yurl/?rootId=37567'>Watch these</a><br>
-						<a href='/yurl/?rootId=37652'>Watched</a><br><br>
+
                                                 <a href='/yurl/?rootId=29196' >Products & Services</a><br>
                                                 <a href='/yurl/?rootId=221013'> Buy these</a><br>
                                                 <a href='/yurl/?rootId=37373'> Owned</a><br><br>
+
+                                                <a href='/yurl/?rootId=469990' >Home (Photos)</a><br>
+                                                <a href='/yurl/?rootId=37658' >Youtube Playlists (videos)</a><br>
+                                                <a href='/yurl/?rootId=37567'>Watch these</a><br>
+						<a href='/yurl/?rootId=37652'>Watched</a><br><br>
+
                                                 <a href='/yurl/?rootId=221026'> Download</a><br>
                                                 <a href='/yurl/?rootId=37581'> Download these</a><br>
                                                 <a href='/yurl/?rootId=322410'> Downloaded</a><br><br>
@@ -1030,9 +1040,14 @@ reading list (pdf))
 			</table>	
 		</td></tr>
 	<table>
-<textarea>
+<br>
+
+<textarea cols=200>
 javascript:window.location.href = 'http://netgear.rohidekar.com/yurl/stash2.html?url=' + encodeURIComponent(document.URL) + '&nodeId=45'  ;
 /* main: 45, product: 29196, video: 37658, tech: 46, other: 29172 */
 </textarea>
+<br>
+<br>
+<br>
 </body>
 </html>
