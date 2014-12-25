@@ -866,15 +866,17 @@ System.out.println(outputFilename);
 					.type("application/json").build();
 		}
 
-                @GET
-                @Path("createAndRelate")
-                @Produces("application/json")
-                public Response createSubDirAndMoveItem(@QueryParam("newParentName") String iNewParentName,
-                                @QueryParam("childId") Integer iChildId,
-                                @QueryParam("currentParentId") Integer iCurrentParentId)
-                                throws JSONException, IOException {
+		@GET
+		@Path("createAndRelate")
+		@Produces("application/json")
+		public Response createSubDirAndMoveItem(
+				@QueryParam("newParentName") String iNewParentName,
+				@QueryParam("childId") Integer iChildId,
+				@QueryParam("currentParentId") Integer iCurrentParentId)
+				throws JSONException, IOException {
 			Integer iNewParentId;
 			// TODO : Implement this
+			return null;
 		}
 
 		/**
