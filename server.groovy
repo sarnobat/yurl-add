@@ -295,9 +295,9 @@ public class Yurl {
 		public Response uncategorized(@QueryParam("rootId") Integer iRootId)
 				throws JSONException, IOException {
 			checkNotNull(iRootId);
-			// TODO: the source is null clause should be obsoleted
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("rootId", iRootId);
+			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
 					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?,n.created?,n.ordinal? ORDER BY n.ordinal? DESC",
 					theParams.build());
