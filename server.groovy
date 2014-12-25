@@ -1139,16 +1139,6 @@ System.out.println(outputFilename);
 			}
 			return oKeys;
 		}
-		
-//		@Deprecated
-//		public static Map<Integer, Integer> test(JSONObject categoriesTree ) throws JSONException, IOException {
-//			JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
-//			Map<Integer, Integer> categorySizes = getCategorySizes(counts.getJSONArray("data"));
-//			
-//			addSizes(categoriesTree,categorySizes);
-//			System.out.println(categoriesTree);
-//			return categorySizes;
-//		}
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
