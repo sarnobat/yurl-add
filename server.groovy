@@ -3,7 +3,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -113,8 +112,6 @@ public class Yurl {
 			while (i < lines.length) {
 
 				System.out.println("1");
-				// System.out.println("lines 1");
-				// System.out.println("lines 2: " + lines);
 				String first = lines[i];
 				
 				if (first.startsWith("http")) {
@@ -122,42 +119,29 @@ public class Yurl {
 					++i;
 					continue;
 				}
-				
-				//System.out.println("first: " + first);
 				String theHttpUrl;
 				try {
 					// Fails if it sees the string "%)"
 					theHttpUrl = URLDecoder.decode(first, "UTF-8");
 				} catch (Exception e) {
-					//System.out.println("Could not decode");
-					//System.out.println(e);
 					System.out.println(e.getStackTrace());
-					// i += lines.length();
 					addToUnsuccessful(unsuccessfulLines, first, "");
 					++i;
-					// for (int j = 0; j < lines.length(); j++) {
-					// addToUnsuccessful(unsuccessfulLines, lines[j], "");
-					// ++i;
-					// }
 					continue;
 				}
 				System.out.println("decoded: " + theHttpUrl);
 				if (first.startsWith("=")) {
 					++i;
 					addToUnsuccessful(unsuccessfulLines, first, "");
-					//System.out.println("1.1");
 					continue;
 				}
-				//System.out.println("2");
 				if (first.startsWith("http")) {
 					++i;
 					addToUnsuccessful(unsuccessfulLines, first, "");
-					System.out.println("1.2");
 					continue;
 				}
 				System.out.println("3");
 				if (first.matches("^\\s*" + '$')) {
-					System.out.println("whitespace: " + first);
 					++i;
 					continue;
 				}
@@ -170,11 +154,8 @@ public class Yurl {
 					System.out.println("to be processed: " + second);
 
 					stash(second, iRootId);
-					System.out.println("5");
-					System.out.println("5.25");
 
 				} else {
-					System.out.println("10");
 					addToUnsuccessful(unsuccessfulLines, first, second);
 				}
 				i += 2;
@@ -186,6 +167,7 @@ public class Yurl {
 					.entity(entity.toString()).type("application/json").build();
 		}
 
+		// TODO : remove mutable state
 		public void addToUnsuccessful(StringBuffer unsuccessfulLines,
 				String first, String second) {
 			unsuccessfulLines.append(first);
@@ -316,8 +298,6 @@ public class Yurl {
 			// TODO: the source is null clause should be obsoleted
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("rootId", iRootId);
-			// TODO: order these by most recent-first (so that they appear this
-			// way in the UI)
 			JSONObject theQueryResultJson = execute(
 					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?,n.created?,n.ordinal? ORDER BY n.ordinal? DESC",
 					theParams.build());
