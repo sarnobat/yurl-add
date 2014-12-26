@@ -169,9 +169,10 @@ function showLinks(biggestImages) {
 		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
 			$("#status").text("Populating")
 			var resultRowNumber = 0;
-			$.each(result.urlsAtTopLevel, function(resultRowNumber, field) {
+			$.each(result.urls, function(resultRowNumber, field) {
 				fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories);
 				fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
+				console.debug(field.parentId);
 				++resultRowNumber;
 			});
 //			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
@@ -376,7 +377,6 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 			asin = asin.replace(/.*gp.aw.d./, '');
 			asin = asin.replace(/.ref_?=.*/, '');
 			asin = asin.replace(/.*offer-listing./, '');
-			console.debug("ASIN = " + asin);
 			var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
 			imageCell += ("<img class=itemImage src='"+productImageUrl+"' height='280'>");
 			hasScreenshot = true;

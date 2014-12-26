@@ -67,6 +67,15 @@ public class Yurl {
 		private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 		private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/Unsorted/images/";
 
+		static {
+			System.out.println("static() begin");
+			refreshCategoriesTreeCache();
+		}
+
+		// This never gets called
+		HelloWorldResource() {
+		}
+
 		@GET
 		@Path("parent")
 		@Produces("application/json")
@@ -297,10 +306,69 @@ public class Yurl {
 			checkNotNull(iRootId);
 			JSONArray theUncategorizedNodesJson = getItemsAtLevel(iRootId);
 			JSONObject retVal = new JSONObject();
-			retVal.put("urlsAtTopLevel", theUncategorizedNodesJson);
+			try {
+				retVal.put("urlsAtTopLevel", theUncategorizedNodesJson);
+				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(retVal.toString())
 					.type("application/json").build();
+		}
+
+		private JSONArray getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
+			if (categoriesTreeCache == null) {
+				categoriesTreeCache = getCategoriesTree(iRootId);
+			}
+			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
+			theParams.put("rootId", iRootId);
+			// TODO: the source is null clause should be obsoleted
+			JSONObject theQueryResultJson = execute(
+					"start source=node(37567) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = 37567) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title?,u.url?, extract(r1 in r | id(r1)) as path,u.created?,u.ordinal? ORDER BY u.ordinal? DESC",
+					theParams.build());
+			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
+			JSONArray theUncategorizedNodesJson = new JSONArray();
+			for (int i = 0; i < theDataJson.length(); i++) {
+				JSONObject anUncategorizedNodeJsonObject = new JSONObject();
+				_1: {
+					JSONArray anItem = theDataJson.getJSONArray(i);
+					_11: {
+						String anId = (String) anItem.get(0);
+						anUncategorizedNodeJsonObject.put("id", anId);
+					}
+					_12: {
+						String aTitle = (String) anItem.get(1);
+						anUncategorizedNodeJsonObject.put("title", aTitle);
+					}
+					_13: {
+						String aUrl = (String) anItem.get(2);
+						anUncategorizedNodeJsonObject.put("url", aUrl);
+					}
+					_14: {
+						try {
+							JSONArray path = (JSONArray) anItem.get(3);
+							System.out
+									.println("getItemsAtLevelAndChildLevels() "
+											+ path.length());
+							if (path.length() < 2) {
+								 // Do nothing, it's just an immediate child URL
+							} else {
+								anUncategorizedNodeJsonObject.put("parentId",
+										path.get(1));
+								System.out
+										.println("getItemsAtLevelAndChildLevels() - parentId = "
+												+ path.get(1));
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
+			}
+			return theUncategorizedNodesJson;
 		}
 
 		private JSONArray getItemsAtLevel(Integer iRootId) throws IOException {
@@ -971,6 +1039,8 @@ System.out.println(outputFilename);
 		// Read operations
 		// ----------------------------------------------------------------------------
 
+		private static JSONObject categoriesTreeCache;
+		
 		@GET
 		@Path("categoriesRecursive")
 		@Produces("application/json")
@@ -981,14 +1051,39 @@ System.out.println(outputFilename);
 			JSONArray oKeys = getFlatListOfSubcategoriesRecursive(iParentId);
 			JSONObject ret = new JSONObject();
 			ret.put("flat", oKeys);
-			JSONObject categoriesTreeJson = getCategoriesTree(ROOT_ID);
+			JSONObject categoriesTreeJson;
+			if (categoriesTreeCache == null) {
+				categoriesTreeJson = getCategoriesTree(ROOT_ID);
+			} else {
+				categoriesTreeJson = categoriesTreeCache;
+				refreshCategoriesTreeCache();
+			}
 			ret.put("categoriesTree", categoriesTreeJson);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
 		}
 
+		private static void refreshCategoriesTreeCache() {
+			System.out.println("refreshCategoriesTreeCache() - begin");
+			new Thread(){
+				@Override
+				public void run() {
+					System.out.println("refreshCategoriesTreeCache() - run - started");
+					try {
+						categoriesTreeCache = getCategoriesTree(ROOT_ID);
+						System.out.println("refreshCategoriesTreeCache() - run - finished");
+					} catch (JSONException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}.start();
+		}
+
 		private static JSONObject getCategoriesTree(Integer rootId)
 				throws JSONException, IOException {
+			System.out.println("getCategoriesTree() - begin");
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			_1: {
 				theParams.put("parentId", rootId);
@@ -1004,9 +1099,8 @@ System.out.println(outputFilename);
 				System.out.println(categorySizes);
 				addSizes(categoriesTree,categorySizes);
 				System.out.println(categoriesTree);
-				
-				
 			}
+			System.out.println("getCategoriesTree() - end");
 			return categoriesTree;
 		}
 	
