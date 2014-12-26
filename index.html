@@ -172,7 +172,6 @@ function showLinks(biggestImages) {
 			$.each(result.urls, function(resultRowNumber, field) {
 				fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories);
 				fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
-				console.debug(field.parentId);
 				++resultRowNumber;
 			});
 //			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
@@ -261,6 +260,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 	var three = $("<td style='background-color:'>3");
 	var four = $("<td id='categoryButtonsCell' style='background-color:'>4");
 	var five = $("<td style='background-color:'>5");
+	var six = $("<td style='background-color:'>6");
 	
 	var table = $("<table/>");
 	{
@@ -278,6 +278,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 			table.append(row2);
 			row2.append(four);
 			row2.append(five);
+			row2.append(six);
 		}
 	
 		{
@@ -299,6 +300,10 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 	
 	var imageCell = createImageCell(field, biggestImages, 300, resultRowNumber);
 	three.append(imageCell);
+	
+	if (field.parentId != null) {
+		six.append("Parent ID: " + field.parentId);
+	}
 	
 	{
 		var buttonCell = two;
