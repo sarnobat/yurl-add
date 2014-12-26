@@ -318,7 +318,7 @@ public class Yurl {
 					.type("application/json").build();
 		}
 
-		private JSONArray getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
+		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 			if (categoriesTreeCache == null) {
 				categoriesTreeCache = getCategoriesTree(iRootId);
 			}
@@ -326,7 +326,7 @@ public class Yurl {
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start source=node(37567) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = 37567) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title?,u.url?, extract(r1 in r | id(r1)) as path,u.created?,u.ordinal? ORDER BY u.ordinal? DESC",
+					"start source=node(*) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title?,u.url?, extract(r1 in r | id(r1)) as path,u.created?,u.ordinal? ORDER BY u.ordinal? DESC",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -349,17 +349,18 @@ public class Yurl {
 					_14: {
 						try {
 							JSONArray path = (JSONArray) anItem.get(3);
-							System.out
-									.println("getItemsAtLevelAndChildLevels() "
-											+ path.length());
+//							System.out
+//									.println("getItemsAtLevelAndChildLevels() "
+//											+ path.length());
 							if (path.length() < 2) {
-								 // Do nothing, it's just an immediate child URL
+								anUncategorizedNodeJsonObject.put("parentId",
+										iRootId);
 							} else {
 								anUncategorizedNodeJsonObject.put("parentId",
-										path.get(1));
-								System.out
-										.println("getItemsAtLevelAndChildLevels() - parentId = "
-												+ path.get(1));
+										path.get(0));
+//								System.out
+//										.println("getItemsAtLevelAndChildLevels() - parentId = "
+//												+ path.get(1));
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -368,7 +369,21 @@ public class Yurl {
 				}
 				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
 			}
-			return theUncategorizedNodesJson;
+			
+			JSONObject ret = new JSONObject();
+			transform : {
+				for (int i = 0; i < theUncategorizedNodesJson.length(); i++) {
+					JSONObject jsonObject = (JSONObject) theUncategorizedNodesJson
+							.get(i);
+					String parentId = (String) jsonObject.get("parentId");
+					if (!ret.has(parentId)) {
+						ret.put(parentId, new JSONArray());
+					}
+					JSONArray target = (JSONArray) ret.get(parentId);
+					target.put(jsonObject);
+				}
+			}
+			return ret;
 		}
 
 		private JSONArray getItemsAtLevel(Integer iRootId) throws IOException {
@@ -1025,9 +1040,9 @@ System.out.println(outputFilename);
 			String theNeo4jResponse = IOUtils.toString(theResponse
 					.getEntityInputStream());
 			_1: {
-				System.out.println("BEGINNING OF RESPONSE");
-				System.out.println("RESPONSE" + theNeo4jResponse);
-				System.out.println("END OF RESPONSE");
+//				System.out.println("BEGINNING OF RESPONSE");
+//				System.out.println("RESPONSE" + theNeo4jResponse);
+//				System.out.println("END OF RESPONSE");
 				theResponse.getEntityInputStream().close();
 				theResponse.close();
 			}
@@ -1098,7 +1113,7 @@ System.out.println(outputFilename);
 				Map<Integer, Integer> categorySizes = getCategorySizes(counts.getJSONArray("data"));
 				System.out.println(categorySizes);
 				addSizes(categoriesTree,categorySizes);
-				System.out.println(categoriesTree);
+//				System.out.println(categoriesTree);
 			}
 			System.out.println("getCategoriesTree() - end");
 			return categoriesTree;
@@ -1207,7 +1222,7 @@ System.out.println(outputFilename);
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
-				System.out.println("getFlatListOfSubcategoriesRecursive() - " + i);
+//				System.out.println("getFlatListOfSubcategoriesRecursive() - " + i);
 				JSONObject aBindingObject = new JSONObject();
 				_1: {
 					JSONArray aBindingArray = theData.getJSONArray(i);
@@ -1216,8 +1231,8 @@ System.out.println(outputFilename);
 					String title = (String) aBindingArray.get(1);
 					aBindingObject.put("name", title);
 					oKeys.put(aBindingObject);
-					System.out.println("getFlatListOfSubcategoriesRecursive() - " + id
-							+ "\t::\t" + title);
+//					System.out.println("getFlatListOfSubcategoriesRecursive() - " + id
+//							+ "\t::\t" + title);
 				}
 			}
 			return oKeys;

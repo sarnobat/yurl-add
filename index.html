@@ -169,11 +169,15 @@ function showLinks(biggestImages) {
 		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
 			$("#status").text("Populating")
 			var resultRowNumber = 0;
-			$.each(result.urls, function(resultRowNumber, field) {
-				fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories);
-				fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
-				++resultRowNumber;
+			$.each(result.urls, function(categoryID, urlsInCategory) {
+				$("#url_thumbnails").append("<h3>" + categoryID +"</h3>")
+				$.each(urlsInCategory, function( resultRowNumber, field ) {
+						fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories);
+						fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
+						++resultRowNumber; // why are we mutating a param?
+				});
 			});
+			
 //			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
 			$("#status").text("Done")
 		});
