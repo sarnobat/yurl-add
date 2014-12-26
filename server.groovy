@@ -295,6 +295,15 @@ public class Yurl {
 		public Response uncategorized(@QueryParam("rootId") Integer iRootId)
 				throws JSONException, IOException {
 			checkNotNull(iRootId);
+			JSONArray theUncategorizedNodesJson = getItemsAtLevel(iRootId);
+			JSONObject retVal = new JSONObject();
+			retVal.put("urlsAtTopLevel", theUncategorizedNodesJson);
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(retVal.toString())
+					.type("application/json").build();
+		}
+
+		private JSONArray getItemsAtLevel(Integer iRootId) throws IOException {
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
@@ -306,25 +315,23 @@ public class Yurl {
 			for (int i = 0; i < theDataJson.length(); i++) {
 				JSONObject anUncategorizedNodeJsonObject = new JSONObject();
 				_1: {
-					JSONArray a = theDataJson.getJSONArray(i);
+					JSONArray anItem = theDataJson.getJSONArray(i);
 					_11: {
-						String anId = (String) a.get(0);
+						String anId = (String) anItem.get(0);
 						anUncategorizedNodeJsonObject.put("id", anId);
 					}
 					_12: {
-						String aTitle = (String) a.get(1);
+						String aTitle = (String) anItem.get(1);
 						anUncategorizedNodeJsonObject.put("title", aTitle);
 					}
 					_13: {
-						String aUrl = (String) a.get(2);
+						String aUrl = (String) anItem.get(2);
 						anUncategorizedNodeJsonObject.put("url", aUrl);
 					}
 				}
 				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
 			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(theUncategorizedNodesJson.toString())
-					.type("application/json").build();
+			return theUncategorizedNodesJson;
 		}
 
 		// -----------------------------------------------------------------------------

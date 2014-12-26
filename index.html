@@ -169,7 +169,7 @@ function showLinks(biggestImages) {
 		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
 			$("#status").text("Populating")
 			var resultRowNumber = 0;
-			$.each(result, function(resultRowNumber, field) {
+			$.each(result.urlsAtTopLevel, function(resultRowNumber, field) {
 				fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories);
 				fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
 				++resultRowNumber;
