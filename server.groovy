@@ -960,6 +960,7 @@ System.out.println(outputFilename);
 				@QueryParam("childId") Integer iChildId,
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
+			System.out.println("relate() Moving " + iChildId + " from " + iCurrentParentId + " to " + iNewParentId);
 			// first delete any existing contains relationship with the
 			// specified existing parent (but not with all parents since we
 			// could have a many-to-one contains)
@@ -1204,7 +1205,7 @@ System.out.println(outputFilename);
 				}
 			}
 			JSONObject json = idToJson.get(45);// TODO: use the constant
-			System.out.println(json.toString(4));
+//			System.out.println(json.toString(4));
 			return json;
 		}
 
