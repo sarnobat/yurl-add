@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+</head>
+<body>
+<div class="container container-xs-height">
+
+<!--
+        <div class="col-xs-2">
+        
+          <div id="image" class="row" style="height : 40% ;  width : 99%; background-color : lightblue">Image</div>-->
+          <div >
+			<div id="title" style="height: 50%; background-color : lightpink; font-size : large">Title</div>
+			<div id="url" style="height: 50%; background-color : bisque;word-wrap:break-word; font-size : small">URL</div>
+
+            <div class="row-xs-height row-fluid">
+
+				<div class="col-xs-6"></div>
+				<div class="col-xs-6">
+					<div id="button1" class="col-xs-height categoryButton" style="height : 33% ; background-color : yellow">button 1</div>
+					<div id="button2" class="col-xs-height categoryButton" style="height : 33% ; background-color : transparent">button 2</div>
+					<div id="button3" class="col-xs-height categoryButton" style="height : 33% ; background-color : orange">button 3</div>
+				</div>
+
+			</div>
+        <!--</div>
+      </div>-->
+
+    <script>
+var rootId = 45;
+var urlBase = "http://netgear.rohidekar.com:4447/yurl";    
+var items;
+$.getJSON(urlBase + "/uncategorized?rootId=" + rootId,function(results){
+	items = results;
+	populateItem(items[0]);
+});
+
+function populateItem(item) {
+	$("#title").text(item.title);
+	$("#url").text(item.url);
+}
+
+$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
+	populateButton(0);
+	populateButton(1);
+	populateButton(2);
+});
+
+function populateButton(i, category) {
+	$("#button" + i).text(i);
+}
+    		
+$('.categoryButton').on('tap', function() {
+	items.shift();
+	populateItem(items[0]);
+});
+    </script>
+</div>
+</body>
+</html>
