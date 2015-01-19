@@ -326,7 +326,7 @@ public class Yurl {
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start source=node(*) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title?,u.url?, extract(r1 in r | id(r1)) as path,u.created?,u.ordinal? ORDER BY u.ordinal? DESC",
+					"start source=node(*) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title,u.url, extract(r1 in r | id(r1)) as path,u.created,u.ordinal ORDER BY u.ordinal DESC",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -391,7 +391,7 @@ public class Yurl {
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start n=node(*) MATCH n<-[r?:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title?,n.url?,n.created?,n.ordinal? ORDER BY n.ordinal? DESC",
+					"start n=node(*) MATCH n<-[r:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title,n.url,n.created,n.ordinal ORDER BY n.ordinal DESC",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -583,7 +583,7 @@ public class Yurl {
 			// a way to do this in Cypher. If there isn't, this is not a huge
 			// compromise.
 			JSONObject theQueryJsonResult = execute(
-					"START n=node(*) MATCH parent-[c:CONTAINS]->n -[c2?:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key?,count(n2) as c order by c desc",
+					"START n=node(*) MATCH parent-[c:CONTAINS]->n -[c2:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key,count(n2) as c order by c desc",
 					theParams.build());
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
@@ -1132,6 +1132,9 @@ System.out.println(outputFilename);
 
 		private static void addSizes(JSONObject categoriesTree,
 				Map<Integer, Integer> categorySizes) {
+//			if (categoriesTree == null) {
+//	                        categoriesTree.put("size", 0);
+//			} else {
 			Integer id = categoriesTree.getInt("id");
 			categoriesTree.put("size", categorySizes.get(id));
 			if (categoriesTree.has("children")) {
@@ -1140,6 +1143,7 @@ System.out.println(outputFilename);
 					addSizes(children.getJSONObject(i), categorySizes);
 				}
 			}
+//			}
 		}
 
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
@@ -1204,7 +1208,7 @@ System.out.println(outputFilename);
 					}
 				}
 			}
-			JSONObject json = idToJson.get(45);// TODO: use the constant
+			JSONObject json = checkNotNull(idToJson.get(45));// TODO: use the constant
 //			System.out.println(json.toString(4));
 			return json;
 		}
