@@ -72,6 +72,8 @@ public class Yurl {
 			refreshCategoriesTreeCache();
 		}
 
+		private static JSONObject categoriesTreeCache;
+
 		// This never gets called
 		HelloWorldResource() {
 		}
@@ -305,10 +307,18 @@ public class Yurl {
 				throws JSONException, IOException {
 			checkNotNull(iRootId);
 			JSONArray theUncategorizedNodesJson = getItemsAtLevel(iRootId);
+			 JSONObject categoriesTreeJson;
+                        if (categoriesTreeCache == null) {
+                                categoriesTreeJson = getCategoriesTree(ROOT_ID);
+                        } else {
+                                categoriesTreeJson = categoriesTreeCache;
+                                refreshCategoriesTreeCache();
+                        }
 			JSONObject retVal = new JSONObject();
 			try {
 				retVal.put("urlsAtTopLevel", theUncategorizedNodesJson);
 				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+				retVal.put("categoriesRecursive", categoriesTreeJson);
 			}
 			catch (Exception e) {
 				e.printStackTrace();
@@ -318,6 +328,10 @@ public class Yurl {
 					.type("application/json").build();
 		}
 
+
+//		private JSONObject getCategoryIdsToCategories(Integer iRootId) {
+//		}
+
 		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 			if (categoriesTreeCache == null) {
 				categoriesTreeCache = getCategoriesTree(iRootId);
@@ -326,7 +340,7 @@ public class Yurl {
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start source=node(*) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title,u.url, extract(r1 in r | id(r1)) as path,u.created,u.ordinal ORDER BY u.ordinal DESC",
+					"start source=node({rootId}) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title,u.url, extract(r1 in r | id(r1)) as path,u.created,u.ordinal ORDER BY u.ordinal DESC",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -386,12 +400,13 @@ public class Yurl {
 			return ret;
 		}
 
+		@Deprecated
 		private JSONArray getItemsAtLevel(Integer iRootId) throws IOException {
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start n=node(*) MATCH n<-[r:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title,n.url,n.created,n.ordinal ORDER BY n.ordinal DESC",
+					"start n=node({rootId}) MATCH n<-[r:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title,n.url,n.created,n.ordinal ORDER BY n.ordinal DESC",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -583,7 +598,7 @@ public class Yurl {
 			// a way to do this in Cypher. If there isn't, this is not a huge
 			// compromise.
 			JSONObject theQueryJsonResult = execute(
-					"START n=node(*) MATCH parent-[c:CONTAINS]->n -[c2:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key,count(n2) as c order by c desc",
+					"START n=node({parentId}) MATCH parent-[c:CONTAINS]->n -[c2:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key,count(n2) as c order by c desc",
 					theParams.build());
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
@@ -704,7 +719,7 @@ public class Yurl {
 		private static void saveImage(String urlString, String targetDirPath)
 				throws IllegalAccessError, IOException {
 
-			URL url = new URL(urlString);
+			URL url = new URL(urlString.replaceAll("/", "-"));
 			BufferedImage image = ImageIO.read(url);
 			String extension = FilenameUtils.getExtension(urlString);
 			String baseName = FilenameUtils.getBaseName(urlString);
@@ -1025,16 +1040,16 @@ System.out.println(outputFilename);
 			thePostBody.put("query", iCypherQuery);
 			thePostBody.put("params", iParams);
 			
-			System.out.println("execute() - query - " + iCypherQuery);
-			System.out.println("execute() - params - " + iParams);
+			System.out.println("execute() - query - " + iCypherQuery + "\n\tparams - " + iParams);
 	
 			// POST {} to the node entry point URI
 			ClientResponse theResponse = theWebResource
 					.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }")
 					.post(ClientResponse.class, thePostBody);
+                        System.out.println("execute() - finished - " + iCypherQuery + "\n\tparams - " + iParams);
 			if (theResponse.getStatus() != 200) {
-				System.out.println("failed: " + iCypherQuery + "\tparams: "
+				System.out.println("failed: " + iCypherQuery + "\n\tparams: "
 						+ iParams);
 				throw new RuntimeException();
 			}
@@ -1054,8 +1069,6 @@ System.out.println(outputFilename);
 		// ----------------------------------------------------------------------------
 		// Read operations
 		// ----------------------------------------------------------------------------
-
-		private static JSONObject categoriesTreeCache;
 		
 		@GET
 		@Path("categoriesRecursive")
@@ -1152,6 +1165,7 @@ System.out.println(outputFilename);
 
 			MultiValueMap parentToChildren = new MultiValueMap();
 			getParentChildrenMap: {
+				System.out.println("createCategoryTreeFromCypherResultPaths() - size " + cypherRawResults.length());
 				for (int i = 0; i < cypherRawResults.length(); i++) {
 					//System.out.println('getCategoriesTree() - cypherRawResults - ' + i + '  ' + cypherRawResults.getJSONArray(i));
 					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);

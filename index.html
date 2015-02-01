@@ -165,19 +165,20 @@ function showLinks(biggestImages) {
 	//// Uncategorized URLs (main part)
 	////
     
-    getUrls : {
-		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
+    	getUrls : {
+		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId, function(result) {
 			$("#status").text("Populating")
 			var resultRowNumber = 0;
 			var categoryOrdinal = 0;
+			var categoryIdsToNames = getCategoryNamesMap(result.categoriesRecursive);
 			$.each(result.urls, function(categoryID, urlsInCategory) {
-				$("#url_thumbnails").append("<h3>" + categoryID +"</h3>")
+				$("#url_thumbnails").append("<h3>" + categoryIdsToNames[categoryID] + " (" + categoryID +")</h3>")
 				$.each(urlsInCategory, function( resultRowNumber, field ) {
-						if (categoryOrdinal == 0) {
-							fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories);
-						}
-						fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
-						++resultRowNumber; // why are we mutating a param?
+					if (categoryOrdinal == 0) {
+						fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories);
+					}
+					fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
+					++resultRowNumber; // why are we mutating a param?
 				});
 				++categoryOrdinal;
 			});
@@ -738,6 +739,21 @@ function getAdjacencies(category) {
 	return adjacenciesList;
 }
 
+
+        function getCategoryNamesMap(categoriesRecursive) {
+                var categoriesMap = {};
+		if (categoriesRecursive.id == null) {
+			debugger;
+		}
+                categoriesMap[categoriesRecursive.id] = categoriesRecursive.name;
+                for (var category in categoriesRecursive.children) {
+			var categoryNames = getCategoryNamesMap(categoriesRecursive.children[category]);
+			categoriesMap  = $.extend(true, categoriesMap, categoryNames);
+//                        categoriesMap.concat(categoryNames);
+                }
+                return categoriesMap;
+  	}
+
 function renderD3Visualization(flareJson) {
 	var w = 680,
 		h = 500,
@@ -923,7 +939,15 @@ body{
 
 </head>
 <body onload='showLinks({})' style="background-color : #E7EDE1;">
-	<br>
+
+<br>
+<script> 
+    $(function(){
+      $("#menubar").load("http://netgear.rohidekar.com/index.html"); 
+    });
+</script>
+<div id="menubar"></div>
+
 	<br>
 	<table>
 		<tr><td>
