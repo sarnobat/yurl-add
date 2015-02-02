@@ -60,14 +60,13 @@ var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
 var parentOfRootId;
 var orderedDescending = true;
+var readyToRender = false;
+var limit;
+var uncategorizedResponse; // Populated via rest call
+var categories; // Populated via rest call
+var biggestImages = {};
 
-function getBiggestImages() {
-	$.getJSON("http://localhost:3000/biggestImages", function(result){
-				showLinks(result);
-			});
-}
-
-function showLinks(biggestImages) {
+function initialize() {
 
 	////
 	//// Determine the root ID
@@ -103,7 +102,7 @@ function showLinks(biggestImages) {
 			$("#rootColor").attr("style", "background-color: #" + rootColor);
 		}
 	
-		var limit = $.url().param('limit')
+		limit = $.url().param('limit')
 		if (limit == null) {
 			limit = 50;
 			window.history.pushState("object or string", "Title", document.URL + "&limit=50");
@@ -112,53 +111,13 @@ function showLinks(biggestImages) {
 	////
 	//// Get the key bindings and categories (non-recursive)
 	////
-	var categories;
 	
 	setCategoriesAndConfigureKeyBindings : {
 		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
 			var originalKeyBindings = $.extend(true, {}, result);// TODO: what does this do?
-			categories = result;	  
-			configureKeyBindings(categories);
+			categories = result;
+			renderIfReady()
 		});
-	
-		function configureKeyBindings(result) {
-			$.each(result, function(a,binding,c){
-				if (binding.key == 'null') {
-					$("#keys").append("#");
-					// Don't remove the "null" otherwise we'll assign hash to this category
-				}
-				$("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
-				$("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + " (<span id='count_"+binding.id+"'></span>)</a></li>");
-				$("#count_" + binding.id).text(binding.count);
-				$(window).keypress(function(event) {
-					if ($("#keys").is(":focus")) {
-						return;
-					}
-					if (binding.key == String.fromCharCode(event.which)) {
-						var parentId = binding.id;
-						var childId = $("#url_cards").children()[0].id;
-						var currentRootId = rootId;
-						relate(parentId, childId, currentRootId);
-					}
-				});			
-			});
-			$(window).keypress(function(event) {
-				var key = String.fromCharCode(event.which);
-				if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
-					var idOfTop = $("#url_cards").children()[0].id;
-					moveToBottom(idOfTop);
-				}
-				if (String.fromCharCode(event.which) == '<') {
-					var parentId = parentOfRootId;
-					var childId = $("#url_cards").children()[0].id;
-					var currentRootId = rootId;
-					relate(parentId, childId, currentRootId);
-				}
-				if (String.fromCharCode(event.which) == '>') {
-					console.debug("remove from list (deal with it later)");
-				}
-			});
-		}
 	}
 	
 	////
@@ -167,24 +126,8 @@ function showLinks(biggestImages) {
     
     	getUrls : {
 		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId, function(result) {
-			$("#status").text("Populating")
-			var resultRowNumber = 0;
-			var categoryOrdinal = 0;
-			var categoryIdsToNames = getCategoryNamesMap(result.categoriesRecursive);
-			$.each(result.urls, function(categoryID, urlsInCategory) {
-				$("#url_thumbnails").append("<h3>" + categoryIdsToNames[categoryID] + " (" + categoryID +")</h3>")
-				$.each(urlsInCategory, function( resultRowNumber, field ) {
-					if (categoryOrdinal == 0) {
-						fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories);
-					}
-					fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
-					++resultRowNumber; // why are we mutating a param?
-				});
-				++categoryOrdinal;
-			});
-			
-//			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
-			$("#status").text("Done")
+			uncategorizedResponse = result;
+			renderIfReady();
 		});
 	}
 	    
@@ -331,7 +274,10 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 	
 	{
 		var categoryButtons = four;
-		// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
+		if (categories.length == 0) {
+			// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
+			debugger;
+		}
 		$.each(categories, function(a,binding,c){
 			categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
 		});						
@@ -616,6 +562,85 @@ function addEmbeddedVideo(id, url) {
 	$("#" + id).children().last().append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
 }
 
+// TODO: Remove. Unused
+function getBiggestImages() {
+	$.getJSON("http://localhost:3000/biggestImages", function(result){
+		biggestImages = result;
+		initialize();
+	});
+}
+
+
+function renderIfReady() {
+	if (!uncategorizedResponse) {
+		return;
+	}
+	categories = uncategorizedResponse.categoriesNonRecursive;
+	if (!categories) {
+		return;
+	}
+	if (categories.length == 0) {
+		debugger;
+	}	
+	configureKeyBindings();
+	$("#status").text("Populating")
+	var resultRowNumber = 0;
+	var categoryOrdinal = 0;
+	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
+	$.each(uncategorizedResponse.urls, function(categoryID, urlsInCategory) {
+		$("#url_thumbnails").append("<h3>" + categoryIdsToNames[categoryID] + " (" + categoryID +")</h3>")
+		$.each(urlsInCategory, function( resultRowNumber, field ) {
+			if (categoryOrdinal == 0) {
+				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
+			}
+			fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
+			++resultRowNumber; // why are we mutating a param?
+		});
+		++categoryOrdinal;
+	});
+	
+//			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
+	$("#status").text("Done")
+}
+
+function configureKeyBindings() {
+	$.each(categories, function(a,binding,c){
+		if (binding.key == 'null') {
+			$("#keys").append("#");
+			// Don't remove the "null" otherwise we'll assign hash to this category
+		}
+		$("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
+		$("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + " (<span id='count_"+binding.id+"'></span>)</a></li>");
+		$("#count_" + binding.id).text(binding.count);
+		$(window).keypress(function(event) {
+			if ($("#keys").is(":focus")) {
+				return;
+			}
+			if (binding.key == String.fromCharCode(event.which)) {
+				var parentId = binding.id;
+				var childId = $("#url_cards").children()[0].id;
+				var currentRootId = rootId;
+				relate(parentId, childId, currentRootId);
+			}
+		});			
+	});
+	$(window).keypress(function(event) {
+		var key = String.fromCharCode(event.which);
+		if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
+			var idOfTop = $("#url_cards").children()[0].id;
+			moveToBottom(idOfTop);
+		}
+		if (String.fromCharCode(event.which) == '<') {
+			var parentId = parentOfRootId;
+			var childId = $("#url_cards").children()[0].id;
+			var currentRootId = rootId;
+			relate(parentId, childId, currentRootId);
+		}
+		if (String.fromCharCode(event.which) == '>') {
+			console.debug("remove from list (deal with it later)");
+		}
+	});
+}
 //----------------------------------------------------------------------------------------
 // D3 Visualization
 //----------------------------------------------------------------------------------------
@@ -938,7 +963,7 @@ body{
 <link type="text/css" href="http://philogb.github.io/jit/static/v20/Jit/Examples/css/base.css" rel="stylesheet" />
 
 </head>
-<body onload='showLinks({})' style="background-color : #E7EDE1;">
+<body onload='initialize()' style="background-color : #E7EDE1;">
 
 <br>
 <script> 

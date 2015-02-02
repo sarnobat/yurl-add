@@ -303,22 +303,26 @@ public class Yurl {
 		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
-		public Response uncategorized(@QueryParam("rootId") Integer iRootId)
+		public Response getUrls(@QueryParam("rootId") Integer iRootId)
 				throws JSONException, IOException {
 			checkNotNull(iRootId);
 			JSONArray theUncategorizedNodesJson = getItemsAtLevel(iRootId);
 			 JSONObject categoriesTreeJson;
                         if (categoriesTreeCache == null) {
+				System.out.println("getUrls() - preloaded categories tree not ready");
                                 categoriesTreeJson = getCategoriesTree(ROOT_ID);
                         } else {
                                 categoriesTreeJson = categoriesTreeCache;
+				// This is done in a separate thread 
                                 refreshCategoriesTreeCache();
                         }
+                        JSONArray ret = getKeys(iRootId);
 			JSONObject retVal = new JSONObject();
 			try {
 				retVal.put("urlsAtTopLevel", theUncategorizedNodesJson);
 				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
 				retVal.put("categoriesRecursive", categoriesTreeJson);
+				retVal.put("categoriesNonRecursive", ret);
 			}
 			catch (Exception e) {
 				e.printStackTrace();
@@ -329,9 +333,7 @@ public class Yurl {
 		}
 
 
-//		private JSONObject getCategoryIdsToCategories(Integer iRootId) {
-//		}
-
+		// The main part
 		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 			if (categoriesTreeCache == null) {
 				categoriesTreeCache = getCategoriesTree(iRootId);
@@ -588,6 +590,7 @@ public class Yurl {
 
 		public JSONArray getKeys(Integer iParentId) throws IOException,
 				JSONException {
+			System.out.println("getKeys() - " + iParentId);
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			_1: {
 				theParams.put("parentId", iParentId);
@@ -598,7 +601,7 @@ public class Yurl {
 			// a way to do this in Cypher. If there isn't, this is not a huge
 			// compromise.
 			JSONObject theQueryJsonResult = execute(
-					"START n=node({parentId}) MATCH parent-[c:CONTAINS]->n -[c2:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key,count(n2) as c order by c desc",
+					"START parent=node({parentId}) MATCH parent-[c:CONTAINS]->n -[c2:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key,count(n2) as c order by c desc",
 					theParams.build());
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
@@ -622,6 +625,7 @@ public class Yurl {
 					oKeys.put(aBindingObject);
 				}
 			}
+			System.out.println("getKeys() - " + theData.length());
 			return oKeys;
 		}
 
@@ -1222,6 +1226,8 @@ System.out.println(outputFilename);
 					}
 				}
 			}
+			System.out.println("createCategoryTreeFromCypherResultPaths() - Category result count: " + idToJson.size());
+                        //System.out.println("createCategoryTreeFromCypherResultPaths() - Category result: " + idToJson);
 			JSONObject json = checkNotNull(idToJson.get(45));// TODO: use the constant
 //			System.out.println(json.toString(4));
 			return json;
@@ -1236,7 +1242,7 @@ System.out.println(outputFilename);
 				theParams.put("parentId", iParentId);
 			}
 			JSONObject theQueryJsonResult = execute(
-					"START n=node(*) MATCH parent-[c:CONTAINS*]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN distinct ID(n),n.name",
+					"START parent=node({parentId}) MATCH parent-[c:CONTAINS*]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN distinct ID(n),n.name",
 					theParams.build());
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
