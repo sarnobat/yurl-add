@@ -576,6 +576,7 @@ public class Yurl {
 						.parseInt(theNewCategoryNodeIdString);
 				relateHelper(iParentId, theNewCategoryNodeId);
 			}
+                        System.out.println("createNewKeyBinding() - end()");
 		}
 
 		@GET
