@@ -40,9 +40,25 @@ if (location.href.match("youtu.*&list=.*") ) {
 						/* window.close(); */
 						document.body.style.backgroundColor = "#99CC33";
 						document.getElementsByTagName("body")[0].innerHTML = "Success:<br>" + getParameterByName('url');
+						document.title = "(stashed)";
+						(function() {
+    var link = document.createElement('link');
+    link.type = 'image/x-icon';
+    link.rel = 'shortcut icon';
+    link.href = 'http://www.favicon.cc/favicon/905/401/favicon.png';
+    document.getElementsByTagName('head')[0].appendChild(link);
+}());
 					} else {
 						document.body.style.backgroundColor = "#CC0033";
 						document.getElementsByTagName("body")[0].innerHTML = "Error:<br>" + getParameterByName('url');
+// TODO: show the existing title
+(function() {
+    var link = document.createElement('link');
+    link.type = 'image/x-icon';
+    link.rel = 'shortcut icon';
+    link.href = 'http://www.favicon.cc/favicon/392/638/favicon.png';
+    document.getElementsByTagName('head')[0].appendChild(link);
+}());
 						alert(x.status);
 					}
 				}

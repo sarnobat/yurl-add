@@ -591,7 +591,7 @@ public class Yurl {
 
 		public JSONArray getKeys(Integer iParentId) throws IOException,
 				JSONException {
-			System.out.println("getKeys() - " + iParentId);
+			System.out.println("getKeys() - parent ID: " + iParentId);
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			_1: {
 				theParams.put("parentId", iParentId);
@@ -605,6 +605,7 @@ public class Yurl {
 					"START parent=node({parentId}) MATCH parent-[c:CONTAINS]->n -[c2:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key,count(n2) as c order by c desc",
 					theParams.build());
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
+			System.out.println("getKeys() - length: " + theData.length());
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
 				JSONObject aBindingObject = new JSONObject();
@@ -626,7 +627,7 @@ public class Yurl {
 					oKeys.put(aBindingObject);
 				}
 			}
-			System.out.println("getKeys() - " + theData.length());
+			System.out.println("getKeys() - length: " + oKeys.length());
 			return oKeys;
 		}
 

@@ -3,6 +3,7 @@ var windowWidth = $(window).width();
 $(document).mousemove(function(e) {
     	var mouseX = e.pageX;
     	var mouseY = e.pageY;
+//	console.debug('mouse: ' + mouseX + ", " + mouseY);
 	var direction = 'left';
 	if (mouseX > windowWidth/2) {
 		direction = 'right';
