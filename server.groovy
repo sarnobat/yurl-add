@@ -408,7 +408,7 @@ public class Yurl {
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start n=node({rootId}) MATCH n<-[r:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title,n.url,n.created,n.ordinal ORDER BY n.ordinal DESC",
+					"start n=node({rootId}) MATCH n<-[r:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title,n.url,n.created,n.ordinal LIMIT 500 ORDER BY n.ordinal DESC",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -724,8 +724,8 @@ public class Yurl {
 
 		private static void saveImage(String urlString, String targetDirPath)
 				throws IllegalAccessError, IOException {
-
-			URL url = new URL(urlString.replaceAll("/", "-"));
+System.out.println("saveImage() - " +urlString + "\t::\t" + targetDirPath);
+			URL url = new URL(urlString);
 			BufferedImage image = ImageIO.read(url);
 			String extension = FilenameUtils.getExtension(urlString);
 			String baseName = FilenameUtils.getBaseName(urlString);
@@ -734,6 +734,7 @@ public class Yurl {
 			String outputFilename = determineDestinationPathAvoidingExisting(
 					targetDirPath + "/" + decoded + "." + extension)
 					.toString();
+			outputFilename = outputFilename.replaceAll("/", "-");
 System.out.println("saveImage() About to decode");
 //String outputFilenameDecoded = java.net.URLDecoder.decode(outputFilename, "UTF-8");
 System.out.println(outputFilename);
@@ -1268,6 +1269,7 @@ System.out.println(outputFilename);
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 		System.err.println("main() - begin");
+		HelloWorldResource.saveImage("http://www.englishheritageprints.com/p/106/anfield-liverpool-afl03_aerofilms_a162056-1217841.jpg","/media/sarnobat/Unsorted/images/");
 		try {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:4447/"), new ResourceConfig(
