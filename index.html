@@ -1084,14 +1084,13 @@ reading list (pdf))
 							  </div>
 
 						</div>
-						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
+<!--						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
 						<div id="d3" style="background-color:grey"></div>
-						<!--<div id="infovis" style="background-color : black"></div>    -->
 						
 						<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
 						<div id="batchStatus"></div>
 						<textarea id="urlBatchToSend" rows="20" cols="100"></textarea>
-						
+						-->
 					</td>
 				</tr>
 				<tr>
@@ -1103,6 +1102,14 @@ reading list (pdf))
 		</td></tr>
 	<table>
 <br>
+
+ <button type=button onclick='$("#d3").toggle()'>Show visualization</button>
+                                                <div id="d3" style="background-color:grey"></div>
+                                                <!--<div id="infovis" style="background-color : black"></div>    -->
+
+                                                <input type="button" value="Add URLs" onclick="sendBatch()" /><br>
+                                                <div id="batchStatus"></div>
+                                                <textarea id="urlBatchToSend" rows="20" cols="100"></textarea>
 
 <textarea cols=200>
 javascript:window.location.href = 'http://netgear.rohidekar.com/yurl/stash2.html?url=' + encodeURIComponent(document.URL) + '&nodeId=45'  ;

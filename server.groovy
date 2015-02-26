@@ -306,8 +306,7 @@ public class Yurl {
 		public Response getUrls(@QueryParam("rootId") Integer iRootId)
 				throws JSONException, IOException {
 			checkNotNull(iRootId);
-			JSONArray theUncategorizedNodesJson = getItemsAtLevel(iRootId);
-			 JSONObject categoriesTreeJson;
+			JSONObject categoriesTreeJson;
                         if (categoriesTreeCache == null) {
 				System.out.println("getUrls() - preloaded categories tree not ready");
                                 categoriesTreeJson = getCategoriesTree(ROOT_ID);
@@ -319,7 +318,7 @@ public class Yurl {
                         JSONArray ret = getKeys(iRootId);
 			JSONObject retVal = new JSONObject();
 			try {
-				retVal.put("urlsAtTopLevel", theUncategorizedNodesJson);
+//				retVal.put("urlsAtTopLevel", getItemsAtLevel(iRootId));
 				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
 				retVal.put("categoriesRecursive", categoriesTreeJson);
 				retVal.put("categoriesNonRecursive", ret);
@@ -334,7 +333,8 @@ public class Yurl {
 
 
 		// The main part
-		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
+		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
+			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
 				categoriesTreeCache = getCategoriesTree(iRootId);
 			}
@@ -342,7 +342,7 @@ public class Yurl {
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start source=node({rootId}) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title,u.url, extract(r1 in r | id(r1)) as path,u.created,u.ordinal ORDER BY u.ordinal DESC",
+					"start source=node({rootId}) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title,u.url, extract(r1 in r | id(r1)) as path,u.created,u.ordinal ORDER BY u.ordinal DESC LIMIT 500",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -408,7 +408,7 @@ public class Yurl {
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start n=node({rootId}) MATCH n<-[r:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title,n.url,n.created,n.ordinal LIMIT 500 ORDER BY n.ordinal DESC",
+					"start n=node({rootId}) MATCH n<-[r:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title,n.url,n.created,n.ordinal ORDER BY n.ordinal DESC LIMIT 500",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -678,10 +678,10 @@ public class Yurl {
 			downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
 		}
 
-		private static void downloadImageInSeparateThread(final String iUrl,
+		private static void downloadImageInSeparateThread(final String iUrl2,
 				final String targetDirPath, final String cypherUri,
 				final String id) {
-
+			String iUrl = iUrl2.replaceAll("\\?.*","");
 			Runnable r = new Runnable() {
 				// @Override
 				public void run() {
@@ -715,7 +715,8 @@ public class Yurl {
 						System.out
 								.println("downloadImageInSeparateThread() - DB updated");
 					} catch (Exception e) {
-						e.printStackTrace();
+//						e.printStackTrace();
+                                                System.out.println(e.getMessage());
 					}
 				}
 			};
@@ -728,13 +729,13 @@ System.out.println("saveImage() - " +urlString + "\t::\t" + targetDirPath);
 			URL url = new URL(urlString);
 			BufferedImage image = ImageIO.read(url);
 			String extension = FilenameUtils.getExtension(urlString);
-			String baseName = FilenameUtils.getBaseName(urlString);
+			String baseName = FilenameUtils.getBaseName(urlString).replaceAll("/", "-");
 			System.out.println(baseName);
 			String decoded = URLDecoder.decode(baseName, "UTF-8");
 			String outputFilename = determineDestinationPathAvoidingExisting(
 					targetDirPath + "/" + decoded + "." + extension)
 					.toString();
-			outputFilename = outputFilename.replaceAll("/", "-");
+//			outputFilename = outputFilename.replaceAll("/", "-");
 System.out.println("saveImage() About to decode");
 //String outputFilenameDecoded = java.net.URLDecoder.decode(outputFilename, "UTF-8");
 System.out.println(outputFilename);
@@ -750,8 +751,7 @@ System.out.println(outputFilename);
 			java.nio.file.Path destinationFile = Paths.get(destinationFilePath);
 			while (Files.exists(destinationFile)) {
 				destinationFilePathWithoutExtension += "1";
-				destinationFilePath = destinationFilePathWithoutExtension + "."
-						+ extension;
+				destinationFilePath = destinationFilePathWithoutExtension + "." + extension;
 				destinationFile = Paths.get(destinationFilePath);
 			}
 			if (Files.exists(destinationFile)) {
@@ -845,18 +845,20 @@ System.out.println(outputFilename);
 								.println("downloadVideoInSeparateThread() - Download recorded in database");
 
 					} catch (IOException e) {
-						e.printStackTrace();
-						throw new RuntimeException(e);
+                                                System.out.println(e.getMessage());
+						//e.printStackTrace();
+						//throw new RuntimeException(e);
 					} catch (JSONException e) {
 						System.out
 								.println("downloadVideoInSeparateThread() - ERROR recording download in database");
 						// Why won't the compiler let me throw this?
-						e.printStackTrace();
+						//e.printStackTrace();
 					} catch (RuntimeException e) {
 						System.out.println(e.getMessage());
 					}
 					catch (Exception e) {
-						e.printStackTrace();
+                                                System.out.println(e.getMessage());
+						//e.printStackTrace();
 					}
 				}
 			};
@@ -1056,7 +1058,7 @@ System.out.println(outputFilename);
 					.post(ClientResponse.class, thePostBody);
                         System.out.println("execute() - finished - " + iCypherQuery + "\n\tparams - " + iParams);
 			if (theResponse.getStatus() != 200) {
-				System.out.println("failed: " + iCypherQuery + "\n\tparams: "
+				System.out.println("FAILED:\n\t" + iCypherQuery + "\n\tparams: "
 						+ iParams);
 				throw new RuntimeException();
 			}
@@ -1269,7 +1271,8 @@ System.out.println(outputFilename);
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 		System.err.println("main() - begin");
-		HelloWorldResource.saveImage("http://www.englishheritageprints.com/p/106/anfield-liverpool-afl03_aerofilms_a162056-1217841.jpg","/media/sarnobat/Unsorted/images/");
+//		HelloWorldResource.saveImage("http://www.englishheritageprints.com/p/106/anfield-liverpool-afl03_aerofilms_a162056-1217841.jpg","/media/sarnobat/Unsorted/images/");
+//		HelloWorldResource.getItemsAtLevelAndChildLevels(45);
 		try {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:4447/"), new ResourceConfig(
