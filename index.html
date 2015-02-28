@@ -291,11 +291,22 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		five.append("<input type=button class='genericButton' value='Watched' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Watch this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Documentary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37659+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Priority 3' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Priority 3' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'><br><br>");
+		console.debug(field.downloaded_video);
+		five.append("<input type=button class='genericButton' value='Save Video' onclick='downloadVideo("+field.id+","+field.downloaded_video+", this)' style='background-color : "+getDownloadedVideoColor(field.downloaded_video)+"'><br>");
 		
 	}	
 }
 
+function getDownloadedVideoColor(downloaded) {
+	if ("null" == downloaded) {
+		return "red";
+	}
+	if (!downloaded) {
+		return "red";
+	}
+	return "green";
+}
 function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 
 	var imageCell = "";

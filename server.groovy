@@ -342,7 +342,7 @@ public class Yurl {
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start source=node({rootId}) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title,u.url, extract(r1 in r | id(r1)) as path,u.created,u.ordinal ORDER BY u.ordinal DESC LIMIT 500",
+					"start source=node({rootId}) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title,u.url,extract(r1 in r | id(r1)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal ORDER BY u.ordinal DESC LIMIT 500",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -365,21 +365,24 @@ public class Yurl {
 					_14: {
 						try {
 							JSONArray path = (JSONArray) anItem.get(3);
-//							System.out
-//									.println("getItemsAtLevelAndChildLevels() "
-//											+ path.length());
 							if (path.length() < 2) {
 								anUncategorizedNodeJsonObject.put("parentId",
 										iRootId);
 							} else {
 								anUncategorizedNodeJsonObject.put("parentId",
 										path.get(0));
-//								System.out
-//										.println("getItemsAtLevelAndChildLevels() - parentId = "
-//												+ path.get(1));
 							}
 						} catch (Exception e) {
+							// TODO: Add this back
 							e.printStackTrace();
+						}
+					}
+					_15: {
+
+						Object val = anItem.get(4);
+						if (val != null) {
+							String aValue = (String) val;
+							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
 						}
 					}
 				}
