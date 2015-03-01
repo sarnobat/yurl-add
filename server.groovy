@@ -380,10 +380,19 @@ public class Yurl {
 					_15: {
 
 						Object val = anItem.get(4);
-						if (val != null) {
+						if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
 							String aValue = (String) val;
 							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
 						}
+					}
+					_16: {
+
+							Object val = anItem.get(6);
+							if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
+									System.out.println("Non-null value: " + val + "\t" + val.getClass());
+									Long aValue = (Long) val;
+									anUncategorizedNodeJsonObject.put("created", aValue);
+							}
 					}
 				}
 				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
