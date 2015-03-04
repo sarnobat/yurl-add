@@ -389,7 +389,7 @@ public class Yurl {
 
 							Object val = anItem.get(6);
 							if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
-									System.out.println("Non-null value: " + val + "\t" + val.getClass());
+//									System.out.println("Non-null value: " + val + "\t" + val.getClass());
 									Long aValue = (Long) val;
 									anUncategorizedNodeJsonObject.put("created", aValue);
 							}
