@@ -582,6 +582,10 @@ function getBiggestImages() {
 }
 
 
+function renderIfReady() {
+	renderIfReadyNew();
+	renderIfReadyOld();
+}
 function renderIfReadyNew() {
 	if (!uncategorizedResponse) {
 		return;
@@ -599,14 +603,29 @@ function renderIfReadyNew() {
 	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
 	var urls = uncategorizedResponse.urls;
 	var urlThumbnailsHtml = "";
-	for (var categoryId in urls) {
-		urlThumbnailsHtml += "<h3>" + categoryIdsToNames[categoryId] + categoryId + "</h3>";
+	var categoryIdsUnderRoot = Object.keys(urls);
+//	var categoryIdsUnderRootOrdered = categoryIdsUnderRoot;
+	var first = categoryIdsUnderRoot.splice(categoryIdsUnderRoot.indexOf(rootId),1);
+	var categoryIdsUnderRootOrdered = first.concat(categoryIdsUnderRoot);
+//	.unshift(rootId);
+	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
+		var categoryId = categoryIdsUnderRootOrdered[i];
+		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 	}
 	$("#url_thumbnails").append(urlThumbnailsHtml);
 }
 
+function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory) {
+		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			var item = urlsInCategory[j];
+			urlThumbnailsHtml += item.title +"<br>";
+		}
+		return urlThumbnailsHtml;
+}
+
 // delete this
-function renderIfReady() {
+function renderIfReadyOld() {
 	if (!uncategorizedResponse) {
 		return;
 	}
