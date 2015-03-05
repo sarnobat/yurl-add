@@ -582,6 +582,30 @@ function getBiggestImages() {
 }
 
 
+function renderIfReadyNew() {
+	if (!uncategorizedResponse) {
+		return;
+	}
+	categories = uncategorizedResponse.categoriesNonRecursive;
+	if (!categories) {
+		return;
+	}
+	if (categories.length == 0) {
+		debugger;
+	}	
+	configureKeyBindings();
+	$("#status").text("Populating")
+	var categoryOrdinal = 0;
+	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
+	var urls = uncategorizedResponse.urls;
+	var urlThumbnailsHtml = "";
+	for (var categoryId in urls) {
+		urlThumbnailsHtml += "<h3>" + categoryIdsToNames[categoryId] + categoryId + "</h3>";
+	}
+	$("#url_thumbnails").append(urlThumbnailsHtml);
+}
+
+// delete this
 function renderIfReady() {
 	if (!uncategorizedResponse) {
 		return;

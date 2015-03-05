@@ -342,7 +342,10 @@ public class Yurl {
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start source=node({rootId}) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title,u.url,extract(r1 in r | id(r1)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal ORDER BY u.ordinal DESC LIMIT 500",
+					"start source=node({rootId}) match p = source-[r:CONTAINS*1..2]->u "
+					+ "where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
+					+ "return distinct ID(u),u.title,u.url,extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal "
+					+ "ORDER BY u.ordinal DESC LIMIT 500",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -365,10 +368,15 @@ public class Yurl {
 					_14: {
 						try {
 							JSONArray path = (JSONArray) anItem.get(3);
-							if (path.length() < 2) {
+							if (path.length() == 3) {
+								anUncategorizedNodeJsonObject.put("parentId",
+										path.get(1));
+							} else if (path.length() == 2) {
 								anUncategorizedNodeJsonObject.put("parentId",
 										iRootId);
-							} else {
+							}
+							else (path.length() == 1) {
+								// This should never happen
 								anUncategorizedNodeJsonObject.put("parentId",
 										path.get(0));
 							}
