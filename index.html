@@ -16,7 +16,8 @@
 <script src="http://netgear.rohidekar.com/yurl/js/imagezoom.ssarnobat.js"></script>
 <script type="text/javascript" src="http://netgear.rohidekar.com/yurl/jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
-<script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
+<script src="http://netgear.rohidekar.com/yurl/js/webtoolkit.md5.js"></script>
+<!-- http://www.webtoolkit.info/djs/webtoolkit.md5.js -->
 <style type="text/css">
 
 .itemImage {
@@ -586,6 +587,7 @@ function renderIfReady() {
 	renderIfReadyNew();
 	renderIfReadyOld();
 }
+
 function renderIfReadyNew() {
 	if (!uncategorizedResponse) {
 		return;
@@ -602,17 +604,20 @@ function renderIfReadyNew() {
 	var categoryOrdinal = 0;
 	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
 	var urls = uncategorizedResponse.urls;
-	var urlThumbnailsHtml = "";
+
 	var categoryIdsUnderRoot = Object.keys(urls);
 //	var categoryIdsUnderRootOrdered = categoryIdsUnderRoot;
 	var first = categoryIdsUnderRoot.splice(categoryIdsUnderRoot.indexOf(rootId),1);
 	var categoryIdsUnderRootOrdered = first.concat(categoryIdsUnderRoot);
 //	.unshift(rootId);
+	var urlThumbnailsHtml = "";
+	var urlListHtml = "";
 	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
 		var categoryId = categoryIdsUnderRootOrdered[i];
 		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
+		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 	}
-	$("#url_thumbnails").append(urlThumbnailsHtml);
+	$("#list").append(urlListHtml);
 }
 
 function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory) {
@@ -624,6 +629,14 @@ function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory) {
 		return urlThumbnailsHtml;
 }
 
+function getCategoryListHtml(categoryId, categoryName, urlsInCategory) {
+		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			var item = urlsInCategory[j];
+			urlThumbnailsHtml += item.title + " (<a href='" + item.url +"'>" + item.url + "</a>)<br>";
+		}
+		return urlThumbnailsHtml;
+}
 // delete this
 function renderIfReadyOld() {
 	if (!uncategorizedResponse) {
@@ -636,7 +649,7 @@ function renderIfReadyOld() {
 	if (categories.length == 0) {
 		debugger;
 	}	
-	configureKeyBindings();
+//	configureKeyBindings();
 	$("#status").text("Populating")
 	var resultRowNumber = 0;
 	var categoryOrdinal = 0;
@@ -1077,26 +1090,9 @@ body{
 					</td>
 					
 					<td width="75%" style="vertical-align: top">
-						<div id="tabs">
-							  <ul>
+
 <!--
-* thumbnails
-** to identify and open what you're looking for most (e.g. videos)
-* cards
-** sorting into subcategory
-* table view
-** deciding whether to buy a product before others you already want
-** as compact as Google Reader/Feedly (so you don't feel like creating RSS feeds so that you can view in Feedly)
-* plaintext
-** for future-proofing, platform independent portability
-** must contain urls and titles
-* pdf (compact)
-** for a simple list to take when travelling to a bookstore
-** doesn't need to have URLs
-* pdf (argos catalog view)
-** printed summary for browsing in bedroom when bookshelf isn't big enough
-** for seeing what you own
-** for seeing what you could buy when you're passively shopping
+
 
 
 * a smart TV view
@@ -1121,26 +1117,73 @@ podcast subscriptions & favorite episodes
 watch history (video library) - thumbnail index
 reading list (pdf))
 
+
+//* thumbnails
+//** to identify and open what you're looking for most (e.g. videos)
+//* cards
+//** sorting into subcategory
+//* table view
+//** deciding whether to buy a product before others you already want
+//** as compact as Google Reader/Feedly (so you don't feel like creating RSS feeds so that you can view in Feedly)
+//* plaintext
+//** for future-proofing, platform independent portability
+//** must contain urls and titles
+//* pdf (compact)
+//** for a simple list to take when travelling to a bookstore
+//** doesn't need to have URLs
+* pdf (argos catalog view)
+** printed summary for browsing in bedroom when bookshelf isn't big enough
+** for seeing what you own
+** for seeing what you could buy when you're passively shopping
+
 -->
-								<li><a href="#tabs-1">Grid</a></li>
+						<div id="tabs">
+							  <ul>
+								<li><a href="#tabs-1">Grid/Thumbnails</a></li>
 								<li><a href="#tabs-2">Cards</a></li>
-								<li><a href="#tabs-3">Table/List</a></li>
-								<li><a href="#tabs-4">Printable</a></li>
+								<li><a href="#tabs-3">Table</a></li>
+								<li><a href="#tabs-4">Printable/PDF (compact)</a></li>
 								<li><a href="#tabs-5">Plaintext/Export</a></li>
+								<li><a href="#tabs-6">List</a></li>
 							  </ul>
 							  <div id="tabs-1">
+									To identify and open what you're looking for most (e.g. videos)<br>
+									Video storyboarding
 								  <ol id="url_thumbnails"></ol>
+								  
 							  </div>
 							  <div id="tabs-2">
+  									For sorting into subcategories 
+
 								  <ol id="url_cards"></ol>
 							  </div>
 							  <div id="tabs-3">
+									  Use cases:<br>
+									* Deciding whether to buy a product before others you already want<br>
+									* As compact as Google Reader/Feedly (so you don't feel like creating RSS feeds so that you can view in Feedly)<br>
+								  <ol id="table"></ol>
+									
 							  </div>
-                                                          <div id="tabs-4">
-                                                          </div>
-							  <div ide="tabs-5">
+							  <div id="tabs-4">
+									 Use cases:<br>
+									* for a simple list to take when travelling to a bookstore<br>
+									* doesn't need to have URLs<br>
+								  <ol id="printable"></ol>
+									 
 							  </div>
+							  <div id="tabs-5">
+									Use Cases:<br>
+									* for future-proofing, platform independent portability<br>
+									* must contain urls and titles<br>
 
+								  <ol id="plaintext"></ol>
+							  </div>
+							  <div id="tabs-6">
+									  Use cases:<br>
+									* Sharing large lists on a forum<br>
+									* Sharing a list in email (though email with rich media can do better)
+								  <ol id="list"></ol>
+							</div>	
 						</div>
 <!--						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
 						<div id="d3" style="background-color:grey"></div>

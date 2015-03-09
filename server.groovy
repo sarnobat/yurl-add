@@ -525,12 +525,15 @@ public class Yurl {
 				}
 				System.out
 						.println("About to remove keybinding for " + aKeyCode);
-				JSONObject json = execute(
+				try {
+					execute(
 						"START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
 						aParamValues);
-				theKeyBindingsNoDuplicates.remove(aKeyCode);
-				System.out.println("Removed keybinding for " + aName);
-
+					theKeyBindingsNoDuplicates.remove(aKeyCode);
+					System.out.println("Removed keybinding for " + aName);
+				} catch (Exception e) {
+					System.out.println("Did not removed keybinding for " + aName + " since there currently isn't one.");
+				}
 				createNewKeyBinding(aName, aKeyCode, iParentId);
 			}
 			JSONArray ret = getKeys(iParentId);
@@ -541,7 +544,7 @@ public class Yurl {
 		private void createNewKeyBinding(String iCategoryName, String iKeyCode,
 				Integer iParentId) throws IOException, JSONException {
 			
-			System.out.println("createNewKeyBinding() - begin()");
+			System.out.println("createNewKeyBinding() - begin() : " + String.format("iCategoryName %s\tiKeyCode %s\tiParentId %d", iCategoryName, iKeyCode, iParentId));
 			// TODO: Also create a trash category for each new category key node
 
 			boolean shouldCreateNewCategoryNode = false;
@@ -647,7 +650,7 @@ public class Yurl {
 					oKeys.put(aBindingObject);
 				}
 			}
-			System.out.println("getKeys() - length: " + oKeys.length());
+			System.out.println("getKeys() - end. length: " + oKeys.length());
 			return oKeys;
 		}
 
