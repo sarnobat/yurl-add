@@ -375,7 +375,7 @@ public class Yurl {
 								anUncategorizedNodeJsonObject.put("parentId",
 										iRootId);
 							}
-							else (path.length() == 1) {
+							else if (path.length() == 1) {
 								// This should never happen
 								anUncategorizedNodeJsonObject.put("parentId",
 										path.get(0));
@@ -388,7 +388,7 @@ public class Yurl {
 					_15: {
 
 						Object val = anItem.get(4);
-						if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
+						if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.NULL))) {
 							String aValue = (String) val;
 							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
 						}
@@ -396,7 +396,7 @@ public class Yurl {
 					_16: {
 
 							Object val = anItem.get(6);
-							if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
+							if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.NULL))) {
 //									System.out.println("Non-null value: " + val + "\t" + val.getClass());
 									Long aValue = (Long) val;
 									anUncategorizedNodeJsonObject.put("created", aValue);
@@ -715,7 +715,7 @@ public class Yurl {
 		private static void downloadImageInSeparateThread(final String iUrl2,
 				final String targetDirPath, final String cypherUri,
 				final String id) {
-			String iUrl = iUrl2.replaceAll("\\?.*","");
+			final String iUrl = iUrl2.replaceAll("\\?.*","");
 			Runnable r = new Runnable() {
 				// @Override
 				public void run() {
@@ -994,16 +994,15 @@ System.out.println(outputFilename);
 					.type("application/json").build();
 		}
 
-		// TODO: remove this. We're not using it
 		@GET
 		@Path("createAndRelate")
 		@Produces("application/json")
 		public Response createSubDirAndMoveItem(
 				@QueryParam("newParentName") String iNewParentName,
-				@QueryParam("childId") Integer iChildId,
+				@QueryParam("itemId") Integer iItemId,
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
-			Integer iNewParentId;
+//			Integer iNewParentId = ;
 			// TODO : Implement this
 			return null;
 		}
@@ -1293,7 +1292,6 @@ System.out.println(outputFilename);
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
-//				System.out.println("getFlatListOfSubcategoriesRecursive() - " + i);
 				JSONObject aBindingObject = new JSONObject();
 				_1: {
 					JSONArray aBindingArray = theData.getJSONArray(i);
@@ -1302,8 +1300,6 @@ System.out.println(outputFilename);
 					String title = (String) aBindingArray.get(1);
 					aBindingObject.put("name", title);
 					oKeys.put(aBindingObject);
-//					System.out.println("getFlatListOfSubcategoriesRecursive() - " + id
-//							+ "\t::\t" + title);
 				}
 			}
 			return oKeys;
@@ -1312,8 +1308,6 @@ System.out.println(outputFilename);
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 		System.err.println("main() - begin");
-//		HelloWorldResource.saveImage("http://www.englishheritageprints.com/p/106/anfield-liverpool-afl03_aerofilms_a162056-1217841.jpg","/media/sarnobat/Unsorted/images/");
-//		HelloWorldResource.getItemsAtLevelAndChildLevels(45);
 		try {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:4447/"), new ResourceConfig(
