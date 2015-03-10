@@ -582,34 +582,38 @@ public class Yurl {
 
 			}
 			if (shouldCreateNewCategoryNode) {
-				Map<String, Object> theParamValues = new HashMap<String, Object>();
-				_1: {
-					theParamValues.put("name", iCategoryName);
-					theParamValues.put("key", iKeyCode);
-					theParamValues.put("type", "categoryNode");
-					theParamValues.put("created", System.currentTimeMillis());
-					System.out.println("cypher params: " + theParamValues);
-				}
-				// TODO: first check if there is already a node with this name,
-				// which is for re-associating the keycode with the category
-				JSONObject theNewKeyBindingResponseJson = execute(
-						"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
-						theParamValues);
-				System.out.println("createNewKeyBinding() - Success:\n\t" + theNewKeyBindingResponseJson.toString());
-				theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
-						.get("data")).get(0)).get(0);
-				System.out.println("createNewKeyBinding() - got new node");
+				theNewCategoryNodeIdString = createCategoryWithKeyBinding(
+						iCategoryName, iKeyCode);
 			}
 			try {
-				System.out.println("createNewKeyBinding() - about to call relateHelper() - " + theNewCategoryNodeIdString);
-				int theNewCategoryNodeId = Integer.parseInt(theNewCategoryNodeIdString);
-				System.out.println("createNewKeyBinding() - parsed");
-				relateHelper(iParentId, theNewCategoryNodeId);
+				relateHelper(iParentId, Integer.parseInt(theNewCategoryNodeIdString));
 			} catch (Exception e) {
-				System.out.println(e);
 				e.printStackTrace();
 			}
 			System.out.println("createNewKeyBinding() - end()");
+		}
+
+		private String createCategoryWithKeyBinding(String iCategoryName,
+				String iKeyCode) throws IOException {
+			String theNewCategoryNodeIdString;
+			Map<String, Object> theParamValues = new HashMap<String, Object>();
+			_1: {
+				theParamValues.put("name", iCategoryName);
+				theParamValues.put("key", iKeyCode);
+				theParamValues.put("type", "categoryNode");
+				theParamValues.put("created", System.currentTimeMillis());
+				System.out.println("cypher params: " + theParamValues);
+			}
+			// TODO: first check if there is already a node with this name,
+			// which is for re-associating the keycode with the category
+			JSONObject theNewKeyBindingResponseJson = execute(
+					"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
+					theParamValues);
+			System.out.println("createNewKeyBinding() - Success:\n\t" + theNewKeyBindingResponseJson.toString());
+			theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
+					.get("data")).get(0)).get(0);
+			System.out.println("createNewKeyBinding() - got new node");
+			return theNewCategoryNodeIdString;
 		}
 
 		@GET
@@ -1002,9 +1006,28 @@ System.out.println(outputFilename);
 				@QueryParam("itemId") Integer iItemId,
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
-//			Integer iNewParentId = ;
-			// TODO : Implement this
-			return null;
+			return relate(createCategory(iNewParentName), iItemId, iCurrentParentId);
+		}
+
+		private Integer createCategory(String iCategoryName) throws IOException {
+			String theNewCategoryNodeIdString;
+			Map<String, Object> theParamValues = new HashMap<String, Object>();
+			_1: {
+				theParamValues.put("name", iCategoryName);
+				theParamValues.put("type", "categoryNode");
+				theParamValues.put("created", System.currentTimeMillis());
+				System.out.println("cypher params: " + theParamValues);
+			}
+			// TODO: first check if there is already a node with this name,
+			// which is for re-associating the keycode with the category
+			JSONObject theNewKeyBindingResponseJson = execute(
+					"CREATE (n { name : {name} , created: {created} , type :{type}}) RETURN id(n)",
+					theParamValues);
+			System.out.println("createNewKeyBinding() - Success:\n\t" + theNewKeyBindingResponseJson.toString());
+			theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
+					.get("data")).get(0)).get(0);
+			System.out.println("createNewKeyBinding() - got new node");
+			return Integer.parseInt(theNewCategoryNodeIdString);
 		}
 
 		/**
