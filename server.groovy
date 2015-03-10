@@ -998,17 +998,6 @@ System.out.println(outputFilename);
 					.type("application/json").build();
 		}
 
-		@GET
-		@Path("createAndRelate")
-		@Produces("application/json")
-		public Response createSubDirAndMoveItem(
-				@QueryParam("newParentName") String iNewParentName,
-				@QueryParam("itemId") Integer iItemId,
-				@QueryParam("currentParentId") Integer iCurrentParentId)
-				throws JSONException, IOException {
-			return relate(createCategory(iNewParentName), iItemId, iCurrentParentId);
-		}
-
 		private Integer createCategory(String iCategoryName) throws IOException {
 			String theNewCategoryNodeIdString;
 			Map<String, Object> theParamValues = new HashMap<String, Object>();
@@ -1028,6 +1017,25 @@ System.out.println(outputFilename);
 					.get("data")).get(0)).get(0);
 			System.out.println("createNewKeyBinding() - got new node");
 			return Integer.parseInt(theNewCategoryNodeIdString);
+		}
+
+		@GET
+		@Path("createAndRelate")
+		@Produces("application/json")
+		public Response createSubDirAndMoveItem(
+				@QueryParam("newParentName") String iNewParentName,
+				@QueryParam("childId") Integer iItemId,
+				@QueryParam("currentParentId") Integer iCurrentParentId)
+				throws JSONException, IOException {
+			System.out.println("createSubDirAndMoveItem() - begin");
+			Integer theNewCategoryNodeIdString = createCategory(iNewParentName) ;
+			Response r =  relate(theNewCategoryNodeIdString, iItemId, iCurrentParentId);
+			try {
+				relateHelper(iCurrentParentId, theNewCategoryNodeIdString);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return r;
 		}
 
 		/**

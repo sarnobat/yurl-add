@@ -281,7 +281,10 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		}
 		$.each(categories, function(a,binding,c){
 			categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
-		});						
+		});
+		categoryButtons.append("<br>");
+		categoryButtons.append("<br>");
+		categoryButtons.append("<input type=button class='genericButton' value='NEW' onclick='createAndRelate("+field.id+","+rootId+")'>&nbsp;");
 	}
 	
 	{
@@ -397,6 +400,27 @@ function relate(parentId, childId, currentRootId) {
 		})
 		.error(function() { alert("error occurred "); })
 		.complete(function() { });
+}
+
+function createAndRelate(childId, currentRootId) {
+	var newParentName = prompt('Category name:');
+	removeTopNoDest(childId);
+	var url = urlBase + "/createAndRelate?newParentName=" +encodeURIComponent(newParentName)+"&childId=" +  childId + "&currentParentId=" + currentRootId;	
+	//
+	// The main part
+	//
+	$.getJSON(url, function(result){})
+		.success(function() { 
+		})
+		.error(function() { alert("error occurred "); })
+		.complete(function() { });
+}
+
+// This part just performs frontend changes, nothing backend
+function removeTopNoDest(childId) {
+
+		$($("#" + childId)).effect( "blind",null, 5, function() { $(this).remove(); });
+
 }
 
 // This part just performs frontend changes, nothing backend
