@@ -994,6 +994,7 @@ System.out.println(outputFilename);
 					.type("application/json").build();
 		}
 
+		// TODO: remove this. We're not using it
 		@GET
 		@Path("createAndRelate")
 		@Produces("application/json")
