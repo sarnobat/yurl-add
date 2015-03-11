@@ -616,7 +616,7 @@ function renderIfReadyNew() {
 	if (!uncategorizedResponse) {
 		return;
 	}
-	categories = uncategorizedResponse.categoriesNonRecursive;
+	categories = uncategorizedResponse.categoriesRecursive.children;
 	if (!categories) {
 		return;
 	}
@@ -1155,10 +1155,10 @@ reading list (pdf))
 //* pdf (compact)
 //** for a simple list to take when travelling to a bookstore
 //** doesn't need to have URLs
-* pdf (argos catalog view)
-** printed summary for browsing in bedroom when bookshelf isn't big enough
-** for seeing what you own
-** for seeing what you could buy when you're passively shopping
+//* pdf (argos catalog view)
+//** printed summary for browsing in bedroom when bookshelf isn't big enough
+//** for seeing what you own
+//** for seeing what you could buy when you're passively shopping
 
 -->
 						<div id="tabs">
@@ -1169,6 +1169,7 @@ reading list (pdf))
 								<li><a href="#tabs-4">Printable/PDF (compact)</a></li>
 								<li><a href="#tabs-5">Plaintext/Export</a></li>
 								<li><a href="#tabs-6">List</a></li>
+                                                                <li><a href="#tabs-7">Catalog</a></li>
 							  </ul>
 							  <div id="tabs-1">
 									To identify and open what you're looking for most (e.g. videos)<br>
@@ -1207,7 +1208,12 @@ reading list (pdf))
 									* Sharing large lists on a forum<br>
 									* Sharing a list in email (though email with rich media can do better)
 								  <ol id="list"></ol>
-							</div>	
+							</div>
+							<div id="tabs-7">
+* printed summary for browsing in bedroom when bookshelf isn't big enough (so it must be more compact than the web view for thumbnails of products; if anything, the thumbnails for the web view are too big)<br>
+* for seeing what you own<br>
+* for seeing what you could buy when you're passively shopping<br>
+                                                          </div>
 						</div>
 <!--						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
 						<div id="d3" style="background-color:grey"></div>

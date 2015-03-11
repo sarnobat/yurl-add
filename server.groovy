@@ -1197,8 +1197,10 @@ System.out.println(outputFilename);
 			_1: {
 				theParams.put("parentId", rootId);
 			}
+			String iCypherQuery = "start n=node({parentId}) match path=n-[r:CONTAINS*]->c WHERE has(c.name) return extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\" , key : \"' + p.key + '\"}')";
+			System.out.println(iCypherQuery);
 			JSONObject theQueryJsonResult = execute(
-					"start n=node({parentId}) match path=n-[r:CONTAINS*]->c WHERE has(c.name) return extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\"}')",
+					iCypherQuery,
 					theParams.build());
 			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult);
 			// Get the number of urls in each category
@@ -1207,7 +1209,6 @@ System.out.println(outputFilename);
 				Map<Integer, Integer> categorySizes = getCategorySizes(counts.getJSONArray("data"));
 				System.out.println(categorySizes);
 				addSizes(categoriesTree,categorySizes);
-//				System.out.println(categoriesTree);
 			}
 			System.out.println("getCategoriesTree() - end");
 			return categoriesTree;
@@ -1225,9 +1226,6 @@ System.out.println(outputFilename);
 
 		private static void addSizes(JSONObject categoriesTree,
 				Map<Integer, Integer> categorySizes) {
-//			if (categoriesTree == null) {
-//	                        categoriesTree.put("size", 0);
-//			} else {
 			Integer id = categoriesTree.getInt("id");
 			categoriesTree.put("size", categorySizes.get(id));
 			if (categoriesTree.has("children")) {
@@ -1236,7 +1234,6 @@ System.out.println(outputFilename);
 					addSizes(children.getJSONObject(i), categorySizes);
 				}
 			}
-//			}
 		}
 
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
@@ -1245,14 +1242,15 @@ System.out.println(outputFilename);
 
 			MultiValueMap parentToChildren = new MultiValueMap();
 			getParentChildrenMap: {
-				System.out.println("createCategoryTreeFromCypherResultPaths() - size " + cypherRawResults.length());
-				for (int i = 0; i < cypherRawResults.length(); i++) {
-					//System.out.println('getCategoriesTree() - cypherRawResults - ' + i + '  ' + cypherRawResults.getJSONArray(i));
-					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
-					for (int j = 0; j < a2.length(); j++) {
-						JSONObject parent = new JSONObject(a2.getString(j));
-						if (j < a2.length() - 1) {
-							JSONObject child = new JSONObject(a2.getString(j + 1));
+				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
+					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
+					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
+							String categoryPathHopString = categoryPath.getString(hopNum);
+							JSONObject parent = new JSONObject(categoryPathHopString);
+							if (!(categoryPath.get(hopNum + 1) instanceof String)) {
+								System.out.println("ERROR 3: " + categoryPath.get(hopNum + 1).getClass() + "\t" + categoryPath);	
+							}
+							JSONObject child = new JSONObject(categoryPath.getString(hopNum + 1));
 							int childId = child.getInt("id");
 							int parentId = checkNotNull(parent.getInt("id"));
 							Object childrenObj = parentToChildren.get(parentId);
@@ -1264,7 +1262,6 @@ System.out.println(outputFilename);
 							} else {
 								parentToChildren.put(parentId, childId);
 							}
-						}
 					}
 				}
 			}
@@ -1280,7 +1277,6 @@ System.out.println(outputFilename);
 			}
 	
 			addChildArrayToEachJsonNode: {
-	
 				for (Object parentIdObj : parentToChildren.keySet()) {
 					Integer parentId = (Integer) parentIdObj;
 					JSONObject parentJson = idToJson.get(parentId);
@@ -1303,10 +1299,18 @@ System.out.println(outputFilename);
 				}
 			}
 			System.out.println("createCategoryTreeFromCypherResultPaths() - Category result count: " + idToJson.size());
-                        //System.out.println("createCategoryTreeFromCypherResultPaths() - Category result: " + idToJson);
 			JSONObject json = checkNotNull(idToJson.get(45));// TODO: use the constant
-//			System.out.println(json.toString(4));
 			return json;
+		}
+
+		private static JSONArray removeNulls(JSONArray jsonArray) {
+			for(int i = 0; i < jsonArray.length(); i++) {
+				if (JSONObject.NULL.equals(jsonArray.get(i))) {
+					jsonArray.remove(i);
+					--i;
+				}
+			}
+			return jsonArray;
 		}
 
 		@Deprecated
