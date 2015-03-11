@@ -629,11 +629,8 @@ function renderIfReadyNew() {
 	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
 	var urls = uncategorizedResponse.urls;
 
-	var categoryIdsUnderRoot = Object.keys(urls);
-//	var categoryIdsUnderRootOrdered = categoryIdsUnderRoot;
-	var first = categoryIdsUnderRoot.splice(categoryIdsUnderRoot.indexOf(rootId),1);
-	var categoryIdsUnderRootOrdered = first.concat(categoryIdsUnderRoot);
-//	.unshift(rootId);
+	var categoryIdsUnderRootOrdered = putRootAtFront(urls, rootId);
+	
 	var urlThumbnailsHtml = "";
 	var urlListHtml = "";
 	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
@@ -642,6 +639,13 @@ function renderIfReadyNew() {
 		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 	}
 	$("#list").append(urlListHtml);
+}
+
+function putRootAtFront(urls, rootId) {
+	var categoryIdsUnderRoot = Object.keys(urls);
+	var first = categoryIdsUnderRoot.splice(categoryIdsUnderRoot.indexOf(rootId),1);
+	var categoryIdsUnderRootOrdered = first.concat(categoryIdsUnderRoot);
+	return categoryIdsUnderRootOrdered;
 }
 
 function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory) {
@@ -661,6 +665,7 @@ function getCategoryListHtml(categoryId, categoryName, urlsInCategory) {
 		}
 		return urlThumbnailsHtml;
 }
+
 // delete this
 function renderIfReadyOld() {
 	if (!uncategorizedResponse) {
@@ -678,17 +683,22 @@ function renderIfReadyOld() {
 	var resultRowNumber = 0;
 	var categoryOrdinal = 0;
 	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
-	$.each(uncategorizedResponse.urls, function(categoryID, urlsInCategory) {
+	var urls = uncategorizedResponse.urls;
+	var categoryIdsUnderRootOrdered = putRootAtFront(urls, rootId);
+	
+	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
+		var categoryID = categoryIdsUnderRootOrdered[i];
+	//$.each(categoryIdsUnderRootOrdered, function(categoryID, urlsInCategory) {
 		$("#url_thumbnails").append("<h3>" + categoryIdsToNames[categoryID] + " (" + categoryID +")</h3>")
-		$.each(urlsInCategory, function( resultRowNumber, field ) {
-			if (categoryOrdinal == 0) {
+		$.each(urls[categoryID], function( resultRowNumber, field ) {
+			if (categoryID == rootId) {
 				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
 			}
 			fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
 			++resultRowNumber; // why are we mutating a param?
 		});
 		++categoryOrdinal;
-	});
+	}
 	
 //			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
 	$("#status").text("Done")
