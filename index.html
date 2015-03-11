@@ -616,7 +616,7 @@ function renderIfReadyNew() {
 	if (!uncategorizedResponse) {
 		return;
 	}
-	categories = uncategorizedResponse.categoriesRecursive.children;
+	categories = getCategoriesUnderID(uncategorizedResponse.categoriesRecursive.children, rootId);
 	if (!categories) {
 		return;
 	}
@@ -671,7 +671,7 @@ function renderIfReadyOld() {
 	if (!uncategorizedResponse) {
 		return;
 	}
-	categories = uncategorizedResponse.categoriesRecursive.children;
+	categories = getCategoriesUnderID(uncategorizedResponse.categoriesRecursive.children, rootId);
 	if (!categories) {
 		return;
 	}
@@ -690,12 +690,8 @@ function renderIfReadyOld() {
 		var categoryID = categoryIdsUnderRootOrdered[i];
 		$("#url_thumbnails").append("<h3>" + categoryIdsToNames[categoryID] + " (" + categoryID +")</h3>")
 		$.each(urls[categoryID], function( resultRowNumber, field ) {
-			var categories2 = getCategoriesUnderID(categories, categoryID);
 			if (categoryID == rootId) {
-				if (! categories2) {
-					debugger;
-				}
-				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories2);
+				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
 			}
 			fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
 			++resultRowNumber; // why are we mutating a param?
