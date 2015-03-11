@@ -280,7 +280,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 			debugger;
 		}
 		$.each(categories, function(a,binding,c){
-			categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
+			categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+" ("+ binding.key+")' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
 		});
 		categoryButtons.append("<br>");
 		categoryButtons.append("<br>");
@@ -671,7 +671,7 @@ function renderIfReadyOld() {
 	if (!uncategorizedResponse) {
 		return;
 	}
-	categories = uncategorizedResponse.categoriesNonRecursive;
+	categories = uncategorizedResponse.categoriesRecursive.children;
 	if (!categories) {
 		return;
 	}
@@ -688,20 +688,30 @@ function renderIfReadyOld() {
 	
 	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
 		var categoryID = categoryIdsUnderRootOrdered[i];
-	//$.each(categoryIdsUnderRootOrdered, function(categoryID, urlsInCategory) {
 		$("#url_thumbnails").append("<h3>" + categoryIdsToNames[categoryID] + " (" + categoryID +")</h3>")
 		$.each(urls[categoryID], function( resultRowNumber, field ) {
+			var categories2 = getCategoriesUnderID(categories, categoryID);
 			if (categoryID == rootId) {
-				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
+				if (! categories2) {
+					debugger;
+				}
+				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories2);
 			}
 			fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
 			++resultRowNumber; // why are we mutating a param?
 		});
 		++categoryOrdinal;
-	}
-	
+	}	
 //			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
 	$("#status").text("Done")
+}
+
+function getCategoriesUnderID(categories, categoryId) {
+	for (var i = 0; i < categories.length; i++) {
+		if (categories[i].id == categoryId) {
+			return categories[i].children;
+		}
+	}
 }
 
 function configureKeyBindings() {
