@@ -706,8 +706,16 @@ function getCategoriesUnderID(categories, categoryId) {
 	for (var i = 0; i < categories.length; i++) {
 		if (categories[i].id == categoryId) {
 			return categories[i].children;
+		} else {
+			if (categories[i].children) {
+				var ret = getCategoriesUnderID(categories[i].children,categoryId);
+				if (ret) {
+					return ret;
+				}
+			}
 		}
 	}
+	return null;
 }
 
 function configureKeyBindings() {
