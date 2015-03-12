@@ -275,13 +275,15 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 	
 	{
 		var categoryButtons = four;
-		if (categories.length == 0) {
+		if (categories && categories.length == 0) {
 			// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
 			debugger;
+		} 
+		if (categories) {
+			$.each(categories, function(a,binding,c){
+				categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+" ("+ binding.key+")' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
+			});
 		}
-		$.each(categories, function(a,binding,c){
-			categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+" ("+ binding.key+")' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
-		});
 		categoryButtons.append("<br>");
 		categoryButtons.append("<br>");
 		categoryButtons.append("<input type=button class='genericButton' value='NEW' onclick='createAndRelate("+field.id+","+rootId+")'>&nbsp;");
@@ -620,13 +622,13 @@ function renderIfReadyNew() {
 	}
 	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
 	if (!categories) {
-		alert('Could not find root ' + rootId);
+//		alert('Could not find root ' + rootId);
 		//return;
+	} else if (categories.length == 0) {
+	//	debugger;
+	} else {	
+		configureKeyBindings();
 	}
-	if (categories.length == 0) {
-		debugger;
-	}	
-	configureKeyBindings();
 	$("#status").text("Populating")
 	var categoryOrdinal = 0;
 	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
@@ -642,6 +644,7 @@ function renderIfReadyNew() {
 		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 	}
 	$("#list").append(urlListHtml);
+//        $("#url_thumbnails").append(urlThumbnailsHtml)
 }
 
 function putRootAtFront(urls, rootId) {
@@ -676,10 +679,10 @@ function renderIfReadyOld() {
 	}
 	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
 	if (!categories) {
-		return;
+//		return;
 	}
-	if (categories.length == 0) {
-		debugger;
+	else if (categories.length == 0) {
+//		debugger;
 	}	
 //	configureKeyBindings();
 	$("#status").text("Populating")
@@ -707,14 +710,14 @@ function renderIfReadyOld() {
 
 function getCategoriesUnderID2(categoryTree, categoryId) {
 	if (categoryTree.id == categoryId) {
-		return categoryTree;
+		return categoryTree.children;
 	} else if (categoryTree.children) {
 		for (var i = 0; i < categoryTree.children.length; i++) {
 			var child = categoryTree.children[i];
 			if (child) {
-				var matchingChild = getCategoriesUnderID2(child, categoryId);
-				if (matchingChild) {
-					return matchingChild;
+				var match = getCategoriesUnderID2(child, categoryId);
+				if (match) {
+					return match;
 				}
 			}
 		}
