@@ -1246,10 +1246,20 @@ System.out.println(outputFilename);
 				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
 					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
 					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
+						//	System.out.println(pathNum + "::" + hopNum + categoryPath.get(hopNum));
+							Object left = categoryPath.get(hopNum);
+							Object right = categoryPath.get(hopNum + 1);
+							if (left.getClass().equals(org.json.JSONObject.Null)) {
+								continue;
+							}
+		   					if (right.getClass().equals(org.json.JSONObject.Null)) {
+                                                                continue;
+                                                        }
 							String categoryPathHopString = categoryPath.getString(hopNum);
 							JSONObject parent = new JSONObject(categoryPathHopString);
 							if (!(categoryPath.get(hopNum + 1) instanceof String)) {
-								System.out.println("ERROR 3: " + categoryPath.get(hopNum + 1).getClass() + "\t" + categoryPath);	
+								System.out.println("ERROR 3: " + categoryPath.get(hopNum + 1).getClass() + "\t" + categoryPath);
+								continue;	
 							}
 							JSONObject child = new JSONObject(categoryPath.getString(hopNum + 1));
 							int childId = child.getInt("id");
@@ -1271,6 +1281,9 @@ System.out.println(outputFilename);
 				for (int i = 0; i < cypherRawResults.length(); i++) {
 					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
 					for (int j = 0; j < a2.length(); j++) {
+						if (a2.get(j).getClass().equals(JSONObject.Null)) {
+							continue;
+						}
 						JSONObject parent = new JSONObject(a2.getString(j));
 						idToJson.put(parent.getInt("id"), parent);
 					}
