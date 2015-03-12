@@ -619,7 +619,7 @@ function renderIfReadyNew() {
 	if (!uncategorizedResponse.categoriesRecursive) {
 		debugger;
 	}
-	categories = getCategoriesUnderID(uncategorizedResponse.categoriesRecursive.children, rootId);
+	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
 	if (!categories) {
 		return;
 	}
@@ -674,7 +674,7 @@ function renderIfReadyOld() {
 	if (!uncategorizedResponse) {
 		return;
 	}
-	categories = getCategoriesUnderID(uncategorizedResponse.categoriesRecursive.children, rootId);
+	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
 	if (!categories) {
 		return;
 	}
@@ -703,6 +703,23 @@ function renderIfReadyOld() {
 	}	
 //			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
 	$("#status").text("Done")
+}
+
+function getCategoriesUnderID2(categoryTree, categoryId) {
+	if (categoryTree.id == categoryId) {
+		return categoryTree.children;
+	} else {
+		for (var i = 0; i < categoryTree.children.length; i++) {
+			var child = categoryTree.children[i];
+			if (child) {
+				var matchingChild = getCategoriesUnderID2(child);
+				if (matchingChild) {
+					return matchingChild;
+				}
+			}
+		}
+		return null;// Do not return an empty list here, the recursive logic will break.
+	}
 }
 
 function getCategoriesUnderID(categories, categoryId) {

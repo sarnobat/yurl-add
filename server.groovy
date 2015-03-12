@@ -396,14 +396,12 @@ public class Yurl {
 					_16: {
 
 							Object val = anItem.get(6);
-							System.out.println("val is: " + val);
 							if ("null".equals(val)) {
 								System.out.println("Is null value");
 							} else if (val == null) {
                                                                 System.out.println("Is null string");
 							}
 							else if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
-//									System.out.println("Non-null value: " + val + "\t" + val.getClass());
 									Long aValue = (Long) val;
 									anUncategorizedNodeJsonObject.put("created", aValue);
 							}
@@ -1210,7 +1208,7 @@ System.out.println(outputFilename);
 			getCounts : {
 				JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
 				Map<Integer, Integer> categorySizes = getCategorySizes(counts.getJSONArray("data"));
-				System.out.println("getCategoriesTree() - sizes of each category" + categorySizes);
+//				System.out.println("getCategoriesTree() - sizes of each category" + categorySizes);
 				addSizes(categoriesTree,categorySizes);
 			}
 			System.out.println("getCategoriesTree() - end");
