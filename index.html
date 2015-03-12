@@ -707,17 +707,19 @@ function renderIfReadyOld() {
 function getCategoriesUnderID2(categoryTree, categoryId) {
 	if (categoryTree.id == categoryId) {
 		return categoryTree.children;
-	} else {
+	} else if (categoryTree.children) {
 		for (var i = 0; i < categoryTree.children.length; i++) {
 			var child = categoryTree.children[i];
 			if (child) {
-				var matchingChild = getCategoriesUnderID2(child);
+				var matchingChild = getCategoriesUnderID2(child, categoryId);
 				if (matchingChild) {
 					return matchingChild;
 				}
 			}
 		}
 		return null;// Do not return an empty list here, the recursive logic will break.
+	} else {
+		return null;
 	}
 }
 
