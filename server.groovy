@@ -388,7 +388,7 @@ public class Yurl {
 					_15: {
 
 						Object val = anItem.get(4);
-						if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.NULL))) {
+						if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
 							String aValue = (String) val;
 							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
 						}
@@ -396,7 +396,13 @@ public class Yurl {
 					_16: {
 
 							Object val = anItem.get(6);
-							if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.NULL))) {
+							System.out.println("val is: " + val);
+							if ("null".equals(val)) {
+								System.out.println("Is null value");
+							} else if (val == null) {
+                                                                System.out.println("Is null string");
+							}
+							else if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
 //									System.out.println("Non-null value: " + val + "\t" + val.getClass());
 									Long aValue = (Long) val;
 									anUncategorizedNodeJsonObject.put("created", aValue);
@@ -556,7 +562,6 @@ public class Yurl {
 				theParamValues.put("aCategoryName", iCategoryName);
 				theParamValues.put("aKeyCode", iKeyCode);
 				String iCypherQuery = "START parent=node({parentId}) MATCH parent -[r:CONTAINS]-> existingCategory WHERE has(existingCategory.type) and existingCategory.type = 'categoryNode' and existingCategory.name = {aCategoryName} SET existingCategory.key = {aKeyCode} RETURN distinct id(existingCategory)";
-			System.out.println("createNewKeyBinding() - map... " + theParamValues);
 				JSONObject theJson = execute(iCypherQuery, theParamValues);
 				System.out.println("restoring unassociated category: "
 						+ iCypherQuery + "\t" + theParamValues);
@@ -1118,9 +1123,7 @@ System.out.println(outputFilename);
 			Map<String, Object> thePostBody = new HashMap<String, Object>();
 			thePostBody.put("query", iCypherQuery);
 			thePostBody.put("params", Preconditions.checkNotNull(iParams));
-			System.out.println("\texecute() - map... ");
-			System.out.println("\texecute() - map - " + iParams);
-			System.out.println("\texecute() - query - \n\t" + iCypherQuery + "\n\tparams - " + (iParams == null ? "null" : iParams));
+			System.out.println("\texecute() - query - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
 	
 			// POST {} to the node entry point URI
 			ClientResponse theResponse = theWebResource
@@ -1309,7 +1312,7 @@ System.out.println(outputFilename);
 
 		private static JSONArray removeNulls(JSONArray jsonArray) {
 			for(int i = 0; i < jsonArray.length(); i++) {
-				if (JSONObject.NULL.equals(jsonArray.get(i))) {
+				if (JSONObject.Null.equals(jsonArray.get(i))) {
 					jsonArray.remove(i);
 					--i;
 				}
