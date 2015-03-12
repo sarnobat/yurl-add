@@ -1207,7 +1207,7 @@ System.out.println(outputFilename);
 			getCounts : {
 				JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
 				Map<Integer, Integer> categorySizes = getCategorySizes(counts.getJSONArray("data"));
-				System.out.println(categorySizes);
+				System.out.println("getCategoriesTree() - sizes of each category" + categorySizes);
 				addSizes(categoriesTree,categorySizes);
 			}
 			System.out.println("getCategoriesTree() - end");
@@ -1299,6 +1299,10 @@ System.out.println(outputFilename);
 				}
 			}
 			System.out.println("createCategoryTreeFromCypherResultPaths() - Category result count: " + idToJson.size());
+			if (idToJson.get(45) == null) {
+				System.out.println("createCategoryTreeFromCypherResultPaths() - 45 not found, but did find:");
+				System.out.println(idToJson);
+			}
 			JSONObject json = checkNotNull(idToJson.get(45));// TODO: use the constant
 			return json;
 		}

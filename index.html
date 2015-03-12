@@ -616,6 +616,9 @@ function renderIfReadyNew() {
 	if (!uncategorizedResponse) {
 		return;
 	}
+	if (!uncategorizedResponse.categoriesRecursive) {
+		debugger;
+	}
 	categories = getCategoriesUnderID(uncategorizedResponse.categoriesRecursive.children, rootId);
 	if (!categories) {
 		return;
@@ -715,7 +718,7 @@ function getCategoriesUnderID(categories, categoryId) {
 			}
 		}
 	}
-	return null;
+	return [];
 }
 
 function configureKeyBindings() {
