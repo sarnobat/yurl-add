@@ -125,13 +125,13 @@ public class Yurl {
 				System.out.println("1");
 				String first = lines[i];
 				
-				if (first.startsWith("http")) {
-					stash(URLEncoder.encode(first, "UTF-8"), iRootId);
-					++i;
-					continue;
-				}
 				String theHttpUrl;
 				try {
+					if (first.startsWith("http")) {
+						stash(URLEncoder.encode(first, "UTF-8"), iRootId);
+						++i;
+						continue;
+					}
 					// Fails if it sees the string "%)"
 					theHttpUrl = URLDecoder.decode(first, "UTF-8");
 				} catch (Exception e) {
@@ -709,7 +709,8 @@ public class Yurl {
 				System.out.println("error");
 				System.out.println(e);
 				e.printStackTrace();
-				return null;
+				//return null;
+				throw new JSONException(e);
 			}
 		}
 
@@ -1240,7 +1241,7 @@ System.out.println(outputFilename);
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
 				JSONObject theQueryJsonResult) {
 			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
-
+			Preconditions.checkState(cypherRawResults.length() > 0);
 			MultiValueMap parentToChildren = new MultiValueMap();
 			getParentChildrenMap: {
 				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
@@ -1278,6 +1279,7 @@ System.out.println(outputFilename);
 			}
 			Map<Integer, JSONObject> idToJson = new HashMap<Integer, JSONObject>();
 			getIdToJsonNodeMap: {
+				System.out.println("createCategoryTreeFromCypherResultPaths() - getIdToJsonNodeMap - " + cypherRawResults.length());
 				for (int i = 0; i < cypherRawResults.length(); i++) {
 					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
 					for (int j = 0; j < a2.length(); j++) {
@@ -1286,6 +1288,7 @@ System.out.println(outputFilename);
 						}
 						JSONObject parent = new JSONObject(a2.getString(j));
 						idToJson.put(parent.getInt("id"), parent);
+						System.out.println("createCategoryTreeFromCypherResultPaths() - " + parent.getInt("id") + "::" + parent);
 					}
 				}
 			}
@@ -1317,6 +1320,7 @@ System.out.println(outputFilename);
 				System.out.println("createCategoryTreeFromCypherResultPaths() - 45 not found, but did find:");
 				System.out.println(idToJson);
 			}
+			Preconditions.checkState(idToJson.size() > 0);
 			JSONObject json = checkNotNull(idToJson.get(45));// TODO: use the constant
 			return json;
 		}
