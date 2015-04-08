@@ -358,6 +358,7 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 				hasScreenshot = true;
 			
 		} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
+		//else if (false) {
 			imageCell += ("");
 			var asin = field.url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
 			asin = asin.replace(/.*dp./,'');
@@ -650,6 +651,7 @@ function renderIfReadyNew() {
 	var urlThumbnailsHtml = "";
 	var urlListHtml = "";
 	var tableHtml = "";
+	var productsHtml = "";
 	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
 		var categoryId = categoryIdsUnderRootOrdered[i];
 		var categoryName = categoryIdsToNames[categoryId];
@@ -657,10 +659,11 @@ function renderIfReadyNew() {
 		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
+		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
 	}
 	$("#url_table").append(tableHtml);
-	
 	$("#list").append(urlListHtml);
+	$("#products").append(productsHtml);
 //        $("#url_thumbnails").append(urlThumbnailsHtml)
 }
 
@@ -695,6 +698,28 @@ function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory) {
 			urlThumbnailsHtml += item.title +"<br>";
 		}
 		return urlThumbnailsHtml;
+}
+
+function getProductsHtml(categoryId, categoryName, urlsInCategory) {
+		var productsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			var item = urlsInCategory[j];
+			
+			if (item.url.match(".amazon.co[^/]+\/[^s]")) {
+				productsHtml += "";
+				var asin = item.url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+				asin = asin.replace(/.*dp./,'');
+				asin = asin.replace(/.*gp.aw.d./, '');
+				asin = asin.replace(/.ref_?=.*/, '');
+				asin = asin.replace(/.*offer-listing./, '');
+				var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+				productsHtml += ("<img class=itemImage src='"+productImageUrl+"' height='280'>");
+				hasScreenshot = true;
+			} else {
+				productsHtml += item.url + "<br>";
+			}
+		}
+		return productsHtml;
 }
 
 function getCategoryListHtml(categoryId, categoryName, urlsInCategory) {
@@ -1300,6 +1325,7 @@ reading list (pdf))
 * for seeing what you could buy when you're passively shopping<br>
 							  </div>
 							<div id="tabs-8">
+							  <ol id="products"></ol>
 							</div>
 						</div>
 <!--						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
