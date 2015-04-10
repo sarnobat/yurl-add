@@ -652,6 +652,7 @@ function renderIfReadyNew() {
 	var urlListHtml = "";
 	var tableHtml = "";
 	var productsHtml = "";
+	var markupHtml = "";
 	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
 		var categoryId = categoryIdsUnderRootOrdered[i];
 		var categoryName = categoryIdsToNames[categoryId];
@@ -660,10 +661,12 @@ function renderIfReadyNew() {
 		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
 		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
+//		markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
 	}
 	$("#url_table").append(tableHtml);
 	$("#list").append(urlListHtml);
 	$("#products").append(productsHtml);
+	$("#htmlText").val(markupHtml);
 //        $("#url_thumbnails").append(urlThumbnailsHtml)
 }
 
@@ -700,6 +703,15 @@ function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory) {
 		return urlThumbnailsHtml;
 }
 
+function getMarkupHtml(categoryId, categoryName, urlsInCategory) {
+		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			var item = urlsInCategory[j];
+			urlThumbnailsHtml += item.title +"<br>";
+		}
+		return urlThumbnailsHtml;
+}
+
 function getProductsHtml(categoryId, categoryName, urlsInCategory) {
 		var productsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
@@ -726,7 +738,7 @@ function getCategoryListHtml(categoryId, categoryName, urlsInCategory) {
 		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
 			var item = urlsInCategory[j];
-			urlThumbnailsHtml += item.title + " (<a href='" + item.url +"'>" + item.url + "</a>)<br>";
+			urlThumbnailsHtml += item.title + " (<a href='" + item.url +"'>" + item.url + "</a>)<br><br>";
 		}
 		return urlThumbnailsHtml;
 }
@@ -1280,6 +1292,7 @@ reading list (pdf))
 								<li><a href="#tabs-6">List</a></li>
 								<li><a href="#tabs-7">Catalog</a></li>
 								<li><a href="#tabs-8">Products</a></li>
+								<li><a href="#tabs-9">HTML</a></li>
 							  </ul>
 							  <div id="tabs-1">
 									To identify and open what you're looking for most (e.g. videos)<br>
@@ -1326,6 +1339,9 @@ reading list (pdf))
 							  </div>
 							<div id="tabs-8">
 							  <ol id="products"></ol>
+							</div>
+							<div id="tabs-9">
+							  <textarea id="htmlText"></textarea>
 							</div>
 						</div>
 <!--						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
