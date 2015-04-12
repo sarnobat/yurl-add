@@ -666,7 +666,7 @@ function renderIfReadyNew() {
 	$("#url_table").append(tableHtml);
 	$("#list").append(urlListHtml);
 	$("#products").append(productsHtml);
-	$("#htmlText").val(markupHtml);
+	$("#htmlText").val(productsHtml);
 //        $("#url_thumbnails").append(urlThumbnailsHtml)
 }
 
@@ -694,6 +694,7 @@ function getCategoryTableHtml(categoryId, categoryName, urlsInCategory) {
 		return html;
 }
 
+// TODO: Implement this.
 function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory) {
 		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
@@ -725,7 +726,8 @@ function getProductsHtml(categoryId, categoryName, urlsInCategory) {
 				asin = asin.replace(/.ref_?=.*/, '');
 				asin = asin.replace(/.*offer-listing./, '');
 				var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
-				productsHtml += ("<img class=itemImage src='"+productImageUrl+"' height='280'>");
+				var imageTag = ("<img class=itemImage src='"+productImageUrl+"' height='280'>");
+				productsHtml += "<a href='" + item.url +"'>" + imageTag + "</a>\n";
 				hasScreenshot = true;
 			} else {
 				productsHtml += item.url + "<br>";
