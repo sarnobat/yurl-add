@@ -657,7 +657,7 @@ function renderIfReadyNew() {
 		var categoryId = categoryIdsUnderRootOrdered[i];
 		var categoryName = categoryIdsToNames[categoryId];
 		var urlsForCategory = urls[categoryId];
-		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
+		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId], limit);
 		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
 		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
@@ -694,9 +694,12 @@ function getCategoryTableHtml(categoryId, categoryName, urlsInCategory) {
 		return html;
 }
 
-function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory) {
+function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, limit) {
 		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
+			if (j > limit) {
+				break;
+			}
 			var item = urlsInCategory[j];
 			urlThumbnailsHtml += item.title +"<br>";
 		}
@@ -771,7 +774,9 @@ function renderIfReadyOld() {
 			if (categoryID == rootId) {
 				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
 			}
-			fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
+			if (resultRowNumber < limit) {
+				fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
+			}
 			++resultRowNumber; // why are we mutating a param?
 		});
 		++categoryOrdinal;
