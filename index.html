@@ -1155,6 +1155,12 @@ body{
 	border-radius: 1px;
 }
 
+.tooBig {
+	width: 200px; 
+	height: 100px; 
+	overflow-y: scroll;
+}
+
 .buttonize {
 	//padding:20px;
 	margin:25px;
@@ -1230,9 +1236,9 @@ body{
 						<!-- I don't see a good reason to have both keys and categoriesTree. Hopefully JSON Tree
 							will replace both -->
 						<br>Tree of Categories<br>
-						<div id="categoriesTree"  class="buttonize"></div>
+						<div id="categoriesTree" class="buttonize tooBig" ></div>
 						<br>Category tags<br>
-						<div id="categoriesRecursive"  class="buttonize">
+						<div id="categoriesRecursive"  class="buttonize tooBig">
 						<br><br>
 
 						<br><br>
