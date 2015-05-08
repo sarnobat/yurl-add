@@ -74,6 +74,7 @@ var limit;
 var uncategorizedResponse; // Populated via rest call
 var categories; // Populated via rest call
 var biggestImages = {};
+var IMAGE_SIZE = 100;
 
 function initialize() {
 
@@ -202,11 +203,12 @@ function initialize() {
     
 }
 
+
 function fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories) {
 	if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
 		return;
 	}
-	var toBeAppended = createImageCell(field, biggestImages, 100, resultRowNumber);
+	var toBeAppended = createImageCell(field, biggestImages, IMAGE_SIZE, resultRowNumber);
 	$("#url_thumbnails").append(toBeAppended);
 	
 }
@@ -663,6 +665,7 @@ function renderIfReadyNew() {
 		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
 //		markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
 	}
+	$("#url_thumbnails").append(urlThumbnailsHtml);
 	$("#url_table").append(tableHtml);
 	$("#list").append(urlListHtml);
 	$("#products").append(productsHtml);
@@ -701,9 +704,58 @@ function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, lim
 				break;
 			}
 			var item = urlsInCategory[j];
-			urlThumbnailsHtml += item.title +"<br>";
+//			urlThumbnailsHtml += item.title + ": " + item.url +"<br>";
+			urlThumbnailsHtml += ("<img class=itemImage src='"+getImageForUrl(item.url)+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'>");
 		}
 		return urlThumbnailsHtml;
+}
+
+function getImageForUrl(url) {
+	var imageUrl;
+	if (url.match(".jpg\??") || 
+		url.match(/.*jpg/i) ||
+		url.match(".gif$") || 
+		url.match(".png\??") || 
+		url.match("images.q=tbn:")) {
+		imageUrl = url;
+	}
+	if (url.match("youtube.com/watch")) {
+		var youtubeId = url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
+		imageUrl = "http://img.youtube.com/vi/"+youtubeId+"/0.jpg";	
+	} else if (url.match("dailymotion.com/video")) {
+		var youtubeId = url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+		imageUrl = "http://dailymotion.com/thumbnail/video/"+youtubeId ;			
+	} else if (url.match(".amazon.co[^/]+\/[^s]")) {
+		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+		asin = asin.replace(/.*dp./,'');
+		asin = asin.replace(/.*gp.aw.d./, '');
+		asin = asin.replace(/.ref_?=.*/, '');
+		asin = asin.replace(/.*offer-listing./, '');
+		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+		imageUrl = productImageUrl;
+	} else {
+		imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
+	}
+	return imageUrl;
+	/*
+	if (!hasScreenshot) {
+		imageCell += ("<img class=itemImage src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" />");
+		// Check if the biggest image server is up
+		if (biggestImages != null) {
+			if (biggestImages[field.url] != null) {
+				imageCell += ("<img class=itemImage src=\""+ biggestImages[field.url] +"\" class='screenshot' width="+imageSize+" />");
+			}
+		}
+	}
+
+	// Tooltip
+	var img = $($.parseHTML("<a href='"+field.url+"'>" + imageCell + "</a>"));
+/ *	img.tooltip({
+		items: "img",
+		content:  field.title + "<br><font style=\"font-size : xx-small \">"+field.url+"</font>",
+	});	* /
+	return img;
+	*/
 }
 
 function getMarkupHtml(categoryId, categoryName, urlsInCategory) {
