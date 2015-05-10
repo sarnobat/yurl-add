@@ -704,8 +704,7 @@ function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, lim
 				break;
 			}
 			var item = urlsInCategory[j];
-//			urlThumbnailsHtml += item.title + ": " + item.url +"<br>";
-			urlThumbnailsHtml += ("<img class=itemImage src='"+getImageForUrl(item.url)+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'>");
+			urlThumbnailsHtml += ("<a href="+item.url+"><img class=itemImage src='"+getImageForUrl(item.url)+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>");
 		}
 		return urlThumbnailsHtml;
 }
@@ -719,7 +718,7 @@ function getImageForUrl(url) {
 		url.match("images.q=tbn:")) {
 		imageUrl = url;
 	}
-	if (url.match("youtube.com/watch")) {
+	else if (url.match("youtube.com/watch")) {
 		var youtubeId = url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
 		imageUrl = "http://img.youtube.com/vi/"+youtubeId+"/0.jpg";	
 	} else if (url.match("dailymotion.com/video")) {
@@ -827,7 +826,7 @@ function renderIfReadyOld() {
 				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
 			}
 			if (resultRowNumber < limit) {
-				fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
+//				fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
 			}
 			++resultRowNumber; // why are we mutating a param?
 		});
