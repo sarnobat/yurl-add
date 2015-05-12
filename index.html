@@ -635,14 +635,14 @@ function renderIfReadyNew() {
 		debugger;
 	}
 	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
-	if (!categories) {
+//	if (!categories) {
 //		alert('Could not find root ' + rootId);
 		//return;
-	} else if (categories.length == 0) {
-	//	debugger;
-	} else {	
+//	} else if (categories.length == 0) {
+//	//	debugger;
+//	} else {	
 		configureKeyBindings();
-	}
+//	}
 	$("#status").text("Populating")
 	var categoryOrdinal = 0;
 	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
@@ -698,7 +698,7 @@ function getCategoryTableHtml(categoryId, categoryName, urlsInCategory) {
 }
 
 function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, limit) {
-		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
+		var urlThumbnailsHtml = "<h3><a href='/yurl/?rootId="+categoryId+"'>" + categoryName + " (" + categoryId + ")</a></h3>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
 			if (j > limit) {
 				break;
@@ -872,26 +872,28 @@ function getCategoriesUnderID(categories, categoryId) {
 }
 
 function configureKeyBindings() {
-	$.each(categories, function(a,binding,c){
-		if (binding.key == 'null') {
-			$("#keys").append("#");
-			// Don't remove the "null" otherwise we'll assign hash to this category
-		}
-		$("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
-		$("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + " (<span id='count_"+binding.id+"'></span>)</a></li>");
-		$("#count_" + binding.id).text(binding.count);
-		$(window).keypress(function(event) {
-			if ($("#keys").is(":focus")) {
-				return;
+	if (categories != null) {
+		$.each(categories, function(a,binding,c){
+			if (binding.key == 'null') {
+				$("#keys").append("#");
+				// Don't remove the "null" otherwise we'll assign hash to this category
 			}
-			if (binding.key == String.fromCharCode(event.which)) {
-				var parentId = binding.id;
-				var childId = $("#url_cards").children()[0].id;
-				var currentRootId = rootId;
-				relate(parentId, childId, currentRootId);
-			}
-		});			
-	});
+			$("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
+			$("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + " (<span id='count_"+binding.id+"'></span>)</a></li>");
+			$("#count_" + binding.id).text(binding.count);
+			$(window).keypress(function(event) {
+				if ($("#keys").is(":focus")) {
+					return;
+				}
+				if (binding.key == String.fromCharCode(event.which)) {
+					var parentId = binding.id;
+					var childId = $("#url_cards").children()[0].id;
+					var currentRootId = rootId;
+					relate(parentId, childId, currentRootId);
+				}
+			});			
+		});
+	}
 	$(window).keypress(function(event) {
 		var key = String.fromCharCode(event.which);
 		if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
