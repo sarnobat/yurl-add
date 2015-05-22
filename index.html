@@ -57,6 +57,17 @@ line.link {
   stroke-width: 1.5px;
 }
 
+.truncate{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    max-height: 51px;
+}
+
+td {
+    text-align: left;
+}
 </style>
 
 <script type="text/javascript" src="d3/d3.js"></script>
@@ -682,14 +693,14 @@ function putRootAtFront(urls, rootId) {
 
 function getCategoryTableHtml(categoryId, categoryName, urlsInCategory) {
 		var html = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
-		html += "<table id='table-"+categoryId+"' class='sortable'>";
+		html += "<table id='table-"+categoryId+"' class='sortable urlTable'>";
 		html += "<thead><th>Title</th><th>URL</th></thead>";
 		html += "<tbody>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
 			var item = urlsInCategory[j];
 			html += "<tr>";
-			html += "<td>" + item.title + "<td>";
-			html += "<td>" + item.url + "<td>";
+			html += "<td class='urlTable'><div class='truncate'>" + item.title + "</div><td>";
+			html += "<td class='urlTable'><div class='truncate'>" + item.url + "</div><td>";
 			html += "</tr>";
 		}
 		html += "</tbody>";
