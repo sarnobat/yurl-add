@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<!-- 
+Uses Bootstrap for UI, and Jquery mobile for other things
+-->
+
+<head>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+
+	<!--
+	<script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+	-->
+</head>
+<body>
+<div class="container-fluid">
+
+
+<script>
+var rootId = 45;
+var urlBase = "http://netgear.rohidekar.com:4447/yurl";    
+var items;
+$.getJSON(urlBase + "/uncategorized?rootId=" + rootId,function(results){
+	items = results;
+//	var urls = results.urls;
+	var categories = Object.keys(results.urls);
+	var itemsHtml = "";
+	//itemsHtml += "<table class='table-responsive'>";
+	var totalUrls = 0;
+	for (var i = 0; i < categories.length; i++) {
+		var categoryId = categories[i];
+		var urls = results.urls[categoryId];
+		for (var j = 0; j < urls.length && totalUrls < 2; j++) {
+			var item = urls[j];
+			var image = 
+				//"<a href="+item.url+">
+				"<img src='"+getImageForUrl(item.url)+"' class='img-responsive' style='max-width= 50px' >"
+				//+"</a>"
+				;
+			console.debug(image);
+			itemsHtml += 
+				//"<tr><td>"
+				//+ "</td></tr>"
+				//+ "<tr><td><h1>"
+				//+
+				
+				//+ "</h1></td></tr>"
+				//+ "<tr><td>"
+				"<h2>" + item.title + "</h2>"
+				+ image
+				//+ "</td></tr>"
+				+ item.url
+				//+ "<tr><td>"
+				+ "<br><br>"
+				//+ "</td></tr>"
+				;
+			itemsHtml += //"<table><tr><td>"				
+			//+ 
+			'<button type="button" class="btn btn-primary btn-lg btn-block">Block level button</button>'
+			+ '<button type="button" class="btn btn-default btn-lg btn-block">Block level button</button>'
+				//+ "<br><br>"
+				//+ "</td></tr></table>"
+				;
+			++totalUrls;
+		}
+	}
+	$("#items").append(itemsHtml);
+	//$("#items").text(items.urls);
+	//populateItem(items[0]);
+});
+
+function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, limit) {
+		var urlThumbnailsHtml = "<h3><a href='/yurl/?rootId="+categoryId+"'>" + categoryName + " (" + categoryId + ")</a></h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			if (j > limit) {
+				break;
+			}
+			var item = urlsInCategory[j];
+			urlThumbnailsHtml += ("<a href="+item.url+"><img class=itemImage src='"+getImageForUrl(item.url)+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>");
+		}
+		return urlThumbnailsHtml;
+}
+
+function getImageForUrl(url) {
+	var imageUrl;
+	if (url.match(".jpg\??") || 
+		url.match(/.*jpg/i) ||
+		url.match(".gif$") || 
+		url.match(".png\??") || 
+		url.match("images.q=tbn:")) {
+		imageUrl = url;
+	}
+	else if (url.match("youtube.com/watch")) {
+		var youtubeId = url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
+		imageUrl = "http://img.youtube.com/vi/"+youtubeId+"/0.jpg";	
+	} else if (url.match("dailymotion.com/video")) {
+		var youtubeId = url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+		imageUrl = "http://dailymotion.com/thumbnail/video/"+youtubeId ;			
+	} else if (url.match(".amazon.co[^/]+\/[^s]")) {
+		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+		asin = asin.replace(/.*dp./,'');
+		asin = asin.replace(/.*gp.aw.d./, '');
+		asin = asin.replace(/.ref_?=.*/, '');
+		asin = asin.replace(/.*offer-listing./, '');
+		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+		imageUrl = productImageUrl;
+	} else {
+		imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
+	}
+	return imageUrl;
+}
+
+function populateItem(item) {
+	$("#title").text(item.title);
+	$("#url").text(item.url);
+}
+
+$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
+	populateButton(0);
+	populateButton(1);
+	populateButton(2);
+});
+
+function populateButton(i, category) {
+	$("#button" + i).text(i);
+}
+    		
+$('.categoryButton').on('tap', function() {
+	items.shift();
+	populateItem(items[0]);
+});
+    </script>
+
+
+
+<div id="items">
+</div>
+
+</div>
+</body>
+</html>
