@@ -1204,7 +1204,7 @@ System.out.println(outputFilename);
 			JSONObject theQueryJsonResult = execute(
 					iCypherQuery,
 					theParams.build());
-			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult);
+			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult, rootId);
 			// Get the number of urls in each category
 			getCounts : {
 				JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
@@ -1239,7 +1239,7 @@ System.out.println(outputFilename);
 		}
 
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
-				JSONObject theQueryJsonResult) {
+				JSONObject theQueryJsonResult, Integer rootId) {
 			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
 			Preconditions.checkState(cypherRawResults.length() > 0);
 			MultiValueMap parentToChildren = new MultiValueMap();
@@ -1321,7 +1321,7 @@ System.out.println(outputFilename);
 				System.out.println(idToJson);
 			}
 			Preconditions.checkState(idToJson.size() > 0);
-			JSONObject json = checkNotNull(idToJson.get(45));// TODO: use the constant
+			JSONObject json = checkNotNull(idToJson.get(rootId));// TODO: use the constant
 			return json;
 		}
 
