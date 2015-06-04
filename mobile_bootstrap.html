@@ -34,9 +34,9 @@ var items;
 var LIMIT = 50;
 var orderedDescending = true;
 
-//getRootId: {
-//			rootId = $.url().param('rootId');
-//		}
+getRootId: {
+	rootId = $.url().param('rootId');
+}
 function setParentOfRootId(nodeId) {    	
 	$.getJSON(urlBase + "/parent?nodeId=" + nodeId, function(result){
 	})
