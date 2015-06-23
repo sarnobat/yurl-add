@@ -125,13 +125,13 @@ public class Yurl {
 				System.out.println("1");
 				String first = lines[i];
 				
+				if (first.startsWith("http")) {
+					stash(URLEncoder.encode(first, "UTF-8"), iRootId);
+					++i;
+					continue;
+				}
 				String theHttpUrl;
 				try {
-					if (first.startsWith("http")) {
-						stash(URLEncoder.encode(first, "UTF-8"), iRootId);
-						++i;
-						continue;
-					}
 					// Fails if it sees the string "%)"
 					theHttpUrl = URLDecoder.decode(first, "UTF-8");
 				} catch (Exception e) {
@@ -342,10 +342,7 @@ public class Yurl {
 			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start source=node({rootId}) match p = source-[r:CONTAINS*1..2]->u "
-					+ "where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
-					+ "return distinct ID(u),u.title,u.url,extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal "
-					+ "ORDER BY u.ordinal DESC LIMIT 500",
+					"start source=node({rootId}) match source-[r:CONTAINS*1..2]->u where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  return distinct ID(u),u.title,u.url,extract(r1 in r | id(r1)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal ORDER BY u.ordinal DESC LIMIT 500",
 					theParams.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
@@ -368,15 +365,10 @@ public class Yurl {
 					_14: {
 						try {
 							JSONArray path = (JSONArray) anItem.get(3);
-							if (path.length() == 3) {
-								anUncategorizedNodeJsonObject.put("parentId",
-										path.get(1));
-							} else if (path.length() == 2) {
+							if (path.length() < 2) {
 								anUncategorizedNodeJsonObject.put("parentId",
 										iRootId);
-							}
-							else if (path.length() == 1) {
-								// This should never happen
+							} else {
 								anUncategorizedNodeJsonObject.put("parentId",
 										path.get(0));
 							}
@@ -396,12 +388,8 @@ public class Yurl {
 					_16: {
 
 							Object val = anItem.get(6);
-							if ("null".equals(val)) {
-								System.out.println("Is null value");
-							} else if (val == null) {
-                                                                System.out.println("Is null string");
-							}
-							else if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
+							if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
+//									System.out.println("Non-null value: " + val + "\t" + val.getClass());
 									Long aValue = (Long) val;
 									anUncategorizedNodeJsonObject.put("created", aValue);
 							}
@@ -529,15 +517,12 @@ public class Yurl {
 				}
 				System.out
 						.println("About to remove keybinding for " + aKeyCode);
-				try {
-					execute(
+				JSONObject json = execute(
 						"START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
 						aParamValues);
-					theKeyBindingsNoDuplicates.remove(aKeyCode);
-					System.out.println("Removed keybinding for " + aName);
-				} catch (Exception e) {
-					System.out.println("Did not removed keybinding for " + aName + " since there currently isn't one.");
-				}
+				theKeyBindingsNoDuplicates.remove(aKeyCode);
+				System.out.println("Removed keybinding for " + aName);
+
 				createNewKeyBinding(aName, aKeyCode, iParentId);
 			}
 			JSONArray ret = getKeys(iParentId);
@@ -548,18 +533,17 @@ public class Yurl {
 		private void createNewKeyBinding(String iCategoryName, String iKeyCode,
 				Integer iParentId) throws IOException, JSONException {
 			
-			System.out.println("createNewKeyBinding() - begin() : " + String.format("iCategoryName %s\tiKeyCode %s\tiParentId %d", iCategoryName, iKeyCode, iParentId));
+			System.out.println("createNewKeyBinding() - begin()");
 			// TODO: Also create a trash category for each new category key node
 
 			boolean shouldCreateNewCategoryNode = false;
-			String theNewCategoryNodeIdString = "-1";
 			_1: {
 				Map<String, Object> theParamValues = new HashMap<String, Object>();
 				theParamValues.put("parentId", iParentId);
 				// TODO: change this back
 				theParamValues.put("aCategoryName", iCategoryName);
 				theParamValues.put("aKeyCode", iKeyCode);
-				String iCypherQuery = "START parent=node({parentId}) MATCH parent -[r:CONTAINS]-> existingCategory WHERE has(existingCategory.type) and existingCategory.type = 'categoryNode' and existingCategory.name = {aCategoryName} SET existingCategory.key = {aKeyCode} RETURN distinct id(existingCategory)";
+				String iCypherQuery = "START parent=node({parentId}) MATCH parent -[r:CONTAINS]-> existingCategory WHERE has(existingCategory.type) and existingCategory.type = 'categoryNode' and existingCategory.name = {aCategoryName} SET existingCategory.key = {aKeyCode} RETURN id(existingCategory)";
 				JSONObject theJson = execute(iCypherQuery, theParamValues);
 				System.out.println("restoring unassociated category: "
 						+ iCypherQuery + "\t" + theParamValues);
@@ -567,56 +551,44 @@ public class Yurl {
 				System.out.println(theJson.get("data"));
 				JSONArray theCategoryNodes = (JSONArray) theJson.get("data");
 				if (theCategoryNodes.length() > 0) {
-					System.out.println("createNewKeyBinding() - We already have a category named " + iCategoryName + " underneath " + iParentId);
 					if (theCategoryNodes.length() > 1) {
-						System.out.println("createNewKeyBinding() - Too many subcategories named " + iCategoryName + " underneath " + iParentId + "\n\t" + theCategoryNodes);
-						// Sanity check
 						throw new RuntimeException(
 								"There should never be 2 child categories of the same node with the same name");
 					}
-					theNewCategoryNodeIdString = (String) ((JSONArray)theCategoryNodes
-							.get(0)).get(0);
-					System.out.println("createNewKeyBinding() - Category ID to reattach: "
+					String theNewCategoryNodeIdString = "-1";
+
+					theNewCategoryNodeIdString = (String) theCategoryNodes
+							.get(0);
+					System.out.println("Category ID to reattach: "
 							+ theNewCategoryNodeIdString);
 				} else {
 					shouldCreateNewCategoryNode = true;
-					System.out.println("We need to create a category named " + iCategoryName + " underneath " + iParentId);
 				}
 
 			}
 			if (shouldCreateNewCategoryNode) {
-				theNewCategoryNodeIdString = createCategoryWithKeyBinding(
-						iCategoryName, iKeyCode);
-			}
-			try {
-				relateHelper(iParentId, Integer.parseInt(theNewCategoryNodeIdString));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			System.out.println("createNewKeyBinding() - end()");
-		}
 
-		private String createCategoryWithKeyBinding(String iCategoryName,
-				String iKeyCode) throws IOException {
-			String theNewCategoryNodeIdString;
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
-			_1: {
-				theParamValues.put("name", iCategoryName);
-				theParamValues.put("key", iKeyCode);
-				theParamValues.put("type", "categoryNode");
-				theParamValues.put("created", System.currentTimeMillis());
-				System.out.println("cypher params: " + theParamValues);
+				Map<String, Object> theParamValues = new HashMap<String, Object>();
+				_1: {
+					theParamValues.put("name", iCategoryName);
+					theParamValues.put("key", iKeyCode);
+					theParamValues.put("type", "categoryNode");
+					theParamValues.put("created", System.currentTimeMillis());
+					System.out.println("cypher params: " + theParamValues);
+				}
+				// TODO: first check if there is already a node with this name,
+				// which is for re-associating the keycode with the category
+				JSONObject theNewKeyBindingResponseJson = execute(
+						"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
+						theParamValues);
+				System.out.println(theNewKeyBindingResponseJson.toString());
+				String theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
+						.get("data")).get(0)).get(0);
+				Integer theNewCategoryNodeId = Integer
+						.parseInt(theNewCategoryNodeIdString);
+				relateHelper(iParentId, theNewCategoryNodeId);
 			}
-			// TODO: first check if there is already a node with this name,
-			// which is for re-associating the keycode with the category
-			JSONObject theNewKeyBindingResponseJson = execute(
-					"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
-					theParamValues);
-			System.out.println("createNewKeyBinding() - Success:\n\t" + theNewKeyBindingResponseJson.toString());
-			theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
-					.get("data")).get(0)).get(0);
-			System.out.println("createNewKeyBinding() - got new node");
-			return theNewCategoryNodeIdString;
+                        System.out.println("createNewKeyBinding() - end()");
 		}
 
 		@GET
@@ -641,9 +613,8 @@ public class Yurl {
 			// there's
 			// a way to do this in Cypher. If there isn't, this is not a huge
 			// compromise.
-			// TODO: find a way to count the nodes
 			JSONObject theQueryJsonResult = execute(
-					"START parent=node({parentId}) MATCH parent-[c:CONTAINS*1..2]->n WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN distinct ID(n),n.name,n.key,0 as c order by c desc",
+					"START parent=node({parentId}) MATCH parent-[c:CONTAINS]->n -[c2:CONTAINS*]->n2 WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN ID(n),n.name,n.key,count(n2) as c order by c desc",
 					theParams.build());
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			System.out.println("getKeys() - length: " + theData.length());
@@ -668,7 +639,7 @@ public class Yurl {
 					oKeys.put(aBindingObject);
 				}
 			}
-			System.out.println("getKeys() - end. length: " + oKeys.length());
+			System.out.println("getKeys() - length: " + oKeys.length());
 			return oKeys;
 		}
 
@@ -709,8 +680,7 @@ public class Yurl {
 				System.out.println("error");
 				System.out.println(e);
 				e.printStackTrace();
-				//return null;
-				throw new JSONException(e);
+				return null;
 			}
 		}
 
@@ -723,7 +693,7 @@ public class Yurl {
 		private static void downloadImageInSeparateThread(final String iUrl2,
 				final String targetDirPath, final String cypherUri,
 				final String id) {
-			final String iUrl = iUrl2.replaceAll("\\?.*","");
+			String iUrl = iUrl2.replaceAll("\\?.*","");
 			Runnable r = new Runnable() {
 				// @Override
 				public void run() {
@@ -1002,44 +972,17 @@ System.out.println(outputFilename);
 					.type("application/json").build();
 		}
 
-		private Integer createCategory(String iCategoryName) throws IOException {
-			String theNewCategoryNodeIdString;
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
-			_1: {
-				theParamValues.put("name", iCategoryName);
-				theParamValues.put("type", "categoryNode");
-				theParamValues.put("created", System.currentTimeMillis());
-				System.out.println("cypher params: " + theParamValues);
-			}
-			// TODO: first check if there is already a node with this name,
-			// which is for re-associating the keycode with the category
-			JSONObject theNewKeyBindingResponseJson = execute(
-					"CREATE (n { name : {name} , created: {created} , type :{type}}) RETURN id(n)",
-					theParamValues);
-			System.out.println("createNewKeyBinding() - Success:\n\t" + theNewKeyBindingResponseJson.toString());
-			theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
-					.get("data")).get(0)).get(0);
-			System.out.println("createNewKeyBinding() - got new node");
-			return Integer.parseInt(theNewCategoryNodeIdString);
-		}
-
 		@GET
 		@Path("createAndRelate")
 		@Produces("application/json")
 		public Response createSubDirAndMoveItem(
 				@QueryParam("newParentName") String iNewParentName,
-				@QueryParam("childId") Integer iItemId,
+				@QueryParam("childId") Integer iChildId,
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
-			System.out.println("createSubDirAndMoveItem() - begin");
-			Integer theNewCategoryNodeIdString = createCategory(iNewParentName) ;
-			Response r =  relate(theNewCategoryNodeIdString, iItemId, iCurrentParentId);
-			try {
-				relateHelper(iCurrentParentId, theNewCategoryNodeIdString);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return r;
+			Integer iNewParentId;
+			// TODO : Implement this
+			return null;
 		}
 
 		/**
@@ -1093,9 +1036,6 @@ System.out.println(outputFilename);
 		 */
 		private JSONObject relateHelper(Integer iParentId, Integer iChildId)
 				throws IOException, JSONException {
-			System.out.println("relateHelper() - begin");
-			System.out.println(String.format("relateHelper() iParentId = " + iParentId + ", iChildId = " + iChildId));
-			System.out.println(String.format("relateHelper() begin iParentId = %d\tiChildId = %d)", iParentId, iChildId));
 			Map<String, Object> theParamValues = new HashMap<String, Object>();
 			_1: {
 				theParamValues.put("parentId", iParentId);
@@ -1105,8 +1045,6 @@ System.out.println(outputFilename);
 			JSONObject theJson = execute(
 					"start a=node({parentId}),b=node({childId}) CREATE a-[r:CONTAINS]->b SET b.accessed = {currentTime} return a,r,b;",
 					theParamValues);
-			System.out.println("relateHelper() - created. " + theJson);
-			System.out.println("relateHelper() - created. Length = " + theJson.length());
 			return theJson;
 		}
 
@@ -1121,15 +1059,16 @@ System.out.println(outputFilename);
 					CYPHER_URI);
 			Map<String, Object> thePostBody = new HashMap<String, Object>();
 			thePostBody.put("query", iCypherQuery);
-			thePostBody.put("params", Preconditions.checkNotNull(iParams));
-			System.out.println("\texecute() - query - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
+			thePostBody.put("params", iParams);
+			
+			System.out.println("execute() - query - " + iCypherQuery + "\n\tparams - " + iParams);
 	
 			// POST {} to the node entry point URI
 			ClientResponse theResponse = theWebResource
 					.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }")
 					.post(ClientResponse.class, thePostBody);
-                        System.out.println("\texecute() - finished - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
+                        System.out.println("execute() - finished - " + iCypherQuery + "\n\tparams - " + iParams);
 			if (theResponse.getStatus() != 200) {
 				System.out.println("FAILED:\n\t" + iCypherQuery + "\n\tparams: "
 						+ iParams);
@@ -1199,18 +1138,17 @@ System.out.println(outputFilename);
 			_1: {
 				theParams.put("parentId", rootId);
 			}
-			String iCypherQuery = "start n=node({parentId}) match path=n-[r:CONTAINS*]->c WHERE has(c.name) return extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\" , key : \"' + p.key + '\"}')";
-			System.out.println(iCypherQuery);
 			JSONObject theQueryJsonResult = execute(
-					iCypherQuery,
+					"start n=node({parentId}) match path=n-[r:CONTAINS*]->c WHERE has(c.name) return extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\"}')",
 					theParams.build());
-			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult, rootId);
+			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult);
 			// Get the number of urls in each category
 			getCounts : {
 				JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
 				Map<Integer, Integer> categorySizes = getCategorySizes(counts.getJSONArray("data"));
-//				System.out.println("getCategoriesTree() - sizes of each category" + categorySizes);
+				System.out.println(categorySizes);
 				addSizes(categoriesTree,categorySizes);
+//				System.out.println(categoriesTree);
 			}
 			System.out.println("getCategoriesTree() - end");
 			return categoriesTree;
@@ -1228,6 +1166,9 @@ System.out.println(outputFilename);
 
 		private static void addSizes(JSONObject categoriesTree,
 				Map<Integer, Integer> categorySizes) {
+//			if (categoriesTree == null) {
+//	                        categoriesTree.put("size", 0);
+//			} else {
 			Integer id = categoriesTree.getInt("id");
 			categoriesTree.put("size", categorySizes.get(id));
 			if (categoriesTree.has("children")) {
@@ -1236,33 +1177,23 @@ System.out.println(outputFilename);
 					addSizes(children.getJSONObject(i), categorySizes);
 				}
 			}
+//			}
 		}
 
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
-				JSONObject theQueryJsonResult, Integer rootId) {
+				JSONObject theQueryJsonResult) {
 			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
-			Preconditions.checkState(cypherRawResults.length() > 0);
+
 			MultiValueMap parentToChildren = new MultiValueMap();
 			getParentChildrenMap: {
-				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
-					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
-					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-						//	System.out.println(pathNum + "::" + hopNum + categoryPath.get(hopNum));
-							Object left = categoryPath.get(hopNum);
-							Object right = categoryPath.get(hopNum + 1);
-							if (left.getClass().equals(org.json.JSONObject.Null)) {
-								continue;
-							}
-		   					if (right.getClass().equals(org.json.JSONObject.Null)) {
-                                                                continue;
-                                                        }
-							String categoryPathHopString = categoryPath.getString(hopNum);
-							JSONObject parent = new JSONObject(categoryPathHopString);
-							if (!(categoryPath.get(hopNum + 1) instanceof String)) {
-								System.out.println("ERROR 3: " + categoryPath.get(hopNum + 1).getClass() + "\t" + categoryPath);
-								continue;	
-							}
-							JSONObject child = new JSONObject(categoryPath.getString(hopNum + 1));
+				System.out.println("createCategoryTreeFromCypherResultPaths() - size " + cypherRawResults.length());
+				for (int i = 0; i < cypherRawResults.length(); i++) {
+					//System.out.println('getCategoriesTree() - cypherRawResults - ' + i + '  ' + cypherRawResults.getJSONArray(i));
+					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
+					for (int j = 0; j < a2.length(); j++) {
+						JSONObject parent = new JSONObject(a2.getString(j));
+						if (j < a2.length() - 1) {
+							JSONObject child = new JSONObject(a2.getString(j + 1));
 							int childId = child.getInt("id");
 							int parentId = checkNotNull(parent.getInt("id"));
 							Object childrenObj = parentToChildren.get(parentId);
@@ -1274,26 +1205,23 @@ System.out.println(outputFilename);
 							} else {
 								parentToChildren.put(parentId, childId);
 							}
+						}
 					}
 				}
 			}
 			Map<Integer, JSONObject> idToJson = new HashMap<Integer, JSONObject>();
 			getIdToJsonNodeMap: {
-				System.out.println("createCategoryTreeFromCypherResultPaths() - getIdToJsonNodeMap - " + cypherRawResults.length());
 				for (int i = 0; i < cypherRawResults.length(); i++) {
 					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
 					for (int j = 0; j < a2.length(); j++) {
-						if (a2.get(j).getClass().equals(JSONObject.Null)) {
-							continue;
-						}
 						JSONObject parent = new JSONObject(a2.getString(j));
 						idToJson.put(parent.getInt("id"), parent);
-						System.out.println("createCategoryTreeFromCypherResultPaths() - " + parent.getInt("id") + "::" + parent);
 					}
 				}
 			}
 	
 			addChildArrayToEachJsonNode: {
+	
 				for (Object parentIdObj : parentToChildren.keySet()) {
 					Integer parentId = (Integer) parentIdObj;
 					JSONObject parentJson = idToJson.get(parentId);
@@ -1316,23 +1244,10 @@ System.out.println(outputFilename);
 				}
 			}
 			System.out.println("createCategoryTreeFromCypherResultPaths() - Category result count: " + idToJson.size());
-			if (idToJson.get(45) == null) {
-				System.out.println("createCategoryTreeFromCypherResultPaths() - 45 not found, but did find:");
-				System.out.println(idToJson);
-			}
-			Preconditions.checkState(idToJson.size() > 0);
-			JSONObject json = checkNotNull(idToJson.get(rootId));// TODO: use the constant
+                        //System.out.println("createCategoryTreeFromCypherResultPaths() - Category result: " + idToJson);
+			JSONObject json = checkNotNull(idToJson.get(45));// TODO: use the constant
+//			System.out.println(json.toString(4));
 			return json;
-		}
-
-		private static JSONArray removeNulls(JSONArray jsonArray) {
-			for(int i = 0; i < jsonArray.length(); i++) {
-				if (JSONObject.Null.equals(jsonArray.get(i))) {
-					jsonArray.remove(i);
-					--i;
-				}
-			}
-			return jsonArray;
 		}
 
 		@Deprecated
@@ -1349,6 +1264,7 @@ System.out.println(outputFilename);
 			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
+//				System.out.println("getFlatListOfSubcategoriesRecursive() - " + i);
 				JSONObject aBindingObject = new JSONObject();
 				_1: {
 					JSONArray aBindingArray = theData.getJSONArray(i);
@@ -1357,6 +1273,8 @@ System.out.println(outputFilename);
 					String title = (String) aBindingArray.get(1);
 					aBindingObject.put("name", title);
 					oKeys.put(aBindingObject);
+//					System.out.println("getFlatListOfSubcategoriesRecursive() - " + id
+//							+ "\t::\t" + title);
 				}
 			}
 			return oKeys;
@@ -1365,6 +1283,8 @@ System.out.println(outputFilename);
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 		System.err.println("main() - begin");
+//		HelloWorldResource.saveImage("http://www.englishheritageprints.com/p/106/anfield-liverpool-afl03_aerofilms_a162056-1217841.jpg","/media/sarnobat/Unsorted/images/");
+//		HelloWorldResource.getItemsAtLevelAndChildLevels(45);
 		try {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:4447/"), new ResourceConfig(

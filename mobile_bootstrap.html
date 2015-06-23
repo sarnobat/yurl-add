@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<!-- 
+Uses Bootstrap for UI, and Jquery mobile for other things
+-->
+
+<head>
+	<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js">
+
+	<!--
+	<script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+	-->
+	<script type="text/javascript" src="http://netgear.rohidekar.com/yurl/jquery/purl.js"></script>
+</head>
+<style>
+.btn {
+    margin: 2px;
+}
+</style>
+<body style='background-color : #E7EDE1;'>
+<div class="container-fluid">
+
+
+<script>
+var rootId = 37658;
+var parentOfRootId;
+var urlBase = "http://netgear.rohidekar.com:4447/yurl";    
+var items;
+var LIMIT = 50;
+var orderedDescending = true;
+
+getRootId: {
+	rootId = $.url().param('rootId');
+}
+function setParentOfRootId(nodeId) {    	
+	$.getJSON(urlBase + "/parent?nodeId=" + nodeId, function(result){
+	})
+	.success(function(data) {  
+		if (data[0] != null) {
+			parentOfRootId = data[0].id;
+//			$("#up").attr("href", "/yurl/?rootId=" + parentOfRootId);
+		}
+	})
+	.error(function() { })
+	.complete(function() { });
+}
+
+setParentOfRootId(rootId);
+
+// Experimenting with map-reduce
+
+function categoryToButtonWithArgs(item, currentRootId) {
+	return function categoryToButton(accumulator, categoryNode) {
+		var categoryId = categoryNode.id;
+		var categoryName = categoryNode.name;
+		var buttonHtml = "<button class='btn btn-primary' onclick='relate("+categoryId+","+item.id+","+currentRootId+", this)'>" + categoryName + "</button>";
+		return accumulator + buttonHtml;
+	};
+}
+
+function itemToHtmlParameterized(childCategoriesOrdered, rootId) {
+	return function itemToHtml(accumulator, item) {
+		var image = "<img src='"+getImageForUrl(item.url)+"' class='img-responsive' style='max-width= 50px' >";
+		var itemHtml = 
+					"<div id='" +item.id+ "'>" 
+				+ "<h2>" + item.title + "</h2>"
+				+ image
+				+ item.url
+				+ "<br><br>"
+				+ item.id
+				;
+
+		var buttonsHtml = childCategoriesOrdered.reduce(categoryToButtonWithArgs(item, rootId), "");
+		return accumulator + itemHtml + buttonsHtml;
+	};
+}
+
+$.getJSON(urlBase + "/uncategorized?rootId=" + rootId,function(results){
+	items = results;
+	var totalUrls = 0;
+	var categories = Object.keys(results.urls);
+	var childCategories = getCategoriesUnderID2(results.categoriesRecursive, rootId);
+	var childCategoriesOrdered = orderByChildCount(childCategories);
+	var itemsHtml = "";
+	var urlsUnderRoot = items.urls[rootId];
+	
+	// Map Reduce. This works, but changing existing code is not worth the effort. If you're going to use it, institute it early on.
+	// Also, massage your data structures if possible.
+	var htmlMapReduce = urlsUnderRoot.reduce(itemToHtmlParameterized(childCategoriesOrdered, rootId), "");	
+	
+	var currentRootId = rootId;	
+	for (var p = 0; p < urlsUnderRoot.length; p++) {
+		var item = urlsUnderRoot[p];
+		var image = "<img src='"+getImageForUrl(item.url)+"' class='img-responsive' style='max-width= 50px' >";
+			console.debug(image);
+			itemsHtml += 
+				"<div id='" +item.id+ "'>" 
+				+ "<h2>" + item.title + "</h2>"
+				+ image
+				+ item.url
+				+ "<br><br>"
+				+ item.id
+				;
+			categoryNodes = results.categoriesRecursive.children;
+			itemsHtml += "<button class='btn btn-primary btn-lg btn-block' onclick='removeTopNoDest("+item.id+")'>HIDE</button>";
+
+			for (var k = 0; k < childCategoriesOrdered.length; k++) {
+				var categoryNode = childCategoriesOrdered[k];
+				var categoryId = categoryNode.id;
+				var categoryName = categoryNode.name;
+				itemsHtml += "<button class='btn btn-primary' onclick='relate("+categoryId+","+item.id+","+currentRootId+", this)'>" + categoryName + "</button>";
+			}
+			itemsHtml += "<br><br>";
+			var field = item;
+			{
+				itemsHtml += ("<button class='btn btn-primary' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'>Wrong Category</button>");			
+				itemsHtml += ("<br>");
+				itemsHtml += ("<br>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='moveToTop("+field.id+")'>Top</button>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='moveUp("+field.id+")'>Move Up</button>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='moveDown("+field.id+")'>Move Down</button>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='moveToBottom("+field.id+")'>Bottom</button>");
+			}
+			itemsHtml += "<br><br>";
+			{
+				itemsHtml += ("<button class='btn btn-primary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37373+"), this)'>I own this</button>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221013+"), this)'>Buy this</button>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221026+"), this)'>Download this</button>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 322410 +"), this)'>Downloaded this</button>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'>Watched</button>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'>Watch this</button>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37659+"), this)'>Documentary</button>");
+				itemsHtml += "<br>";
+				itemsHtml += ("<button class='btn btn-primary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 608592+"), this)'>Find in Library</button>");
+				itemsHtml += ("<button class='btn btn-primary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'>Priority 3</button><br><br>");
+			}
+			itemsHtml += '</div>';
+			++totalUrls;
+	}
+	$("#items").append(itemsHtml);
+});
+
+
+function moveToTop(source) {
+	var idToMove = source;
+	var firstId = $("#items").children().first().attr("id");
+
+
+	if (orderedDescending) {
+		var elem = $("#" + idToMove).remove();
+		$("#items").prepend(elem);
+		// 1 more than latest timestamp
+		$.getJSON(urlBase + "/surpassOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToSurpass=" + firstId,
+			function(result){
+			})
+			.success(function(data) {  
+			})
+			.error(function() {
+				alert("error occurred "); 
+			})
+			.complete(function() { });
+	} else {
+		// 1 less than earliest timestamp
+		alert('not implemented');
+	}
+}
+
+function moveToBottom(source) {
+	var idToMove = source;
+	var lastId = $("#items").children().last().attr("id");
+
+	if (orderedDescending) {
+		var elem = $("#" + idToMove).remove();
+		$("#items").append(elem);
+		$.getJSON(urlBase + "/undercutOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToUndercut=" + lastId, 
+			function(result){
+			})
+			.success(function(data) {  
+			})
+			.error(function() {
+				alert("error occurred "); 
+			})
+			.complete(function() { });
+	} else {
+		alert('not implemented');
+	}
+}
+
+function moveUp(source) {
+	var first = $("#" + source).prev().attr('id');
+	var second = source;
+	swap(first, second);
+}
+
+function moveDown(source) {
+	var first = source;
+	var second = $("#" + source).next().attr('id');
+	swap(first, second);
+}
+
+function swap(firstId, secondId) {
+	$.getJSON(urlBase + "/swapOrdinals?firstId=" + firstId + "&secondId=" + secondId, 
+		function(result){
+		})
+		.success(function(data) {  
+			$("#" + secondId).after($("#" + firstId));
+		})
+		.error(function() { 
+			alert("error occurred "); 
+		})
+		.complete(function() { 
+		});
+
+}
+
+function orderByChildCount(categories) {
+	var categoryNamesToCategories = {};
+	for(var i = 0; i < categories.length; i++)
+    {
+		categoryNamesToCategories[capitalizeFirstLetter(categories[i].name)] = categories[i];
+    }
+
+	var keys = new Array();
+    for(var i = 0; i < categories.length; i++)
+    {
+		keys.push(capitalizeFirstLetter(categories[i].name));
+    }
+    keysSorted = keys.sort();
+    var ret = [];
+    for(var i = 0; i < keysSorted.length; i++) {
+    	var name = keysSorted[i];
+    	var category = categoryNamesToCategories[name];
+    	ret.push(categoryNamesToCategories[name]);
+    }
+    return ret;
+}
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function tagUrlWithCategoryIds(nodeId, selections, button) {
+	var url = urlBase + "/relateCategoriesToItem?nodeId=" + nodeId + "&newCategoryIds=" + encodeURIComponent(selections);
+	$.getJSON(url, 
+		function(result){
+		})
+		.success(function(data) {
+//			button.style.cssText = "background-color : green";
+			$(button).removeClass("btn-warning");
+			$(button).addClass("btn-success");
+		})
+		.error(function() { 
+			alert("error occurred "); 
+		})
+		.complete(function() { 
+		}
+	);
+	$(button).removeClass("btn-primary");
+	$(button).addClass("btn-warning");
+}
+
+function createArrayWithId(id) {
+	var selected = new Array();
+	selected.push(id);
+	return JSON.stringify(selected);
+}
+
+function getCategoriesUnderID2(categoryTree, categoryId) {
+	if (categoryTree.id == categoryId) {
+		return categoryTree.children;
+	} else if (categoryTree.children) {
+		for (var i = 0; i < categoryTree.children.length; i++) {
+			var child = categoryTree.children[i];
+			if (child) {
+				var match = getCategoriesUnderID2(child, categoryId);
+				if (match) {
+					return match;
+				}
+			}
+		}
+		return null;// Do not return an empty list here, the recursive logic will break.
+	} else {
+		return null;
+	}
+}
+
+function getCategoriesUnderID(categories, categoryId) {
+	for (var i = 0; i < categories.length; i++) {
+		if (categories[i].id == categoryId) {
+			return categories[i].children;
+		} else {
+			if (categories[i].children) {
+				var ret = getCategoriesUnderID(categories[i].children,categoryId);
+				if (ret) {
+					return ret;
+				}
+			}
+		}
+	}
+	return [];
+}
+
+
+function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, limit) {
+		var urlThumbnailsHtml = "<h3><a href='/yurl/?rootId="+categoryId+"'>" + categoryName + " (" + categoryId + ")</a></h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			if (j > limit) {
+				break;
+			}
+			var item = urlsInCategory[j];
+			urlThumbnailsHtml += ("<a href="+item.url+"><img class=itemImage src='"+getImageForUrl(item.url)+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>");
+		}
+		return urlThumbnailsHtml;
+}
+
+function getImageForUrl(url) {
+	var imageUrl;
+	if (url.match(".jpg\??") || 
+		url.match(/.*jpg/i) ||
+		url.match(".gif$") || 
+		url.match(".png\??") || 
+		url.match("images.q=tbn:")) {
+		imageUrl = url;
+	}
+	else if (url.match("youtube.com/watch")) {
+		var youtubeId = url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
+		imageUrl = "http://img.youtube.com/vi/"+youtubeId+"/0.jpg";	
+	} else if (url.match("dailymotion.com/video")) {
+		var youtubeId = url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+		imageUrl = "http://dailymotion.com/thumbnail/video/"+youtubeId ;			
+	} else if (url.match(".amazon.co[^/]+\/[^s]")) {
+		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+		asin = asin.replace(/.*dp./,'');
+		asin = asin.replace(/.*gp.aw.d./, '');
+		asin = asin.replace(/.ref_?=.*/, '');
+		asin = asin.replace(/.*offer-listing./, '');
+		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+		imageUrl = productImageUrl;
+	} else {
+		imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
+	}
+	return imageUrl;
+}
+
+
+function relate(parentId, childId, currentRootId, button) {
+
+	var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;	
+	//
+	// The main part
+	//
+	$.getJSON(url, function(result){})
+		.success(function() { 
+
+//			$("#list_"+parentId).effect("highlight", null, 4000, function() {});
+			
+			// Change the destination category count
+//			var count = parseInt($("#count_"+parentId).text()) + 1;
+//			$("#count_"+parentId).text(count);
+//			$("#count_"+parentId).css("font-weight","Bold");
+			
+			// Decrement the number of items in this category that is displayed
+//			var newCount = parseInt($("#count").text());
+//			newCount -= 1;
+//			$("#count").text(newCount);
+			removeTop(parentId, childId);
+		})
+		.error(function() { alert("error occurred "); })
+		.complete(function() { });
+		$(button).removeClass("btn-primary");
+		$(button).addClass("btn-warning");
+}
+
+// This part just performs frontend changes, nothing backend
+function removeTopNoDest(childId) {
+
+//		$($("#" + childId)).effect( "blind",null, 5, function() { $(this).remove(); });
+	$("#" + childId).remove();
+}
+
+// This part just performs frontend changes, nothing backend
+function removeTop(parentId, childId) {
+	$("#" + childId).remove();
+/*
+	var target;
+	if (parentId == parentOfRootId) {
+		target = "#up";
+	} else {
+		target = "#list_"+parentId;
+	}
+	var options = { to: target, className: "ui-effects-transfer" };
+	$($("#" + childId)).effect('transfer', options, 50, function() { // !!!!!!!! TODO : Wrong. remove the one specified by child ID
+		$($("#" + childId)).effect( "blind",null, 5, function() { $(this).remove(); });	
+	});
+	*/
+}
+    </script>
+
+
+
+<div id='favorites' class='buttonize'>
+
+	<a href='/yurl/mobile.html?rootId=29196' >Products & Services</a><br>
+	<a href='/yurl/mobile.html?rootId=221013'> Buy these</a><br>
+	<a href='/yurl/mobile.html?rootId=37373'> Owned</a><br>
+	<a href='/yurl/mobile.html?rootId=608592'>Library</a><br><br>
+
+	<a href='/yurl/mobile.html?rootId=469990' >Home (Photos)</a><br>
+	<a href='/yurl/mobile.html?rootId=37658' >Youtube Playlists (videos)</a><br>
+	<a href='/yurl/mobile.html?rootId=37567'>Watch these</a><br>
+	<a href='/yurl/mobile.html?rootId=37652'>Watched</a><br><br>
+
+	<a href='/yurl/mobile.html?rootId=221026'> Download</a><br>
+	<a href='/yurl/mobile.html?rootId=37581'> Download these</a><br>
+	<a href='/yurl/mobile.html?rootId=322410'> Downloaded</a><br><br>
+	<a href='/yurl/mobile.html?rootId=29172'> Other</a><br>
+</div>
+<div id="items">
+</div>
+
+</div>
+</body>
+</html>

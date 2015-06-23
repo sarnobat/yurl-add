@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css">
+<style>
+html, body {
+    height : 100%;
+}
+#map-page {
+    height : 100%;
+}
+#map-page .ui-header {
+/*    height : 40px; */
+    visibility	: hidden;
+}
+#map-page .ui-content {
+    position : absolute;
+    top      : 0px;
+    right    : 0;
+    bottom   : 0px;
+    left     : 0;
+}
+#map-page .ui-footer {
+/*    position : absolute;
+    bottom   : 0;
+    left     : 0;
+    width    : 100%;
+    height   : 30px;*/
+}
+
+span {
+white-space:nowrap;
+}
+div {
+	border : 1;
+}
+</style>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+</head>
+<body>
+
+
+<script>
+var rootId = 45;
+var urlBase = "http://netgear.rohidekar.com:4447/yurl";    
+var items;
+$.getJSON(urlBase + "/uncategorized?rootId=" + rootId,function(results){
+	items = results;
+//	var urls = results.urls;
+	var categories = Object.keys(results.urls);
+	for (var i = 0; i < categories.length; i++) {
+		var categoryId = categories[i];
+		var urls = results.urls[categoryId];
+		for (var j = 0; j < urls.length; j++) {
+			var item = urls[j];
+			var image = ("<a href="+item.url+"><img src='"+getImageForUrl(item.url)+"' width='100%'></a>");
+			console.debug(image);
+			$("#items").append(item.title);
+			$("#items").append(image);
+			$("#items").append("<br>");
+		}
+
+	}
+	//$("#items").text(items.urls);
+	//populateItem(items[0]);
+});
+
+function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, limit) {
+		var urlThumbnailsHtml = "<h3><a href='/yurl/?rootId="+categoryId+"'>" + categoryName + " (" + categoryId + ")</a></h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			if (j > limit) {
+				break;
+			}
+			var item = urlsInCategory[j];
+			urlThumbnailsHtml += ("<a href="+item.url+"><img class=itemImage src='"+getImageForUrl(item.url)+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>");
+		}
+		return urlThumbnailsHtml;
+}
+
+function getImageForUrl(url) {
+	var imageUrl;
+	if (url.match(".jpg\??") || 
+		url.match(/.*jpg/i) ||
+		url.match(".gif$") || 
+		url.match(".png\??") || 
+		url.match("images.q=tbn:")) {
+		imageUrl = url;
+	}
+	else if (url.match("youtube.com/watch")) {
+		var youtubeId = url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
+		imageUrl = "http://img.youtube.com/vi/"+youtubeId+"/0.jpg";	
+	} else if (url.match("dailymotion.com/video")) {
+		var youtubeId = url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+		imageUrl = "http://dailymotion.com/thumbnail/video/"+youtubeId ;			
+	} else if (url.match(".amazon.co[^/]+\/[^s]")) {
+		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+		asin = asin.replace(/.*dp./,'');
+		asin = asin.replace(/.*gp.aw.d./, '');
+		asin = asin.replace(/.ref_?=.*/, '');
+		asin = asin.replace(/.*offer-listing./, '');
+		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+		imageUrl = productImageUrl;
+	} else {
+		imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
+	}
+	return imageUrl;
+}
+function populateItem(item) {
+	$("#title").text(item.title);
+	$("#url").text(item.url);
+}
+
+$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
+	populateButton(0);
+	populateButton(1);
+	populateButton(2);
+});
+
+function populateButton(i, category) {
+	$("#button" + i).text(i);
+}
+    		
+$('.categoryButton').on('tap', function() {
+	items.shift();
+	populateItem(items[0]);
+});
+</script>
+
+<div id="items">
+</div>
+
+<div data-role="page" id="map-page">
+    <!--<div data-role="header"></div>-->
+    <div data-role="content" style="background-color : gold; ">
+		<div style="height: 60%; width : 62%; background-color : purple; display: inline-block;">
+			<div id="title" style="height: 50%; background-color : lightpink; font-size : large">Title</div>
+			<div id="url" style="height: 50%; background-color : bisque;word-wrap:break-word; font-size : small">URL</div>
+		</div>
+
+        <div style="height : 60% ; width : 34%; background-color : transparent; display: inline-block;">
+			<div id="button1" class="categoryButton" style="height : 33% ; background-color : yellow">button 1</div>
+			<div id="button2" class="categoryButton" style="height : 33% ; background-color : transparent">button 2</div>
+			<div id="button3" class="categoryButton" style="height : 33% ; background-color : orange">button 3</div>
+		</div>
+        <div id="image" style="height : 40% ;  width : 99%; background-color : lightblue">Image</div>
+    </div>
+    <div data-role="footer"> </div>
+</div>    
+</body>
+</html>

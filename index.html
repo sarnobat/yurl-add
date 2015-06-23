@@ -4,19 +4,36 @@
 
 <link rel="shortcut icon" href="http://netgear.rohidekar.com/static/icons/Orb_Icons_005.png" type="image/x-icon" />
 
+<script src="http://www.kryogenix.org/code/browser/sorttable/sorttable.js" type="text/javascript"></script>
+
+
 <link rel="stylesheet" href="http://jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
-<script src="jquery/jquery-1.9.1.js"></script>
-<script src="jquery/jquery-ui.js"></script>
+
+<!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.2/js/jquery.tablesorter.min.js"></script>-->
+
+
+<!--<script src="jquery/jquery-1.9.1.js"></script>-->
+<script src="http://netgear.rohidekar.com/yurl/jquery/jquery-ui.js"></script>
+
+<!--<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" >
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.6.0/bootstrap-table.min.css" rel="stylesheet" >-->
+<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.6.0/bootstrap-table.min.js"></script>-->
 
 
 <!-- WORKS BETTER THAN OTHERS BUT STILL NOT IDEAL <script src="jquery/hover_zoom.min.js"></script> -->
 <script src="http://netgear.rohidekar.com/yurl/js/imagezoom.ssarnobat.js"></script>
-<script type="text/javascript" src="jquery/purl.js"></script>
+<script type="text/javascript" src="http://netgear.rohidekar.com/yurl/jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
-<script src="http://www.webtoolkit.info/djs/webtoolkit.md5.js"></script>
+<script src="http://netgear.rohidekar.com/yurl/js/webtoolkit.md5.js"></script>
+<!-- http://www.webtoolkit.info/djs/webtoolkit.md5.js -->
+<!--
+<script src="http://netgear.rohidekar.com/yurl/js/jquery-latest.js"></script> 
+<script src="http://netgear.rohidekar.com/yurl/js/jquery.tablesorter.js"></script> 
+-->
 <style type="text/css">
 
 .itemImage {
@@ -48,6 +65,18 @@ line.link {
   stroke-width: 1.5px;
 }
 
+.truncate{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    max-height: 51px;
+    text-align: left;
+}
+
+//.urlTable.tbody.tr.td {
+    text-align: left;
+//}
 </style>
 
 <script type="text/javascript" src="d3/d3.js"></script>
@@ -60,14 +89,14 @@ var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
 var parentOfRootId;
 var orderedDescending = true;
+var readyToRender = false;
+var limit;
+var uncategorizedResponse; // Populated via rest call
+var categories; // Populated via rest call
+var biggestImages = {};
+var IMAGE_SIZE = 100;
 
-function getBiggestImages() {
-	$.getJSON("http://localhost:3000/biggestImages", function(result){
-				showLinks(result);
-			});
-}
-
-function showLinks(biggestImages) {
+function initialize() {
 
 	////
 	//// Determine the root ID
@@ -103,7 +132,7 @@ function showLinks(biggestImages) {
 			$("#rootColor").attr("style", "background-color: #" + rootColor);
 		}
 	
-		var limit = $.url().param('limit')
+		limit = $.url().param('limit')
 		if (limit == null) {
 			limit = 50;
 			window.history.pushState("object or string", "Title", document.URL + "&limit=50");
@@ -112,78 +141,23 @@ function showLinks(biggestImages) {
 	////
 	//// Get the key bindings and categories (non-recursive)
 	////
-	var categories;
 	
 	setCategoriesAndConfigureKeyBindings : {
 		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
 			var originalKeyBindings = $.extend(true, {}, result);// TODO: what does this do?
-			categories = result;	  
-			configureKeyBindings(categories);
+			categories = result;
+			renderIfReady()
 		});
-	
-		function configureKeyBindings(result) {
-			$.each(result, function(a,binding,c){
-				if (binding.key == 'null') {
-					$("#keys").append("#");
-					// Don't remove the "null" otherwise we'll assign hash to this category
-				}
-				$("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
-				$("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + " (<span id='count_"+binding.id+"'></span>)</a></li>");
-				$("#count_" + binding.id).text(binding.count);
-				$(window).keypress(function(event) {
-					if ($("#keys").is(":focus")) {
-						return;
-					}
-					if (binding.key == String.fromCharCode(event.which)) {
-						var parentId = binding.id;
-						var childId = $("#url_cards").children()[0].id;
-						var currentRootId = rootId;
-						relate(parentId, childId, currentRootId);
-					}
-				});			
-			});
-			$(window).keypress(function(event) {
-				var key = String.fromCharCode(event.which);
-				if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
-					var idOfTop = $("#url_cards").children()[0].id;
-					moveToBottom(idOfTop);
-				}
-				if (String.fromCharCode(event.which) == '<') {
-					var parentId = parentOfRootId;
-					var childId = $("#url_cards").children()[0].id;
-					var currentRootId = rootId;
-					relate(parentId, childId, currentRootId);
-				}
-				if (String.fromCharCode(event.which) == '>') {
-					console.debug("remove from list (deal with it later)");
-				}
-			});
-		}
 	}
 	
 	////
 	//// Uncategorized URLs (main part)
 	////
     
-    getUrls : {
-		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId,function(result){
-			$("#status").text("Populating")
-			var resultRowNumber = 0;
-			var categoryOrdinal = 0;
-			$.each(result.urls, function(categoryID, urlsInCategory) {
-				$("#url_thumbnails").append("<h3>" + categoryID +"</h3>")
-				$.each(urlsInCategory, function( resultRowNumber, field ) {
-						if (categoryOrdinal == 0) {
-							fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories);
-						}
-						fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories);
-						++resultRowNumber; // why are we mutating a param?
-				});
-				++categoryOrdinal;
-			});
-			
-//			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
-			$("#status").text("Done")
+    	getUrls : {
+		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId, function(result) {
+			uncategorizedResponse = result;
+			renderIfReady();
 		});
 	}
 	    
@@ -249,11 +223,12 @@ function showLinks(biggestImages) {
     
 }
 
+
 function fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories) {
 	if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
 		return;
 	}
-	var toBeAppended = createImageCell(field, biggestImages, 100, resultRowNumber);
+	var toBeAppended = createImageCell(field, biggestImages, IMAGE_SIZE, resultRowNumber);
 	$("#url_thumbnails").append(toBeAppended);
 	
 }
@@ -303,7 +278,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 			var site = urlElements[0];
 			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
 		}
-		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font></sub>");
+		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+(new Date(field.created))+"<br>"+"</sub>");
 	}
 	
 	var imageCell = createImageCell(field, biggestImages, 300, resultRowNumber);
@@ -330,10 +305,18 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 	
 	{
 		var categoryButtons = four;
-		// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
-		$.each(categories, function(a,binding,c){
-			categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+"' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
-		});						
+		if (categories && categories.length == 0) {
+			// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
+			debugger;
+		} 
+		if (categories) {
+			$.each(categories, function(a,binding,c){
+				categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+" ("+ binding.key+")' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
+			});
+		}
+		categoryButtons.append("<br>");
+		categoryButtons.append("<br>");
+		categoryButtons.append("<input type=button class='genericButton' value='NEW' onclick='createAndRelate("+field.id+","+rootId+")'>&nbsp;");
 	}
 	
 	{
@@ -344,11 +327,24 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		five.append("<input type=button class='genericButton' value='Watched' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Watch this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Documentary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37659+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Priority 3' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'><br>");
+
+		five.append("<input type=button class='genericButton' value='Find in Library' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 608592+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Priority 3' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'><br><br>");
+		five.append("<input type=button class='genericButton' value='Save Video' onclick='downloadVideo("+field.id+","+field.downloaded_video+", this)' style='background-color : "+getDownloadedVideoColor(field.downloaded_video)+"'><br>");
+
 		
 	}	
 }
 
+function getDownloadedVideoColor(downloaded) {
+	if ("null" == downloaded) {
+		return "red";
+	}
+	if (!downloaded) {
+		return "red";
+	}
+	return "green";
+}
 function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 
 	var imageCell = "";
@@ -384,6 +380,7 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 				hasScreenshot = true;
 			
 		} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
+		//else if (false) {
 			imageCell += ("");
 			var asin = field.url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
 			asin = asin.replace(/.*dp./,'');
@@ -438,6 +435,27 @@ function relate(parentId, childId, currentRootId) {
 		})
 		.error(function() { alert("error occurred "); })
 		.complete(function() { });
+}
+
+function createAndRelate(childId, currentRootId) {
+	var newParentName = prompt('Category name:');
+	removeTopNoDest(childId);
+	var url = urlBase + "/createAndRelate?newParentName=" +encodeURIComponent(newParentName)+"&childId=" +  childId + "&currentParentId=" + currentRootId;	
+	//
+	// The main part
+	//
+	$.getJSON(url, function(result){})
+		.success(function() { 
+		})
+		.error(function() { alert("error occurred "); })
+		.complete(function() { });
+}
+
+// This part just performs frontend changes, nothing backend
+function removeTopNoDest(childId) {
+
+		$($("#" + childId)).effect( "blind",null, 5, function() { $(this).remove(); });
+
 }
 
 // This part just performs frontend changes, nothing backend
@@ -615,6 +633,306 @@ function addEmbeddedVideo(id, url) {
 	$("#" + id).children().last().append("<iframe width=420 height=345 src="+url.replace("watch?v=","embed/")+"></iframe>");
 }
 
+// TODO: Remove. Unused
+function getBiggestImages() {
+	$.getJSON("http://localhost:3000/biggestImages", function(result){
+		biggestImages = result;
+		initialize();
+	});
+}
+
+
+function renderIfReady() {
+	renderIfReadyNew();
+	renderIfReadyOld();
+}
+
+function renderIfReadyNew() {
+	if (!uncategorizedResponse) {
+		return;
+	}
+	if (!uncategorizedResponse.categoriesRecursive) {
+		debugger;
+	}
+	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
+//	if (!categories) {
+//		alert('Could not find root ' + rootId);
+		//return;
+//	} else if (categories.length == 0) {
+//	//	debugger;
+//	} else {	
+		configureKeyBindings();
+//	}
+	$("#status").text("Populating")
+	var categoryOrdinal = 0;
+	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
+	var urls = uncategorizedResponse.urls;
+
+	var categoryIdsUnderRootOrdered = putRootAtFront(urls, rootId);
+	
+	var urlThumbnailsHtml = "";
+	var urlListHtml = "";
+	var tableHtml = "";
+	var productsHtml = "";
+	var markupHtml = "";
+	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
+		var categoryId = categoryIdsUnderRootOrdered[i];
+		var categoryName = categoryIdsToNames[categoryId];
+		var urlsForCategory = urls[categoryId];
+		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId], limit);
+		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
+		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
+		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
+//		markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
+	}
+	$("#url_thumbnails").append(urlThumbnailsHtml);
+	$("#url_table").append(tableHtml);
+	$("#list").append(urlListHtml);
+	$("#products").append(productsHtml);
+	$("#htmlText").val(productsHtml);
+//        $("#url_thumbnails").append(urlThumbnailsHtml)
+
+//	$(".urlTable").tablesorter(); 
+}
+
+function putRootAtFront(urls, rootId) {
+	var categoryIdsUnderRoot = Object.keys(urls);
+	var first = categoryIdsUnderRoot.splice(categoryIdsUnderRoot.indexOf(rootId),1);
+	var categoryIdsUnderRootOrdered = first.concat(categoryIdsUnderRoot);
+	return categoryIdsUnderRootOrdered;
+}
+
+function getCategoryTableHtml(categoryId, categoryName, urlsInCategory) {
+		var html = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
+		html += "<table id='table-"+categoryId+"' class='sortable urlTable'>";
+		html += "<thead><th>Title</th><th>URL</th></thead>";
+		html += "<tbody>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			var item = urlsInCategory[j];
+			html += "<tr>";
+			html += "<td><div class='truncate'>" + item.title + "</div><td>";
+			html += "<td><div class='truncate'>" + item.url + "</div><td>";
+			html += "</tr>";
+		}
+		html += "</tbody>";
+		html += "</table>";
+		return html;
+}
+
+function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, limit) {
+		var urlThumbnailsHtml = "<h3><a href='/yurl/?rootId="+categoryId+"'>" + categoryName + " (" + categoryId + ")</a></h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			if (j > limit) {
+				break;
+			}
+			var item = urlsInCategory[j];
+			urlThumbnailsHtml += ("<a href="+item.url+"><img class=itemImage src='"+getImageForUrl(item.url)+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>");
+		}
+		return urlThumbnailsHtml;
+}
+
+function getImageForUrl(url) {
+	var imageUrl;
+	if (url.match(".jpg\??") || 
+		url.match(/.*jpg/i) ||
+		url.match(".gif$") || 
+		url.match(".png\??") || 
+		url.match("images.q=tbn:")) {
+		imageUrl = url;
+	}
+	else if (url.match("youtube.com/watch")) {
+		var youtubeId = url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
+		imageUrl = "http://img.youtube.com/vi/"+youtubeId+"/0.jpg";	
+	} else if (url.match("dailymotion.com/video")) {
+		var youtubeId = url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+		imageUrl = "http://dailymotion.com/thumbnail/video/"+youtubeId ;			
+	} else if (url.match(".amazon.co[^/]+\/[^s]")) {
+		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+		asin = asin.replace(/.*dp./,'');
+		asin = asin.replace(/.*gp.aw.d./, '');
+		asin = asin.replace(/.ref_?=.*/, '');
+		asin = asin.replace(/.*offer-listing./, '');
+		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+		imageUrl = productImageUrl;
+	} else {
+		imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
+	}
+	return imageUrl;
+	/*
+	if (!hasScreenshot) {
+		imageCell += ("<img class=itemImage src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" />");
+		// Check if the biggest image server is up
+		if (biggestImages != null) {
+			if (biggestImages[field.url] != null) {
+				imageCell += ("<img class=itemImage src=\""+ biggestImages[field.url] +"\" class='screenshot' width="+imageSize+" />");
+			}
+		}
+	}
+
+	// Tooltip
+	var img = $($.parseHTML("<a href='"+field.url+"'>" + imageCell + "</a>"));
+/ *	img.tooltip({
+		items: "img",
+		content:  field.title + "<br><font style=\"font-size : xx-small \">"+field.url+"</font>",
+	});	* /
+	return img;
+	*/
+}
+
+function getMarkupHtml(categoryId, categoryName, urlsInCategory) {
+		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			var item = urlsInCategory[j];
+			urlThumbnailsHtml += item.title +"<br>";
+		}
+		return urlThumbnailsHtml;
+}
+
+function getProductsHtml(categoryId, categoryName, urlsInCategory) {
+		var productsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			var item = urlsInCategory[j];
+			
+			if (item.url.match(".amazon.co[^/]+\/[^s]")) {
+				productsHtml += "";
+				var asin = item.url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+				asin = asin.replace(/.*dp./,'');
+				asin = asin.replace(/.*gp.aw.d./, '');
+				asin = asin.replace(/.ref_?=.*/, '');
+				asin = asin.replace(/.*offer-listing./, '');
+				var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+				var imageTag = ("<img class=itemImage src='"+productImageUrl+"' height='280'>");
+				productsHtml += "<a href='" + item.url +"'>" + imageTag + "</a>\n";
+				hasScreenshot = true;
+			} else {
+				productsHtml += item.url + "<br>";
+			}
+		}
+		return productsHtml;
+}
+
+function getCategoryListHtml(categoryId, categoryName, urlsInCategory) {
+		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
+		for (var j = 0; j < urlsInCategory.length; j++) {
+			var item = urlsInCategory[j];
+			urlThumbnailsHtml += item.title + " (<a href='" + item.url +"'>" + item.url + "</a>)<br><br>";
+		}
+		return urlThumbnailsHtml;
+}
+
+// delete this
+function renderIfReadyOld() {
+	if (!uncategorizedResponse) {
+		return;
+	}
+	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
+	if (!categories) {
+//		return;
+	}
+	else if (categories.length == 0) {
+//		debugger;
+	}	
+//	configureKeyBindings();
+	$("#status").text("Populating")
+	var resultRowNumber = 0;
+	var categoryOrdinal = 0;
+	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
+	var urls = uncategorizedResponse.urls;
+	var categoryIdsUnderRootOrdered = putRootAtFront(urls, rootId);
+	
+	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
+		var categoryID = categoryIdsUnderRootOrdered[i];
+		$("#url_thumbnails").append("<h3>" + categoryIdsToNames[categoryID] + " (" + categoryID +")</h3>")
+		$.each(urls[categoryID], function( resultRowNumber, field ) {
+			if (categoryID == rootId) {
+				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
+			}
+			if (resultRowNumber < limit) {
+//				fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
+			}
+			++resultRowNumber; // why are we mutating a param?
+		});
+		++categoryOrdinal;
+	}	
+//			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
+	$("#status").text("Done")
+}
+
+function getCategoriesUnderID2(categoryTree, categoryId) {
+	if (categoryTree.id == categoryId) {
+		return categoryTree.children;
+	} else if (categoryTree.children) {
+		for (var i = 0; i < categoryTree.children.length; i++) {
+			var child = categoryTree.children[i];
+			if (child) {
+				var match = getCategoriesUnderID2(child, categoryId);
+				if (match) {
+					return match;
+				}
+			}
+		}
+		return null;// Do not return an empty list here, the recursive logic will break.
+	} else {
+		return null;
+	}
+}
+
+function getCategoriesUnderID(categories, categoryId) {
+	for (var i = 0; i < categories.length; i++) {
+		if (categories[i].id == categoryId) {
+			return categories[i].children;
+		} else {
+			if (categories[i].children) {
+				var ret = getCategoriesUnderID(categories[i].children,categoryId);
+				if (ret) {
+					return ret;
+				}
+			}
+		}
+	}
+	return [];
+}
+
+function configureKeyBindings() {
+	if (categories != null) {
+		$.each(categories, function(a,binding,c){
+			if (binding.key == 'null') {
+				$("#keys").append("#");
+				// Don't remove the "null" otherwise we'll assign hash to this category
+			}
+			$("#keys").append(binding.key + "=" + binding.name +" # node " + binding.id + "\n");
+			$("#keyLinks").append("<li style='text-transform:capitalize;' id='list_"+binding.id+"'><a href='/yurl/?rootId=" + binding.id+ "'>" + " " + binding.name + " (<span id='count_"+binding.id+"'></span>)</a></li>");
+			$("#count_" + binding.id).text(binding.count);
+			$(window).keypress(function(event) {
+				if ($("#keys").is(":focus")) {
+					return;
+				}
+				if (binding.key == String.fromCharCode(event.which)) {
+					var parentId = binding.id;
+					var childId = $("#url_cards").children()[0].id;
+					var currentRootId = rootId;
+					relate(parentId, childId, currentRootId);
+				}
+			});			
+		});
+	}
+	$(window).keypress(function(event) {
+		var key = String.fromCharCode(event.which);
+		if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
+			var idOfTop = $("#url_cards").children()[0].id;
+			moveToBottom(idOfTop);
+		}
+		if (String.fromCharCode(event.which) == '<') {
+			var parentId = parentOfRootId;
+			var childId = $("#url_cards").children()[0].id;
+			var currentRootId = rootId;
+			relate(parentId, childId, currentRootId);
+		}
+		if (String.fromCharCode(event.which) == '>') {
+			console.debug("remove from list (deal with it later)");
+		}
+	});
+}
 //----------------------------------------------------------------------------------------
 // D3 Visualization
 //----------------------------------------------------------------------------------------
@@ -737,6 +1055,21 @@ function getAdjacencies(category) {
 	}
 	return adjacenciesList;
 }
+
+
+        function getCategoryNamesMap(categoriesRecursive) {
+                var categoriesMap = {};
+		if (categoriesRecursive.id == null) {
+			debugger;
+		}
+                categoriesMap[categoriesRecursive.id] = categoriesRecursive.name;
+                for (var category in categoriesRecursive.children) {
+			var categoryNames = getCategoryNamesMap(categoriesRecursive.children[category]);
+			categoriesMap  = $.extend(true, categoriesMap, categoryNames);
+//                        categoriesMap.concat(categoryNames);
+                }
+                return categoriesMap;
+  	}
 
 function renderD3Visualization(flareJson) {
 	var w = 680,
@@ -897,6 +1230,12 @@ body{
 	border-radius: 1px;
 }
 
+.tooBig {
+	width: 200px; 
+	height: 100px; 
+	overflow-y: scroll;
+}
+
 .buttonize {
 	//padding:20px;
 	margin:25px;
@@ -922,8 +1261,16 @@ body{
 <link type="text/css" href="http://philogb.github.io/jit/static/v20/Jit/Examples/css/base.css" rel="stylesheet" />
 
 </head>
-<body onload='showLinks({})' style="background-color : #E7EDE1;">
-	<br>
+<body onload='initialize()' style="background-color : #E7EDE1;">
+
+<br>
+<script> 
+    $(function(){
+      $("#menubar").load("http://netgear.rohidekar.com/index.html"); 
+    });
+</script>
+<div id="menubar"></div>
+
 	<br>
 	<table>
 		<tr><td>
@@ -945,12 +1292,13 @@ body{
 
                                                 <a href='/yurl/?rootId=29196' >Products & Services</a><br>
                                                 <a href='/yurl/?rootId=221013'> Buy these</a><br>
-                                                <a href='/yurl/?rootId=37373'> Owned</a><br><br>
+                                                <a href='/yurl/?rootId=37373'> Owned</a><br>
+                                                <a href='/yurl/?rootId=608592'>Library</a><br><br>
 
                                                 <a href='/yurl/?rootId=469990' >Home (Photos)</a><br>
                                                 <a href='/yurl/?rootId=37658' >Youtube Playlists (videos)</a><br>
                                                 <a href='/yurl/?rootId=37567'>Watch these</a><br>
-						<a href='/yurl/?rootId=37652'>Watched</a><br><br>
+												<a href='/yurl/?rootId=37652'>Watched</a><br><br>
 
                                                 <a href='/yurl/?rootId=221026'> Download</a><br>
                                                 <a href='/yurl/?rootId=37581'> Download these</a><br>
@@ -963,9 +1311,9 @@ body{
 						<!-- I don't see a good reason to have both keys and categoriesTree. Hopefully JSON Tree
 							will replace both -->
 						<br>Tree of Categories<br>
-						<div id="categoriesTree"  class="buttonize"></div>
+						<div id="categoriesTree" class="buttonize tooBig" ></div>
 						<br>Category tags<br>
-						<div id="categoriesRecursive"  class="buttonize">
+						<div id="categoriesRecursive"  class="buttonize tooBig">
 						<br><br>
 
 						<br><br>
@@ -974,26 +1322,9 @@ body{
 					</td>
 					
 					<td width="75%" style="vertical-align: top">
-						<div id="tabs">
-							  <ul>
+
 <!--
-* thumbnails
-** to identify and open what you're looking for most (e.g. videos)
-* cards
-** sorting into subcategory
-* table view
-** deciding whether to buy a product before others you already want
-** as compact as Google Reader/Feedly (so you don't feel like creating RSS feeds so that you can view in Feedly)
-* plaintext
-** for future-proofing, platform independent portability
-** must contain urls and titles
-* pdf (compact)
-** for a simple list to take when travelling to a bookstore
-** doesn't need to have URLs
-* pdf (argos catalog view)
-** printed summary for browsing in bedroom when bookshelf isn't big enough
-** for seeing what you own
-** for seeing what you could buy when you're passively shopping
+
 
 
 * a smart TV view
@@ -1001,7 +1332,10 @@ body{
 
 yurl export ideas
 
-tv channel
+tv channel (m3u)
+rough cut (m3u)
+page rss feed (xml)
+scrolling text (html)
 syllabus (pdf)
 create your own re-podcast feed (.xml)
 playlists
@@ -1009,40 +1343,101 @@ to watch list
 compilation of videos (e.g. world cup highlights)
 listen list
 shopping list (pdf)
+library visit list
 owned items (thumbnails)
 podcast subscriptions & favorite episodes
 watch history (video library) - thumbnail index
 reading list (pdf))
 
+
+//* thumbnails
+//** to identify and open what you're looking for most (e.g. videos)
+//* cards
+//** sorting into subcategory
+//* table view
+//** deciding whether to buy a product before others you already want
+//** as compact as Google Reader/Feedly (so you don't feel like creating RSS feeds so that you can view in Feedly)
+//* plaintext
+//** for future-proofing, platform independent portability
+//** must contain urls and titles
+//* pdf (compact)
+//** for a simple list to take when travelling to a bookstore
+//** doesn't need to have URLs
+//* pdf (argos catalog view)
+//** printed summary for browsing in bedroom when bookshelf isn't big enough
+//** for seeing what you own
+//** for seeing what you could buy when you're passively shopping
+
 -->
-								<li><a href="#tabs-1">Grid</a></li>
+						<div id="tabs">
+							  <ul>
+								<li><a href="#tabs-1">Grid/Thumbnails</a></li>
 								<li><a href="#tabs-2">Cards</a></li>
-								<li><a href="#tabs-3">Table/List</a></li>
-								<li><a href="#tabs-4">Printable</a></li>
+								<li><a href="#tabs-3">Table</a></li>
+								<li><a href="#tabs-4">Printable/PDF (compact)</a></li>
 								<li><a href="#tabs-5">Plaintext/Export</a></li>
+								<li><a href="#tabs-6">List</a></li>
+								<li><a href="#tabs-7">Catalog</a></li>
+								<li><a href="#tabs-8">Products</a></li>
+								<li><a href="#tabs-9">HTML</a></li>
 							  </ul>
 							  <div id="tabs-1">
+									To identify and open what you're looking for most (e.g. videos)<br>
+									Video storyboarding
 								  <ol id="url_thumbnails"></ol>
+								  
 							  </div>
 							  <div id="tabs-2">
+  									For sorting into subcategories 
+
 								  <ol id="url_cards"></ol>
 							  </div>
 							  <div id="tabs-3">
+									  Use cases:<br>
+									* Deciding whether to buy a product before others you already want<br>
+									* As compact as Google Reader/Feedly (so you don't feel like creating RSS feeds so that you can view in Feedly)<br>
+								  <ol id="url_table"></ol>
+									
 							  </div>
-                                                          <div id="tabs-4">
-                                                          </div>
-							  <div ide="tabs-5">
+							  <div id="tabs-4">
+									 Use cases:<br>
+									* for a simple list to take when travelling to a bookstore<br>
+									* doesn't need to have URLs<br>
+								  <ol id="printable"></ol>
+									 
 							  </div>
+							  <div id="tabs-5">
+									Use Cases:<br>
+									* for future-proofing, platform independent portability<br>
+									* must contain urls and titles<br>
 
+								  <ol id="plaintext"></ol>
+							  </div>
+							  <div id="tabs-6">
+									  Use cases:<br>
+									* Sharing large lists on a forum<br>
+									* Sharing a list in email (though email with rich media can do better)
+								  <ol id="list"></ol>
+							</div>
+							<div id="tabs-7">
+* printed summary for browsing in bedroom when bookshelf isn't big enough (so it must be more compact than the web view for thumbnails of products; if anything, the thumbnails for the web view are too big)<br>
+* for seeing what you own<br>
+* for seeing what you could buy when you're passively shopping<br>
+							  </div>
+							<div id="tabs-8">
+							  <ol id="products"></ol>
+							</div>
+							<div id="tabs-9">
+							  <textarea id="htmlText"></textarea>
+							</div>
 						</div>
-						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
+<!--						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
 						<div id="d3" style="background-color:grey"></div>
-						<!--<div id="infovis" style="background-color : black"></div>    -->
 						
 						<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
 						<div id="batchStatus"></div>
 						<textarea id="urlBatchToSend" rows="20" cols="100"></textarea>
-						
+						-->
 					</td>
 				</tr>
 				<tr>
@@ -1054,6 +1449,14 @@ reading list (pdf))
 		</td></tr>
 	<table>
 <br>
+
+ <button type=button onclick='$("#d3").toggle()'>Show visualization</button>
+                                                <div id="d3" style="background-color:grey"></div>
+                                                <!--<div id="infovis" style="background-color : black"></div>    -->
+
+                                                <input type="button" value="Add URLs" onclick="sendBatch()" /><br>
+                                                <div id="batchStatus"></div>
+                                                <textarea id="urlBatchToSend" rows="20" cols="100"></textarea>
 
 <textarea cols=200>
 javascript:window.location.href = 'http://netgear.rohidekar.com/yurl/stash2.html?url=' + encodeURIComponent(document.URL) + '&nodeId=45'  ;

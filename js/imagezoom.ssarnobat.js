@@ -3,11 +3,12 @@ var windowWidth = $(window).width();
 $(document).mousemove(function(e) {
     	var mouseX = e.pageX;
     	var mouseY = e.pageY;
+//	console.debug('mouse: ' + mouseX + ", " + mouseY);
 	var direction = 'left';
 	if (mouseX > windowWidth/2) {
 		direction = 'right';
 	} 
-	$('#enlarged_image').css('top', mouseY + 10).css(direction, mouseX + 10);
+	$('#enlarged_image').css('top', mouseY + 10 - window.pageYOffset).css(direction, mouseX + 10);
 }).mouseover();
 
 function zoom(img) {
