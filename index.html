@@ -67,11 +67,9 @@ line.link {
     text-align: left;
 //}
 </style>
-
 <script type="text/javascript" src="d3/d3.js"></script>
 <script type="text/javascript" src="d3/d3.geom.js"></script>
 <script type="text/javascript" src="d3/d3.layout.js"></script>
-    
 <script>
 
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
@@ -87,46 +85,8 @@ var IMAGE_SIZE = 100;
 
 function initialize() {
 
-	////
-	//// Determine the root ID
-	////
-	{
-		getRootId: {
-			rootId = $.url().param('rootId');
-		}
+	initializeBeforeAjax();
 	
-		updateURL: {
-			if (rootId == null || rootId == '') {
-				rootId = 45;
-				history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
-			}
-		}
-		
-		setCountAndTitle: {
-			$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
-				$("#count").text(result.count);
-				$("#category").text(result.name);
-				document.title = "." + result.name + " (yurl)";
-			});
-		}
-	
-		setParentOfRootId(rootId);
-		
-		showLoading : {
-			$("#status").text("Loading")  			
-		}
-
-		setColorForCategory : {		
-			var rootColor = MD5(rootId.toString()).substring(0,6);
-			$("#rootColor").attr("style", "background-color: #" + rootColor);
-		}
-	
-		limit = $.url().param('limit')
-		if (limit == null) {
-			limit = 50;
-			window.history.pushState("object or string", "Title", document.URL + "&limit=50");
-		}
-	}
 	////
 	//// Get the key bindings and categories (non-recursive)
 	////
@@ -212,6 +172,47 @@ function initialize() {
     
 }
 
+function initializeBeforeAjax() {
+
+	////
+	//// Determine the root ID
+	////
+	getRootId: {
+		rootId = $.url().param('rootId');
+	}
+
+	updateURL: {
+		if (rootId == null || rootId == '') {
+			rootId = 45;
+			history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
+		}
+	}
+	
+	setCountAndTitle: {
+		$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
+			$("#count").text(result.count);
+			$("#category").text(result.name);
+			document.title = "." + result.name + " (yurl)";
+		});
+	}
+
+	setParentOfRootId(rootId);
+	
+	showLoading : {
+		$("#status").text("Loading")  			
+	}
+
+	setColorForCategory : {		
+		var rootColor = MD5(rootId.toString()).substring(0,6);
+		$("#rootColor").attr("style", "background-color: #" + rootColor);
+	}
+
+	limit = $.url().param('limit')
+	if (limit == null) {
+		limit = 50;
+		window.history.pushState("object or string", "Title", document.URL + "&limit=50");
+	}
+}
 
 function fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories) {
 	if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
