@@ -738,25 +738,6 @@ function getImageForUrl(url) {
 		imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
 	}
 	return imageUrl;
-	/*
-	if (!hasScreenshot) {
-		imageCell += ("<img class=itemImage src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" />");
-		// Check if the biggest image server is up
-		if (biggestImages != null) {
-			if (biggestImages[field.url] != null) {
-				imageCell += ("<img class=itemImage src=\""+ biggestImages[field.url] +"\" class='screenshot' width="+imageSize+" />");
-			}
-		}
-	}
-
-	// Tooltip
-	var img = $($.parseHTML("<a href='"+field.url+"'>" + imageCell + "</a>"));
-/ *	img.tooltip({
-		items: "img",
-		content:  field.title + "<br><font style=\"font-size : xx-small \">"+field.url+"</font>",
-	});	* /
-	return img;
-	*/
 }
 
 function getMarkupHtml(categoryId, categoryName, urlsInCategory) {
