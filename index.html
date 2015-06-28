@@ -200,8 +200,8 @@ function renderIfReadyNew() {
 		var urlsRootOnly = uncategorizedResponse.urls[rootId];
 		var headLength = 10;
 		//var truncated = 
-		// This doesn't return the new list unfortunately
-		urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
+		// This doesn't return the new list unfortunately. It will cause the thumbnails to also get truncated
+		//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
 		//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
 		var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
 		cardsHtml = urlsRootOnly.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
