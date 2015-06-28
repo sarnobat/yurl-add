@@ -645,14 +645,7 @@ function renderIfReadyNew() {
 		debugger;
 	}
 	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
-//	if (!categories) {
-//		alert('Could not find root ' + rootId);
-		//return;
-//	} else if (categories.length == 0) {
-//	//	debugger;
-//	} else {	
-		configureKeyBindings();
-//	}
+	configureKeyBindings();
 	$("#status").text("Populating")
 	var categoryOrdinal = 0;
 	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
@@ -680,9 +673,6 @@ function renderIfReadyNew() {
 	$("#list").append(urlListHtml);
 	$("#products").append(productsHtml);
 	$("#htmlText").val(productsHtml);
-//        $("#url_thumbnails").append(urlThumbnailsHtml)
-
-//	$(".urlTable").tablesorter(); 
 }
 
 function putRootAtFront(urls, rootId) {
