@@ -141,7 +141,7 @@ function initialize() {
 
 
 	////
-    //// Update the key bindings
+    //// Start listening for changes to the key bindings
     ////
     
     addKeyBindingsUpdateHandler : {
@@ -171,6 +171,63 @@ function initialize() {
     }
 	console.debug('finished declaring addKeyBindingsUpdateHandler function.');
     
+}
+
+function renderIfReady() {
+	renderIfReadyNew();
+	//renderIfReadyOld();
+}
+
+// TODO: pass uncategorizedResponse as a parameter if possible
+function renderIfReadyNew() {
+	if (!uncategorizedResponse) {
+		return;
+	}
+	if (!uncategorizedResponse.categoriesRecursive) {
+		debugger;
+	}
+	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
+	configureKeyBindings();
+	$("#status").text("Populating")
+	var categoryOrdinal = 0;
+	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
+	var urls = uncategorizedResponse.urls;
+
+	var categoryIdsUnderRootOrdered = putRootAtFront(urls, rootId);
+	
+	var cardsHtml = "";
+	{
+		var urlsRootOnly = uncategorizedResponse.urls[rootId];
+		var headLength = 10;
+		//var truncated = 
+		// This doesn't return the new list unfortunately
+		urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
+		//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
+		var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
+		cardsHtml = urlsRootOnly.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
+	}
+	var urlThumbnailsHtml = "";
+	var urlListHtml = "";
+	var tableHtml = "";
+	var productsHtml = "";
+	var markupHtml = "";
+	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
+		var categoryId = categoryIdsUnderRootOrdered[i];
+		var categoryName = categoryIdsToNames[categoryId];
+		var urlsForCategory = urls[categoryId];
+		
+		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId], limit);
+		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
+		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
+		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
+//		markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
+	}
+	$("#url_cards").append(cardsHtml);
+	$("#url_thumbnails").append(urlThumbnailsHtml);
+	$("#url_table").append(tableHtml);
+	$("#list").append(urlListHtml);
+	$("#products").append(productsHtml);
+	$("#htmlText").val(productsHtml);
 }
 
 function initializeBeforeAjax() {
@@ -530,64 +587,6 @@ function getBiggestImages() {
 		biggestImages = result;
 		initialize();
 	});
-}
-
-
-function renderIfReady() {
-	renderIfReadyNew();
-	//renderIfReadyOld();
-}
-
-// TODO: pass uncategorizedResponse as a parameter if possible
-function renderIfReadyNew() {
-	if (!uncategorizedResponse) {
-		return;
-	}
-	if (!uncategorizedResponse.categoriesRecursive) {
-		debugger;
-	}
-	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
-	configureKeyBindings();
-	$("#status").text("Populating")
-	var categoryOrdinal = 0;
-	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
-	var urls = uncategorizedResponse.urls;
-
-	var categoryIdsUnderRootOrdered = putRootAtFront(urls, rootId);
-	
-	var cardsHtml = "";
-	{
-		var urlsRootOnly = uncategorizedResponse.urls[rootId];
-		var headLength = 10;
-		//var truncated = 
-		// This doesn't return the new list unfortunately
-		urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
-		//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
-		var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
-		cardsHtml = urlsRootOnly.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
-	}
-	var urlThumbnailsHtml = "";
-	var urlListHtml = "";
-	var tableHtml = "";
-	var productsHtml = "";
-	var markupHtml = "";
-	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
-		var categoryId = categoryIdsUnderRootOrdered[i];
-		var categoryName = categoryIdsToNames[categoryId];
-		var urlsForCategory = urls[categoryId];
-		
-		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId], limit);
-		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
-		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
-		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
-//		markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
-	}
-	$("#url_cards").append(cardsHtml);
-	$("#url_thumbnails").append(urlThumbnailsHtml);
-	$("#url_table").append(tableHtml);
-	$("#list").append(urlListHtml);
-	$("#products").append(productsHtml);
-	$("#htmlText").val(productsHtml);
 }
 
 function findCategoryChildren(categoriesNode, categoryIdToFind) {
