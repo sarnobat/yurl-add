@@ -141,17 +141,14 @@ function initialize() {
 
 
 	////
-    //// Start listening for changes to the key bindings
+    //// Start listening for changes to the key binding assignments
     ////
     
     addKeyBindingsUpdateHandler : {
 		var oldKeyBindings;
 		$("#keys").focus(function() {
-			console.debug('focus callback begin');
 			oldKeyBindings = $.trim($("#keys").val());
-			console.debug('focus callback');
 		}).blur(function() {
-			console.debug('blur callback');
 			var newKeyBindings = $.trim($("#keys").val());
 			var i = 1;
 			var url;
@@ -159,7 +156,6 @@ function initialize() {
 			} else {
 				url = urlBase + "/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
 			}
-			console.debug('sending ' + url);
 			$.getJSON(url, function(result){})
 				.success(function(data) {  
 					configureKeyBindings(data);
@@ -167,10 +163,7 @@ function initialize() {
 				.error(function() { })
 				.complete(function() { });
 		});
-		console.debug('inside addKeyBindingsUpdateHandler function end...');
-    }
-	console.debug('finished declaring addKeyBindingsUpdateHandler function.');
-    
+    }    
 }
 
 function renderIfReady() {
