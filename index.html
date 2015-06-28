@@ -535,7 +535,7 @@ function getBiggestImages() {
 
 function renderIfReady() {
 	renderIfReadyNew();
-	renderIfReadyOld();
+	//renderIfReadyOld();
 }
 
 // TODO: pass uncategorizedResponse as a parameter if possible
@@ -558,7 +558,13 @@ function renderIfReadyNew() {
 	var cardsHtml = "";
 	{
 		var urlsRootOnly = uncategorizedResponse.urls[rootId];
-		cardsHtml = urlsRootOnly.map(ITEM_TO_HTML).join("\n");
+		var headLength = 10;
+		//var truncated = 
+		// This doesn't return the new list unfortunately
+		urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
+		//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
+		var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
+		cardsHtml = urlsRootOnly.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
 	}
 	var urlThumbnailsHtml = "";
 	var urlListHtml = "";
@@ -576,7 +582,7 @@ function renderIfReadyNew() {
 		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
 //		markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
 	}
-	$("#url_cards1").append(cardsHtml);
+	$("#url_cards").append(cardsHtml);
 	$("#url_thumbnails").append(urlThumbnailsHtml);
 	$("#url_table").append(tableHtml);
 	$("#list").append(urlListHtml);
@@ -584,11 +590,31 @@ function renderIfReadyNew() {
 	$("#htmlText").val(productsHtml);
 }
 
-function ITEM_TO_HTML(item) {
-	var html = "";
-	//item = {downloaded_video: "1435364575714", created: 1435364570183, id: "611656", title: "Atletico Madrid Goal Celebration Song - YouTube", url: "https://www.youtube.com/watch?v=RVSIVFB_KPw"};
-	html = createImageCell(item).html();
-	return html;
+function findCategoryChildren(categoriesNode, categoryIdToFind) {
+	if (categoriesNode.id == categoryIdToFind) {
+		return categoriesNode.children;
+	}
+	else if (categoriesNode.children != null) {
+		for (var i = 0; i < categoriesNode.children.length; i++ ) {
+			var category = findCategoryChildren(categoriesNode.children[i], categoryIdToFind);
+			if (category != null) {
+				return category;
+			}
+		}
+	} else {
+		return null;
+	}
+}
+
+function ITEM_TO_HTML(categories, currentCategoryId, parentCategoryId, item) {
+	return function (item) {
+		var html = "";
+		//item = {downloaded_video: "1435364575714", created: 1435364570183, id: "611656", title: "Atletico Madrid Goal Celebration Song - YouTube", url: "https://www.youtube.com/watch?v=RVSIVFB_KPw"};
+		//html = createImageCell(item).html();
+		html = fillCardItem(null, item, null, null, null, categories);
+		console.debug('item html: ' + html);
+		return html;
+	};
 }
 
 function putRootAtFront(urls, rootId) {
@@ -720,9 +746,9 @@ function renderIfReadyOld() {
 		var categoryID = categoryIdsUnderRootOrdered[i];
 		$("#url_thumbnails").append("<h3>" + categoryIdsToNames[categoryID] + " (" + categoryID +")</h3>")
 		$.each(urls[categoryID], function( resultRowNumber, field ) {
-			if (categoryID == rootId) {
-				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
-			}
+//			if (categoryID == rootId) {
+//				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
+//			}
 			if (resultRowNumber < limit) {
 //				fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
 			}
@@ -735,8 +761,10 @@ function renderIfReadyOld() {
 }
 
 function fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories) {
-	if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
-		return;
+	if (resultRowNumber != null && result != null && limit != null) {	
+		if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
+			return;
+		}
 	}
 	
 	var one = $("<td style='background-color:'>1");
@@ -746,6 +774,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 	var five = $("<td style='background-color:'>5");
 	var six = $("<td style='background-color:'>6");
 	
+	var listItem;
 	var table = $("<table/>");
 	{
 		table.attr('width','100%');
@@ -766,9 +795,9 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		}
 	
 		{
-			var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
+			listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
 			listItem.append(table);
-			$("#url_cards").append(listItem);
+			//$("#url_cards").append(listItem);
 		}
 	
 	}
@@ -782,7 +811,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+(new Date(field.created))+"<br>"+"</sub>");
 	}
 	
-	var imageCell = createImageCell(field, biggestImages, 300, resultRowNumber);
+	var imageCell = createImageCell(field, biggestImages, null, resultRowNumber);
 	three.append(imageCell);
 	
 	if (field.parentId != null) {
@@ -835,6 +864,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 
 		
 	}	
+	return listItem[0].outerHTML;
 }
 
 function getCategoriesUnderID2(categoryTree, categoryId) {
@@ -1368,8 +1398,6 @@ reading list (pdf))
 							  </div>
 							  <div id="tabs-2">
   									For sorting into subcategories 
-								  <ol id="url_cards1"></ol>
-								  <h1>Deprecated</h1>
 								  <ol id="url_cards"></ol>
 							  </div>
 							  <div id="tabs-3">
