@@ -223,109 +223,6 @@ function fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages,
 	
 }
 
-function fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories) {
-	if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
-		return;
-	}
-	
-	var one = $("<td style='background-color:'>1");
-	var two = $("<td style='background-color:' >2");
-	var three = $("<td style='background-color:'>3");
-	var four = $("<td id='categoryButtonsCell' style='background-color:'>4");
-	var five = $("<td style='background-color:'>5");
-	var six = $("<td style='background-color:'>6");
-	
-	var table = $("<table/>");
-	{
-		table.attr('width','100%');
-	
-		{
-			var row1 = $("<tr/>");
-			table.append(row1);
-			row1.append(two);
-			row1.append(three);
-		}
-	
-		{
-			var row2 = $("<tr/>");
-			table.append(row2);
-			row2.append(four);
-			row2.append(five);
-			row2.append(six);
-		}
-	
-		{
-			var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
-			listItem.append(table);
-			$("#url_cards").append(listItem);
-		}
-	
-	}
-	
-	{
-		var urlElements = field.url.match(/^http:\/\/[^/]+/);
-		if (urlElements != null) {
-			var site = urlElements[0];
-			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
-		}
-		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+(new Date(field.created))+"<br>"+"</sub>");
-	}
-	
-	var imageCell = createImageCell(field, biggestImages, 300, resultRowNumber);
-	three.append(imageCell);
-	
-	if (field.parentId != null) {
-		six.append("Parent ID: " + field.parentId);
-	}
-	
-	{
-		var buttonCell = two;
-		buttonCell.append("<br>");
-		buttonCell.append("<br>");
-		buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
-		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'><br>");			
-		buttonCell.append("<br>");
-		buttonCell.append("<br>");
-		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
-		buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
-		buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
-		buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
-		buttonCell.append("<sub>"+field.id+"</sub>");
-	}
-	
-	{
-		var categoryButtons = four;
-		if (categories && categories.length == 0) {
-			// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
-			debugger;
-		} 
-		if (categories) {
-			$.each(categories, function(a,binding,c){
-				categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+" ("+ binding.key+")' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
-			});
-		}
-		categoryButtons.append("<br>");
-		categoryButtons.append("<br>");
-		categoryButtons.append("<input type=button class='genericButton' value='NEW' onclick='createAndRelate("+field.id+","+rootId+")'>&nbsp;");
-	}
-	
-	{
-		five.append("<input type=button class='genericButton' value='I own this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37373+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Buy this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221013+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Download this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221026+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Downloaded this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 322410 +"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Watched' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Watch this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Documentary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37659+"), this)'><br>");
-
-		five.append("<input type=button class='genericButton' value='Find in Library' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 608592+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Priority 3' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'><br><br>");
-		five.append("<input type=button class='genericButton' value='Save Video' onclick='downloadVideo("+field.id+","+field.downloaded_video+", this)' style='background-color : "+getDownloadedVideoColor(field.downloaded_video)+"'><br>");
-
-		
-	}	
-}
-
 function getDownloadedVideoColor(downloaded) {
 	if ("null" == downloaded) {
 		return "red";
@@ -816,6 +713,109 @@ function renderIfReadyOld() {
 	}	
 //			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
 	$("#status").text("Done")
+}
+
+function fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories) {
+	if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
+		return;
+	}
+	
+	var one = $("<td style='background-color:'>1");
+	var two = $("<td style='background-color:' >2");
+	var three = $("<td style='background-color:'>3");
+	var four = $("<td id='categoryButtonsCell' style='background-color:'>4");
+	var five = $("<td style='background-color:'>5");
+	var six = $("<td style='background-color:'>6");
+	
+	var table = $("<table/>");
+	{
+		table.attr('width','100%');
+	
+		{
+			var row1 = $("<tr/>");
+			table.append(row1);
+			row1.append(two);
+			row1.append(three);
+		}
+	
+		{
+			var row2 = $("<tr/>");
+			table.append(row2);
+			row2.append(four);
+			row2.append(five);
+			row2.append(six);
+		}
+	
+		{
+			var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
+			listItem.append(table);
+			$("#url_cards").append(listItem);
+		}
+	
+	}
+	
+	{
+		var urlElements = field.url.match(/^http:\/\/[^/]+/);
+		if (urlElements != null) {
+			var site = urlElements[0];
+			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
+		}
+		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+(new Date(field.created))+"<br>"+"</sub>");
+	}
+	
+	var imageCell = createImageCell(field, biggestImages, 300, resultRowNumber);
+	three.append(imageCell);
+	
+	if (field.parentId != null) {
+		six.append("Parent ID: " + field.parentId);
+	}
+	
+	{
+		var buttonCell = two;
+		buttonCell.append("<br>");
+		buttonCell.append("<br>");
+		buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
+		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'><br>");			
+		buttonCell.append("<br>");
+		buttonCell.append("<br>");
+		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
+		buttonCell.append("<sub>"+field.id+"</sub>");
+	}
+	
+	{
+		var categoryButtons = four;
+		if (categories && categories.length == 0) {
+			// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
+			debugger;
+		} 
+		if (categories) {
+			$.each(categories, function(a,binding,c){
+				categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+" ("+ binding.key+")' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
+			});
+		}
+		categoryButtons.append("<br>");
+		categoryButtons.append("<br>");
+		categoryButtons.append("<input type=button class='genericButton' value='NEW' onclick='createAndRelate("+field.id+","+rootId+")'>&nbsp;");
+	}
+	
+	{
+		five.append("<input type=button class='genericButton' value='I own this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37373+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Buy this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221013+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Download this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221026+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Downloaded this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 322410 +"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Watched' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Watch this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Documentary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37659+"), this)'><br>");
+
+		five.append("<input type=button class='genericButton' value='Find in Library' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 608592+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Priority 3' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'><br><br>");
+		five.append("<input type=button class='genericButton' value='Save Video' onclick='downloadVideo("+field.id+","+field.downloaded_video+", this)' style='background-color : "+getDownloadedVideoColor(field.downloaded_video)+"'><br>");
+
+		
+	}	
 }
 
 function getCategoriesUnderID2(categoryTree, categoryId) {
