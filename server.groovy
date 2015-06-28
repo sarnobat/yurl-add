@@ -69,13 +69,13 @@ public class Yurl {
 
 		static {
 			System.out.println("static() begin");
-			refreshCategoriesTreeCache();
 		}
 
 		private static JSONObject categoriesTreeCache;
 
-		// This never gets called
+		// This never gets called - or does it?
 		HelloWorldResource() {
+//			HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		}
 
 		@GET
@@ -313,7 +313,7 @@ public class Yurl {
                         } else {
                                 categoriesTreeJson = categoriesTreeCache;
 				// This is done in a separate thread 
-                                refreshCategoriesTreeCache();
+                                refreshCategoriesTreeCacheInSeparateThread();
                         }
                         JSONArray ret = getKeys(iRootId);
 			JSONObject retVal = new JSONObject();
@@ -856,58 +856,103 @@ System.out.println(outputFilename);
 
 				// @Override
 				public void run() {
-					try {
-
-						System.out
-								.println("downloadVideoInSeparateThread() - Begin");
-
-						File theTargetDir = new File(TARGET_DIR_PATH);
-						if (!theTargetDir.exists()) {
-							throw new RuntimeException(
-									"Target directory doesn't exist");
-						}
-						VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
-						System.out
-								.println("downloadVideoInSeparateThread() - About to start downloading");
-						v.getVideo().setVideoQuality(VideoQuality.p1080);
-
-						System.out.println(v.getVideo().getWeb().toString());
-						System.out.println(v.getVideo().getVideoQuality());
-						v.download();// If this hangs, make sure you are using
-										// vget 1.15. If you use 1.13 I know it
-										// hangs
-						System.out
-								.println("downloadVideoInSeparateThread() - Download successful. Updating database");
-
-						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
-								ImmutableMap.<String, Object> of("id",
-										Long.valueOf(id), "url", iVideoUrl,
-										"date", System.currentTimeMillis()));
-						System.out
-								.println("downloadVideoInSeparateThread() - Download recorded in database");
-
-					} catch (IOException e) {
-                                                System.out.println(e.getMessage());
-						//e.printStackTrace();
-						//throw new RuntimeException(e);
-					} catch (JSONException e) {
-						System.out
-								.println("downloadVideoInSeparateThread() - ERROR recording download in database");
-						// Why won't the compiler let me throw this?
-						//e.printStackTrace();
-					} catch (RuntimeException e) {
-						System.out.println(e.getMessage());
-					}
-					catch (Exception e) {
-                                                System.out.println(e.getMessage());
-						//e.printStackTrace();
-					}
+					System.out
+					.println("downloadVideoSynchronous() - Begin");
+					downloadVideo(iVideoUrl, TARGET_DIR_PATH, id);
 				}
 			};
 			new Thread(r).start();
 			System.out.println("End");
 		}
 
+		private static void downloadUndownloadedVideosInSeparateThread()
+		{
+			new Thread() {
+				public void run() {
+					try {
+						downloadUndownloadedVideos();
+					} catch (JSONException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}.start();
+		}
+
+		private static void downloadUndownloadedVideos() throws JSONException, IOException {
+			String query = "start root=node(37658) match  root-[CONTAINS*]->n return n.title, n.downloaded_video, n.url, ID(n) LIMIT 20;";
+			JSONObject results = execute(query, ImmutableMap.<String, Object>of());
+			JSONArray jsonArray = results.getJSONArray("data");
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONArray row = jsonArray.getJSONArray(i);
+				Object title = row.get(0);
+				Object downloaded = row.get(1);
+				Object url =  row.get(2);
+				Object id = row.get(3);
+				if (downloaded == null || downloaded == JSONObject.NULL  || "null".equals(downloaded)) {
+					if (url instanceof String) {
+						if (id instanceof Integer) {
+							downloadVideo(row.getString(2), TARGET_DIR_PATH, Integer.toString(row.getInt(3)));
+						} else {
+							System.out.println("id - " + id.getClass());
+						}
+					} else {
+						System.out.println("url - " + url.getClass());
+					}
+				} else  {
+					Long downloaded1 = row.getLong(1);
+					System.out.println(title + "\t" + downloaded1);
+//					System.out.println(downloaded.getClass());
+				}
+			}
+		}
+		
+		private static void downloadVideo( String iVideoUrl,
+				String targetDirPath, String id) {
+			try {
+				System.out
+						.println("downloadVideo() - Begin");
+				File theTargetDir = new File(targetDirPath);
+				if (!theTargetDir.exists()) {
+					throw new RuntimeException(
+							"Target directory doesn't exist");
+				}
+				VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
+				System.out
+						.println("downloadVideo() - About to start downloading");
+				v.getVideo().setVideoQuality(VideoQuality.p1080);
+
+				System.out.println(v.getVideo().getWeb().toString());
+				System.out.println(v.getVideo().getVideoQuality());
+				v.download();// If this hangs, make sure you are using
+								// vget 1.15. If you use 1.13 I know it
+								// hangs
+				System.out
+						.println("downloadVideo() - Download successful. Updating database");
+
+				execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
+						ImmutableMap.<String, Object> of("id",
+								Long.valueOf(id), "url", iVideoUrl,
+								"date", System.currentTimeMillis()));
+				System.out
+						.println("downloadVideo() - Download recorded in database");
+
+			} catch (IOException e) {
+				System.out.println(e.getMessage());
+				//e.printStackTrace();
+				//throw new RuntimeException(e);
+			} catch (JSONException e) {
+				System.out.println("downloadVideo() - ERROR recording download in database");
+				// Why won't the compiler let me throw this?
+				//e.printStackTrace();
+			} catch (RuntimeException e) {
+				System.out.println(e.getMessage());
+			}
+			catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
 		@GET
 		@Path("surpassOrdinal")
 		@Produces("application/json")
@@ -1167,22 +1212,22 @@ System.out.println(outputFilename);
 				categoriesTreeJson = getCategoriesTree(ROOT_ID);
 			} else {
 				categoriesTreeJson = categoriesTreeCache;
-				refreshCategoriesTreeCache();
+				refreshCategoriesTreeCacheInSeparateThread();
 			}
 			ret.put("categoriesTree", categoriesTreeJson);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
 		}
 
-		private static void refreshCategoriesTreeCache() {
-			System.out.println("refreshCategoriesTreeCache() - begin");
+		private static void refreshCategoriesTreeCacheInSeparateThread() {
+			System.out.println("refreshCategoriesTreeCacheInSeparateThread() - begin");
 			new Thread(){
 				@Override
 				public void run() {
-					System.out.println("refreshCategoriesTreeCache() - run - started");
+					System.out.println("refreshCategoriesTreeCacheInSeparateThread() - run - started");
 					try {
 						categoriesTreeCache = getCategoriesTree(ROOT_ID);
-						System.out.println("refreshCategoriesTreeCache() - run - finished");
+						System.out.println("refreshCategoriesTreeCacheInSeparateThread() - run - finished");
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -1365,10 +1410,17 @@ System.out.println(outputFilename);
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 		System.err.println("main() - begin");
+		
+		HelloWorldResource.refreshCategoriesTreeCacheInSeparateThread();
 		try {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:4447/"), new ResourceConfig(
 							HelloWorldResource.class));
+			// Do not allow this in multiple processes otherwise your hard disk will fill up
+			// or overload the database
+			// Problem - this won't get executed until the server ends
+			//HelloWorldResource.refreshCategoriesTreeCacheInSeparateThread();
+			//HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		} catch (Exception e) {
 			System.out.println("Not creating server instance");
 		}
