@@ -81,7 +81,8 @@ var limit;
 var uncategorizedResponse; // Populated via rest call
 var categories; // Populated via rest call
 var biggestImages = {};
-var IMAGE_SIZE = 100;
+var IMAGE_SIZE = 100; // for thumbnails
+var imageSize = 300; // for cards
 
 function initialize() {
 
@@ -232,7 +233,10 @@ function getDownloadedVideoColor(downloaded) {
 	}
 	return "green";
 }
-function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
+
+// Creates a JQquery DOM element
+// field = item
+function createImageCell(field, biggestImages, deleteThis_imageSize, resultRowNumber) {
 
 	var imageCell = "";
 	var hasScreenshot = false;
@@ -534,6 +538,7 @@ function renderIfReady() {
 	renderIfReadyOld();
 }
 
+// TODO: pass uncategorizedResponse as a parameter if possible
 function renderIfReadyNew() {
 	if (!uncategorizedResponse) {
 		return;
@@ -550,6 +555,11 @@ function renderIfReadyNew() {
 
 	var categoryIdsUnderRootOrdered = putRootAtFront(urls, rootId);
 	
+	var cardsHtml = "";
+	{
+		var urlsRootOnly = uncategorizedResponse.urls[rootId];
+		cardsHtml = urlsRootOnly.map(ITEM_TO_HTML).join("\n");
+	}
 	var urlThumbnailsHtml = "";
 	var urlListHtml = "";
 	var tableHtml = "";
@@ -559,17 +569,26 @@ function renderIfReadyNew() {
 		var categoryId = categoryIdsUnderRootOrdered[i];
 		var categoryName = categoryIdsToNames[categoryId];
 		var urlsForCategory = urls[categoryId];
+		
 		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId], limit);
 		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
 		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
 //		markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
 	}
+	$("#url_cards1").append(cardsHtml);
 	$("#url_thumbnails").append(urlThumbnailsHtml);
 	$("#url_table").append(tableHtml);
 	$("#list").append(urlListHtml);
 	$("#products").append(productsHtml);
 	$("#htmlText").val(productsHtml);
+}
+
+function ITEM_TO_HTML(item) {
+	var html = "";
+	//item = {downloaded_video: "1435364575714", created: 1435364570183, id: "611656", title: "Atletico Madrid Goal Celebration Song - YouTube", url: "https://www.youtube.com/watch?v=RVSIVFB_KPw"};
+	html = createImageCell(item).html();
+	return html;
 }
 
 function putRootAtFront(urls, rootId) {
@@ -1349,7 +1368,8 @@ reading list (pdf))
 							  </div>
 							  <div id="tabs-2">
   									For sorting into subcategories 
-
+								  <ol id="url_cards1"></ol>
+								  <h1>Deprecated</h1>
 								  <ol id="url_cards"></ol>
 							  </div>
 							  <div id="tabs-3">
