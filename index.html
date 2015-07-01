@@ -94,18 +94,16 @@ function initialize() {
 			oldKeyBindings = $.trim($("#keys").val());
 		}).blur(function() {
 			var newKeyBindings = $.trim($("#keys").val());
-			var i = 1;
-			var url;
 			if (oldKeyBindings === newKeyBindings) {
 			} else {
-				url = urlBase + "/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
+				var url = urlBase + "/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
+				$.getJSON(url, function(result){})
+					.success(function(data) {  
+						configureKeyBindings(data);
+					})
+					.error(function() { })
+					.complete(function() { });
 			}
-			$.getJSON(url, function(result){})
-				.success(function(data) {  
-					configureKeyBindings(data);
-				})
-				.error(function() { })
-				.complete(function() { });
 		});
     }    
 }
@@ -115,7 +113,6 @@ function renderIfReady() {
 	//renderIfReadyOld();
 }
 
-// TODO: pass uncategorizedResponse as a parameter if possible
 function renderIfReadyNew() {
 	if (!uncategorizedResponse) {
 		return;
@@ -1416,6 +1413,7 @@ reading list (pdf))
 							  <ol id="products"></ol>
 							</div>
 							<div id="tabs-9">
+							  <a href="#" onclick="alert('implement this')">Open in new tab</a><br>
 							  <textarea id="htmlText"></textarea>
 							</div>
 						</div>
