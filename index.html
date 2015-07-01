@@ -30,23 +30,9 @@ var imageSize = 300; // for cards
 
 
 function openHtmlTextInNewTab() {
-
-var newWin = open('url', '_blank');
-newWin.document.write($("#htmlText").val());
-
-
-
-	console.debug('1');
-	var newWindow = window.open();
-	console.debug('2');
-	newWindow.onload = function() {	
-		console.debug('3');
-		var val = $("#htmlText").val();
-			console.debug('4');
-		newWindow.document.write(val);
-			console.debug('5');
-	};
-	newWindow.onload();
+	var newWin = open('url', '_blank', '');
+	newWin.document.write($("#htmlText").val());
+	newWin.document.title = document.title;
 }
 
 function initialize() {
@@ -1434,7 +1420,8 @@ reading list (pdf))
 							  <ol id="products"></ol>
 							</div>
 							<div id="tabs-9">
-							  <a onclick="openHtmlTextInNewTab()">Open in new tab</a><br>
+							  <a href="" onclick="openHtmlTextInNewTab()">Open in new tab</a><br>
+							  <br>
 							  <textarea id="htmlText"></textarea>
 							</div>
 						</div>
