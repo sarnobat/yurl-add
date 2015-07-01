@@ -151,17 +151,19 @@ function renderIfReadyNew() {
 		var urlsForCategory = urls[categoryId];
 		
 		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId], limit);
-		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
+		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
-//		markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
+		markupHtml += "<h1>" + categoryName + "</h1>" + urlsForCategory.map(ITEM_TO_IMAGE).join("\n");
+		//markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
+		
 	}
 	$("#url_cards").append(cardsHtml);
 	$("#url_thumbnails").append(urlThumbnailsHtml);
 	$("#url_table").append(tableHtml);
 	$("#list").append(urlListHtml);
 	$("#products").append(productsHtml);
-	$("#htmlText").val(productsHtml);
+	$("#htmlText").val(markupHtml);
 }
 
 function initializeBeforeAjax() {
@@ -225,9 +227,13 @@ function getDownloadedVideoColor(downloaded) {
 	return "green";
 }
 
+function ITEM_TO_IMAGE(item) {
+	return createImageCell(item)[0].outerHTML;
+}
+
 // Creates a JQquery DOM element
 // field = item
-function createImageCell(field, biggestImages, deleteThis_imageSize, resultRowNumber) {
+function createImageCell(field) {
 
 	var imageCell = "";
 	var hasScreenshot = false;
@@ -237,14 +243,14 @@ function createImageCell(field, biggestImages, deleteThis_imageSize, resultRowNu
 			field.url.match(".gif$") || 
 			field.url.match(".png\??") || 
 			field.url.match("images.q=tbn:")) {
-			imageCell += ("<img class=itemImage src='"+field.url+"' height="+imageSize+" onmouseenter='zoom(this)'>");
+			imageCell += ("<img class=itemImage src='"+field.url+"' height="+imageSize+" onmouseenter='zoom(this)' title='" +field.title+ "'>");
 			hasScreenshot = true;
 		}
 		if (field.url.match("youtube.com")) {
 			if (field.url.match("youtube.com/watch")) {
 				var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
 				imageCell += ("");
-				imageCell += ("<img class=itemImage src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+">");
+				imageCell += ("<img class=itemImage src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+" title='" +field.title+ "'>");
 				
 				imageCell += ("");
 				imageCell += ("");
@@ -255,7 +261,7 @@ function createImageCell(field, biggestImages, deleteThis_imageSize, resultRowNu
 		} else if (field.url.match("dailymotion.com/video")) {
 				var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
 				imageCell += ("");
-				imageCell += ("<img class=itemImage src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+">");
+				imageCell += ("<img class=itemImage src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+" title='" +field.title+ "'>");
 				imageCell += ("");
 				imageCell += ("");
 				imageCell += ("");
@@ -270,13 +276,13 @@ function createImageCell(field, biggestImages, deleteThis_imageSize, resultRowNu
 			asin = asin.replace(/.ref_?=.*/, '');
 			asin = asin.replace(/.*offer-listing./, '');
 			var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
-			imageCell += ("<img class=itemImage src='"+productImageUrl+"' height='280'>");
+			imageCell += ("<img class=itemImage src='"+productImageUrl+"' height='280' title='" +field.title+ "'>");
 			hasScreenshot = true;
 		}
 	}
 	
 	if (!hasScreenshot) {
-		imageCell += ("<img class=itemImage src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" />");
+		imageCell += ("<img class=itemImage src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" title='" +field.title+ "'/>");
 		// Check if the biggest image server is up
 		if (biggestImages != null) {
 			if (biggestImages[field.url] != null) {
@@ -286,7 +292,7 @@ function createImageCell(field, biggestImages, deleteThis_imageSize, resultRowNu
 	}
 
 	// Tooltip
-	var img = $($.parseHTML("<a href='"+field.url+"'>" + imageCell + "</a>"));
+	var img = $($.parseHTML("<a href='"+field.url+"'  title='" +field.title+ "' >" + imageCell + "</a>"));
 /*	img.tooltip({
 		items: "img",
 		content:  field.title + "<br><font style=\"font-size : xx-small \">"+field.url+"</font>",
@@ -541,12 +547,7 @@ function findCategoryChildren(categoriesNode, categoryIdToFind) {
 
 function ITEM_TO_HTML(categories, currentCategoryId, parentCategoryId, item) {
 	return function (item) {
-		var html = "";
-		//item = {downloaded_video: "1435364575714", created: 1435364570183, id: "611656", title: "Atletico Madrid Goal Celebration Song - YouTube", url: "https://www.youtube.com/watch?v=RVSIVFB_KPw"};
-		//html = createImageCell(item).html();
-		html = fillCardItem(null, item, null, null, null, categories);
-		//console.debug('item html: ' + html);
-		return html;
+		return fillCardItem(null, item, null, null, null, categories);
 	};
 }
 
@@ -616,6 +617,8 @@ function getImageForUrl(url) {
 }
 
 function getMarkupHtml(categoryId, categoryName, urlsInCategory) {
+
+//ITEM_TO_IMAGE;
 		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
 			var item = urlsInCategory[j];
