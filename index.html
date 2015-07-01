@@ -184,7 +184,7 @@ function initializeBeforeAjax() {
 		$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
 			$("#count").text(result.count);
 			$("#category").text(result.name);
-			document.title = "." + result.name.charAt(0).toUpperCase() + result.name.slice(1) + " (yurl)";
+			document.title = result.name.charAt(0).toUpperCase() + result.name.slice(1) + " (yurl)";
 		});
 	}
 
