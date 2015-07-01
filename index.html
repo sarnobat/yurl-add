@@ -28,6 +28,27 @@ var biggestImages = {};
 var IMAGE_SIZE = 100; // for thumbnails
 var imageSize = 300; // for cards
 
+
+function openHtmlTextInNewTab() {
+
+var newWin = open('url', '_blank');
+newWin.document.write($("#htmlText").val());
+
+
+
+	console.debug('1');
+	var newWindow = window.open();
+	console.debug('2');
+	newWindow.onload = function() {	
+		console.debug('3');
+		var val = $("#htmlText").val();
+			console.debug('4');
+		newWindow.document.write(val);
+			console.debug('5');
+	};
+	newWindow.onload();
+}
+
 function initialize() {
 
 	initializeBeforeAjax();
@@ -1413,7 +1434,7 @@ reading list (pdf))
 							  <ol id="products"></ol>
 							</div>
 							<div id="tabs-9">
-							  <a href="#" onclick="alert('implement this')">Open in new tab</a><br>
+							  <a onclick="openHtmlTextInNewTab()">Open in new tab</a><br>
 							  <textarea id="htmlText"></textarea>
 							</div>
 						</div>
