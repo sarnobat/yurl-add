@@ -28,13 +28,6 @@ var biggestImages = {};
 var IMAGE_SIZE = 100; // for thumbnails
 var imageSize = 300; // for cards
 
-
-function openHtmlTextInNewTab() {
-	var newWin = open('url', '_blank', '');
-	newWin.document.write($("#htmlText").val());
-	newWin.document.title = document.title;
-}
-
 function initialize() {
 
 	initializeBeforeAjax();
@@ -191,7 +184,7 @@ function initializeBeforeAjax() {
 		$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
 			$("#count").text(result.count);
 			$("#category").text(result.name);
-			document.title = "." + result.name + " (yurl)";
+			document.title = "." + result.name.charAt(0).toUpperCase() + result.name.slice(1) + " (yurl)";
 		});
 	}
 
@@ -1160,6 +1153,12 @@ function renderD3Visualization(flareJson) {
 	  root.size = recurse(root);
 	  return nodes;
 	}
+}
+
+function openHtmlTextInNewTab() {
+	var newWin = open('url', '_blank', '');
+	newWin.document.write($("#htmlText").val());
+	newWin.document.title = document.title;
 }
 
 </script>
