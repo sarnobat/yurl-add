@@ -1,4 +1,5 @@
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -56,6 +57,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -606,41 +608,30 @@ public class Yurl {
 		public static JSONArray getKeys(Integer iParentId) throws IOException,
 				JSONException {
 			System.out.println("getKeys() - parent ID: " + iParentId);
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			_1: {
-				theParams.put("parentId", iParentId);
-			}
 			// Unfortunately, we cannot insist on counting only the URL nodes -
 			// it will prevent category nodes from being returned. See if
-			// there's
-			// a way to do this in Cypher. If there isn't, this is not a huge
-			// compromise.
+			// there's a way to do this in Cypher. If there isn't, this is not a
+			// huge compromise.
 			// TODO: find a way to count the nodes
-			JSONObject theQueryJsonResult = execute(
-					"START parent=node({parentId}) MATCH parent-[c:CONTAINS*1..2]->n WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN distinct ID(n),n.name,n.key,0 as c order by c desc",
-					theParams.build());
-			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
-			System.out.println("getKeys() - length: " + theData.length());
+			JSONArray theData = (JSONArray) execute(
+					"START parent=node({parentId}) " +
+					"MATCH parent-[c:CONTAINS*1..2]->n " +
+					"WHERE has(n.name)  and n.type = 'categoryNode' and id(parent) = {parentId} " +
+					"RETURN distinct ID(n),n.name,n.key,0 as c order by c desc",
+					ImmutableMap.<String, Object> builder()
+							.put("parentId", iParentId).build()).get("data");
+//			System.out.println("getKeys() - length: " + theData.length());
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
+				JSONArray aBindingArray = theData.getJSONArray(i);
 				JSONObject aBindingObject = new JSONObject();
-				_1: {
-					JSONArray aBindingArray = theData.getJSONArray(i);
-					String id = (String) aBindingArray.get(0);
-					aBindingObject.put("id", id);
-					String title = (String) aBindingArray.get(1);
-					String aUrl = (String) aBindingArray.get(2);
-					String aCount = ((Integer) aBindingArray.get(3)).toString();
-					_11: {
-						// remove this. Just checking that this is a valid
-						// number
-						Integer.parseInt(aCount);
-					}
-					aBindingObject.put("name", title);
-					aBindingObject.put("key", aUrl);// TODO: this could be null
-					aBindingObject.put("count", aCount);
-					oKeys.put(aBindingObject);
-				}
+				aBindingObject.put("id", (String) aBindingArray.get(0));
+				aBindingObject.put("name", (String) aBindingArray.get(1));
+				// TODO: this could be null
+				aBindingObject.put("key", (String) aBindingArray.get(2));
+				aBindingObject.put("count",
+						((Integer) aBindingArray.get(3)).toString());
+				oKeys.put(aBindingObject);
 			}
 			System.out.println("getKeys() - end. length: " + oKeys.length());
 			return oKeys;
@@ -1131,7 +1122,8 @@ System.out.println(outputFilename);
 
 		// TODO: make this map immutable
 		private static JSONObject execute(String iCypherQuery,
-				Map<String, Object> iParams) throws IOException, JSONException {
+				Map<String, Object> iParams, String...comment) throws IOException, JSONException {
+			System.out.println("" + comment);
 			ClientConfig clientConfig = new DefaultClientConfig();
 			clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
 					Boolean.TRUE);
@@ -1213,135 +1205,178 @@ System.out.println(outputFilename);
 
 		private static JSONObject getCategoriesTree(Integer rootId)
 				throws JSONException, IOException {
-			System.out.println("getCategoriesTree() - begin");
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			_1: {
-				theParams.put("parentId", rootId);
-			}
-			String iCypherQuery = "start n=node({parentId}) match path=n-[r:CONTAINS*]->c WHERE has(c.name) return extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\" , key : \"' + p.key + '\"}')";
-			System.out.println(iCypherQuery);
-			JSONObject theQueryJsonResult = execute(
-					iCypherQuery,
-					theParams.build());
-			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult, rootId);
-			// Get the number of urls in each category
-			getCounts : {
-				JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
-				Map<Integer, Integer> categorySizes = getCategorySizes(counts.getJSONArray("data"));
-//				System.out.println("getCategoriesTree() - sizes of each category" + categorySizes);
-				addSizes(categoriesTree,categorySizes);
-			}
-			System.out.println("getCategoriesTree() - end");
-			return categoriesTree;
+			return new AddSizes(getCategorySizes(execute(
+					"START n=node(*) MATCH n-->u WHERE has(n.name) "
+							+ "RETURN id(n),count(u);",
+					ImmutableMap.<String, Object> of()).getJSONArray("data")))
+					.apply(
+					// Path to JSON conversion done in Cypher
+					createCategoryTreeFromCypherResultPaths(
+							execute("START n=node({parentId}) "
+									+ "MATCH path=n-[r:CONTAINS*]->c "
+									+ "WHERE has(c.name) "
+									+ "RETURN extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\" , key : \"' + p.key + '\"}')",
+									ImmutableMap.<String, Object> of(
+											"parentId", rootId),
+									"getCategoriesTree() - getting all paths"),
+							rootId));
 		}
 	
 		private static Map<Integer, Integer> getCategorySizes(JSONArray counts) {
-
-			Map<Integer,Integer> sizesMap = new HashMap<Integer,Integer>();
-			for (int i = 0 ; i < counts.length(); i++) {
+			Map<Integer, Integer> sizesMap = new HashMap<Integer, Integer>();
+			for (int i = 0; i < counts.length(); i++) {
 				JSONArray row = counts.getJSONArray(i);
 				sizesMap.put(row.getInt(0), row.getInt(1));
 			}
-			return sizesMap;
+			return ImmutableMap.copyOf(sizesMap);
 		}
+		
+		private static class AddSizes implements
+				Function<JSONObject, JSONObject> {
+			private final Map<Integer, Integer> categorySizes;
 
-		private static void addSizes(JSONObject categoriesTree,
+			AddSizes(Map<Integer, Integer> categorySizes) {
+				this.categorySizes = categorySizes;
+			}
+
+			@Override
+			public JSONObject apply(JSONObject input) {
+				return HelloWorldResource.addSizesToCypherJsonResultObjects(
+						input, categorySizes);
+			}
+		}
+		
+		private static JSONObject addSizesToCypherJsonResultObjects(JSONObject categoriesTree,
 				Map<Integer, Integer> categorySizes) {
 			Integer id = categoriesTree.getInt("id");
 			categoriesTree.put("size", categorySizes.get(id));
 			if (categoriesTree.has("children")) {
 				JSONArray children = categoriesTree.getJSONArray("children");
 				for (int i = 0; i < children.length(); i++) {
-					addSizes(children.getJSONObject(i), categorySizes);
+					addSizesToCypherJsonResultObjects(children.getJSONObject(i), categorySizes);
 				}
 			}
+			return categoriesTree;
 		}
 
+		@SuppressWarnings("unchecked")
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
 				JSONObject theQueryJsonResult, Integer rootId) {
 			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
-			Preconditions.checkState(cypherRawResults.length() > 0);
+			checkState(cypherRawResults.length() > 0);
+			return createIdToNodeMap(
+					buildParentToChildMultimap(cypherRawResults),
+					createIdToNodeMap(cypherRawResults)).get(rootId);
+		}
+
+		/**
+		 * @param cypherRawResults
+		 * @param categoryIdToChildrenIdList
+		 *            - Integer to List<Integer>
+		 * @return
+		 */
+		@SuppressWarnings("unchecked")
+		private static Map<Integer, JSONObject> createIdToNodeMap(
+				MultiValueMap categoryIdToChildrenIdList,
+				Map<Integer, JSONObject> categoryIdToNode) {
+			ImmutableMap.Builder<Integer, JSONObject> builder = ImmutableMap
+					.builder();
+			for (Map.Entry<Integer, JSONObject> entry : FluentIterable
+					.from(categoryIdToNode.entrySet())
+					.transform(new AddChildren(categoryIdToChildrenIdList, categoryIdToNode))
+					.toSet()) {
+				builder.put(entry);
+			}
+			return builder.build();
+		}
+
+		private static class AddChildren implements Function<Map.Entry<Integer, JSONObject>, Map.Entry<Integer,JSONObject>> {
+			private final MultiValueMap parentIdToChildrenIdList;
+			private final Map<Integer, JSONObject> idToCategoryNode; 
+			AddChildren(MultiValueMap parentIdToChildrenIdList, Map<Integer, JSONObject> idToCategoryNode) {
+				this.parentIdToChildrenIdList = parentIdToChildrenIdList;
+				this.idToCategoryNode = idToCategoryNode;
+			}
+			@Override
+			public Map.Entry<Integer,JSONObject> apply(Map.Entry<Integer,JSONObject> categoryNodeWithoutChildren) {
+				Collection<Integer> childCategoryIds = (Collection<Integer>) parentIdToChildrenIdList
+						.getCollection(categoryNodeWithoutChildren.getKey());
+				if (childCategoryIds == null) {
+				} else {
+					JSONArray childCategoryNodes = new JSONArray();
+					for (Integer childId : childCategoryIds) {
+						childCategoryNodes.put(idToCategoryNode.get(childId));
+					}
+					categoryNodeWithoutChildren.getValue().put("children", childCategoryNodes);
+				}
+				return categoryNodeWithoutChildren;
+			}
+		};
+
+		/**
+		 * @return - a pair for each category node
+		 */
+		private static Map<Integer, JSONObject> createIdToNodeMap(JSONArray cypherRawResults) {
+			ImmutableMap.Builder<Integer, JSONObject> idToJsonBuilder = ImmutableMap
+					.<Integer, JSONObject> builder();
+			Set<Integer> seen = new HashSet<Integer>();
+			for (int i = 0; i < cypherRawResults.length(); i++) {
+				JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
+				for (int j = 0; j < treePath.length(); j++) {
+					if (treePath.get(j).getClass().equals(JSONObject.Null)) {
+						continue;
+					}
+					JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
+					int categoryId = pathHopNode.getInt("id");
+					if (!seen.contains(categoryId)){
+						seen.add(categoryId);
+						idToJsonBuilder.put(categoryId,
+								pathHopNode);
+						System.out
+								.println("createCategoryTreeFromCypherResultPaths() - "
+										+ pathHopNode.getInt("id")
+										+ "::"
+										+ pathHopNode);
+					}
+				}
+			}
+			return idToJsonBuilder.build();
+		}
+
+		private static MultiValueMap buildParentToChildMultimap(
+				JSONArray cypherRawResults) {
 			MultiValueMap parentToChildren = new MultiValueMap();
 			getParentChildrenMap: {
 				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
 					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
 					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-						//	System.out.println(pathNum + "::" + hopNum + categoryPath.get(hopNum));
-							Object left = categoryPath.get(hopNum);
-							Object right = categoryPath.get(hopNum + 1);
-							if (left.getClass().equals(org.json.JSONObject.Null)) {
-								continue;
-							}
-		   					if (right.getClass().equals(org.json.JSONObject.Null)) {
-                                                                continue;
-                                                        }
-							String categoryPathHopString = categoryPath.getString(hopNum);
-							JSONObject parent = new JSONObject(categoryPathHopString);
-							if (!(categoryPath.get(hopNum + 1) instanceof String)) {
-								System.out.println("ERROR 3: " + categoryPath.get(hopNum + 1).getClass() + "\t" + categoryPath);
-								continue;	
-							}
-							JSONObject child = new JSONObject(categoryPath.getString(hopNum + 1));
-							int childId = child.getInt("id");
-							int parentId = checkNotNull(parent.getInt("id"));
-							Object childrenObj = parentToChildren.get(parentId);
-							if (childrenObj != null) {
-								List<?> children = (List<?>) childrenObj;
-								if (!children.contains(childId)) {
-									parentToChildren.put(parentId, childId);
-								}
-							} else {
-								parentToChildren.put(parentId, childId);
-							}
-					}
-				}
-			}
-			Map<Integer, JSONObject> idToJson = new HashMap<Integer, JSONObject>();
-			getIdToJsonNodeMap: {
-				System.out.println("createCategoryTreeFromCypherResultPaths() - getIdToJsonNodeMap - " + cypherRawResults.length());
-				for (int i = 0; i < cypherRawResults.length(); i++) {
-					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
-					for (int j = 0; j < a2.length(); j++) {
-						if (a2.get(j).getClass().equals(JSONObject.Null)) {
+						if (categoryPath.get(hopNum).getClass().equals(org.json.JSONObject.Null)) {
 							continue;
 						}
-						JSONObject parent = new JSONObject(a2.getString(j));
-						idToJson.put(parent.getInt("id"), parent);
-						System.out.println("createCategoryTreeFromCypherResultPaths() - " + parent.getInt("id") + "::" + parent);
+						if (categoryPath.get(hopNum + 1).getClass().equals(org.json.JSONObject.Null)) {
+							continue;
+						}
+						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
+							continue;
+						}
+						int childId = new JSONObject(
+								categoryPath.getString(hopNum + 1)).getInt("id");
+						int parentId = checkNotNull(new JSONObject(
+								categoryPath
+										.getString(hopNum)).getInt("id"));
+						Object childrenObj = parentToChildren.get(parentId);
+						if (childrenObj != null) {
+							List<?> children = (List<?>) childrenObj;
+							if (!children.contains(childId)) {
+								parentToChildren.put(parentId, childId);
+							}
+						} else {
+							parentToChildren.put(parentId, childId);
+						}
 					}
 				}
 			}
-	
-			addChildArrayToEachJsonNode: {
-				for (Object parentIdObj : parentToChildren.keySet()) {
-					Integer parentId = (Integer) parentIdObj;
-					JSONObject parentJson = idToJson.get(parentId);
-					parentJson.put("children", new JSONArray());
-				}
-	
-			}
-	
-			connectJsonNodes: {
-				for (Object parentIdObj : parentToChildren.keySet()) {
-					Integer parentId = (Integer) parentIdObj;
-					JSONObject parentJson = idToJson.get(parentId);
-					@SuppressWarnings("unchecked")
-					List<Integer> childrenIds = (List<Integer>) parentToChildren
-							.get(parentId);
-					for (Integer childId : childrenIds) {
-						JSONObject childJson = idToJson.get(childId);
-						parentJson.getJSONArray("children").put(childJson);
-					}
-				}
-			}
-			System.out.println("createCategoryTreeFromCypherResultPaths() - Category result count: " + idToJson.size());
-			if (idToJson.get(45) == null) {
-				System.out.println("createCategoryTreeFromCypherResultPaths() - 45 not found, but did find:");
-				System.out.println(idToJson);
-			}
-			Preconditions.checkState(idToJson.size() > 0);
-			JSONObject json = checkNotNull(idToJson.get(rootId));// TODO: use the constant
-			return json;
+			return parentToChildren;
 		}
 
 		private static JSONArray removeNulls(JSONArray jsonArray) {
