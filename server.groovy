@@ -770,42 +770,32 @@ System.out.println(outputFilename);
 
 		private JSONObject createNode(String theHttpUrl, String theTitle,
 				Integer rootId) throws IOException, JSONException {
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
-			_1: {
-				theParamValues.put("url", theHttpUrl);
-				theParamValues.put("title", theTitle);
-				long currentTimeMillis = System.currentTimeMillis();
-				theParamValues.put("created", currentTimeMillis);
-				theParamValues.put("ordinal", currentTimeMillis);
-			}
+			long currentTimeMillis = System.currentTimeMillis();
 			JSONObject json = execute(
-					"CREATE (n { title : {title} , url : {url}, created: {created}, ordinal: {ordinal} }) RETURN id(n)",
-					theParamValues);
-			_2: {
-				JSONArray theNewNodeId = (JSONArray) ((JSONArray) json
-						.get("data")).get(0);
-				System.out.println("New node: " + theNewNodeId.get(0));
-				relateHelper(rootId, (Integer) theNewNodeId.get(0));
-			}
+					"CREATE (n { title : {title} , url : {url}, created: {created}, ordinal: {ordinal} }) " +
+					"RETURN id(n)",
+					ImmutableMap.<String, Object> builder()
+							.put("url", theHttpUrl).put("title", theTitle)
+							.put("created", currentTimeMillis)
+							.put("ordinal", currentTimeMillis).build());
+			relateHelper(rootId,
+					(Integer) ((JSONArray) ((JSONArray) json.get("data"))
+							.get(0)).get(0));
 			return json;
 		}
 
 		private String getTitle(final URL iUrl) {
 			String title = "";
-			ExecutorService theExecutorService = Executors
-					.newFixedThreadPool(2);
-			Collection<Callable<String>> tasks = new ArrayList<Callable<String>>();
-			Callable<String> callable = new Callable<String>() {
-				public String call() throws Exception {
-					Document doc = Jsoup.connect(iUrl.toString()).get();
-					return doc.title();
-				}
-			};
-			tasks.add(callable);
 			try {
-				List<Future<String>> taskFutures = theExecutorService
-						.invokeAll(tasks, 3000L, TimeUnit.SECONDS);
-				title = taskFutures.get(0).get();
+				title = Executors
+						.newFixedThreadPool(2)
+						.invokeAll(
+								ImmutableSet.<Callable<String>> of(new Callable<String>() {
+									public String call() throws Exception {
+										return Jsoup.connect(iUrl.toString())
+												.get().title();
+									}
+								}), 3000L, TimeUnit.SECONDS).get(0).get();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -925,19 +915,16 @@ System.out.println(outputFilename);
 				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
 				@QueryParam("nodeIdToSurpass") Integer nodeIdToSurpass)
 				throws IOException, JSONException {
-
-			System.out.println("surpassOrdinals");
-
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("nodeIdToChange", nodeIdToChange);
-			theParams.put("nodeIdToSurpass", nodeIdToSurpass);
-
-			JSONObject jsonObject = execute(
-					" start n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) set n.ordinal=n2.ordinal + 100 return n.ordinal,n2.ordinal",
-					theParams.build());
-
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(jsonObject.toString()).type("application/json")
+			return Response
+					.ok()
+					.header("Access-Control-Allow-Origin", "*")
+					.entity(execute(
+							"START n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) "
+									+ "SET n.ordinal = n2.ordinal + 100 "
+									+ "RETURN n.ordinal, n2.ordinal",
+							ImmutableMap.<String, Object> of("nodeIdToChange",
+									nodeIdToChange, "nodeIdToSurpass",
+									nodeIdToSurpass))).type("application/json")
 					.build();
 		}
 
@@ -948,9 +935,6 @@ System.out.println(outputFilename);
 				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
 				@QueryParam("nodeIdToUndercut") Integer nodeIdToUndercut)
 				throws IOException, JSONException {
-
-			System.out.println("undercutOrdinal");
-
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("nodeIdToChange", nodeIdToChange);
 			theParams.put("nodeIdToUndercut", nodeIdToUndercut);
@@ -1299,6 +1283,7 @@ System.out.println(outputFilename);
 			}
 			@Override
 			public Map.Entry<Integer,JSONObject> apply(Map.Entry<Integer,JSONObject> categoryNodeWithoutChildren) {
+				@SuppressWarnings("unchecked")
 				Collection<Integer> childCategoryIds = (Collection<Integer>) parentIdToChildrenIdList
 						.getCollection(categoryNodeWithoutChildren.getKey());
 				if (childCategoryIds == null) {
@@ -1393,14 +1378,9 @@ System.out.println(outputFilename);
 		// This gives a flat list
 		private JSONArray getFlatListOfSubcategoriesRecursive(Integer iParentId)
 				throws IOException {
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			_1: {
-				theParams.put("parentId", iParentId);
-			}
-			JSONObject theQueryJsonResult = execute(
+			JSONArray theData = (JSONArray) execute(
 					"START parent=node({parentId}) MATCH parent-[c:CONTAINS*]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN distinct ID(n),n.name",
-					theParams.build());
-			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
+					ImmutableMap.<String, Object> of("parentId", iParentId)).get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
 				JSONObject aBindingObject = new JSONObject();
