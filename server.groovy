@@ -935,18 +935,17 @@ System.out.println(outputFilename);
 				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
 				@QueryParam("nodeIdToUndercut") Integer nodeIdToUndercut)
 				throws IOException, JSONException {
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("nodeIdToChange", nodeIdToChange);
-			theParams.put("nodeIdToUndercut", nodeIdToUndercut);
-
-			JSONObject jsonObject = execute(
-					" start n=node({nodeIdToChange}),n2=node({nodeIdToUndercut}) set n.ordinal=n2.ordinal - 100 return n.ordinal,n2.ordinal",
-					theParams.build());
-
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(jsonObject.toString()).type("application/json")
-					.build();
-
+			return Response
+					.ok()
+					.header("Access-Control-Allow-Origin", "*")
+					.entity(execute(
+							"START n=node({nodeIdToChange}), n2=node({nodeIdToUndercut}) "
+									+ "SET n.ordinal=n2.ordinal - 100 "
+									+ "RETURN n.ordinal,n2.ordinal",
+							ImmutableMap.<String, Object> of("nodeIdToChange",
+									nodeIdToChange, "nodeIdToUndercut",
+									nodeIdToUndercut)).toString())
+					.type("application/json").build();
 		}
 
 		@GET
@@ -955,24 +954,19 @@ System.out.println(outputFilename);
 		public Response swapOrdinals(@QueryParam("firstId") Integer iFirstId,
 				@QueryParam("secondId") Integer iSecondId) throws IOException,
 				JSONException {
-			System.out.println("swapOrdinals");
-
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("id1", iFirstId);
-			theParams.put("id2", iSecondId);
-
-			JSONObject jsonObject = execute(
-					" start n=node({id1}),n2=node({id2}) set n.temp=n2.ordinal, n2.ordinal=n.ordinal,n.ordinal=n.temp  return n.ordinal,n2.ordinal",
-					theParams.build());
-
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(jsonObject.toString()).type("application/json")
-					.build();
+			return Response
+					.ok()
+					.header("Access-Control-Allow-Origin", "*")
+					.entity(execute(
+							"START n=node({id1}), n2=node({id2}) "
+									+ "SET n.temp=n2.ordinal, n2.ordinal=n.ordinal, n.ordinal=n.temp "
+									+ "RETURN n.ordinal, n2.ordinal",
+							ImmutableMap.<String, Object> of("id1", iFirstId,
+									"id2", iSecondId)).toString())
+					.type("application/json").build();
 		}
 
-		/**
-		 * No existing relationships get deleted
-		 */
+		/** No existing relationships get deleted */
 		@GET
 		@Path("relateCategoriesToItem")
 		@Produces("application/json")
@@ -981,15 +975,14 @@ System.out.println(outputFilename);
 				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo)
 				throws JSONException, IOException {
 			System.out.println("relateCategoriesToItem(): begin");
-			String decode = URLDecoder.decode(iCategoriesToBeAddedTo, "UTF-8");
-			System.out.println(decode);
-			JSONArray theCategoryIdsToBeAddedTo = new JSONArray(decode);
+			JSONArray theCategoryIdsToBeAddedTo = new JSONArray(
+					URLDecoder.decode(iCategoriesToBeAddedTo, "UTF-8"));
 			for (int i = 0; i < theCategoryIdsToBeAddedTo.length(); i++) {
-				Integer aCategoryIdToBeAddedTo = theCategoryIdsToBeAddedTo
-						.getInt(i);
 				System.out.println("relateCategoriesToItem(): "
-						+ aCategoryIdToBeAddedTo + " --> " + iNodeToBeTagged);
-				relateHelper(aCategoryIdToBeAddedTo, iNodeToBeTagged);
+						+ theCategoryIdsToBeAddedTo.getInt(i) + " --> "
+						+ iNodeToBeTagged);
+				relateHelper(theCategoryIdsToBeAddedTo.getInt(i),
+						iNodeToBeTagged);
 			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(new JSONObject().toString())
@@ -997,24 +990,17 @@ System.out.println(outputFilename);
 		}
 
 		private Integer createCategory(String iCategoryName) throws IOException {
-			String theNewCategoryNodeIdString;
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
-			_1: {
-				theParamValues.put("name", iCategoryName);
-				theParamValues.put("type", "categoryNode");
-				theParamValues.put("created", System.currentTimeMillis());
-				System.out.println("cypher params: " + theParamValues);
-			}
 			// TODO: first check if there is already a node with this name,
 			// which is for re-associating the keycode with the category
-			JSONObject theNewKeyBindingResponseJson = execute(
-					"CREATE (n { name : {name} , created: {created} , type :{type}}) RETURN id(n)",
-					theParamValues);
-			System.out.println("createNewKeyBinding() - Success:\n\t" + theNewKeyBindingResponseJson.toString());
-			theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
-					.get("data")).get(0)).get(0);
-			System.out.println("createNewKeyBinding() - got new node");
-			return Integer.parseInt(theNewCategoryNodeIdString);
+			return Integer
+					.parseInt((String) ((JSONArray) ((JSONArray) execute(
+							"CREATE (n { name : {name} , created: {created} , type :{type}}) " +
+							"RETURN id(n)",
+							ImmutableMap.<String, Object> builder()
+									.put("name", iCategoryName)
+									.put("type", "categoryNode")
+									.put("created", System.currentTimeMillis())
+									.build()).get("data")).get(0)).get(0));
 		}
 
 		@GET
@@ -1026,7 +1012,8 @@ System.out.println(outputFilename);
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
 			System.out.println("createSubDirAndMoveItem() - begin");
-			Integer theNewCategoryNodeIdString = createCategory(iNewParentName) ;
+			Integer theNewCategoryNodeIdString = createCategory(iNewParentName);
+			// On first glance, it looks wrong that we're calling 2 functions
 			Response r =  relate(theNewCategoryNodeIdString, iItemId, iCurrentParentId);
 			try {
 				relateHelper(iCurrentParentId, theNewCategoryNodeIdString);
@@ -1047,33 +1034,15 @@ System.out.println(outputFilename);
 				@QueryParam("childId") Integer iChildId,
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
-			System.out.println("relate() Moving " + iChildId + " from " + iCurrentParentId + " to " + iNewParentId);
 			// first delete any existing contains relationship with the
 			// specified existing parent (but not with all parents since we
 			// could have a many-to-one contains)
-			_1: {
-				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-				theParams.put("currentParentId", iCurrentParentId);
-				theParams.put("childId", iChildId);
-
-				execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
-						theParams.build());
-				System.out
-						.println("Finished trying to delete relationship between "
-								+ iCurrentParentId + " and " + iChildId);
-			}
-			JSONObject theRelateOperationResponseJson;
-			_2: {
-				Map<String, Object> theParamValues = new HashMap<String, Object>();
-				theParamValues.put("childId", iChildId);
-
-				theRelateOperationResponseJson = relateHelper(iNewParentId,
-						iChildId);
-				System.out.println("Finished relating to new category");
-			}
-
+			execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
+					ImmutableMap.<String, Object> builder()
+							.put("currentParentId", iCurrentParentId)
+							.put("childId", iChildId).build());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(theRelateOperationResponseJson.toString())
+					.entity(relateHelper(iNewParentId, iChildId).toString())
 					.type("application/json").build();
 		}
 
@@ -1087,21 +1056,14 @@ System.out.println(outputFilename);
 		 */
 		private static JSONObject relateHelper(Integer iParentId, Integer iChildId)
 				throws IOException, JSONException {
-			System.out.println("relateHelper() - begin");
-			System.out.println(String.format("relateHelper() iParentId = " + iParentId + ", iChildId = " + iChildId));
-			System.out.println(String.format("relateHelper() begin iParentId = %d\tiChildId = %d)", iParentId, iChildId));
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
-			_1: {
-				theParamValues.put("parentId", iParentId);
-				theParamValues.put("childId", iChildId);
-				theParamValues.put("currentTime", System.currentTimeMillis());
-			}
-			JSONObject theJson = execute(
-					"start a=node({parentId}),b=node({childId}) CREATE a-[r:CONTAINS]->b SET b.accessed = {currentTime} return a,r,b;",
-					theParamValues);
-			System.out.println("relateHelper() - created. " + theJson);
-			System.out.println("relateHelper() - created. Length = " + theJson.length());
-			return theJson;
+			return execute(
+					"START a=node({parentId}),b=node({childId}) "
+							+ "CREATE a-[r:CONTAINS]->b SET b.accessed = {currentTime} return a,r,b;",
+					ImmutableMap.<String, Object> builder()
+							.put("parentId", iParentId)
+							.put("childId", iChildId)
+							.put("currentTime", System.currentTimeMillis())
+							.build());
 		}
 
 		// TODO: make this map immutable
