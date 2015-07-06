@@ -322,13 +322,17 @@ public class Yurl {
 				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
 				retVal.put("categoriesRecursive", categoriesTreeJson);
 				retVal.put("categoriesNonRecursive", ret);
+				return Response.ok().header("Access-Control-Allow-Origin", "*")
+						.entity(retVal.toString())
+						.type("application/json").build();
 			}
 			catch (Exception e) {
 				e.printStackTrace();
+				return Response.serverError().header("Access-Control-Allow-Origin", "*")
+						.entity(e.getStackTrace())
+						.type("application/text").build();
 			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(retVal.toString())
-					.type("application/json").build();
+			
 		}
 
 
