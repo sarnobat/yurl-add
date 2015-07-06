@@ -347,21 +347,23 @@ public class Yurl {
 		}
 
 
-		// The main part
+		////
+		//// The main part
+		////
 		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
 				categoriesTreeCache = getCategoriesTree(iRootId);
 			}
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start source=node({rootId}) match p = source-[r:CONTAINS*1..2]->u "
-					+ "where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
-					+ "return distinct ID(u),u.title,u.url,extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal "
-					+ "ORDER BY u.ordinal DESC LIMIT 500",
-					theParams.build());
+					"START source=node({rootId}) "
+							+ "MATCH p = source-[r:CONTAINS*1..2]->u "
+							+ "WHERE (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
+							+ "RETURN distinct ID(u),u.title,u.url,extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal "
+							+ "ORDER BY u.ordinal DESC LIMIT 500", ImmutableMap
+							.<String, Object> builder().put("rootId", iRootId)
+							.build());
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
 			for (int i = 0; i < theDataJson.length(); i++) {
@@ -488,8 +490,6 @@ public class Yurl {
 			public Entry<String, String> apply(String bindingLine) {
 				String[] aLineElements = bindingLine.split("=");
 				// Ignore trailing comments
-				// System.out.println("Accepting proposal to create key binding for "
-				// + aName + "(" + aKeyCode + ")");
 				return new AbstractMap.SimpleEntry<String, String>(aLineElements[0].trim(),
 						aLineElements[1].trim().split("#")[0].trim());
 			}
@@ -620,7 +620,6 @@ public class Yurl {
 					"RETURN distinct ID(n),n.name,n.key,0 as c order by c desc",
 					ImmutableMap.<String, Object> builder()
 							.put("parentId", iParentId).build()).get("data");
-//			System.out.println("getKeys() - length: " + theData.length());
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
 				JSONArray aBindingArray = theData.getJSONArray(i);
@@ -722,8 +721,8 @@ public class Yurl {
 						System.out
 								.println("downloadImageInSeparateThread() - DB updated");
 					} catch (Exception e) {
-//						e.printStackTrace();
-                                                System.out.println(e.getMessage());
+						// e.printStackTrace();
+						System.out.println(e.getMessage());
 					}
 				}
 			};
@@ -732,21 +731,21 @@ public class Yurl {
 
 		private static void saveImage(String urlString, String targetDirPath)
 				throws IllegalAccessError, IOException {
-System.out.println("saveImage() - " +urlString + "\t::\t" + targetDirPath);
-			URL url = new URL(urlString);
-			BufferedImage image = ImageIO.read(url);
+			System.out.println("saveImage() - " + urlString + "\t::\t"
+					+ targetDirPath);
 			String extension = FilenameUtils.getExtension(urlString);
-			String baseName = FilenameUtils.getBaseName(urlString).replaceAll("/", "-");
-			System.out.println(baseName);
-			String decoded = URLDecoder.decode(baseName, "UTF-8");
-			String outputFilename = determineDestinationPathAvoidingExisting(
-					targetDirPath + "/" + decoded + "." + extension)
-					.toString();
-//			outputFilename = outputFilename.replaceAll("/", "-");
-System.out.println("saveImage() About to decode");
-//String outputFilenameDecoded = java.net.URLDecoder.decode(outputFilename, "UTF-8");
-System.out.println(outputFilename);
-			ImageIO.write(image, extension, new File(outputFilename));
+			ImageIO.write(
+					ImageIO.read(new URL(urlString)),
+					extension,
+					new File(determineDestinationPathAvoidingExisting(
+							targetDirPath
+									+ "/"
+									+ URLDecoder.decode(
+											FilenameUtils
+													.getBaseName(urlString)
+													.replaceAll("/", "-"),
+											"UTF-8") + "." + extension)
+							.toString()));
 
 		}
 
@@ -1070,23 +1069,20 @@ System.out.println(outputFilename);
 		private static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams, String...comment) throws IOException, JSONException {
 			System.out.println("" + comment);
+			System.out.println("\texecute() - query - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
+
 			ClientConfig clientConfig = new DefaultClientConfig();
 			clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
 					Boolean.TRUE);
 	
-			WebResource theWebResource = Client.create(clientConfig).resource(
-					CYPHER_URI);
-			Map<String, Object> thePostBody = new HashMap<String, Object>();
-			thePostBody.put("query", iCypherQuery);
-			thePostBody.put("params", Preconditions.checkNotNull(iParams));
-			System.out.println("\texecute() - query - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
-	
 			// POST {} to the node entry point URI
-			ClientResponse theResponse = theWebResource
+			ClientResponse theResponse = Client.create(clientConfig).resource(
+					CYPHER_URI)
 					.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }")
-					.post(ClientResponse.class, thePostBody);
-                        System.out.println("\texecute() - finished - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
+					.post(ClientResponse.class, ImmutableMap
+							.<String, Object> of("query", iCypherQuery, "params",
+									Preconditions.checkNotNull(iParams)));
 			if (theResponse.getStatus() != 200) {
 				System.out.println("FAILED:\n\t" + iCypherQuery + "\n\tparams: "
 						+ iParams);
@@ -1094,15 +1090,9 @@ System.out.println(outputFilename);
 			}
 			String theNeo4jResponse = IOUtils.toString(theResponse
 					.getEntityInputStream());
-			_1: {
-//				System.out.println("BEGINNING OF RESPONSE");
-//				System.out.println("RESPONSE" + theNeo4jResponse);
-//				System.out.println("END OF RESPONSE");
-				theResponse.getEntityInputStream().close();
-				theResponse.close();
-			}
-			JSONObject oJson = new JSONObject(theNeo4jResponse);
-			return oJson;
+			theResponse.getEntityInputStream().close();
+			theResponse.close();
+			return new JSONObject(theNeo4jResponse);
 		}
 
 		// ----------------------------------------------------------------------------
@@ -1115,10 +1105,8 @@ System.out.println(outputFilename);
 		public Response categoriesRecursive(
 				@QueryParam("parentId") Integer iParentId)
 				throws JSONException, IOException {
-			System.out.println("categoriesRecursive() - begin");
-			JSONArray oKeys = getFlatListOfSubcategoriesRecursive(iParentId);
 			JSONObject ret = new JSONObject();
-			ret.put("flat", oKeys);
+			ret.put("flat", getFlatListOfSubcategoriesRecursive(iParentId));
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
 				categoriesTreeJson = getCategoriesTree(ROOT_ID);
@@ -1132,14 +1120,12 @@ System.out.println(outputFilename);
 		}
 
 		private static void refreshCategoriesTreeCacheInSeparateThread() {
-			System.out.println("refreshCategoriesTreeCacheInSeparateThread() - begin");
 			new Thread(){
 				@Override
 				public void run() {
 					System.out.println("refreshCategoriesTreeCacheInSeparateThread() - run - started");
 					try {
 						categoriesTreeCache = getCategoriesTree(ROOT_ID);
-						System.out.println("refreshCategoriesTreeCacheInSeparateThread() - run - finished");
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -1292,7 +1278,7 @@ System.out.println(outputFilename);
 
 		private static MultiValueMap buildParentToChildMultimap(
 				JSONArray cypherRawResults) {
-			MultiValueMap parentToChildren = new MultiValueMap();
+			MultiValueMap oParentToChildren = new MultiValueMap();
 			getParentChildrenMap: {
 				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
 					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
@@ -1311,29 +1297,29 @@ System.out.println(outputFilename);
 						int parentId = checkNotNull(new JSONObject(
 								categoryPath
 										.getString(hopNum)).getInt("id"));
-						Object childrenObj = parentToChildren.get(parentId);
+						Object childrenObj = oParentToChildren.get(parentId);
 						if (childrenObj != null) {
 							List<?> children = (List<?>) childrenObj;
 							if (!children.contains(childId)) {
-								parentToChildren.put(parentId, childId);
+								oParentToChildren.put(parentId, childId);
 							}
 						} else {
-							parentToChildren.put(parentId, childId);
+							oParentToChildren.put(parentId, childId);
 						}
 					}
 				}
 			}
-			return parentToChildren;
+			return oParentToChildren;
 		}
 
-		private static JSONArray removeNulls(JSONArray jsonArray) {
-			for(int i = 0; i < jsonArray.length(); i++) {
-				if (JSONObject.Null.equals(jsonArray.get(i))) {
-					jsonArray.remove(i);
+		private static JSONArray removeNulls(JSONArray iJsonArray) {
+			for(int i = 0; i < iJsonArray.length(); i++) {
+				if (JSONObject.Null.equals(iJsonArray.get(i))) {
+					iJsonArray.remove(i);
 					--i;
 				}
 			}
-			return jsonArray;
+			return iJsonArray;
 		}
 
 		@Deprecated
@@ -1341,19 +1327,21 @@ System.out.println(outputFilename);
 		private JSONArray getFlatListOfSubcategoriesRecursive(Integer iParentId)
 				throws IOException {
 			JSONArray theData = (JSONArray) execute(
-					"START parent=node({parentId}) MATCH parent-[c:CONTAINS*]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN distinct ID(n),n.name",
-					ImmutableMap.<String, Object> of("parentId", iParentId)).get("data");
+					"START parent=node({parentId}) " +
+					"MATCH parent-[c:CONTAINS*]->n " +
+					"WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} " +
+					"RETURN distinct ID(n),n.name",
+					ImmutableMap.<String, Object> of("parentId", iParentId))
+					.get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
 				JSONObject aBindingObject = new JSONObject();
-				_1: {
-					JSONArray aBindingArray = theData.getJSONArray(i);
-					String id = (String) aBindingArray.get(0);
-					aBindingObject.put("id", id);
-					String title = (String) aBindingArray.get(1);
-					aBindingObject.put("name", title);
-					oKeys.put(aBindingObject);
-				}
+				JSONArray aBindingArray = theData.getJSONArray(i);
+				String id = (String) aBindingArray.get(0);
+				aBindingObject.put("id", id);
+				String title = (String) aBindingArray.get(1);
+				aBindingObject.put("name", title);
+				oKeys.put(aBindingObject);
 			}
 			return oKeys;
 		}
