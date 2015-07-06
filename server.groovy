@@ -307,21 +307,22 @@ public class Yurl {
 				throws JSONException, IOException {
 			checkNotNull(iRootId);
 			JSONObject categoriesTreeJson;
-                        if (categoriesTreeCache == null) {
-				System.out.println("getUrls() - preloaded categories tree not ready");
-                                categoriesTreeJson = getCategoriesTree(ROOT_ID);
-                        } else {
-                                categoriesTreeJson = categoriesTreeCache;
-				// This is done in a separate thread 
-                                refreshCategoriesTreeCacheInSeparateThread();
-                        }
-                        JSONArray ret = getKeys(iRootId);
+			if (categoriesTreeCache == null) {
+				System.out
+						.println("getUrls() - preloaded categories tree not ready");
+				categoriesTreeJson = getCategoriesTree(ROOT_ID);
+			} else {
+				categoriesTreeJson = categoriesTreeCache;
+				// This is done in a separate thread
+				refreshCategoriesTreeCacheInSeparateThread();
+			}
+			// JSONArray ret = getKeys(iRootId);
 			JSONObject retVal = new JSONObject();
 			try {
-//				retVal.put("urlsAtTopLevel", getItemsAtLevel(iRootId));
+				// retVal.put("urlsAtTopLevel", getItemsAtLevel(iRootId));
 				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
 				retVal.put("categoriesRecursive", categoriesTreeJson);
-				retVal.put("categoriesNonRecursive", ret);
+				//retVal.put("categoriesNonRecursive", ret);
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(retVal.toString())
 						.type("application/json").build();
@@ -428,38 +429,6 @@ public class Yurl {
 				}
 			}
 			return ret;
-		}
-
-		@Deprecated
-		private JSONArray getItemsAtLevel(Integer iRootId) throws IOException {
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("rootId", iRootId);
-			// TODO: the source is null clause should be obsoleted
-			JSONObject theQueryResultJson = execute(
-					"start n=node({rootId}) MATCH n<-[r:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title,n.url,n.created,n.ordinal ORDER BY n.ordinal DESC LIMIT 500",
-					theParams.build());
-			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
-			JSONArray theUncategorizedNodesJson = new JSONArray();
-			for (int i = 0; i < theDataJson.length(); i++) {
-				JSONObject anUncategorizedNodeJsonObject = new JSONObject();
-				_1: {
-					JSONArray anItem = theDataJson.getJSONArray(i);
-					_11: {
-						String anId = (String) anItem.get(0);
-						anUncategorizedNodeJsonObject.put("id", anId);
-					}
-					_12: {
-						String aTitle = (String) anItem.get(1);
-						anUncategorizedNodeJsonObject.put("title", aTitle);
-					}
-					_13: {
-						String aUrl = (String) anItem.get(2);
-						anUncategorizedNodeJsonObject.put("url", aUrl);
-					}
-				}
-				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
-			}
-			return theUncategorizedNodesJson;
 		}
 
 		// -----------------------------------------------------------------------------
