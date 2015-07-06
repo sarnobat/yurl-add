@@ -1265,11 +1265,6 @@ public class Yurl {
 						seen.add(categoryId);
 						idToJsonBuilder.put(categoryId,
 								pathHopNode);
-						System.out
-								.println("createCategoryTreeFromCypherResultPaths() - "
-										+ pathHopNode.getInt("id")
-										+ "::"
-										+ pathHopNode);
 					}
 				}
 			}
