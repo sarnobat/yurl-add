@@ -10,6 +10,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -25,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -46,8 +49,13 @@ import org.jsoup.nodes.Document;
 
 import com.github.axet.vget.VGet;
 import com.github.axet.vget.info.VideoInfo.VideoQuality;
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -446,150 +454,143 @@ public class Yurl {
 				@QueryParam("newKeyBindings") String iNewKeyBindings,
 				@QueryParam("oldKeyBindings") String iOldKeyBindings)
 				throws JSONException, IOException {
-			System.out.println("keysUpdate");
+			System.out.println("keysUpdate() - begin");
+			// Remove duplicates by putting the bindings in a map
+			for (Map.Entry<String, String> pair : FluentIterable
+					.from(difference(iNewKeyBindings, iOldKeyBindings))
+					.filter(Predicates.not(IS_COMMENTED))
+					.transform(LINE_TO_BINDING_ENTRY).toSet()) {
+				deleteBinding(iParentId, pair.getKey(), pair.getValue());
+				// TODO: if it fails, recover and create the remaining ones?
+				createNewKeyBinding(pair.getValue(), pair.getKey(), iParentId);
+			}
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(getKeys(iParentId).toString())
+					.type("application/json").build();
+		}
 
-			Set<String> theOldKeyBindingsSet = new HashSet<String>();
-			Collections.addAll(theOldKeyBindingsSet, iOldKeyBindings.trim()
-					.split("\n"));
-			Set<String> theNewKeyBindingsSet = new HashSet<String>();
-			Collections.addAll(theNewKeyBindingsSet, iNewKeyBindings.trim()
-					.split("\n"));
+		private static void deleteBinding(Integer iParentId, String key, String name) {
+			try {
+				execute("START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
+						ImmutableMap.<String, Object> builder()
+								.put("parentId", iParentId)
+								.put("key", key).build());
+				System.out.println("Removed keybinding for " + name);
+			} catch (Exception e) {
+				System.out.println("Did not removed keybinding for " + name + " since there currently isn't one.");
+			}
+		}
+		
+		private static final Function<String, Map.Entry<String, String>> LINE_TO_BINDING_ENTRY = new Function<String, Map.Entry<String, String>>() {
+			@Override
+			public Entry<String, String> apply(String bindingLine) {
+				String[] aLineElements = bindingLine.split("=");
+				// Ignore trailing comments
+				// System.out.println("Accepting proposal to create key binding for "
+				// + aName + "(" + aKeyCode + ")");
+				return new AbstractMap.SimpleEntry<String, String>(aLineElements[0].trim(),
+						aLineElements[1].trim().split("#")[0].trim());
+			}
+		};
 
+		private static final Predicate<String> IS_COMMENTED = new Predicate<String>(){
+			@Override
+			public boolean apply(@Nullable String aNewKeyBinding) {
+				if (aNewKeyBinding == null) {
+					return true;
+				}
+				if (aNewKeyBinding.equals("")){
+					return true;
+				}
+				if (aNewKeyBinding.trim().startsWith("#")
+						&& !aNewKeyBinding.trim().startsWith("#=")) {
+					return true;
+				}
+				if (aNewKeyBinding.trim().startsWith("_")) {
+					// do not allow key binding that is "_". This is reserved
+					// for hiding until refresh
+					return true;
+				}
+				return false;
+			}
+		};
+		
+		private Set<String> difference(String iNewKeyBindings,
+				String iOldKeyBindings) {
 			// NOTE: This is not symmetric (commutative?). If you want to
 			// support removal do that in a separate loop
 			Set<String> theNewKeyBindingLines = Sets.difference(
-					theNewKeyBindingsSet, theOldKeyBindingsSet);
-			_1: {
-				System.out.println("Old: " + theOldKeyBindingsSet);
-				System.out.println("New: " + theNewKeyBindingsSet);
-				System.out.println("Difference: " + theNewKeyBindingLines);
-			}
-
-			// Remove duplicates by putting the bindings in a map
-			Map<String, String> theKeyBindingsNoDuplicates = new HashMap<String, String>();
-			for (String aNewKeyBinding : theNewKeyBindingLines) {
-				if (aNewKeyBinding.trim().startsWith("#")
-						&& !aNewKeyBinding.trim().startsWith("#=")) {
-					continue;// A commented out keybinding
-				}
-				// TODO: do not allow key binding that is "_". This is reserved
-				// for hiding until refresh
-
-				_1: {
-					// Ignore trailing comments
-					String[] aLineElements = aNewKeyBinding.split("=");
-					String aKeyCode = aLineElements[0].trim();
-					String[] aRightHandSideElements = aLineElements[1].trim()
-							.split("#");
-					_2: {
-						String aName = aRightHandSideElements[0].trim();
-						System.out
-								.println("Accepting proposal to create key binding for "
-										+ aName + "(" + aKeyCode + ")");
-						theKeyBindingsNoDuplicates.put(aKeyCode, aName);
-					}
-				}
-
-				// TODO: if it fails, recover and create the remaining ones?
-			}
-
-			for (String aKeyCode : theKeyBindingsNoDuplicates.keySet()) {
-				String aName = theKeyBindingsNoDuplicates.get(aKeyCode);
-				Map<String, Object> aParamValues = new HashMap<String, Object>();
-				_1: {
-					aParamValues.put("parentId", iParentId);
-					aParamValues.put("key", aKeyCode);
-				}
-				System.out
-						.println("About to remove keybinding for " + aKeyCode);
-				try {
-					execute(
-						"START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
-						aParamValues);
-					theKeyBindingsNoDuplicates.remove(aKeyCode);
-					System.out.println("Removed keybinding for " + aName);
-				} catch (Exception e) {
-					System.out.println("Did not removed keybinding for " + aName + " since there currently isn't one.");
-				}
-				createNewKeyBinding(aName, aKeyCode, iParentId);
-			}
-			JSONArray ret = getKeys(iParentId);
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
+					ImmutableSet.copyOf(iNewKeyBindings.trim().split("\n")),
+					ImmutableSet.copyOf(iOldKeyBindings.trim().split("\n")));
+			System.out.println("Difference: " + theNewKeyBindingLines);
+			return theNewKeyBindingLines;
 		}
 
-		private void createNewKeyBinding(String iCategoryName, String iKeyCode,
+		private static void createNewKeyBinding(String iCategoryName, String iKeyCode,
 				Integer iParentId) throws IOException, JSONException {
-			
 			System.out.println("createNewKeyBinding() - begin() : " + String.format("iCategoryName %s\tiKeyCode %s\tiParentId %d", iCategoryName, iKeyCode, iParentId));
 			// TODO: Also create a trash category for each new category key node
+			JSONArray theCategoryNodes = (JSONArray) execute(
+					"START parent=node({parentId}) MATCH parent -[r:CONTAINS]-> existingCategory WHERE has(existingCategory.type) and existingCategory.type = 'categoryNode' and existingCategory.name = {aCategoryName} SET existingCategory.key = {aKeyCode} RETURN distinct id(existingCategory)",
+					ImmutableMap.<String, Object> builder()
+							.put("parentId", iParentId)
+							// TODO: change this back
+							.put("aCategoryName", iCategoryName)
+							.put("aKeyCode", iKeyCode).build()).get("data");
+			try {
+				relateHelper(iParentId,
+						Integer.parseInt(getCategoryNodeIdString(iCategoryName,
+								iKeyCode, theCategoryNodes)));
+				System.out.println("createNewKeyBinding() - end()");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
-			boolean shouldCreateNewCategoryNode = false;
-			String theNewCategoryNodeIdString = "-1";
-			_1: {
-				Map<String, Object> theParamValues = new HashMap<String, Object>();
-				theParamValues.put("parentId", iParentId);
-				// TODO: change this back
-				theParamValues.put("aCategoryName", iCategoryName);
-				theParamValues.put("aKeyCode", iKeyCode);
-				String iCypherQuery = "START parent=node({parentId}) MATCH parent -[r:CONTAINS]-> existingCategory WHERE has(existingCategory.type) and existingCategory.type = 'categoryNode' and existingCategory.name = {aCategoryName} SET existingCategory.key = {aKeyCode} RETURN distinct id(existingCategory)";
-				JSONObject theJson = execute(iCypherQuery, theParamValues);
-				System.out.println("restoring unassociated category: "
-						+ iCypherQuery + "\t" + theParamValues);
-
-				System.out.println(theJson.get("data"));
-				JSONArray theCategoryNodes = (JSONArray) theJson.get("data");
+		/** Get or create the category node that is to be associated with the key code */
+		private static String getCategoryNodeIdString(String iCategoryName,
+				String iKeyCode, JSONArray theCategoryNodes) throws IOException {
+			String theNewCategoryNodeIdString;
+			if (shouldCreateNewCategoryNode(theCategoryNodes, iCategoryName)) {
+				// TODO: first check if there is already a node with this name,
+				// which is for re-associating the keycode with the category
+				theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) execute(
+						"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) "
+								+ "RETURN id(n)",
+						ImmutableMap.<String, Object> builder()
+								.put("name", iCategoryName)
+								.put("key", iKeyCode)
+								.put("type", "categoryNode")
+								.put("created", System.currentTimeMillis())
+								.build()).get("data")).get(0)).get(0);
+			} else {
 				if (theCategoryNodes.length() > 0) {
-					System.out.println("createNewKeyBinding() - We already have a category named " + iCategoryName + " underneath " + iParentId);
 					if (theCategoryNodes.length() > 1) {
-						System.out.println("createNewKeyBinding() - Too many subcategories named " + iCategoryName + " underneath " + iParentId + "\n\t" + theCategoryNodes);
 						// Sanity check
 						throw new RuntimeException(
 								"There should never be 2 child categories of the same node with the same name");
 					}
-					theNewCategoryNodeIdString = (String) ((JSONArray)theCategoryNodes
+					theNewCategoryNodeIdString = (String) ((JSONArray) theCategoryNodes
 							.get(0)).get(0);
-					System.out.println("createNewKeyBinding() - Category ID to reattach: "
-							+ theNewCategoryNodeIdString);
 				} else {
-					shouldCreateNewCategoryNode = true;
-					System.out.println("We need to create a category named " + iCategoryName + " underneath " + iParentId);
+					theNewCategoryNodeIdString = "-1";
 				}
-
 			}
-			if (shouldCreateNewCategoryNode) {
-				theNewCategoryNodeIdString = createCategoryWithKeyBinding(
-						iCategoryName, iKeyCode);
-			}
-			try {
-				relateHelper(iParentId, Integer.parseInt(theNewCategoryNodeIdString));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			System.out.println("createNewKeyBinding() - end()");
+			return theNewCategoryNodeIdString;
 		}
 
-		private String createCategoryWithKeyBinding(String iCategoryName,
-				String iKeyCode) throws IOException {
-			String theNewCategoryNodeIdString;
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
-			_1: {
-				theParamValues.put("name", iCategoryName);
-				theParamValues.put("key", iKeyCode);
-				theParamValues.put("type", "categoryNode");
-				theParamValues.put("created", System.currentTimeMillis());
-				System.out.println("cypher params: " + theParamValues);
+		private static boolean shouldCreateNewCategoryNode(JSONArray theCategoryNodes, String iCategoryName) {
+			boolean shouldCreateNewCategoryNode = false;
+			if (theCategoryNodes.length() > 0) {
+				if (theCategoryNodes.length() > 1) {
+					// Sanity check
+					throw new RuntimeException(
+							"There should never be 2 child categories of the same node with the same name");
+				}
+			} else {
+				shouldCreateNewCategoryNode = true;
 			}
-			// TODO: first check if there is already a node with this name,
-			// which is for re-associating the keycode with the category
-			JSONObject theNewKeyBindingResponseJson = execute(
-					"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
-					theParamValues);
-			System.out.println("createNewKeyBinding() - Success:\n\t" + theNewKeyBindingResponseJson.toString());
-			theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
-					.get("data")).get(0)).get(0);
-			System.out.println("createNewKeyBinding() - got new node");
-			return theNewCategoryNodeIdString;
+			return shouldCreateNewCategoryNode;
 		}
 
 		@GET
@@ -602,7 +603,7 @@ public class Yurl {
 					.entity(ret.toString()).type("application/json").build();
 		}
 
-		public JSONArray getKeys(Integer iParentId) throws IOException,
+		public static JSONArray getKeys(Integer iParentId) throws IOException,
 				JSONException {
 			System.out.println("getKeys() - parent ID: " + iParentId);
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
@@ -1109,7 +1110,7 @@ System.out.println(outputFilename);
 		 *             we try to relate to a newly created category if the
 		 *             system becomes non-deterministic.
 		 */
-		private JSONObject relateHelper(Integer iParentId, Integer iChildId)
+		private static JSONObject relateHelper(Integer iParentId, Integer iChildId)
 				throws IOException, JSONException {
 			System.out.println("relateHelper() - begin");
 			System.out.println(String.format("relateHelper() iParentId = " + iParentId + ", iChildId = " + iChildId));
