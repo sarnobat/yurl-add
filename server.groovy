@@ -1147,6 +1147,7 @@ public class Yurl {
 							execute("START n=node({parentId}) "
 									+ "MATCH path=n-[r:CONTAINS*]->c "
 									+ "WHERE has(c.name) "
+									// TODO: some nodes are nulling out (e.g. 37567 - watch these) which causes undefined headings. We may have to remove the "extract" clause and filter the data in java.
 									+ "RETURN extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\" , key : \"' + p.key + '\"}')",
 									ImmutableMap.<String, Object> of(
 											"parentId", rootId),
