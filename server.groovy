@@ -55,9 +55,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -1067,8 +1069,8 @@ public class Yurl {
 
 		// TODO: make this map immutable
 		private static JSONObject execute(String iCypherQuery,
-				Map<String, Object> iParams, String...comment) throws IOException, JSONException {
-			System.out.println("" + comment);
+				Map<String, Object> iParams, String...commentPrefix) throws IOException, JSONException {
+			System.out.println(commentPrefix + "begin");
 			System.out.println("\texecute() - query - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
 
 			ClientConfig clientConfig = new DefaultClientConfig();
@@ -1092,6 +1094,7 @@ public class Yurl {
 					.getEntityInputStream());
 			theResponse.getEntityInputStream().close();
 			theResponse.close();
+			System.out.println(commentPrefix + "end");
 			return new JSONObject(theNeo4jResponse);
 		}
 
@@ -1137,10 +1140,13 @@ public class Yurl {
 
 		private static JSONObject getCategoriesTree(Integer rootId)
 				throws JSONException, IOException {
-			return new AddSizes(getCategorySizes(execute(
-					"START n=node(*) MATCH n-->u WHERE has(n.name) "
-							+ "RETURN id(n),count(u);",
-					ImmutableMap.<String, Object> of()).getJSONArray("data")))
+			return new AddSizes(
+					// This is the expensive query, not the other one
+					getCategorySizes(execute(
+							"START n=node(*) MATCH n-->u WHERE has(n.name) "
+									+ "RETURN id(n),count(u);",
+							ImmutableMap.<String, Object> of(), "getCategoriesTree() [The expensive query] - ").getJSONArray(
+							"data")))
 					.apply(
 					// Path to JSON conversion done in Cypher
 					createCategoryTreeFromCypherResultPaths(
@@ -1192,14 +1198,43 @@ public class Yurl {
 			return categoriesTree;
 		}
 
+		// TODO: This is really difficult to understand. See if you can make it more intuitive
+		// while retaining the functional programming style
 		@SuppressWarnings("unchecked")
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
 				JSONObject theQueryJsonResult, Integer rootId) {
 			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
 			checkState(cypherRawResults.length() > 0);
+			if (false){
 			return createIdToNodeMap(
 					buildParentToChildMultimap(cypherRawResults),
 					createIdToNodeMap(cypherRawResults)).get(rootId);
+			} else {
+				try {
+					// new way
+					Multimap<Integer, JSONObject> parentToChildren = buildParentToChildJsonMultimap(cypherRawResults);
+					JSONObject root = new JSONObject();
+					root.put("id", rootId);
+					root.put("name", "root");
+					return addChildrenToTree(root, parentToChildren);
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				}
+			}
+		}
+
+		// We build the JSONObject nodes as we encounter them. Luckily, since it's a tree structure, we don't need to maintain references to previously created nodes.
+		private static JSONObject addChildrenToTree(JSONObject root,
+				Multimap<Integer, JSONObject> buildParentToChildMultimap) {
+			JSONArray childrenJson = new JSONArray();
+			for (JSONObject child : buildParentToChildMultimap.get(root
+					.getInt("id"))) {
+				childrenJson.put(child);
+				addChildrenToTree(child, buildParentToChildMultimap);
+			}
+			root.put("children", childrenJson);
+			return root;
 		}
 
 		/**
@@ -1209,8 +1244,9 @@ public class Yurl {
 		 * @return
 		 */
 		@SuppressWarnings("unchecked")
+		@Deprecated // This is too difficult to understand
 		private static Map<Integer, JSONObject> createIdToNodeMap(
-				MultiValueMap categoryIdToChildrenIdList,
+				Multimap<Integer, Integer> categoryIdToChildrenIdList,
 				Map<Integer, JSONObject> categoryIdToNode) {
 			ImmutableMap.Builder<Integer, JSONObject> builder = ImmutableMap
 					.builder();
@@ -1224,17 +1260,16 @@ public class Yurl {
 		}
 
 		private static class AddChildren implements Function<Map.Entry<Integer, JSONObject>, Map.Entry<Integer,JSONObject>> {
-			private final MultiValueMap parentIdToChildrenIdList;
+			private final Multimap<Integer, Integer> parentIdToChildrenIdList;
 			private final Map<Integer, JSONObject> idToCategoryNode; 
-			AddChildren(MultiValueMap parentIdToChildrenIdList, Map<Integer, JSONObject> idToCategoryNode) {
+			AddChildren(Multimap<Integer, Integer> parentIdToChildrenIdList, Map<Integer, JSONObject> idToCategoryNode) {
 				this.parentIdToChildrenIdList = parentIdToChildrenIdList;
 				this.idToCategoryNode = idToCategoryNode;
 			}
 			@Override
 			public Map.Entry<Integer,JSONObject> apply(Map.Entry<Integer,JSONObject> categoryNodeWithoutChildren) {
-				@SuppressWarnings("unchecked")
 				Collection<Integer> childCategoryIds = (Collection<Integer>) parentIdToChildrenIdList
-						.getCollection(categoryNodeWithoutChildren.getKey());
+						.get(categoryNodeWithoutChildren.getKey());
 				if (childCategoryIds == null) {
 				} else {
 					JSONArray childCategoryNodes = new JSONArray();
@@ -1250,6 +1285,9 @@ public class Yurl {
 		/**
 		 * @return - a pair for each category node
 		 */
+		// I think we shouldn't create this from the cypher paths. We've already created
+		// a parent to child multimap
+		@Deprecated  
 		private static Map<Integer, JSONObject> createIdToNodeMap(JSONArray cypherRawResults) {
 			ImmutableMap.Builder<Integer, JSONObject> idToJsonBuilder = ImmutableMap
 					.<Integer, JSONObject> builder();
@@ -1272,9 +1310,13 @@ public class Yurl {
 			return idToJsonBuilder.build();
 		}
 
-		private static MultiValueMap buildParentToChildMultimap(
+		/**
+		 * @return Integer to set of Integers
+		 */
+		@Deprecated // We need Multimap<Integer, JSONObject> otherwise we lose the name. The ID is not enough 
+		private static Multimap<Integer, Integer> buildParentToChildMultimap(
 				JSONArray cypherRawResults) {
-			MultiValueMap oParentToChildren = new MultiValueMap();
+			Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
 			getParentChildrenMap: {
 				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
 					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
@@ -1301,6 +1343,54 @@ public class Yurl {
 							}
 						} else {
 							oParentToChildren.put(parentId, childId);
+						}
+					}
+				}
+			}
+			return oParentToChildren;
+		}
+
+		private static Multimap<Integer, JSONObject> buildParentToChildJsonMultimap(
+				JSONArray cypherRawResults) {
+			// TODO: yuck, mutable state
+			Set<Integer> parentsKnown = new HashSet<Integer>();
+			System.out
+					.println("buildParentToChildJsonMultimap() - MUTABLE STATE, GET RID OF THIS BEFORE IT CAUSES BIGS: "
+							+ parentsKnown);
+			Multimap<Integer, JSONObject> oParentToChildren = HashMultimap.create();
+			getParentChildrenMap: {
+				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
+					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
+					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
+						if (categoryPath.get(hopNum).getClass().equals(org.json.JSONObject.Null)) {
+							continue;
+						}
+						if (categoryPath.get(hopNum + 1).getClass().equals(org.json.JSONObject.Null)) {
+							continue;
+						}
+						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
+							continue;
+						}
+						JSONObject childJson = new JSONObject(
+								categoryPath.getString(hopNum + 1));
+						
+						int childId = childJson.getInt("id");
+						int parentId = checkNotNull(new JSONObject(
+								categoryPath
+										.getString(hopNum)).getInt("id"));
+						if (parentsKnown.contains(childId)) {
+							continue;
+						}
+						Object childrenObj = oParentToChildren.get(parentId);
+						if (childrenObj != null) {
+							Set<?> children = (Set<?>) childrenObj;
+							if (!parentsKnown.contains(childId)) {// We can't rely on list contains jsonobject, it will never be true.
+								oParentToChildren.put(parentId, childJson);
+								parentsKnown.add(childId);
+							}
+						} else {
+							oParentToChildren.put(parentId, childJson);
+							parentsKnown.add(childId);
 						}
 					}
 				}
