@@ -58,6 +58,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -1069,9 +1070,10 @@ public class Yurl {
 
 		// TODO: make this map immutable
 		private static JSONObject execute(String iCypherQuery,
-				Map<String, Object> iParams, String...commentPrefix) throws IOException, JSONException {
+				Map<String, Object> iParams, String... iCommentPrefix) throws IOException, JSONException {
+			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] : "";
 			System.out.println(commentPrefix + "begin");
-			System.out.println("\texecute() - query - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
+			System.out.println(commentPrefix + "execute() - query - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
 
 			ClientConfig clientConfig = new DefaultClientConfig();
 			clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
@@ -1086,7 +1088,7 @@ public class Yurl {
 							.<String, Object> of("query", iCypherQuery, "params",
 									Preconditions.checkNotNull(iParams)));
 			if (theResponse.getStatus() != 200) {
-				System.out.println("FAILED:\n\t" + iCypherQuery + "\n\tparams: "
+				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: "
 						+ iParams);
 				throw new RuntimeException();
 			}
@@ -1198,33 +1200,76 @@ public class Yurl {
 			return categoriesTree;
 		}
 
-		// TODO: This is really difficult to understand. See if you can make it more intuitive
-		// while retaining the functional programming style
-		@SuppressWarnings("unchecked")
-		private static JSONObject createCategoryTreeFromCypherResultPaths(
+		private static JSONObject createCategoryTreeFromCypherResultPathsOld1(
 				JSONObject theQueryJsonResult, Integer rootId) {
 			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
 			checkState(cypherRawResults.length() > 0);
-			if (false){
-			return createIdToNodeMap(
-					buildParentToChildMultimap(cypherRawResults),
-					createIdToNodeMap(cypherRawResults)).get(rootId);
-			} else {
-				try {
-					// new way
-					Multimap<Integer, JSONObject> parentToChildren = buildParentToChildJsonMultimap(cypherRawResults);
-					JSONObject root = new JSONObject();
-					root.put("id", rootId);
-					root.put("name", "root");
-					return addChildrenToTree(root, parentToChildren);
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RuntimeException(e);
-				}
+				return createIdToNodeMap(
+						buildParentToChildMultimap(cypherRawResults),
+						createId(cypherRawResults)).get(rootId);
+		}
+
+		private static JSONObject createCategoryTreeFromCypherResultPathsOld2(
+				JSONObject theQueryJsonResult, Integer rootId) {
+			JSONArray cypherRawResults = theQueryJsonResult
+					.getJSONArray("data");
+			checkState(cypherRawResults.length() > 0);
+			try {
+				// new way. Works but not a proper map reduce
+				Multimap<Integer, JSONObject> parentToChildren = buildParentToChildJsonMultimap(cypherRawResults);
+				JSONObject root = new JSONObject();
+				root.put("id", rootId);
+				root.put("name", "root");
+				return addChildrenToTree(root, parentToChildren);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 
+		@SuppressWarnings("unchecked")
+		private static JSONObject createCategoryTreeFromCypherResultPaths(
+				JSONObject theQueryJsonResult, Integer rootId) {
+			JSONArray cypherRawResults = theQueryJsonResult
+					.getJSONArray("data");
+			checkState(cypherRawResults.length() > 0);
+			Multimap<Integer, Integer> parentToChildren = buildParentToChildMultimap2(cypherRawResults);
+			Map<Integer, JSONObject> categoryNodesWithoutChildren = createId(cypherRawResults);
+			JSONObject root = categoryNodesWithoutChildren.get(rootId);
+			root.put(
+					"children",
+					toJsonArray(buildChildren(parentToChildren.get(rootId),
+							categoryNodesWithoutChildren, parentToChildren)));
+			return root;
+		}
+
+		private static JSONArray toJsonArray(Collection<JSONObject> children) {
+			JSONArray arr = new JSONArray();
+			for (JSONObject child : children) {
+				arr.put(child);
+			}
+			return arr;
+		}
+
+		private static Set<JSONObject> buildChildren(
+				Collection<Integer> childIds, Map<Integer, JSONObject> nodes,
+				Multimap<Integer, Integer> parentToChildren) {
+			Builder<JSONObject> set = ImmutableSet.builder();
+			for (int childId : childIds) {
+				JSONObject childJson = nodes.get(childId);
+				Collection<Integer> grandchildIds = parentToChildren
+						.get(childId);
+				Collection<JSONObject> grandchildNodes = buildChildren(
+						grandchildIds, nodes, parentToChildren);
+				JSONArray grandchildrenArray = toJsonArray(grandchildNodes);
+				childJson.put("children", grandchildrenArray);
+				set.add(childJson);
+			}
+			return set.build();
+		}
+
 		// We build the JSONObject nodes as we encounter them. Luckily, since it's a tree structure, we don't need to maintain references to previously created nodes.
+		@Deprecated
 		private static JSONObject addChildrenToTree(JSONObject root,
 				Multimap<Integer, JSONObject> buildParentToChildMultimap) {
 			JSONArray childrenJson = new JSONArray();
@@ -1285,10 +1330,7 @@ public class Yurl {
 		/**
 		 * @return - a pair for each category node
 		 */
-		// I think we shouldn't create this from the cypher paths. We've already created
-		// a parent to child multimap
-		@Deprecated  
-		private static Map<Integer, JSONObject> createIdToNodeMap(JSONArray cypherRawResults) {
+		private static Map<Integer, JSONObject> createId(JSONArray cypherRawResults) {
 			ImmutableMap.Builder<Integer, JSONObject> idToJsonBuilder = ImmutableMap
 					.<Integer, JSONObject> builder();
 			Set<Integer> seen = new HashSet<Integer>();
@@ -1309,11 +1351,48 @@ public class Yurl {
 			}
 			return idToJsonBuilder.build();
 		}
-
 		/**
 		 * @return Integer to set of Integers
 		 */
-		@Deprecated // We need Multimap<Integer, JSONObject> otherwise we lose the name. The ID is not enough 
+		private static Multimap<Integer, Integer> buildParentToChildMultimap2(
+				JSONArray cypherRawResults) {
+			Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
+			getParentChildrenMap: {
+				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
+					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
+					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
+						if (categoryPath.get(hopNum).getClass().equals(org.json.JSONObject.Null)) {
+							continue;
+						}
+						if (categoryPath.get(hopNum + 1).getClass().equals(org.json.JSONObject.Null)) {
+							continue;
+						}
+						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
+							continue;
+						}
+						int childId = new JSONObject(
+								categoryPath.getString(hopNum + 1)).getInt("id");
+						int parentId = checkNotNull(new JSONObject(
+								categoryPath
+										.getString(hopNum)).getInt("id"));
+						Object childrenObj = oParentToChildren.get(parentId);
+						if (childrenObj != null) {
+							Set<?> children = (Set<?>) childrenObj;
+							if (!children.contains(childId)) {
+								oParentToChildren.put(parentId, childId);
+							}
+						} else {
+							oParentToChildren.put(parentId, childId);
+						}
+					}
+				}
+			}
+			return oParentToChildren;
+		}
+		
+		/**
+		 * @return Integer to set of Integers
+		 */
 		private static Multimap<Integer, Integer> buildParentToChildMultimap(
 				JSONArray cypherRawResults) {
 			Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
@@ -1350,6 +1429,7 @@ public class Yurl {
 			return oParentToChildren;
 		}
 
+		@Deprecated
 		private static Multimap<Integer, JSONObject> buildParentToChildJsonMultimap(
 				JSONArray cypherRawResults) {
 			// TODO: yuck, mutable state

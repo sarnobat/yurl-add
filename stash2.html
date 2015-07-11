@@ -50,7 +50,7 @@ main: 45, product: 29196, video: 37658, tech: 46, other: 29172
 						}());
 					} else {
 						document.body.style.backgroundColor = "#CC0033";
-						document.getElementsByTagName("body")[0].innerHTML = "Error:<br>" + getParameterByName('url');
+						document.getElementsByTagName("body")[0].innerHTML = "Error:<br><a href='" +  url + "'>" + url + "</a>";
 						// TODO: show the existing title
 						(function() {
 							var link = document.createElement('link');
