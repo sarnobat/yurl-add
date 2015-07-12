@@ -76,7 +76,6 @@ public class Yurl {
 	@Path("yurl")
 	public static class HelloWorldResource { // Must be public
 
-		@Deprecated
 		private static final Integer ROOT_ID = 45;
 		private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 		private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
@@ -88,9 +87,43 @@ public class Yurl {
 
 		private static JSONObject categoriesTreeCache;
 
-		// This never gets called - or does it?
 		HelloWorldResource() {
+			// We have to put this in the constructor because if we put it in main()
+			// then either it will be called every time the cron job is executed,
+			// or not until the server terminates unexceptionally (which never happens).
 //			HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
+		}
+		
+		@GET
+		@Path("uncategorized")
+		@Produces("application/json")
+		public Response getUrls(@QueryParam("rootId") Integer iRootId)
+				throws JSONException, IOException {
+			checkNotNull(iRootId);
+			JSONObject categoriesTreeJson;
+			if (categoriesTreeCache == null) {
+				System.out.println("getUrls() - preloaded categories tree not ready");
+				categoriesTreeJson = getCategoriesTree(ROOT_ID);
+			} else {
+				categoriesTreeJson = categoriesTreeCache;
+				// This is done in a separate thread
+				refreshCategoriesTreeCacheInSeparateThread();
+			}
+			JSONObject retVal = new JSONObject();
+			try {
+				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+				retVal.put("categoriesRecursive", categoriesTreeJson);
+				return Response.ok().header("Access-Control-Allow-Origin", "*")
+						.entity(retVal.toString())
+						.type("application/json").build();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				return Response.serverError().header("Access-Control-Allow-Origin", "*")
+						.entity(e.getStackTrace())
+						.type("application/text").build();
+			}
+			
 		}
 
 		@GET
@@ -291,6 +324,7 @@ public class Yurl {
 		@Deprecated // Use categoriesRecursive
 		public Response countNonRecursive(@QueryParam("rootId") Integer iRootId)
 				throws Exception {
+			System.out.println("DEPRECATED::countNonRecursive() - begin");
 			checkNotNull(iRootId);
 			try {
 				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
@@ -314,43 +348,6 @@ public class Yurl {
 				throw e;
 			}
 		}
-
-		@GET
-		@Path("uncategorized")
-		@Produces("application/json")
-		public Response getUrls(@QueryParam("rootId") Integer iRootId)
-				throws JSONException, IOException {
-			checkNotNull(iRootId);
-			JSONObject categoriesTreeJson;
-			if (categoriesTreeCache == null) {
-				System.out
-						.println("getUrls() - preloaded categories tree not ready");
-				categoriesTreeJson = getCategoriesTree(ROOT_ID);
-			} else {
-				categoriesTreeJson = categoriesTreeCache;
-				// This is done in a separate thread
-				refreshCategoriesTreeCacheInSeparateThread();
-			}
-			// JSONArray ret = getKeys(iRootId);
-			JSONObject retVal = new JSONObject();
-			try {
-				// retVal.put("urlsAtTopLevel", getItemsAtLevel(iRootId));
-				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
-				retVal.put("categoriesRecursive", categoriesTreeJson);
-				//retVal.put("categoriesNonRecursive", ret);
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(retVal.toString())
-						.type("application/json").build();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				return Response.serverError().header("Access-Control-Allow-Origin", "*")
-						.entity(e.getStackTrace())
-						.type("application/text").build();
-			}
-			
-		}
-
 
 		////
 		//// The main part
@@ -1497,6 +1494,7 @@ public class Yurl {
 		// This gives a flat list
 		private JSONArray getFlatListOfSubcategoriesRecursive(Integer iParentId)
 				throws IOException {
+			System.out.println("DEPRECATED::getFlatListOfSubcategoriesRecursive() - begin");
 			JSONArray theData = (JSONArray) execute(
 					"START parent=node({parentId}) " +
 					"MATCH parent-[c:CONTAINS*]->n " +
@@ -1519,8 +1517,6 @@ public class Yurl {
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
-		System.err.println("main() - begin");
-		
 		HelloWorldResource.refreshCategoriesTreeCacheInSeparateThread();
 		try {
 			JdkHttpServerFactory.createHttpServer(
