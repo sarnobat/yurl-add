@@ -944,19 +944,19 @@ function getAdjacencies(category) {
 }
 
 
-        function getCategoryNamesMap(categoriesRecursive) {
-                var categoriesMap = {};
-		if (categoriesRecursive.id == null) {
-			debugger;
-		}
-                categoriesMap[categoriesRecursive.id] = categoriesRecursive.name;
-                for (var category in categoriesRecursive.children) {
-			var categoryNames = getCategoryNamesMap(categoriesRecursive.children[category]);
-			categoriesMap  = $.extend(true, categoriesMap, categoryNames);
+function getCategoryNamesMap(categoriesRecursive) {
+	var categoriesMap = {};
+	if (categoriesRecursive.id == null) {
+		debugger;
+	}
+	categoriesMap[categoriesRecursive.id] = categoriesRecursive.name;
+	for (var category in categoriesRecursive.children) {
+		var categoryNames = getCategoryNamesMap(categoriesRecursive.children[category]);
+		categoriesMap  = $.extend(true, categoriesMap, categoryNames);
 //                        categoriesMap.concat(categoryNames);
-                }
-                return categoriesMap;
-  	}
+	}
+	return categoriesMap;
+}
 
 function renderD3Visualization(flareJson) {
 	var w = 680,
