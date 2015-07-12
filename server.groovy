@@ -321,10 +321,9 @@ public class Yurl {
 		@GET
 		@Path("count_non_recursive")
 		@Produces("application/json")
-		@Deprecated // Use categoriesRecursive
+		// It's better to do this in a separate Ajax request because it's fast and we can get an idea if database queries are working.
 		public Response countNonRecursive(@QueryParam("rootId") Integer iRootId)
 				throws Exception {
-			System.out.println("DEPRECATED::countNonRecursive() - begin");
 			checkNotNull(iRootId);
 			try {
 				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
