@@ -1071,7 +1071,7 @@ public class Yurl {
 		// TODO: make this map immutable
 		private static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams, String... iCommentPrefix) throws IOException, JSONException {
-			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] : "";
+			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
 			System.out.println(commentPrefix + "begin");
 			System.out.println(commentPrefix + "execute() - query - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
 
@@ -1152,14 +1152,17 @@ public class Yurl {
 					.apply(
 					// Path to JSON conversion done in Cypher
 					createCategoryTreeFromCypherResultPaths(
+							// TODO: I don't think we need each path do we? We just need each parent-child relationship.
 							execute("START n=node({parentId}) "
 									+ "MATCH path=n-[r:CONTAINS*]->c "
 									+ "WHERE has(c.name) "
-									// TODO: some nodes are nulling out (e.g. 37567 - watch these) which causes undefined headings. We may have to remove the "extract" clause and filter the data in java.
-									+ "RETURN extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\" , key : \"' + p.key + '\"}')",
+									+ "RETURN extract(p in nodes(path)| coalesce("
+									+ "'{ " + "id : ' + id(p) + ', "
+									+ "name : \"'+ p.name +'\" , "
+									+ "key : \"' + p.key + '\"" + " }'" + "))",
 									ImmutableMap.<String, Object> of(
 											"parentId", rootId),
-									"getCategoriesTree() - getting all paths"),
+									"getCategoriesTree() - [getting all paths 3]"),
 							rootId));
 		}
 	
@@ -1227,7 +1230,6 @@ public class Yurl {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
 		private static JSONObject createCategoryTreeFromCypherResultPaths(
 				JSONObject theQueryJsonResult, Integer rootId) {
 			JSONArray cypherRawResults = theQueryJsonResult
@@ -1351,6 +1353,7 @@ public class Yurl {
 			}
 			return idToJsonBuilder.build();
 		}
+
 		/**
 		 * @return Integer to set of Integers
 		 */
