@@ -71,6 +71,8 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
 public class Yurl {
+	public static final Object JSON_OBJECT_NULL = JSONObject.Null;
+	
 	@Path("yurl")
 	public static class HelloWorldResource { // Must be public
 
@@ -408,7 +410,7 @@ public class Yurl {
 					_15: {
 
 						Object val = anItem.get(4);
-						if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
+						if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSON_OBJECT_NULL))) {
 							String aValue = (String) val;
 							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
 						}
@@ -421,7 +423,7 @@ public class Yurl {
 							} else if (val == null) {
                                                                 System.out.println("Is null string");
 							}
-							else if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
+							else if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSON_OBJECT_NULL))) {
 									Long aValue = (Long) val;
 									anUncategorizedNodeJsonObject.put("created", aValue);
 							}
@@ -1339,7 +1341,7 @@ public class Yurl {
 			for (int i = 0; i < cypherRawResults.length(); i++) {
 				JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
 				for (int j = 0; j < treePath.length(); j++) {
-					if (treePath.get(j).getClass().equals(JSONObject.Null)) {
+					if (treePath.get(j).getClass().equals(JSON_OBJECT_NULL)) {
 						continue;
 					}
 					JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
@@ -1364,10 +1366,10 @@ public class Yurl {
 				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
 					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
 					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-						if (categoryPath.get(hopNum).getClass().equals(org.json.JSONObject.Null)) {
+						if (categoryPath.get(hopNum).getClass().equals(JSON_OBJECT_NULL)) {
 							continue;
 						}
-						if (categoryPath.get(hopNum + 1).getClass().equals(org.json.JSONObject.Null)) {
+						if (categoryPath.get(hopNum + 1).getClass().equals(JSON_OBJECT_NULL)) {
 							continue;
 						}
 						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
@@ -1403,10 +1405,10 @@ public class Yurl {
 				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
 					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
 					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-						if (categoryPath.get(hopNum).getClass().equals(org.json.JSONObject.Null)) {
+						if (categoryPath.get(hopNum).getClass().equals(JSON_OBJECT_NULL)) {
 							continue;
 						}
-						if (categoryPath.get(hopNum + 1).getClass().equals(org.json.JSONObject.Null)) {
+						if (categoryPath.get(hopNum + 1).getClass().equals(JSON_OBJECT_NULL)) {
 							continue;
 						}
 						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
@@ -1445,10 +1447,10 @@ public class Yurl {
 				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
 					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
 					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-						if (categoryPath.get(hopNum).getClass().equals(org.json.JSONObject.Null)) {
+						if (categoryPath.get(hopNum).getClass().equals(JSON_OBJECT_NULL)) {
 							continue;
 						}
-						if (categoryPath.get(hopNum + 1).getClass().equals(org.json.JSONObject.Null)) {
+						if (categoryPath.get(hopNum + 1).getClass().equals(JSON_OBJECT_NULL)) {
 							continue;
 						}
 						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
@@ -1483,7 +1485,7 @@ public class Yurl {
 
 		private static JSONArray removeNulls(JSONArray iJsonArray) {
 			for(int i = 0; i < iJsonArray.length(); i++) {
-				if (JSONObject.Null.equals(iJsonArray.get(i))) {
+				if (JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
 					iJsonArray.remove(i);
 					--i;
 				}
