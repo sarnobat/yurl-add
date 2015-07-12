@@ -150,8 +150,6 @@ function renderIfReady() {
 		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
 		markupHtml += "<h1>" + categoryName + "</h1>" + urlsForCategory.map(ITEM_TO_IMAGE).join("\n");
-		//markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
-		
 	}
 	$("#url_cards").append(cardsHtml);
 	$("#url_thumbnails").append(urlThumbnailsHtml);
@@ -365,7 +363,6 @@ function writeCategoryTree(root, level) {
 	
 	if (root.children != null) {
 		$.each(root.children, function(a,b){
-			
 			writeCategoryTree(b, level + 1);
 		});
 	}
@@ -374,8 +371,6 @@ function writeCategoryTree(root, level) {
 function moveToTop(source) {
 	var idToMove = source;
 	var firstId = $("#url_cards").children().first().attr("id");
-
-
 	if (orderedDescending) {
 		var elem = $("#" + idToMove).remove();
 		$("#url_cards").prepend(elem);
@@ -609,17 +604,6 @@ function getImageForUrl(url) {
 		imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
 	}
 	return imageUrl;
-}
-
-function getMarkupHtml(categoryId, categoryName, urlsInCategory) {
-
-//ITEM_TO_IMAGE;
-		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
-		for (var j = 0; j < urlsInCategory.length; j++) {
-			var item = urlsInCategory[j];
-			urlThumbnailsHtml += item.title +"<br>";
-		}
-		return urlThumbnailsHtml;
 }
 
 function getProductsHtml(categoryId, categoryName, urlsInCategory) {
@@ -1232,32 +1216,34 @@ body{
 			<table style="width: 100%;table-layout: fixed;">
 				<tr>
 					<td width="25%" valign=top>
+
 						<a id="up">Up</a>
 						<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
-						<a href="http://netgear.rohidekar.com/launcher">Netcat Query</a>
+						<strike><a href="http://netgear.rohidekar.com/launcher">Netcat Query</a></strike>
 						<div id=rootColor class="buttonize">
 							<center>
 								<br><h2><span id="category"></span>(<span id="count"></span>)<br></h2><br>
 							</center>
 						</div>
+
 						<!--Favorites-->
-                                                <div id='favorites' class='buttonize'>
+						<div id='favorites' class='buttonize'>
+							<a href='/yurl/?rootId=29196' >Products & Services</a><br>
+							<a href='/yurl/?rootId=221013'> Buy these</a><br>
+							<a href='/yurl/?rootId=37373'> Owned</a><br>
+							<a href='/yurl/?rootId=608592'>Library</a><br><br>
 
-                                                <a href='/yurl/?rootId=29196' >Products & Services</a><br>
-                                                <a href='/yurl/?rootId=221013'> Buy these</a><br>
-                                                <a href='/yurl/?rootId=37373'> Owned</a><br>
-                                                <a href='/yurl/?rootId=608592'>Library</a><br><br>
+							<a href='/yurl/?rootId=469990' >Home (Photos)</a><br>
+							<a href='/yurl/?rootId=37658' >Youtube Playlists (videos)</a><br>
+							<a href='/yurl/?rootId=37567'>Watch these</a><br>
+							<a href='/yurl/?rootId=37652'>Watched</a><br><br>
 
-                                                <a href='/yurl/?rootId=469990' >Home (Photos)</a><br>
-                                                <a href='/yurl/?rootId=37658' >Youtube Playlists (videos)</a><br>
-                                                <a href='/yurl/?rootId=37567'>Watch these</a><br>
-												<a href='/yurl/?rootId=37652'>Watched</a><br><br>
+							<a href='/yurl/?rootId=221026'> Download</a><br>
+							<a href='/yurl/?rootId=37581'> Download these</a><br>
+							<a href='/yurl/?rootId=322410'> Downloaded</a><br><br>
+							<a href='/yurl/?rootId=29172'> Other</a><br>
+						</div>
 
-                                                <a href='/yurl/?rootId=221026'> Download</a><br>
-                                                <a href='/yurl/?rootId=37581'> Download these</a><br>
-                                                <a href='/yurl/?rootId=322410'> Downloaded</a><br><br>
-                                                <a href='/yurl/?rootId=29172'> Other</a><br>
-                                                </div>
 						<ol id="keyLinks"  class="buttonize" style="" ></ol>
 						<font color=grey><div id="status">Init</div></font>
 						<textarea id="keys" cols="34" rows="20px" class="buttonize"></textarea>
