@@ -71,22 +71,24 @@ function initialize() {
 					  
 					  renderD3Visualization(data.categoriesTree);
 					  
-					  writeCategoryTree(data.categoriesTree, 0);
+					  //writeCategoryTree(data.categoriesTree, 0);
 
-					  var children = findCategoryChildren(data.categoriesTree, rootId);
+					  //var children = findCategoryChildren(data.categoriesTree, rootId);
 					  
+					  /*
+					  html += "-------OLD----------";
 					  // TODO: stop using flat
 					  $.each(data.flat, function(a,category,c){
-							$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"' style='text-transform:capitalize;'>DEPRECATED" + category.name + " (" + category.id + ")</a></input>");
-							$("#categoriesRecursive").append("<br>");
+							html += CATEGORY_TO_LINK("", category);
 						});
+						*/
+					$("#categoriesRecursive").append(CATGORY_TREE_TO_LINKS_HTML(data.categoriesTree));
 				}
 			)
 			.error(function() {  })
 			.complete(function() {  }
 		);
 	}
-
 
 	////
     //// Start listening for changes to the key binding assignments
@@ -112,6 +114,32 @@ function initialize() {
     }    
 }
 
+// Map function
+function CATGORY_TREE_TO_LINKS_HTML(categoryNode) {
+	var category = categoryNode;
+	return "<input type=checkbox value=false name=" + category.id + ">"
+		+ "<a href='/yurl/?rootId=" + category.id + "' style='text-transform:capitalize;'>"
+		+ category.name + " (" + category.id + ")"
+		+ "</a>"
+		+ "</input>"
+		+ "<br>"
+		+ "<block>"
+		+ category.children.map(CATGORY_TREE_TO_LINKS_HTML).join()
+		+ "</block>"
+		;
+}
+
+// Reduction function
+function CATEGORY_TO_LINK(accumulator, categoryNode) {
+	var category = categoryNode;
+	return accumulator + "<input type=checkbox value=false name=" + category.id + ">"
+		+ "<a href='/yurl/?rootId=" + category.id + "' style='text-transform:capitalize;'>"
+		+ category.name + " (" + category.id + ")"
+		+ "</a>"
+		+ "</input>"
+		+ "<br>";
+}
+	
 function renderIfReady() {
 	if (!uncategorizedResponse) {
 		return;
@@ -357,6 +385,7 @@ function removeTop(parentId, childId) {
 	});	
 }
   
+// Delete. Redundant functionality
 function writeCategoryTree(root, level) {
 	var indent = "";
 	for (var i = 0; i < level; i++) {
@@ -1253,10 +1282,9 @@ body{
 						<textarea id="keys" cols="34" rows="20px" class="buttonize"></textarea>
 						<!-- I don't see a good reason to have both keys and categoriesTree. Hopefully JSON Tree
 							will replace both -->
-						<br>Tree of Categories<br>
-						<div id="categoriesTree" class="buttonize tooBig" ></div>
-						<br>Category tags<br>
+						<br>Tree of Categories / Category tags<br>
 						<div id="categoriesRecursive"  class="buttonize tooBig">
+						<!--<div id="categoriesTree" class="buttonize tooBig" ></div>-->
 						<br><br>
 
 						<br><br>
