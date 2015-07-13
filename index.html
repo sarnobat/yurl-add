@@ -123,9 +123,9 @@ function CATGORY_TREE_TO_LINKS_HTML(categoryNode) {
 		+ "</a>"
 		+ "</input>"
 		+ "<br>"
-		+ "<block>"
-		+ category.children.map(CATGORY_TREE_TO_LINKS_HTML).join()
-		+ "</block>"
+		+ "<ul>"
+		+ category.children.map(CATGORY_TREE_TO_LINKS_HTML).join("</li><li>")
+		+ "</ul>"
 		;
 }
 
@@ -751,9 +751,12 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 			debugger;
 		} 
 		if (categories) {
-			$.each(categories, function(a,binding,c){
-				categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+" ("+ binding.key+")' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
-			});
+			var html = categories.sort(COMPARE_OBJ_NAME).map(CATEGORY_TO_BUTTON(field.id, rootId)).join("&nbsp;");
+			categoryButtons.append(html);
+			// TODO: would be nice to use map and fold
+			//$.each(categories, function(a,binding,c){
+			//	categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+" ("+ binding.key+")' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
+			//});
 		}
 		categoryButtons.append("<br>");
 		categoryButtons.append("<br>");
@@ -776,6 +779,19 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		
 	}	
 	return listItem[0].outerHTML;
+}
+
+function CATEGORY_TO_BUTTON(itemId, currentCategoryId, categoryNode) {
+	return function(categoryNode) {
+		return "<input type=button class='genericButton' "
+			+ " value='"+categoryNode.name+" ("+ categoryNode.key+")'"
+			+ " onclick='relate("+categoryNode.id+","+itemId+","+currentCategoryId+")'>"
+			+ "";
+	};
+}
+
+function COMPARE_OBJ_NAME(categoryNode1, categoryNode2) {
+	return categoryNode1.name.toUpperCase().charCodeAt(0) - categoryNode2.name.toUpperCase().charCodeAt(0);
 }
 
 function getCategoriesUnderID2(categoryTree, categoryId) {
