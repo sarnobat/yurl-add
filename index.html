@@ -72,8 +72,12 @@ function initialize() {
 					  renderD3Visualization(data.categoriesTree);
 					  
 					  writeCategoryTree(data.categoriesTree, 0);
+
+					  var children = findCategoryChildren(data.categoriesTree, rootId);
+					  
+					  // TODO: stop using flat
 					  $.each(data.flat, function(a,category,c){
-							$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"' style='text-transform:capitalize;'>" + category.name + " (" + category.id + ")</a></input>");
+							$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"' style='text-transform:capitalize;'>DEPRECATED" + category.name + " (" + category.id + ")</a></input>");
 							$("#categoriesRecursive").append("<br>");
 						});
 				}
@@ -520,7 +524,7 @@ function getBiggestImages() {
 }
 
 function findCategoryChildren(categoriesNode, categoryIdToFind) {
-	if (categoriesNode.id == categoryIdToFind) {
+	if (categoriesNode.id == categoryIdToFind || categoriesNode.id == parseInt(categoryIdToFind)) {
 		return categoriesNode.children;
 	}
 	else if (categoriesNode.children != null) {

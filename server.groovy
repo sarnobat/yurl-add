@@ -1154,10 +1154,10 @@ public class Yurl {
 							execute("START n=node({parentId}) "
 									+ "MATCH path=n-[r:CONTAINS*]->c "
 									+ "WHERE has(c.name) "
-									+ "RETURN extract(p in nodes(path)| coalesce("
+									+ "RETURN extract(p in nodes(path)| "
 									+ "'{ " + "id : ' + id(p) + ', "
 									+ "name : \"'+ p.name +'\" , "
-									+ "key : \"' + p.key + '\"" + " }'" + "))",
+									+ "key : \"' + coalesce(p.key, '') + '\"" + " }'" + ")",
 									ImmutableMap.<String, Object> of(
 											"parentId", rootId),
 									"getCategoriesTree() - [getting all paths 3]"),
