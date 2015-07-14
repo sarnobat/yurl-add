@@ -548,7 +548,7 @@ public class Yurl {
 							.put("aCategoryName", iCategoryName)
 							.put("aKeyCode", iKeyCode).build()).get("data");
 			try {
-				relateHelper(iParentId,
+				createNewRelation(iParentId,
 						Integer.parseInt(getCategoryNodeIdString(iCategoryName,
 								iKeyCode, theCategoryNodes)));
 				System.out.println("createNewKeyBinding() - end()");
@@ -775,7 +775,7 @@ public class Yurl {
 							.put("url", theHttpUrl).put("title", theTitle)
 							.put("created", currentTimeMillis)
 							.put("ordinal", currentTimeMillis).build());
-			relateHelper(rootId,
+			createNewRelation(rootId,
 					(Integer) ((JSONArray) ((JSONArray) json.get("data"))
 							.get(0)).get(0));
 			return json;
@@ -962,7 +962,7 @@ public class Yurl {
 				System.out.println("relateCategoriesToItem(): "
 						+ theCategoryIdsToBeAddedTo.getInt(i) + " --> "
 						+ iNodeToBeTagged);
-				relateHelper(theCategoryIdsToBeAddedTo.getInt(i),
+				createNewRelation(theCategoryIdsToBeAddedTo.getInt(i),
 						iNodeToBeTagged);
 			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -993,15 +993,35 @@ public class Yurl {
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
 			System.out.println("createSubDirAndMoveItem() - begin");
-			Integer theNewCategoryNodeIdString = createCategory(iNewParentName);
-			// TODO: On first glance, it looks wrong that we're calling 2 functions
-			Response rResponse =  relate(theNewCategoryNodeIdString, iItemId, iCurrentParentId);
-			try {
-				relateHelper(iCurrentParentId, theNewCategoryNodeIdString);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			JSONObject relateToExistingCategory = relateToExistingCategory(iItemId,
+					iCurrentParentId,
+					createNewCategoryUnderExistingCategory(iNewParentName, iCurrentParentId));
+			Response rResponse =  Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(relateToExistingCategory.toString())
+					.type("application/json").build();
 			return rResponse;
+		}
+
+		private Integer createNewCategoryUnderExistingCategory(String iNewParentName,
+				Integer iCurrentParentId) throws IOException {
+			// Create new category node
+			Integer theNewCategoryNodeIdString = createCategory(iNewParentName);
+
+			// Associate new category with current category
+			createNewRelation(iCurrentParentId, theNewCategoryNodeIdString);
+			return theNewCategoryNodeIdString;
+		}
+
+		private JSONObject relateToExistingCategory(Integer iItemId, Integer iCurrentParentId,
+				Integer theNewCategoryNodeIdString) throws IOException {
+			// delete any existing contains relationship with the
+			// specified existing parent (but not with all parents since we
+			// could have a many-to-one contains)
+			deleteExistingRelationship(iItemId, iCurrentParentId);
+			
+			// Relate the item to the new category
+			JSONObject moveHelper = createNewRelation(theNewCategoryNodeIdString, iItemId);
+			return moveHelper;
 		}
 
 		/**
@@ -1011,20 +1031,24 @@ public class Yurl {
 		@GET
 		@Path("relate")
 		@Produces("application/json")
-		public Response relate(@QueryParam("parentId") Integer iNewParentId,
+		public Response move(@QueryParam("parentId") Integer iNewParentId,
 				@QueryParam("childId") Integer iChildId,
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
-			// first delete any existing contains relationship with the
-			// specified existing parent (but not with all parents since we
-			// could have a many-to-one contains)
+			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
+					iNewParentId);
+
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(moveHelper.toString())
+					.type("application/json").build();
+		}
+
+		private void deleteExistingRelationship(Integer iChildId, Integer iCurrentParentId)
+				throws IOException {
 			execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
 					ImmutableMap.<String, Object> builder()
 							.put("currentParentId", iCurrentParentId)
 							.put("childId", iChildId).build());
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(relateHelper(iNewParentId, iChildId).toString())
-					.type("application/json").build();
 		}
 
 		/**
@@ -1035,7 +1059,7 @@ public class Yurl {
 		 *             we try to relate to a newly created category if the
 		 *             system becomes non-deterministic.
 		 */
-		private static JSONObject relateHelper(Integer iParentId, Integer iChildId)
+		private static JSONObject createNewRelation(Integer iParentId, Integer iChildId)
 				throws IOException, JSONException {
 			return execute(
 					"START a=node({parentId}),b=node({childId}) "
