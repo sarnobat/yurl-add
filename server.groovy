@@ -103,7 +103,7 @@ public class Yurl {
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
 				System.out.println("getUrls() - preloaded categories tree not ready");
-				categoriesTreeJson = getCategoriesTree(ROOT_ID);
+				categoriesTreeJson = CategoryTree.getCategoriesTree(ROOT_ID);
 			} else {
 				categoriesTreeJson = categoriesTreeCache;
 				// This is done in a separate thread
@@ -351,10 +351,11 @@ public class Yurl {
 		////
 		//// The main part
 		////
+		// TODO: See if you can turn this into a map-reduce
 		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
-				categoriesTreeCache = getCategoriesTree(iRootId);
+				categoriesTreeCache = CategoryTree.getCategoriesTree(iRootId);
 			}
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
@@ -406,7 +407,7 @@ public class Yurl {
 					_15: {
 
 						Object val = anItem.get(4);
-						if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSON_OBJECT_NULL))) {
+						if (val != null && !("null".equals(val)) && !(val.getClass().equals(Yurl.JSON_OBJECT_NULL))) {
 							String aValue = (String) val;
 							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
 						}
@@ -419,7 +420,7 @@ public class Yurl {
 							} else if (val == null) {
                                                                 System.out.println("Is null string");
 							}
-							else if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSON_OBJECT_NULL))) {
+							else if (val != null && !("null".equals(val)) && !(val.getClass().equals(Yurl.JSON_OBJECT_NULL))) {
 									Long aValue = (Long) val;
 									anUncategorizedNodeJsonObject.put("created", aValue);
 							}
@@ -534,7 +535,13 @@ public class Yurl {
 			System.out.println("createNewKeyBinding() - begin() : " + String.format("iCategoryName %s\tiKeyCode %s\tiParentId %d", iCategoryName, iKeyCode, iParentId));
 			// TODO: Also create a trash category for each new category key node
 			JSONArray theCategoryNodes = (JSONArray) execute(
-					"START parent=node({parentId}) MATCH parent -[r:CONTAINS]-> existingCategory WHERE has(existingCategory.type) and existingCategory.type = 'categoryNode' and existingCategory.name = {aCategoryName} SET existingCategory.key = {aKeyCode} RETURN distinct id(existingCategory)",
+					"START parent=node({parentId})" +
+					" MATCH parent -[r:CONTAINS]-> existingCategory" +
+					" WHERE has(existingCategory.type)" +
+					" and existingCategory.type = 'categoryNode'" +
+					" and existingCategory.name = {aCategoryName}" +
+					" SET existingCategory.key = {aKeyCode}" +
+					" RETURN distinct id(existingCategory)",
 					ImmutableMap.<String, Object> builder()
 							.put("parentId", iParentId)
 							// TODO: change this back
@@ -606,6 +613,7 @@ public class Yurl {
 					.entity(ret.toString()).type("application/json").build();
 		}
 
+		// TODO: Rewrite this as a map-fold?
 		public static JSONArray getKeys(Integer iParentId) throws IOException,
 				JSONException {
 			System.out.println("getKeys() - parent ID: " + iParentId);
@@ -695,26 +703,15 @@ public class Yurl {
 					System.out.println("downloadImageInSeparateThread() - "
 							+ iUrl + " :: " + targetDirPath);
 					if (iUrl.toLowerCase().contains(".jpg")) {
-
 					} else if (iUrl.toLowerCase().contains(".jpeg")) {
-
 					} else if (iUrl.toLowerCase().contains(".png")) {
-
 					} else if (iUrl.toLowerCase().contains(".gif")) {
-
 					} else if (iUrl.toLowerCase().contains("gstatic")) {
-
 					} else {
-						System.out
-								.println("downloadImageInSeparateThread() - not an image");
-						return;// not an image
+						return;
 					}
 					try {
-						System.out
-								.println("downloadImageInSeparateThread() - about to save");
 						saveImage(iUrl, targetDirPath);
-						System.out
-								.println("downloadImageInSeparateThread() - success, updating DB");
 						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_image = {date}",
 								ImmutableMap.<String, Object> of("id",
 										Long.valueOf(id), "url", iUrl, "date",
@@ -820,8 +817,7 @@ public class Yurl {
 			System.out.println("End");
 		}
 
-		private static void downloadUndownloadedVideosInSeparateThread()
-		{
+		private static void downloadUndownloadedVideosInSeparateThread() {
 			new Thread() {
 				public void run() {
 					try {
@@ -836,7 +832,10 @@ public class Yurl {
 		}
 
 		private static void downloadUndownloadedVideos() throws JSONException, IOException {
-			String query = "start root=node(37658) match  root-[CONTAINS*]->n return n.title, n.downloaded_video, n.url, ID(n) LIMIT 20;";
+			String query = "start root=node(37658)" +
+					" match  root-[CONTAINS*]->n" +
+					" return n.title, n.downloaded_video, n.url, ID(n)" +
+					" LIMIT 20;";
 			JSONObject results = execute(query, ImmutableMap.<String, Object>of());
 			JSONArray jsonArray = results.getJSONArray("data");
 			for (int i = 0; i < jsonArray.length(); i++) {
@@ -857,8 +856,7 @@ public class Yurl {
 					}
 				} else  {
 					Long downloaded1 = row.getLong(1);
-					System.out.println(title + "\t" + downloaded1);
-//					System.out.println(downloaded.getClass());
+					System.out.println("downloadUndownloadedVideos() - " + title + "\t" + downloaded1);
 				}
 			}
 		}
@@ -866,43 +864,26 @@ public class Yurl {
 		private static void downloadVideo( String iVideoUrl,
 				String targetDirPath, String id) {
 			try {
-				System.out
-						.println("downloadVideo() - Begin");
+				System.out.println("downloadVideo() - Begin");
 				File theTargetDir = new File(targetDirPath);
 				if (!theTargetDir.exists()) {
 					throw new RuntimeException(
 							"Target directory doesn't exist");
 				}
 				VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
-				System.out
-						.println("downloadVideo() - About to start downloading");
 				v.getVideo().setVideoQuality(VideoQuality.p1080);
-
 				System.out.println(v.getVideo().getWeb().toString());
 				System.out.println(v.getVideo().getVideoQuality());
 				v.download();// If this hangs, make sure you are using
 								// vget 1.15. If you use 1.13 I know it
 								// hangs
-				System.out
-						.println("downloadVideo() - Download successful. Updating database");
-
 				execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
 						ImmutableMap.<String, Object> of("id",
 								Long.valueOf(id), "url", iVideoUrl,
 								"date", System.currentTimeMillis()));
-				System.out
-						.println("downloadVideo() - Download recorded in database");
-
-			} catch (IOException e) {
-				System.out.println(e.getMessage());
-				//e.printStackTrace();
-				//throw new RuntimeException(e);
+				System.out.println("downloadVideo() - Download recorded in database");
 			} catch (JSONException e) {
 				System.out.println("downloadVideo() - ERROR recording download in database");
-				// Why won't the compiler let me throw this?
-				//e.printStackTrace();
-			} catch (RuntimeException e) {
-				System.out.println(e.getMessage());
 			}
 			catch (Exception e) {
 				System.out.println(e.getMessage());
@@ -1013,14 +994,14 @@ public class Yurl {
 				throws JSONException, IOException {
 			System.out.println("createSubDirAndMoveItem() - begin");
 			Integer theNewCategoryNodeIdString = createCategory(iNewParentName);
-			// On first glance, it looks wrong that we're calling 2 functions
-			Response r =  relate(theNewCategoryNodeIdString, iItemId, iCurrentParentId);
+			// TODO: On first glance, it looks wrong that we're calling 2 functions
+			Response rResponse =  relate(theNewCategoryNodeIdString, iItemId, iCurrentParentId);
 			try {
 				relateHelper(iCurrentParentId, theNewCategoryNodeIdString);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			return r;
+			return rResponse;
 		}
 
 		/**
@@ -1067,7 +1048,7 @@ public class Yurl {
 		}
 
 		// TODO: make this map immutable
-		private static JSONObject execute(String iCypherQuery,
+		static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams, String... iCommentPrefix) throws IOException, JSONException {
 			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
 			System.out.println(commentPrefix + "begin");
@@ -1090,10 +1071,13 @@ public class Yurl {
 						+ iParams);
 				throw new RuntimeException();
 			}
-			String theNeo4jResponse = IOUtils.toString(theResponse
-					.getEntityInputStream());
-			theResponse.getEntityInputStream().close();
-			theResponse.close();
+			String theNeo4jResponse ;
+			_1: {
+				// Do not inline this. We need to close the stream after copying
+				theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream());
+				theResponse.getEntityInputStream().close();
+				theResponse.close();
+			}
 			System.out.println(commentPrefix + "end");
 			return new JSONObject(theNeo4jResponse);
 		}
@@ -1112,7 +1096,7 @@ public class Yurl {
 //			ret.put("flat", getFlatListOfSubcategoriesRecursive(iParentId));
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
-				categoriesTreeJson = getCategoriesTree(ROOT_ID);
+				categoriesTreeJson = CategoryTree.getCategoriesTree(ROOT_ID);
 			} else {
 				categoriesTreeJson = categoriesTreeCache;
 				refreshCategoriesTreeCacheInSeparateThread();
@@ -1128,7 +1112,7 @@ public class Yurl {
 				public void run() {
 					System.out.println("refreshCategoriesTreeCacheInSeparateThread() - run - started");
 					try {
-						categoriesTreeCache = getCategoriesTree(ROOT_ID);
+						categoriesTreeCache = CategoryTree.getCategoriesTree(ROOT_ID);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -1137,109 +1121,189 @@ public class Yurl {
 				}
 			}.start();
 		}
-
-		private static JSONObject getCategoriesTree(Integer rootId)
-				throws JSONException, IOException {
-			return new AddSizes(
-					// This is the expensive query, not the other one
-					getCategorySizes(execute(
-							"START n=node(*) MATCH n-->u WHERE has(n.name) "
-									+ "RETURN id(n),count(u);",
-							ImmutableMap.<String, Object> of(), "getCategoriesTree() [The expensive query] - ").getJSONArray(
-							"data")))
-					.apply(
-					// Path to JSON conversion done in Cypher
-					createCategoryTreeFromCypherResultPaths(
-							// TODO: I don't think we need each path do we? We just need each parent-child relationship.
-							execute("START n=node({parentId}) "
-									+ "MATCH path=n-[r:CONTAINS*]->c "
-									+ "WHERE has(c.name) "
-									+ "RETURN extract(p in nodes(path)| "
-									+ "'{ " + "id : ' + id(p) + ', "
-									+ "name : \"'+ p.name +'\" , "
-									+ "key : \"' + coalesce(p.key, '') + '\"" + " }'" + ")",
-									ImmutableMap.<String, Object> of(
-											"parentId", rootId),
-									"getCategoriesTree() - [getting all paths 3]"),
-							rootId));
-		}
-	
-		private static Map<Integer, Integer> getCategorySizes(JSONArray counts) {
-			Map<Integer, Integer> sizesMap = new HashMap<Integer, Integer>();
-			for (int i = 0; i < counts.length(); i++) {
-				JSONArray row = counts.getJSONArray(i);
-				sizesMap.put(row.getInt(0), row.getInt(1));
-			}
-			return ImmutableMap.copyOf(sizesMap);
-		}
 		
-		private static class AddSizes implements
-				Function<JSONObject, JSONObject> {
-			private final Map<Integer, Integer> categorySizes;
-
-			AddSizes(Map<Integer, Integer> categorySizes) {
-				this.categorySizes = categorySizes;
+		private static class CategoryTree {
+			static JSONObject getCategoriesTree(Integer rootId)
+					throws JSONException, IOException {
+				return new AddSizes(
+						// This is the expensive query, not the other one
+						getCategorySizes(HelloWorldResource.execute(
+								"START n=node(*) MATCH n-->u WHERE has(n.name) "
+										+ "RETURN id(n),count(u);",
+								ImmutableMap.<String, Object>of(),
+								"getCategoriesTree() [The expensive query] - ").getJSONArray(
+								"data")))
+						.apply(
+						// Path to JSON conversion done in Cypher
+						createCategoryTreeFromCypherResultPaths(
+								// TODO: I don't think we need each path do we? We just need each parent-child relationship.
+								HelloWorldResource.execute("START n=node({parentId}) "
+										+ "MATCH path=n-[r:CONTAINS*]->c "
+										+ "WHERE has(c.name) "
+										+ "RETURN extract(p in nodes(path)| "
+										+ "'{ " + "id : ' + id(p) + ', "
+										+ "name : \"'+ p.name +'\" , "
+										+ "key : \"' + coalesce(p.key, '') + '\"" + " }'" + ")",
+										ImmutableMap.<String, Object> of(
+												"parentId", rootId),
+										"getCategoriesTree() - [getting all paths 3]"),
+								rootId));
 			}
-
-			@Override
-			public JSONObject apply(JSONObject input) {
-				return HelloWorldResource.addSizesToCypherJsonResultObjects(
-						input, categorySizes);
+			
+			private static Map<Integer, Integer> getCategorySizes(JSONArray counts) {
+				Map<Integer, Integer> sizesMap = new HashMap<Integer, Integer>();
+				for (int i = 0; i < counts.length(); i++) {
+					JSONArray row = counts.getJSONArray(i);
+					sizesMap.put(row.getInt(0), row.getInt(1));
+				}
+				return ImmutableMap.copyOf(sizesMap);
 			}
-		}
-		
-		private static JSONObject addSizesToCypherJsonResultObjects(JSONObject categoriesTree,
-				Map<Integer, Integer> categorySizes) {
-			Integer id = categoriesTree.getInt("id");
-			categoriesTree.put("size", categorySizes.get(id));
-			if (categoriesTree.has("children")) {
-				JSONArray children = categoriesTree.getJSONArray("children");
-				for (int i = 0; i < children.length(); i++) {
-					addSizesToCypherJsonResultObjects(children.getJSONObject(i), categorySizes);
+			
+
+			private static JSONObject addSizesToCypherJsonResultObjects(JSONObject categoriesTree,
+					Map<Integer, Integer> categorySizes) {
+				Integer id = categoriesTree.getInt("id");
+				categoriesTree.put("size", categorySizes.get(id));
+				if (categoriesTree.has("children")) {
+					JSONArray children = categoriesTree.getJSONArray("children");
+					for (int i = 0; i < children.length(); i++) {
+						addSizesToCypherJsonResultObjects(children.getJSONObject(i), categorySizes);
+					}
+				}
+				return categoriesTree;
+			}
+			
+			private static class AddSizes implements
+					Function<JSONObject, JSONObject> {
+				private final Map<Integer, Integer> categorySizes;
+
+				AddSizes(Map<Integer, Integer> categorySizes) {
+					this.categorySizes = categorySizes;
+				}
+
+				@Override
+				public JSONObject apply(JSONObject input) {
+					return addSizesToCypherJsonResultObjects(
+							input, categorySizes);
 				}
 			}
-			return categoriesTree;
-		}
-
-		private static JSONObject createCategoryTreeFromCypherResultPaths(
-				JSONObject theQueryJsonResult, Integer rootId) {
-			JSONArray cypherRawResults = theQueryJsonResult
-					.getJSONArray("data");
-			checkState(cypherRawResults.length() > 0);
-			Multimap<Integer, Integer> parentToChildren = buildParentToChildMultimap2(cypherRawResults);
-			Map<Integer, JSONObject> categoryNodesWithoutChildren = createId(cypherRawResults);
-			JSONObject root = categoryNodesWithoutChildren.get(rootId);
-			root.put(
-					"children",
-					toJsonArray(buildChildren(parentToChildren.get(rootId),
-							categoryNodesWithoutChildren, parentToChildren)));
-			return root;
-		}
-
-		private static JSONArray toJsonArray(Collection<JSONObject> children) {
-			JSONArray arr = new JSONArray();
-			for (JSONObject child : children) {
-				arr.put(child);
+			
+			private static JSONObject createCategoryTreeFromCypherResultPaths(
+					JSONObject theQueryJsonResult, Integer rootId) {
+				JSONArray cypherRawResults = theQueryJsonResult
+						.getJSONArray("data");
+				checkState(cypherRawResults.length() > 0);
+				Multimap<Integer, Integer> parentToChildren = buildParentToChildMultimap2(cypherRawResults);
+				Map<Integer, JSONObject> categoryNodesWithoutChildren = createId(cypherRawResults);
+				JSONObject root = categoryNodesWithoutChildren.get(rootId);
+				root.put(
+						"children",
+						toJsonArray(buildChildren(parentToChildren.get(rootId),
+								categoryNodesWithoutChildren, parentToChildren)));
+				return root;
 			}
-			return arr;
+
+			/**
+			 * @return - a pair for each category node
+			 */
+			private static Map<Integer, JSONObject> createId(JSONArray cypherRawResults) {
+				ImmutableMap.Builder<Integer, JSONObject> idToJsonBuilder = ImmutableMap
+						.<Integer, JSONObject> builder();
+				Set<Integer> seen = new HashSet<Integer>();
+				for (int i = 0; i < cypherRawResults.length(); i++) {
+					JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
+					for (int j = 0; j < treePath.length(); j++) {
+						if (treePath.get(j).getClass().equals(Yurl.JSON_OBJECT_NULL)) {
+							continue;
+						}
+						JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
+						int categoryId = pathHopNode.getInt("id");
+						if (!seen.contains(categoryId)){
+							seen.add(categoryId);
+							idToJsonBuilder.put(categoryId,
+									pathHopNode);
+						}
+					}
+				}
+				return idToJsonBuilder.build();
+			}
+			
+			private static JSONArray removeNulls(JSONArray iJsonArray) {
+				for(int i = 0; i < iJsonArray.length(); i++) {
+					if (Yurl.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
+						iJsonArray.remove(i);
+						--i;
+					}
+				}
+				return iJsonArray;
+			}
+
+			/**
+			 * @return Integer to set of Integers
+			 */
+			private static Multimap<Integer, Integer> buildParentToChildMultimap2(
+					JSONArray cypherRawResults) {
+				Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
+				getParentChildrenMap: {
+					for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
+						JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
+						for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
+							if (categoryPath.get(hopNum).getClass().equals(Yurl.JSON_OBJECT_NULL)) {
+								continue;
+							}
+							if (categoryPath.get(hopNum + 1).getClass().equals(Yurl.JSON_OBJECT_NULL)) {
+								continue;
+							}
+							if (!(categoryPath.get(hopNum + 1) instanceof String)) {
+								continue;
+							}
+							int childId = new JSONObject(
+									categoryPath.getString(hopNum + 1)).getInt("id");
+							int parentId = checkNotNull(new JSONObject(
+									categoryPath
+											.getString(hopNum)).getInt("id"));
+							Object childrenObj = oParentToChildren.get(parentId);
+							if (childrenObj != null) {
+								Set<?> children = (Set<?>) childrenObj;
+								if (!children.contains(childId)) {
+									oParentToChildren.put(parentId, childId);
+								}
+							} else {
+								oParentToChildren.put(parentId, childId);
+							}
+						}
+					}
+				}
+				return oParentToChildren;
+			}
+
+			private static JSONArray toJsonArray(Collection<JSONObject> children) {
+				JSONArray arr = new JSONArray();
+				for (JSONObject child : children) {
+					arr.put(child);
+				}
+				return arr;
+			}
+
+			private static Set<JSONObject> buildChildren(
+					Collection<Integer> childIds, Map<Integer, JSONObject> nodes,
+					Multimap<Integer, Integer> parentToChildren) {
+				Builder<JSONObject> set = ImmutableSet.builder();
+				for (int childId : childIds) {
+					JSONObject childJson = nodes.get(childId);
+					Collection<Integer> grandchildIds = parentToChildren
+							.get(childId);
+					Collection<JSONObject> grandchildNodes = buildChildren(
+							grandchildIds, nodes, parentToChildren);
+					JSONArray grandchildrenArray = toJsonArray(grandchildNodes);
+					childJson.put("children", grandchildrenArray);
+					set.add(childJson);
+				}
+				return set.build();
+			}			
 		}
 
-		private static Set<JSONObject> buildChildren(
-				Collection<Integer> childIds, Map<Integer, JSONObject> nodes,
-				Multimap<Integer, Integer> parentToChildren) {
-			Builder<JSONObject> set = ImmutableSet.builder();
-			for (int childId : childIds) {
-				JSONObject childJson = nodes.get(childId);
-				Collection<Integer> grandchildIds = parentToChildren
-						.get(childId);
-				Collection<JSONObject> grandchildNodes = buildChildren(
-						grandchildIds, nodes, parentToChildren);
-				JSONArray grandchildrenArray = toJsonArray(grandchildNodes);
-				childJson.put("children", grandchildrenArray);
-				set.add(childJson);
-			}
-			return set.build();
-		}
+
 
 		private static class AddChildren implements Function<Map.Entry<Integer, JSONObject>, Map.Entry<Integer,JSONObject>> {
 			private final Multimap<Integer, Integer> parentIdToChildrenIdList;
@@ -1263,119 +1327,6 @@ public class Yurl {
 				return categoryNodeWithoutChildren;
 			}
 		};
-
-		/**
-		 * @return - a pair for each category node
-		 */
-		private static Map<Integer, JSONObject> createId(JSONArray cypherRawResults) {
-			ImmutableMap.Builder<Integer, JSONObject> idToJsonBuilder = ImmutableMap
-					.<Integer, JSONObject> builder();
-			Set<Integer> seen = new HashSet<Integer>();
-			for (int i = 0; i < cypherRawResults.length(); i++) {
-				JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
-				for (int j = 0; j < treePath.length(); j++) {
-					if (treePath.get(j).getClass().equals(JSON_OBJECT_NULL)) {
-						continue;
-					}
-					JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
-					int categoryId = pathHopNode.getInt("id");
-					if (!seen.contains(categoryId)){
-						seen.add(categoryId);
-						idToJsonBuilder.put(categoryId,
-								pathHopNode);
-					}
-				}
-			}
-			return idToJsonBuilder.build();
-		}
-
-		/**
-		 * @return Integer to set of Integers
-		 */
-		private static Multimap<Integer, Integer> buildParentToChildMultimap2(
-				JSONArray cypherRawResults) {
-			Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
-			getParentChildrenMap: {
-				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
-					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
-					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-						if (categoryPath.get(hopNum).getClass().equals(JSON_OBJECT_NULL)) {
-							continue;
-						}
-						if (categoryPath.get(hopNum + 1).getClass().equals(JSON_OBJECT_NULL)) {
-							continue;
-						}
-						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
-							continue;
-						}
-						int childId = new JSONObject(
-								categoryPath.getString(hopNum + 1)).getInt("id");
-						int parentId = checkNotNull(new JSONObject(
-								categoryPath
-										.getString(hopNum)).getInt("id"));
-						Object childrenObj = oParentToChildren.get(parentId);
-						if (childrenObj != null) {
-							Set<?> children = (Set<?>) childrenObj;
-							if (!children.contains(childId)) {
-								oParentToChildren.put(parentId, childId);
-							}
-						} else {
-							oParentToChildren.put(parentId, childId);
-						}
-					}
-				}
-			}
-			return oParentToChildren;
-		}
-		
-		/**
-		 * @return Integer to set of Integers
-		 */
-		private static Multimap<Integer, Integer> buildParentToChildMultimap(
-				JSONArray cypherRawResults) {
-			Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
-			getParentChildrenMap: {
-				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
-					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
-					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-						if (categoryPath.get(hopNum).getClass().equals(JSON_OBJECT_NULL)) {
-							continue;
-						}
-						if (categoryPath.get(hopNum + 1).getClass().equals(JSON_OBJECT_NULL)) {
-							continue;
-						}
-						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
-							continue;
-						}
-						int childId = new JSONObject(
-								categoryPath.getString(hopNum + 1)).getInt("id");
-						int parentId = checkNotNull(new JSONObject(
-								categoryPath
-										.getString(hopNum)).getInt("id"));
-						Object childrenObj = oParentToChildren.get(parentId);
-						if (childrenObj != null) {
-							List<?> children = (List<?>) childrenObj;
-							if (!children.contains(childId)) {
-								oParentToChildren.put(parentId, childId);
-							}
-						} else {
-							oParentToChildren.put(parentId, childId);
-						}
-					}
-				}
-			}
-			return oParentToChildren;
-		}
-
-		private static JSONArray removeNulls(JSONArray iJsonArray) {
-			for(int i = 0; i < iJsonArray.length(); i++) {
-				if (JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
-					iJsonArray.remove(i);
-					--i;
-				}
-			}
-			return iJsonArray;
-		}
 
 		@Deprecated
 		// This gives a flat list
@@ -1412,7 +1363,6 @@ public class Yurl {
 			// Do not allow this in multiple processes otherwise your hard disk will fill up
 			// or overload the database
 			// Problem - this won't get executed until the server ends
-			//HelloWorldResource.refreshCategoriesTreeCacheInSeparateThread();
 			//HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		} catch (Exception e) {
 			System.out.println("Not creating server instance");
