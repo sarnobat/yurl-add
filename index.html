@@ -159,13 +159,15 @@ function renderIfReady() {
 	var cardsHtml = "";
 	{
 		var urlsRootOnly = uncategorizedResponse.urls[rootId];
-		var headLength = 10;
-		//var truncated = 
-		// This doesn't return the new list unfortunately. It will cause the thumbnails to also get truncated
-		//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
-		//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
-		var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
-		cardsHtml = urlsRootOnly.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
+		if (urlsRootOnly != null) {
+			var headLength = 10;
+			//var truncated = 
+			// This doesn't return the new list unfortunately. It will cause the thumbnails to also get truncated
+			//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
+			//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
+			var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
+			cardsHtml = urlsRootOnly.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
+		}
 	}
 	var urlThumbnailsHtml = "";
 	var urlListHtml = "";
@@ -1285,7 +1287,8 @@ body{
 							<a href='/yurl/?rootId=469990' >Home (Photos)</a><br>
 							<a href='/yurl/?rootId=37658' >Youtube Playlists (videos)</a><br>
 							<a href='/yurl/?rootId=37567'>Watch these</a><br>
-							<a href='/yurl/?rootId=37652'>Watched</a><br><br>
+							<a href='/yurl/?rootId=37652'>Watched</a><br>
+							<a href='/yurl/?rootId=322647'>Atletico Madrid Documentary</a><br><br>
 
 							<a href='/yurl/?rootId=221026'> Download</a><br>
 							<a href='/yurl/?rootId=37581'> Download these</a><br>

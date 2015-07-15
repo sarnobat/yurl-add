@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -62,6 +64,7 @@ import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -83,15 +86,20 @@ public class Yurl {
 
 		static {
 			System.out.println("static() begin");
+//we can't put this in the constructor because multiple instances will get created
+//			HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		}
 
 		private static JSONObject categoriesTreeCache;
 
+		// This only gets invoked when it receives the first request
+		// Multiple instances get created
 		HelloWorldResource() {
-			// We have to put this in the constructor because if we put it in main()
+			System.out.println("HelloWorldResource() - begin");
+			// We can't put the auto downloader in main()
 			// then either it will be called every time the cron job is executed,
 			// or not until the server terminates unexceptionally (which never happens).
-//			HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
+			
 		}
 		
 		@GET
@@ -329,7 +337,7 @@ public class Yurl {
 				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 				theParams.put("rootId", iRootId);
 				JSONObject theQueryResultJson = execute(
-						"start n=node({rootId}) match n-[CONTAINS]->u where has(u.title) return n.name, count(u) as cnt",
+						"start n=node({rootId}) optional match n-[CONTAINS]->u where has(u.title) return n.name, count(u) as cnt",
 						theParams.build());
 				JSONArray outerArray = (JSONArray) theQueryResultJson
 						.get("data");
@@ -818,10 +826,37 @@ public class Yurl {
 		}
 
 		private static void downloadUndownloadedVideosInSeparateThread() {
+			System.out.println("downloadUndownloadedVideosInSeparateThread() - begin");
+//			Timer timer = new Timer ();
+//			TimerTask hourlyTask = new TimerTask() {
+//				@Override
+//				public void run() {
+//					try {
+//						downloadUndownloadedVideosBatch();
+//					} catch (JSONException e) {
+//						e.printStackTrace();
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			};
+//
+//			// schedule the task to run starting now and then every hour...
+//			timer.schedule (hourlyTask, 0l, 1000*60*10);
+			
+//			
 			new Thread() {
 				public void run() {
 					try {
-						downloadUndownloadedVideos();
+						downloadUndownloadedVideosBatch();
+
+				        while(true) {
+				            try {
+				                Thread.sleep(1000*60*60);
+				                //your code here...
+				            } catch (InterruptedException ie) {
+				            }
+				        }
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -831,15 +866,18 @@ public class Yurl {
 			}.start();
 		}
 
-		private static void downloadUndownloadedVideos() throws JSONException, IOException {
+		private static void downloadUndownloadedVideosBatch() throws JSONException, IOException {
+			System.out.println("downloadUndownloadedVideosBatch() - begin");
 			String query = "start root=node(37658)" +
 					" match  root-[CONTAINS*]->n" +
+					" where not(has(n.downloaded_video)) OR n.downloaded_video is null " +
 					" return n.title, n.downloaded_video, n.url, ID(n)" +
 					" LIMIT 20;";
 			JSONObject results = execute(query, ImmutableMap.<String, Object>of());
 			JSONArray jsonArray = results.getJSONArray("data");
 			for (int i = 0; i < jsonArray.length(); i++) {
-				JSONArray row = jsonArray.getJSONArray(i);
+				final JSONArray row = jsonArray.getJSONArray(i);
+				System.out.println("downloadUndownloadedVideosBatch() - iteration: " + row);
 				Object title = row.get(0);
 				Object downloaded = row.get(1);
 				Object url =  row.get(2);
@@ -847,7 +885,22 @@ public class Yurl {
 				if (downloaded == null || downloaded == JSONObject.NULL  || "null".equals(downloaded)) {
 					if (url instanceof String) {
 						if (id instanceof Integer) {
-							downloadVideo(row.getString(2), TARGET_DIR_PATH, Integer.toString(row.getInt(3)));
+							System.out.println("downloadUndownloadedVideosBatch() - Starting retroactively downloading: " + title);
+							try {
+								new SimpleTimeLimiter().callWithTimeout(new Callable() {
+
+									@Override
+									public Object call() throws Exception {
+										downloadVideo(row.getString(2), TARGET_DIR_PATH,
+												Integer.toString(row.getInt(3)));
+
+									}
+								}, 10, TimeUnit.SECONDS, true);
+							} catch (Exception e) {
+								System.out.println("Continuing");
+								continue;
+							}
+							System.out.println("downloadUndownloadedVideosBatch() - Finished retroactively downloading: " + title);
 						} else {
 							System.out.println("id - " + id.getClass());
 						}
@@ -856,13 +909,13 @@ public class Yurl {
 					}
 				} else  {
 					Long downloaded1 = row.getLong(1);
-					System.out.println("downloadUndownloadedVideos() - " + title + "\t" + downloaded1);
+					System.out.println("downloadUndownloadedVideosBatch() - Already downloaded: " + title + "\t" + downloaded1);
 				}
 			}
 		}
 		
-		private static void downloadVideo( String iVideoUrl,
-				String targetDirPath, String id) {
+		private static void downloadVideo(final String iVideoUrl,
+				String targetDirPath, final String id) {
 			try {
 				System.out.println("downloadVideo() - Begin");
 				File theTargetDir = new File(targetDirPath);
@@ -870,18 +923,20 @@ public class Yurl {
 					throw new RuntimeException(
 							"Target directory doesn't exist");
 				}
-				VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
+				final VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
 				v.getVideo().setVideoQuality(VideoQuality.p1080);
-				System.out.println(v.getVideo().getWeb().toString());
-				System.out.println(v.getVideo().getVideoQuality());
+				System.out.println("downloadVideo() - " + v.getVideo().getWeb().toString());
+				System.out.println("downloadVideo() - " + v.getVideo().getVideoQuality());
+				System.out.print("downloadVideo() - If this is the last thing you see, vget is hanging");
 				v.download();// If this hangs, make sure you are using
-								// vget 1.15. If you use 1.13 I know it
-								// hangs
+				// vget 1.15. If you use 1.13 I know it
+				// hangs
+				System.out.println("downloadVideo() - no hanging");
 				execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
-						ImmutableMap.<String, Object> of("id",
-								Long.valueOf(id), "url", iVideoUrl,
+						ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iVideoUrl,
 								"date", System.currentTimeMillis()));
 				System.out.println("downloadVideo() - Download recorded in database");
+				
 			} catch (JSONException e) {
 				System.out.println("downloadVideo() - ERROR recording download in database");
 			}
