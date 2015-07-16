@@ -363,7 +363,7 @@ public class Yurl {
 		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
-				categoriesTreeCache = CategoryTree.getCategoriesTree(iRootId);
+				categoriesTreeCache = CategoryTree.getCategoriesTree(ROOT_ID);
 			}
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
