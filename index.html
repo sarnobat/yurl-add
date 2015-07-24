@@ -183,7 +183,7 @@ function renderIfReady() {
 		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
 		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
 		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
-		markupHtml += "<h1>" + categoryName + "</h1>" + urlsForCategory.map(ITEM_TO_IMAGE).join("\n");
+		markupHtml += "<h1>" + categoryName + "</h1>\n\n" + urlsForCategory.map(ITEM_TO_IMAGE).join("\n");
 	}
 	$("#url_cards").append(cardsHtml);
 	$("#url_thumbnails").append(urlThumbnailsHtml);
@@ -1419,7 +1419,7 @@ reading list (pdf))
 							<div id="tabs-9">
 							  <a href="" onclick="openHtmlTextInNewTab()">Open in new tab</a><br>
 							  <br>
-							  <textarea id="htmlText"></textarea>
+							  <textarea id="htmlText" rows=20 columns=100 style="white-space: nowrap; overflow: none;"></textarea>
 							</div>
 						</div>
 <!--						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
