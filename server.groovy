@@ -1,9 +1,10 @@
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -12,22 +13,18 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -39,7 +36,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
@@ -49,6 +45,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 import com.github.axet.vget.VGet;
 import com.github.axet.vget.info.VideoInfo.VideoQuality;
@@ -58,22 +58,23 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
 public class Yurl {
+	// I hope this is the same as JSONObject.Null (not capitals)
 	public static final Object JSON_OBJECT_NULL = JSONObject.Null;
 	
 	@Path("yurl")
@@ -370,7 +371,7 @@ public class Yurl {
 					"START source=node({rootId}) "
 							+ "MATCH p = source-[r:CONTAINS*1..2]->u "
 							+ "WHERE (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
-							+ "RETURN distinct ID(u),u.title,u.url,extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal "
+							+ "RETURN distinct ID(u),u.title,u.url, extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal, u.biggest_image "
 							+ "ORDER BY u.ordinal DESC LIMIT 500", ImmutableMap
 							.<String, Object> builder().put("rootId", iRootId)
 							.build());
@@ -408,7 +409,6 @@ public class Yurl {
 										path.get(0));
 							}
 						} catch (Exception e) {
-							// TODO: Add this back
 							e.printStackTrace();
 						}
 					}
@@ -421,17 +421,26 @@ public class Yurl {
 						}
 					}
 					_16: {
-
-							Object val = anItem.get(6);
-							if ("null".equals(val)) {
-								System.out.println("Is null value");
-							} else if (val == null) {
-                                                                System.out.println("Is null string");
+						Object val = anItem.get(6);
+						if ("null".equals(val)) {
+							System.out.println("Is null value");
+						} else if (val == null) {
+							System.out.println("Is null string");
+						} else if (val != null && !("null".equals(val))
+								&& !(val.getClass().equals(Yurl.JSON_OBJECT_NULL))) {
+							Long aValue = (Long) val;
+							anUncategorizedNodeJsonObject.put("created", aValue);
+						}
+					}
+					_17: {
+						Object val = anItem.get(8);
+						if (val != null && !("null".equals(val)) && !(val.getClass().equals(Yurl.JSON_OBJECT_NULL))) {
+							String aValue = (String) val;
+							if ("null".equals(aValue)) {
+								System.out.println("Yurl.HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur?");
 							}
-							else if (val != null && !("null".equals(val)) && !(val.getClass().equals(Yurl.JSON_OBJECT_NULL))) {
-									Long aValue = (Long) val;
-									anUncategorizedNodeJsonObject.put("created", aValue);
-							}
+							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
+						}
 					}
 				}
 				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
@@ -699,6 +708,91 @@ public class Yurl {
 			downloadImageInSeparateThread(iUrl, TARGET_DIR_PATH_IMAGES,
 					CYPHER_URI, id);
 			downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
+			recordBiggestImage(iUrl, CYPHER_URI, id);
+		}
+		
+		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+		private static void recordBiggestImage(final String iUrl, final String cypherUri, final String id) {
+			System.out.println("Yurl.HelloWorldResource.recordBiggestImage() - begin");
+//			Callable<String> callable = new Callable<String>() {
+//				public String call() {
+//					return HelloWorldResource.getBiggestImage(iUrl);
+//				}
+//
+//				
+//			};
+//			String biggestImageAbsUrl = HelloWorldResource.BiggestImage
+//					.getBiggestImage("http://www.denimblog.com/2015/07/stella-maxwell-in-rag-bone/");
+//			System.out.println("Yurl.HelloWorldResource.recordBiggestImage()" + " - Biggest image is: " + biggestImageAbsUrl);
+			Runnable r = new Runnable() {
+				
+				@Override
+				public void run() {
+					execute2("start n=node({id}) SET n.biggest_image = {biggestImage}",
+							ImmutableMap.<String, Object> of("id", Integer.parseInt(id),
+									"biggestImage", HelloWorldResource.getBiggestImage(iUrl)));		
+				}
+			};
+//			FutureTask<String> future = new FutureTask<String>(callable);
+			executorService.execute(r);
+			
+		}
+
+		private static String getBiggestImage(final String iUrl2) {
+			System.out.println("Yurl.HelloWorldResource.getBiggestImage() - begin");
+			String biggestImageAbsUrl = null;
+			try {
+				biggestImageAbsUrl = BiggestImage.getBiggestImage(iUrl2);
+				return biggestImageAbsUrl;
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+		}
+
+		private static String encode(String value) {
+			String encode = null;
+			try {
+				encode = URLEncoder.encode(value, "UTF-8");
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
+			return encode;
+		}
+
+		private static String getValue(FutureTask<String> future) {
+			String s;
+			try {
+				s = future.get();
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+				throw new RuntimeException(e1);
+			} catch (ExecutionException e1) {
+				e1.printStackTrace();
+				throw new RuntimeException(e1);
+			}
+			return s;
+		}
+
+		private static void execute2(String iCypherQuery, ImmutableMap<String, Object> of) {
+			String string = "recordBiggestImage()";
+			try {
+				HelloWorldResource.execute(iCypherQuery, of, string);
+			} catch (JSONException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
 		}
 
 		private static void downloadImageInSeparateThread(final String iUrl2,
@@ -893,6 +987,7 @@ public class Yurl {
 									public Object call() throws Exception {
 										downloadVideo(row.getString(2), TARGET_DIR_PATH,
 												Integer.toString(row.getInt(3)));
+										return null;
 
 									}
 								}, 10, TimeUnit.SECONDS, true);
@@ -917,7 +1012,7 @@ public class Yurl {
 		private static void downloadVideo(final String iVideoUrl,
 				String targetDirPath, final String id) {
 			try {
-				System.out.println("downloadVideo() - Begin");
+				System.out.println("downloadVideo() - Begin: " + iVideoUrl);
 				File theTargetDir = new File(targetDirPath);
 				if (!theTargetDir.exists()) {
 					throw new RuntimeException(
@@ -931,7 +1026,7 @@ public class Yurl {
 				v.download();// If this hangs, make sure you are using
 				// vget 1.15. If you use 1.13 I know it
 				// hangs
-				System.out.println("downloadVideo() - no hanging");
+				System.out.println("\ndownloadVideo() - successfully downloaded video at " + iVideoUrl);
 				execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
 						ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iVideoUrl,
 								"date", System.currentTimeMillis()));
@@ -1148,7 +1243,7 @@ public class Yurl {
 			if (theResponse.getStatus() != 200) {
 				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: "
 						+ iParams);
-				throw new RuntimeException();
+				throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream()));
 			}
 			String theNeo4jResponse ;
 			_1: {
@@ -1382,7 +1477,140 @@ public class Yurl {
 			}			
 		}
 
+		private static class BiggestImage {
 
+			static String getBiggestImage(String url) throws MalformedURLException, IOException {
+				System.out.println("Yurl.HelloWorldResource.BiggestImage.getBiggestImage() - begin");
+				List<String> imagesDescendingSize = getImagesDescendingSize(url);
+//				List<String> imagesOrdered = movePngToEnd(imagesDescendingSize);
+				String biggestImage = imagesDescendingSize.get(0);
+				return biggestImage;
+			}
+
+//			private static List<String> movePngToEnd(List<String> imagesDescendingSize) {
+//				List<String> pngFiles = new LinkedList<String>();
+//				List<String> nonPngFiles = new LinkedList<String>();
+//				for (String filePath : imagesDescendingSize) {
+//					if (filePath.matches("(?i).*png$") || filePath.matches("(?i).*png\\?.*")) {
+//						pngFiles.add(filePath);
+//					} else {
+//						nonPngFiles.add(filePath);
+//					}
+//				}
+//				nonPngFiles.addAll(pngFiles);
+//				return ImmutableList.copyOf(nonPngFiles); 
+//			}
+
+			private static List<String> getImagesDescendingSize(String url) throws MalformedURLException,
+					IOException {
+				String base = getBaseUrl(url);
+				// Don't use the chrome binaries that you browse the web with.
+				System.setProperty("webdriver.chrome.driver",
+//						"/Users/sarnobat/trash/chromedriver"
+						"/home/sarnobat/trash/chromedriver"
+						);
+
+				WebDriver driver = //new  org.openqa.selenium.htmlunit.HtmlUnitDriver(); 
+				//org.openqa.selenium.firefox.FirefoxDriver();
+										new ChromeDriver();
+				//driver.manage().timeouts().implicitlyWait(180, java.util.concurrent.TimeUnit.SECONDS);
+				List<String> ret = ImmutableList.of();
+				try {
+					driver.get(url);
+					// TODO: shame there isn't an input stream, then we wouldn't have to
+					// store the whole page in memory
+					String source = driver.getPageSource();
+					// System.out.println(source);
+					List<String> out = getAllTags(base, source);
+					System.out.println(out);
+					Map<Integer, String> imageSizes = getImageSizes(out);
+					System.out.println(imageSizes);
+					// System.out.println(Joiner.on("\n").join(sortedImages));
+					ret = sortByKey(imageSizes);
+				} finally {
+					driver.quit();
+				}
+				return ret;
+			}
+
+			private static List<String> sortByKey(Map<Integer, String> imageSizes) {
+				ImmutableList.Builder<String> builder = ImmutableList.builder();
+				ImmutableList<Integer> sortedList = FluentIterable.from(imageSizes.keySet())
+						.toSortedList(Ordering.natural().reverse());
+				for (Integer size : sortedList) {
+					String url = imageSizes.get(size);
+					if (!isPngFile(url)) {
+						builder.add(url);
+						System.out.println(size + "\t" + url);
+					}
+				}
+				for (Integer size : sortedList) {
+					String url = imageSizes.get(size);
+					if (isPngFile(url)) {
+						builder.add(url);
+						System.out.println(size + "\t" + url);
+					}
+				}
+				return builder.build();
+			}
+
+			private static boolean isPngFile(String url) {
+				return url.matches("(?i).*\\.png") || url.matches("(?i).*\\.png\\?.*");
+			}
+
+			private static Map<Integer, String> getImageSizes(List<String> out) {
+				ImmutableMap.Builder<Integer, String> builder = ImmutableMap.builder();
+				Set<Integer> taken = new HashSet<Integer>();
+				for (String imgSrc : out) {
+					int size = getByteSize(imgSrc);
+					if (!taken.contains(size)) {
+						builder.put(size, imgSrc);
+						taken.add(size);
+					}
+				}
+				return builder.build();
+			}
+
+			private static int getByteSize(String absUrl) {
+				URL url;
+				try {
+					url = new URL(absUrl);
+					int contentLength = url.openConnection().getContentLength();
+					// System.out.println(contentLength + "\t"+ absUrl);
+					return contentLength;
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return 0;
+			}
+
+			private static String getBaseUrl(String url1) throws MalformedURLException {
+				URL url = new URL(url1);
+				String file = url.getFile();
+				String path;
+				if (file.length() == 0) {
+					path = url1;
+				} else {
+					path = url.getFile().substring(0, file.lastIndexOf('/'));
+				}
+				return url.getProtocol() + "://" + url.getHost() + path;
+			}
+
+			private static List<String> getAllTags(String domainRoot, String source) throws IOException {
+				Document doc = Jsoup.parse(IOUtils.toInputStream(source), "UTF-8", domainRoot);
+				Elements tags = doc.getElementsByTag("img");
+				return FluentIterable.<Element> from(tags).transform(IMG_TO_SOURCE).toList();
+			}
+
+			private static final Function<Element, String> IMG_TO_SOURCE = new Function<Element, String>() {
+				@Override
+				public String apply(Element e) {
+					return e.absUrl("src");
+				}
+			};
+		}
 
 		private static class AddChildren implements Function<Map.Entry<Integer, JSONObject>, Map.Entry<Integer,JSONObject>> {
 			private final Multimap<Integer, Integer> parentIdToChildrenIdList;
@@ -1434,6 +1662,10 @@ public class Yurl {
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
+//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.teamtalk.com/liverpool");
+//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.denimblog.com/2015/07/stella-maxwell-in-rag-bone/");
+//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.lfchistory.net/Articles/Article/61");
+//		System.out.println("Biggest image is: " + biggestImageAbsUrl);
 		HelloWorldResource.refreshCategoriesTreeCacheInSeparateThread();
 		try {
 			JdkHttpServerFactory.createHttpServer(

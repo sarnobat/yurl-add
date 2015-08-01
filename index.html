@@ -607,7 +607,14 @@ function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, lim
 				break;
 			}
 			var item = urlsInCategory[j];
-			urlThumbnailsHtml += ("<a href="+item.url+"><img class=itemImage src='"+getImageForUrl(item.url)+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>");
+			var displayImageUrl;
+			if (item.biggest_image == null) {
+				displayImageUrl = getImageForUrl(item.url);
+			} else {
+				displayImageUrl = item.biggest_image;
+			}
+			
+			urlThumbnailsHtml += "<a href="+item.url+"><img class=itemImage src='"+displayImageUrl+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>" ;
 		}
 		return urlThumbnailsHtml;
 }
