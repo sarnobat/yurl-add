@@ -1579,6 +1579,7 @@ public class Yurl {
 					// System.out.println(contentLength + "\t"+ absUrl);
 					return contentLength;
 				} catch (MalformedURLException e) {
+					System.out.println("Yurl.HelloWorldResource.BiggestImage.getByteSize() - " + absUrl);
 					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
