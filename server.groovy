@@ -60,6 +60,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Multimap;
@@ -76,6 +77,8 @@ import com.sun.jersey.api.json.JSONConfiguration;
 public class Yurl {
 	// I hope this is the same as JSONObject.Null (not capitals)
 	public static final Object JSON_OBJECT_NULL = JSONObject.Null;
+	private static final String CHROMEDRIVER_PATH = //"/Users/sarnobat/trash/chromedriver";
+	"/home/sarnobat/trash/chromedriver";
 	
 	@Path("yurl")
 	public static class HelloWorldResource { // Must be public
@@ -910,8 +913,7 @@ public class Yurl {
 
 				// @Override
 				public void run() {
-					System.out
-					.println("downloadVideoSynchronous() - Begin");
+//					System.out.println("downloadVideoSynchronous() - Begin");
 					downloadVideo(iVideoUrl, TARGET_DIR_PATH, id);
 				}
 			};
@@ -1012,21 +1014,7 @@ public class Yurl {
 		private static void downloadVideo(final String iVideoUrl,
 				String targetDirPath, final String id) {
 			try {
-				System.out.println("downloadVideo() - Begin: " + iVideoUrl);
-				File theTargetDir = new File(targetDirPath);
-				if (!theTargetDir.exists()) {
-					throw new RuntimeException(
-							"Target directory doesn't exist");
-				}
-				final VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
-				v.getVideo().setVideoQuality(VideoQuality.p1080);
-				System.out.println("downloadVideo() - " + v.getVideo().getWeb().toString());
-				System.out.println("downloadVideo() - " + v.getVideo().getVideoQuality());
-				System.out.print("downloadVideo() - If this is the last thing you see, vget is hanging");
-				v.download();// If this hangs, make sure you are using
-				// vget 1.15. If you use 1.13 I know it
-				// hangs
-				System.out.println("\ndownloadVideo() - successfully downloaded video at " + iVideoUrl);
+				downloadVideo(iVideoUrl, targetDirPath);
 				execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
 						ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iVideoUrl,
 								"date", System.currentTimeMillis()));
@@ -1038,6 +1026,25 @@ public class Yurl {
 			catch (Exception e) {
 				System.out.println(e.getMessage());
 			}
+		}
+
+		private static void downloadVideo(final String iVideoUrl, String targetDirPath)
+				throws MalformedURLException {
+			System.out.println("downloadVideo() - Begin: " + iVideoUrl);
+			File theTargetDir = new File(targetDirPath);
+			if (!theTargetDir.exists()) {
+				throw new RuntimeException(
+						"Target directory doesn't exist");
+			}
+			final VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
+			v.getVideo().setVideoQuality(VideoQuality.p1080);
+			System.out.println("downloadVideo() - " + v.getVideo().getWeb().toString());
+			System.out.println("downloadVideo() - " + v.getVideo().getVideoQuality());
+			System.out.print("downloadVideo() - If this is the last thing you see, vget is hanging");
+			v.download();// If this hangs, make sure you are using
+			// vget 1.15. If you use 1.13 I know it
+			// hangs
+			System.out.println("\ndownloadVideo() - successfully downloaded video at " + iVideoUrl + " (" + v.getVideo().getTitle() + ")");
 		}
 		@GET
 		@Path("surpassOrdinal")
@@ -1505,9 +1512,7 @@ public class Yurl {
 					IOException {
 				String base = getBaseUrl(url);
 				// Don't use the chrome binaries that you browse the web with.
-				System.setProperty("webdriver.chrome.driver",
-//						"/Users/sarnobat/trash/chromedriver"
-						"/home/sarnobat/trash/chromedriver"
+				System.setProperty("webdriver.chrome.driver", Yurl.CHROMEDRIVER_PATH
 						);
 
 				WebDriver driver = //new  org.openqa.selenium.htmlunit.HtmlUnitDriver(); 
@@ -1519,12 +1524,19 @@ public class Yurl {
 					driver.get(url);
 					// TODO: shame there isn't an input stream, then we wouldn't have to
 					// store the whole page in memory
+					try {
+						// We need to let the dynamic content load.
+						Thread.sleep(5000L);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					String source = driver.getPageSource();
 					// System.out.println(source);
-					List<String> out = getAllTags(base, source);
-					System.out.println(out);
-					Map<Integer, String> imageSizes = getImageSizes(out);
-					System.out.println(imageSizes);
+					List<String> out = getAllTags(base + "/", source);
+					System.out.println("Yurl.HelloWorldResource.BiggestImage.getImagesDescendingSize() - all img tags: " + out);
+					Multimap<Integer, String> imageSizes = getImageSizes(out);
+					System.out.println("Yurl.HelloWorldResource.BiggestImage.getImagesDescendingSize()" + imageSizes);
 					// System.out.println(Joiner.on("\n").join(sortedImages));
 					ret = sortByKey(imageSizes);
 				} finally {
@@ -1533,40 +1545,59 @@ public class Yurl {
 				return ret;
 			}
 
-			private static List<String> sortByKey(Map<Integer, String> imageSizes) {
-				ImmutableList.Builder<String> builder = ImmutableList.builder();
+			private static List<String> sortByKey(Multimap<Integer, String> imageSizes) {
+				ImmutableList.Builder<String> finalList = ImmutableList.builder();
+				
+				// Phase 1: Sort by size descending
 				ImmutableList<Integer> sortedList = FluentIterable.from(imageSizes.keySet())
 						.toSortedList(Ordering.natural().reverse());
+				
+				// Phase 2: Put JPGs first 
 				for (Integer size : sortedList) {
-					String url = imageSizes.get(size);
-					if (!isPngFile(url)) {
-						builder.add(url);
-						System.out.println(size + "\t" + url);
+					for (String url: imageSizes.get(size)) {
+						if (isJpgFile(url)) {
+							finalList.add(url);
+							System.out
+									.println("Yurl.HelloWorldResource.BiggestImage.sortByKey() - "
+											+ size + "\t" + url);
+						}
 					}
 				}
 				for (Integer size : sortedList) {
-					String url = imageSizes.get(size);
-					if (isPngFile(url)) {
-						builder.add(url);
-						System.out.println(size + "\t" + url);
+					for (String url: imageSizes.get(size)) {
+						if (!isJpgFile(url)) {
+							finalList.add(url);
+							System.out
+									.println("Yurl.HelloWorldResource.BiggestImage.sortByKey() - "
+											+ size + "\t" + url);
+						}
 					}
 				}
-				return builder.build();
+				return finalList.build();
 			}
 
+			private static boolean isJpgFile(String url) {
+				return url.matches("(?i).*\\.jpg") || url.matches("(?i).*\\.jpg\\?.*");
+			}
+			
 			private static boolean isPngFile(String url) {
 				return url.matches("(?i).*\\.png") || url.matches("(?i).*\\.png\\?.*");
 			}
 
-			private static Map<Integer, String> getImageSizes(List<String> out) {
-				ImmutableMap.Builder<Integer, String> builder = ImmutableMap.builder();
+			private static Multimap<Integer, String> getImageSizes(List<String> out) {
+//				ImmutableMap.Builder<Integer, String> builder = ImmutableMap.builder();
+				ImmutableMultimap.Builder<Integer, String> builder = ImmutableMultimap.builder();
 				Set<Integer> taken = new HashSet<Integer>();
 				for (String imgSrc : out) {
 					int size = getByteSize(imgSrc);
-					if (!taken.contains(size)) {
-						builder.put(size, imgSrc);
-						taken.add(size);
-					}
+					System.out.println("Yurl.HelloWorldResource.BiggestImage.getImageSizes() - " + size + "\t" + imgSrc);
+					builder.put(size, imgSrc);
+//					if (!taken.contains(size)) {
+//						builder.put(size, imgSrc);
+//						taken.add(size);
+//					} else {
+//						System.out.println("Yurl.HelloWorldResource.BiggestImage.getImageSizes() - size already taken: " + size);
+//					}
 				}
 				return builder.build();
 			}
@@ -1588,6 +1619,7 @@ public class Yurl {
 			}
 
 			private static String getBaseUrl(String url1) throws MalformedURLException {
+				System.out.println("Yurl.HelloWorldResource.BiggestImage.getBaseUrl() -\t"+url1);
 				URL url = new URL(url1);
 				String file = url.getFile();
 				String path;
@@ -1596,11 +1628,15 @@ public class Yurl {
 				} else {
 					path = url.getFile().substring(0, file.lastIndexOf('/'));
 				}
-				return url.getProtocol() + "://" + url.getHost() + path;
+				String string = url.getProtocol() + "://" + url.getHost() + path;
+				System.out.println("Yurl.HelloWorldResource.BiggestImage.getBaseUrl() -\t"+string);
+				return string;
 			}
 
-			private static List<String> getAllTags(String domainRoot, String source) throws IOException {
-				Document doc = Jsoup.parse(IOUtils.toInputStream(source), "UTF-8", domainRoot);
+			private static List<String> getAllTags(String baseUrl, String source) throws IOException {
+				System.out.println("Yurl.HelloWorldResource.BiggestImage.getAllTags() - base URL : " + baseUrl);
+				Document doc = Jsoup.parse(IOUtils.toInputStream(source), "UTF-8", baseUrl);
+//				System.out.println("Yurl.HelloWorldResource.BiggestImage.getAllTags() - Entire document: " + doc.toString());
 				Elements tags = doc.getElementsByTag("img");
 				return FluentIterable.<Element> from(tags).transform(IMG_TO_SOURCE).toList();
 			}
@@ -1666,7 +1702,12 @@ public class Yurl {
 //		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.teamtalk.com/liverpool");
 //		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.denimblog.com/2015/07/stella-maxwell-in-rag-bone/");
 //		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.lfchistory.net/Articles/Article/61");
+//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.imdb.com/title/tt2484460/");
+//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.midatlanticwrestling.net/resourcecenter/gateway_remembers/uswrestlingclub/ringside_1-3.htm");
 //		System.out.println("Biggest image is: " + biggestImageAbsUrl);
+
+		//		HelloWorldResource.downloadVideo("https://www.youtube.com/watch?v=ugf4-sl7tnQ", "/media/sarnobat/Unsorted/Videos/");
+
 		HelloWorldResource.refreshCategoriesTreeCacheInSeparateThread();
 		try {
 			JdkHttpServerFactory.createHttpServer(
