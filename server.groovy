@@ -963,6 +963,7 @@ public class Yurl {
 			}.start();
 		}
 
+		@SuppressWarnings("unchecked")
 		private static void downloadUndownloadedVideosBatch() throws JSONException, IOException {
 			System.out.println("downloadUndownloadedVideosBatch() - begin");
 			String query = "start root=node(37658)" +
