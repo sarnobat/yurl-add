@@ -56,6 +56,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -99,7 +100,7 @@ public class Yurl {
 		// This only gets invoked when it receives the first request
 		// Multiple instances get created
 		HelloWorldResource() {
-			System.out.println("HelloWorldResource() - begin");
+//			System.out.println("HelloWorldResource() - begin");
 			// We can't put the auto downloader in main()
 			// then either it will be called every time the cron job is executed,
 			// or not until the server terminates unexceptionally (which never happens).
@@ -149,7 +150,7 @@ public class Yurl {
 			// way in the UI)
 			JSONObject theParentNodeJson = execute(
 					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)",
-					theParams.build());
+					theParams.build(), "parent()");
 			JSONArray theData = (JSONArray) theParentNodeJson.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
@@ -280,7 +281,7 @@ public class Yurl {
 			theParams.put("nodeId", iRootId);
 			JSONObject theResponse = execute(
 					"start root=node({nodeId}) MATCH root--n RETURN distinct n, id(n)",
-					theParams.build());
+					theParams.build(), "printNode()");
 			JSONArray jsonArray = (JSONArray) theResponse.get("data");
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONArray aNode = (JSONArray) jsonArray.get(i);
@@ -377,7 +378,7 @@ public class Yurl {
 							+ "RETURN distinct ID(u),u.title,u.url, extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal, u.biggest_image "
 							+ "ORDER BY u.ordinal DESC LIMIT 500", ImmutableMap
 							.<String, Object> builder().put("rootId", iRootId)
-							.build());
+							.build(), "getItemsAtLevelAndChildLevels()");
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
 			for (int i = 0; i < theDataJson.length(); i++) {
@@ -500,10 +501,10 @@ public class Yurl {
 				execute("START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
 						ImmutableMap.<String, Object> builder()
 								.put("parentId", iParentId)
-								.put("key", key).build());
-				System.out.println("Removed keybinding for " + name);
+								.put("key", key).build(), "deleteBinding()");
+				System.out.println("deleteBinding() - Removed keybinding for " + name);
 			} catch (Exception e) {
-				System.out.println("Did not removed keybinding for " + name + " since there currently isn't one.");
+				System.out.println("deleteBinding() - Did not removed keybinding for " + name + " since there currently isn't one.");
 			}
 		}
 		
@@ -566,7 +567,7 @@ public class Yurl {
 							.put("parentId", iParentId)
 							// TODO: change this back
 							.put("aCategoryName", iCategoryName)
-							.put("aKeyCode", iKeyCode).build()).get("data");
+							.put("aKeyCode", iKeyCode).build(), "createNewKeyBinding()").get("data");
 			try {
 				createNewRelation(iParentId,
 						Integer.parseInt(getCategoryNodeIdString(iCategoryName,
@@ -592,7 +593,7 @@ public class Yurl {
 								.put("key", iKeyCode)
 								.put("type", "categoryNode")
 								.put("created", System.currentTimeMillis())
-								.build()).get("data")).get(0)).get(0);
+								.build(), "getCategoryNodeIdString()").get("data")).get(0)).get(0);
 			} else {
 				if (theCategoryNodes.length() > 0) {
 					if (theCategoryNodes.length() > 1) {
@@ -648,7 +649,7 @@ public class Yurl {
 					"WHERE has(n.name)  and n.type = 'categoryNode' and id(parent) = {parentId} " +
 					"RETURN distinct ID(n),n.name,n.key,0 as c order by c desc",
 					ImmutableMap.<String, Object> builder()
-							.put("parentId", iParentId).build()).get("data");
+							.put("parentId", iParentId).build(), "getKeys()").get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
 				JSONArray aBindingArray = theData.getJSONArray(i);
@@ -733,9 +734,9 @@ public class Yurl {
 				
 				@Override
 				public void run() {
-					execute2("start n=node({id}) SET n.biggest_image = {biggestImage}",
+					execute("start n=node({id}) SET n.biggest_image = {biggestImage}",
 							ImmutableMap.<String, Object> of("id", Integer.parseInt(id),
-									"biggestImage", HelloWorldResource.getBiggestImage(iUrl)));		
+									"biggestImage", HelloWorldResource.getBiggestImage(iUrl)), "recordBiggestImage()");		
 				}
 			};
 //			FutureTask<String> future = new FutureTask<String>(callable);
@@ -786,7 +787,7 @@ public class Yurl {
 			return s;
 		}
 
-		private static void execute2(String iCypherQuery, ImmutableMap<String, Object> of) {
+		private static void execute2(String iCypherQuery, Map<String, Object> of) {
 			String string = "recordBiggestImage()";
 			try {
 				HelloWorldResource.execute(iCypherQuery, of, string);
@@ -821,9 +822,8 @@ public class Yurl {
 						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_image = {date}",
 								ImmutableMap.<String, Object> of("id",
 										Long.valueOf(id), "url", iUrl, "date",
-										System.currentTimeMillis()));
-						System.out
-								.println("downloadImageInSeparateThread() - DB updated");
+										System.currentTimeMillis()), "downloadImageInSeparateThread()");
+						System.out.println("downloadImageInSeparateThread() - DB updated");
 					} catch (Exception e) {
 						// e.printStackTrace();
 						System.out.println(e.getMessage());
@@ -880,7 +880,7 @@ public class Yurl {
 					ImmutableMap.<String, Object> builder()
 							.put("url", theHttpUrl).put("title", theTitle)
 							.put("created", currentTimeMillis)
-							.put("ordinal", currentTimeMillis).build());
+							.put("ordinal", currentTimeMillis).build(), "createNode()");
 			createNewRelation(rootId,
 					(Integer) ((JSONArray) ((JSONArray) json.get("data"))
 							.get(0)).get(0));
@@ -970,7 +970,7 @@ public class Yurl {
 					" where not(has(n.downloaded_video)) OR n.downloaded_video is null " +
 					" return n.title, n.downloaded_video, n.url, ID(n)" +
 					" LIMIT 20;";
-			JSONObject results = execute(query, ImmutableMap.<String, Object>of());
+			JSONObject results = execute(query, ImmutableMap.<String, Object>of(), "downloadUndownloadedVideosBatch()");
 			JSONArray jsonArray = results.getJSONArray("data");
 			for (int i = 0; i < jsonArray.length(); i++) {
 				final JSONArray row = jsonArray.getJSONArray(i);
@@ -1018,7 +1018,7 @@ public class Yurl {
 				downloadVideo(iVideoUrl, targetDirPath);
 				execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
 						ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iVideoUrl,
-								"date", System.currentTimeMillis()));
+								"date", System.currentTimeMillis()), "downloadVideo()");
 				System.out.println("downloadVideo() - Download recorded in database");
 				
 			} catch (JSONException e) {
@@ -1063,7 +1063,7 @@ public class Yurl {
 									+ "RETURN n.ordinal, n2.ordinal",
 							ImmutableMap.<String, Object> of("nodeIdToChange",
 									nodeIdToChange, "nodeIdToSurpass",
-									nodeIdToSurpass))).type("application/json")
+									nodeIdToSurpass), "surpassOrdinal()")).type("application/json")
 					.build();
 		}
 
@@ -1083,7 +1083,7 @@ public class Yurl {
 									+ "RETURN n.ordinal,n2.ordinal",
 							ImmutableMap.<String, Object> of("nodeIdToChange",
 									nodeIdToChange, "nodeIdToUndercut",
-									nodeIdToUndercut)).toString())
+									nodeIdToUndercut), "undercutOrdinal()").toString())
 					.type("application/json").build();
 		}
 
@@ -1101,7 +1101,7 @@ public class Yurl {
 									+ "SET n.temp=n2.ordinal, n2.ordinal=n.ordinal, n.ordinal=n.temp "
 									+ "RETURN n.ordinal, n2.ordinal",
 							ImmutableMap.<String, Object> of("id1", iFirstId,
-									"id2", iSecondId)).toString())
+									"id2", iSecondId), "swapOrdinals()").toString())
 					.type("application/json").build();
 		}
 
@@ -1139,7 +1139,7 @@ public class Yurl {
 									.put("name", iCategoryName)
 									.put("type", "categoryNode")
 									.put("created", System.currentTimeMillis())
-									.build()).get("data")).get(0)).get(0));
+									.build(), "createCategory()").get("data")).get(0)).get(0));
 		}
 
 		@GET
@@ -1206,7 +1206,7 @@ public class Yurl {
 			execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
 					ImmutableMap.<String, Object> builder()
 							.put("currentParentId", iCurrentParentId)
-							.put("childId", iChildId).build());
+							.put("childId", iChildId).build(), "deleteExistingRelationship()");
 		}
 
 		/**
@@ -1226,7 +1226,7 @@ public class Yurl {
 							.put("parentId", iParentId)
 							.put("childId", iChildId)
 							.put("currentTime", System.currentTimeMillis())
-							.build());
+							.build(), "createNewRelation()");
 		}
 
 		// TODO: make this map immutable
@@ -1313,7 +1313,7 @@ public class Yurl {
 								"START n=node(*) MATCH n-->u WHERE has(n.name) "
 										+ "RETURN id(n),count(u);",
 								ImmutableMap.<String, Object>of(),
-								"getCategoriesTree() [The expensive query] - ").getJSONArray(
+								"getCategoriesTree() [The expensive query]").getJSONArray(
 								"data")))
 						.apply(
 						// Path to JSON conversion done in Cypher
@@ -1604,6 +1604,9 @@ public class Yurl {
 			}
 
 			private static int getByteSize(String absUrl) {
+				if (Strings.isNullOrEmpty(absUrl)) {
+					return 0;
+				}
 				URL url;
 				try {
 					url = new URL(absUrl);
@@ -1683,7 +1686,7 @@ public class Yurl {
 					"MATCH parent-[c:CONTAINS*]->n " +
 					"WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} " +
 					"RETURN distinct ID(n),n.name",
-					ImmutableMap.<String, Object> of("parentId", iParentId))
+					ImmutableMap.<String, Object> of("parentId", iParentId), "getFlatListOfSubcategoriesRecursive()")
 					.get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
