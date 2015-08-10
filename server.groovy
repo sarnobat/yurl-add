@@ -910,16 +910,37 @@ public class Yurl {
 		private static void downloadVideoInSeparateThread(
 				final String iVideoUrl, final String TARGET_DIR_PATH,
 				final String cypherUri, final String id) {
-			Runnable r = new Runnable() {
-
-				// @Override
-				public void run() {
-//					System.out.println("downloadVideoSynchronous() - Begin");
-					downloadVideo(iVideoUrl, TARGET_DIR_PATH, id);
-				}
-			};
-			new Thread(r).start();
-//			System.out.println("End");
+			_1: {
+			// VGet stopped working
+//				Runnable r = new Runnable() {
+//
+//					// @Override
+//					public void run() {
+//						downloadVideo(iVideoUrl, TARGET_DIR_PATH, id);
+//					}
+//				};
+//				new Thread(r).start();
+			}
+			_2: {
+				Runnable r2 = new Runnable() {
+					// @Override
+					public void run() {
+						_3: {
+							//downloadVideoWorkaround(iVideoUrl, TARGET_DIR_PATH, id);
+							Process p = new ProcessBuilder().directory(Paths.get(TARGET_DIR_PATH).toFile()).command("/home/sarnobat/bin/youtube_download '" + iVideoUrl+ "'").start();
+							if (p.exitValue() == 0) {
+								System.out
+										.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded " + iVideoUrl);
+								writeSuccessToDb(iVideoUrl, id);
+							} else {
+								System.out
+										.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading " + iVideoUrl);
+							}
+						}
+					}
+				};
+				executorService.submit(r2);
+			}
 		}
 
 		private static void downloadUndownloadedVideosInSeparateThread() {
@@ -1017,10 +1038,7 @@ public class Yurl {
 				String targetDirPath, final String id) {
 			try {
 				downloadVideo(iVideoUrl, targetDirPath);
-				execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
-						ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iVideoUrl,
-								"date", System.currentTimeMillis()), "downloadVideo()");
-				System.out.println("downloadVideo() - Download recorded in database");
+				writeSuccessToDb(iVideoUrl, id);
 				
 			} catch (JSONException e) {
 				System.out.println("downloadVideo() - ERROR recording download in database");
@@ -1028,6 +1046,14 @@ public class Yurl {
 			catch (Exception e) {
 				System.out.println(e.getMessage());
 			}
+		}
+
+		private static void writeSuccessToDb(final String iVideoUrl, final String id)
+				throws IOException {
+			execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
+					ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iVideoUrl,
+							"date", System.currentTimeMillis()), "downloadVideo()");
+			System.out.println("downloadVideo() - Download recorded in database");
 		}
 
 		private static void downloadVideo(final String iVideoUrl, String targetDirPath)
