@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkState;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.ProcessBuilder.Redirect;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -136,7 +137,28 @@ public class Yurl {
 						.entity(e.getStackTrace())
 						.type("application/text").build();
 			}
-			
+		}
+
+
+		@GET
+		@Path("downloadVideo")
+		@Produces("application/json")
+		public Response downloadVideoSynchronous(@QueryParam("id") Integer iRootId, @QueryParam("url") String iUrl)
+				throws JSONException, IOException {
+			getVideoDownloadJob(iUrl, TARGET_DIR_PATH,
+					Integer.toString(iRootId)).run();
+			JSONObject retVal = new JSONObject();
+			try {
+				return Response.ok().header("Access-Control-Allow-Origin", "*")
+						.entity(retVal.toString())
+						.type("application/json").build();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				return Response.serverError().header("Access-Control-Allow-Origin", "*")
+						.entity(e.getStackTrace())
+						.type("application/text").build();
+			}
 		}
 
 		@GET
@@ -441,7 +463,7 @@ public class Yurl {
 						if (val != null && !("null".equals(val)) && !(val.getClass().equals(Yurl.JSON_OBJECT_NULL))) {
 							String aValue = (String) val;
 							if ("null".equals(aValue)) {
-								System.out.println("Yurl.HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur?");
+								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur?");
 							}
 							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
 						}
@@ -719,7 +741,7 @@ public class Yurl {
 		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
 		private static void recordBiggestImage(final String iUrl, final String cypherUri, final String id) {
-//			System.out.println("Yurl.HelloWorldResource.recordBiggestImage() - begin");
+//			System.out.println("HelloWorldResource.recordBiggestImage() - begin");
 //			Callable<String> callable = new Callable<String>() {
 //				public String call() {
 //					return HelloWorldResource.getBiggestImage(iUrl);
@@ -729,7 +751,7 @@ public class Yurl {
 //			};
 //			String biggestImageAbsUrl = HelloWorldResource.BiggestImage
 //					.getBiggestImage("http://www.denimblog.com/2015/07/stella-maxwell-in-rag-bone/");
-//			System.out.println("Yurl.HelloWorldResource.recordBiggestImage()" + " - Biggest image is: " + biggestImageAbsUrl);
+//			System.out.println("HelloWorldResource.recordBiggestImage()" + " - Biggest image is: " + biggestImageAbsUrl);
 			Runnable r = new Runnable() {
 				
 				@Override
@@ -745,7 +767,7 @@ public class Yurl {
 		}
 
 		private static String getBiggestImage(final String iUrl2) {
-//			System.out.println("Yurl.HelloWorldResource.getBiggestImage() - begin");
+//			System.out.println("HelloWorldResource.getBiggestImage() - begin");
 			String biggestImageAbsUrl = null;
 			try {
 				biggestImageAbsUrl = BiggestImage.getBiggestImage(iUrl2);
@@ -910,6 +932,7 @@ public class Yurl {
 		private static void downloadVideoInSeparateThread(
 				final String iVideoUrl, final String TARGET_DIR_PATH,
 				final String cypherUri, final String id) {
+			System.out.println("Yurl.HelloWorldResource.downloadVideoInSeparateThread() - begin: " + iVideoUrl);
 			_1: {
 			// VGet stopped working
 //				Runnable r = new Runnable() {
@@ -922,25 +945,32 @@ public class Yurl {
 //				new Thread(r).start();
 			}
 			_2: {
-				Runnable r2 = new Runnable() {
-					// @Override
-					public void run() {
-						_3: {
-							//downloadVideoWorkaround(iVideoUrl, TARGET_DIR_PATH, id);
-							Process p = new ProcessBuilder().directory(Paths.get(TARGET_DIR_PATH).toFile()).command("/home/sarnobat/bin/youtube_download '" + iVideoUrl+ "'").start();
-							if (p.exitValue() == 0) {
-								System.out
-										.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded " + iVideoUrl);
-								writeSuccessToDb(iVideoUrl, id);
-							} else {
-								System.out
-										.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading " + iVideoUrl);
-							}
+				Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
+				executorService.submit(r2);
+//				new Thread(r2).run();
+			}
+		}
+
+		private static Runnable getVideoDownloadJob(final String iVideoUrl, final String TARGET_DIR_PATH,
+				final String id) {
+			Runnable r2 = new Runnable() {
+				@Override
+				public void run() {
+					_3: {
+						Process p = new ProcessBuilder()
+								.directory(Paths.get(TARGET_DIR_PATH).toFile())
+								.command(ImmutableList.of("/home/sarnobat/bin/youtube_download", iVideoUrl)).inheritIO().start();
+						p.waitFor();
+						if (p.exitValue() == 0) {
+							System.out.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded " + iVideoUrl);
+							writeSuccessToDb(iVideoUrl, id);
+						} else {
+							System.out.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading " + iVideoUrl);
 						}
 					}
-				};
-				executorService.submit(r2);
-			}
+				}
+			};
+			return r2;
 		}
 
 		private static void downloadUndownloadedVideosInSeparateThread() {
@@ -1515,7 +1545,7 @@ public class Yurl {
 		private static class BiggestImage {
 
 			static String getBiggestImage(String url) throws MalformedURLException, IOException {
-//				System.out.println("Yurl.HelloWorldResource.BiggestImage.getBiggestImage() - begin");
+//				System.out.println("HelloWorldResource.BiggestImage.getBiggestImage() - begin");
 				List<String> imagesDescendingSize = getImagesDescendingSize(url);
 //				List<String> imagesOrdered = movePngToEnd(imagesDescendingSize);
 				String biggestImage = imagesDescendingSize.get(0);
@@ -1562,9 +1592,9 @@ public class Yurl {
 					String source = driver.getPageSource();
 					// System.out.println(source);
 					List<String> out = getAllTags(base + "/", source);
-//					System.out.println("Yurl.HelloWorldResource.BiggestImage.getImagesDescendingSize() - all img tags: " + out);
+//					System.out.println("HelloWorldResource.BiggestImage.getImagesDescendingSize() - all img tags: " + out);
 					Multimap<Integer, String> imageSizes = getImageSizes(out);
-//					System.out.println("Yurl.HelloWorldResource.BiggestImage.getImagesDescendingSize()" + imageSizes);
+//					System.out.println("HelloWorldResource.BiggestImage.getImagesDescendingSize()" + imageSizes);
 					// System.out.println(Joiner.on("\n").join(sortedImages));
 					ret = sortByKey(imageSizes);
 				} finally {
@@ -1624,7 +1654,7 @@ public class Yurl {
 //						builder.put(size, imgSrc);
 //						taken.add(size);
 //					} else {
-//						System.out.println("Yurl.HelloWorldResource.BiggestImage.getImageSizes() - size already taken: " + size);
+//						System.out.println("HelloWorldResource.BiggestImage.getImageSizes() - size already taken: " + size);
 //					}
 				}
 				return builder.build();
@@ -1641,7 +1671,7 @@ public class Yurl {
 					// System.out.println(contentLength + "\t"+ absUrl);
 					return contentLength;
 				} catch (MalformedURLException e) {
-					System.out.println("Yurl.HelloWorldResource.BiggestImage.getByteSize() - " + absUrl);
+					System.out.println("HelloWorldResource.BiggestImage.getByteSize() - " + absUrl);
 					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -1650,7 +1680,7 @@ public class Yurl {
 			}
 
 			private static String getBaseUrl(String url1) throws MalformedURLException {
-				System.out.println("Yurl.HelloWorldResource.BiggestImage.getBaseUrl() -\t"+url1);
+				System.out.println("HelloWorldResource.BiggestImage.getBaseUrl() -\t"+url1);
 				URL url = new URL(url1);
 				String file = url.getFile();
 				String path;
@@ -1660,14 +1690,14 @@ public class Yurl {
 					path = url.getFile().substring(0, file.lastIndexOf('/'));
 				}
 				String string = url.getProtocol() + "://" + url.getHost() + path;
-				System.out.println("Yurl.HelloWorldResource.BiggestImage.getBaseUrl() -\t"+string);
+				System.out.println("HelloWorldResource.BiggestImage.getBaseUrl() -\t"+string);
 				return string;
 			}
 
 			private static List<String> getAllTags(String baseUrl, String source) throws IOException {
-//				System.out.println("Yurl.HelloWorldResource.BiggestImage.getAllTags() - base URL : " + baseUrl);
+//				System.out.println("HelloWorldResource.BiggestImage.getAllTags() - base URL : " + baseUrl);
 				Document doc = Jsoup.parse(IOUtils.toInputStream(source), "UTF-8", baseUrl);
-//				System.out.println("Yurl.HelloWorldResource.BiggestImage.getAllTags() - Entire document: " + doc.toString());
+//				System.out.println("HelloWorldResource.BiggestImage.getAllTags() - Entire document: " + doc.toString());
 				Elements tags = doc.getElementsByTag("img");
 				return FluentIterable.<Element> from(tags).transform(IMG_TO_SOURCE).toList();
 			}

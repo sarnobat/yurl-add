@@ -783,11 +783,20 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 
 		five.append("<input type=button class='genericButton' value='Find in Library' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 608592+"), this)'><br>");
 		five.append("<input type=button class='genericButton' value='Priority 3' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'><br><br>");
-		five.append("<input type=button class='genericButton' value='Save Video' onclick='downloadVideo("+field.id+","+field.downloaded_video+", this)' style='background-color : "+getDownloadedVideoColor(field.downloaded_video)+"'><br>");
-
+//		five.append("<input type=button class='genericButton' value='Save Video' onclick='alert(\"saved\")' style='background-color : blue'><br>");
+		five.append("<input type=button class='genericButton' value='Save Video' onclick='downloadVideo("+field.id+",\""+ field.url +"\", this)' style='background-color : "+getDownloadedVideoColor(field.downloaded_video)+"'><br>");
+//encodeURIComponent(field.url)+
 		
 	}	
 	return listItem[0].outerHTML;
+}
+
+function downloadVideo(id, url, buttonElement) {
+	$.getJSON(urlBase + "/downloadVideo?url=" + encodeURIComponent(url) + "&id=" + id, function(result) {
+		buttonElement.style.backgroundColor = getDownloadedVideoColor(true);
+		console.debug("downloaded");
+	});
+	buttonElement.style.backgroundColor = "orange";
 }
 
 function CATEGORY_TO_BUTTON(itemId, currentCategoryId, categoryNode) {
