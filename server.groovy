@@ -80,7 +80,8 @@ public class Yurl {
 	// I hope this is the same as JSONObject.Null (not capitals)
 	public static final Object JSON_OBJECT_NULL = JSONObject.Null;
 	private static final String CHROMEDRIVER_PATH = //"/Users/sarnobat/trash/chromedriver";
-	"/home/sarnobat/trash/chromedriver";
+	//"/home/sarnobat/trash/chromedriver";
+	"/home/sarnobat/github/yurl/chromedriver";
 	
 	@Path("yurl")
 	public static class HelloWorldResource { // Must be public
