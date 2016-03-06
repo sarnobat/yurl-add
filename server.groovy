@@ -398,7 +398,7 @@ public class Yurl {
 					"START source=node({rootId}) "
 							+ "MATCH p = source-[r:CONTAINS*1..2]->u "
 							+ "WHERE (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
-							+ "RETURN distinct ID(u),u.title,u.url, extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal, u.biggest_image "
+							+ "RETURN distinct ID(u),u.title,u.url, extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal, u.biggest_image, u.user_image "
 							+ "ORDER BY u.ordinal DESC LIMIT 500", ImmutableMap
 							.<String, Object> builder().put("rootId", iRootId)
 							.build(), "getItemsAtLevelAndChildLevels()");
@@ -442,7 +442,7 @@ public class Yurl {
 					_15: {
 
 						Object val = anItem.get(4);
-						if (val != null && !("null".equals(val)) && !(val.getClass().equals(Yurl.JSON_OBJECT_NULL))) {
+						if (isNotNull(val)) {
 							String aValue = (String) val;
 							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
 						}
@@ -453,20 +453,29 @@ public class Yurl {
 							System.out.println("Is null value");
 						} else if (val == null) {
 							System.out.println("Is null string");
-						} else if (val != null && !("null".equals(val))
-								&& !(val.getClass().equals(Yurl.JSON_OBJECT_NULL))) {
+						} else if (isNotNull(val)) {
 							Long aValue = (Long) val;
 							anUncategorizedNodeJsonObject.put("created", aValue);
 						}
 					}
 					_17: {
 						Object val = anItem.get(8);
-						if (val != null && !("null".equals(val)) && !(val.getClass().equals(Yurl.JSON_OBJECT_NULL))) {
+						if (isNotNull(val)) {
 							String aValue = (String) val;
 							if ("null".equals(aValue)) {
 								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur?");
 							}
 							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
+						}
+					}
+					_18: {
+						Object val = anItem.get(9);
+						if (isNotNull(val)) {
+							String aValue = (String) val;
+							if ("null".equals(aValue)) {
+								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur?");
+							}
+							anUncategorizedNodeJsonObject.put("user_image", aValue);
 						}
 					}
 				}
@@ -487,6 +496,10 @@ public class Yurl {
 				}
 			}
 			return ret;
+		}
+
+		private static boolean isNotNull(Object val) {
+			return val != null && !("null".equals(val)) && !(val.getClass().equals(Yurl.JSON_OBJECT_NULL));
 		}
 
 		// -----------------------------------------------------------------------------
@@ -1105,6 +1118,28 @@ public class Yurl {
 			// hangs
 			System.out.println("\ndownloadVideo() - successfully downloaded video at " + iVideoUrl + " (" + v.getVideo().getTitle() + ")");
 		}
+		
+		@GET
+		@Path("updateImage")
+		@Produces("application/json")
+		public Response changeImage(
+				@QueryParam("url") String imageUrl,
+				@QueryParam("id") Integer nodeIdToChange)
+				throws IOException, JSONException {
+			return Response
+					.ok()
+					.header("Access-Control-Allow-Origin", "*")
+					.entity(execute(
+							"START n=node({nodeIdToChange}) "
+									+ "SET n.user_image =  {imageUrl}"
+									+ "RETURN n",
+							ImmutableMap.<String, Object> of("nodeIdToChange",
+									nodeIdToChange, "imageUrl",
+									imageUrl), "changeImage()")).type("application/json")
+					.build();
+		}
+		
+		// moveup, move up
 		@GET
 		@Path("surpassOrdinal")
 		@Produces("application/json")
