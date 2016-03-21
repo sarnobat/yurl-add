@@ -16,6 +16,7 @@
 <script type="text/javascript" src="d3/d3.layout.js"></script>
 <script>
 
+
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
 var parentOfRootId;
@@ -729,7 +730,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 	}
 	
 	{
-		var urlElements = field.url.match(/^http:\/\/[^/]+/);
+		var urlElements = field.url.match(/^http:\/\/[^\/]+/);
 		if (urlElements != null) {
 			var site = urlElements[0];
 			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
@@ -1199,6 +1200,9 @@ function openHtmlTextInNewTab() {
 	newWin.document.write($("#htmlText").val());
 	newWin.document.title = document.title;
 }
+
+
+
 
 </script>
 <style type="text/css">
