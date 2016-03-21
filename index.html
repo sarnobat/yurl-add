@@ -612,19 +612,29 @@ function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, lim
 				break;
 			}
 			var item = urlsInCategory[j];
-			var displayImageUrl;
-			if (item.user_image != null) {
-				displayImageUrl = item.user_image;
-			} 
-			else if (item.biggest_image != null) {
-				displayImageUrl = item.biggest_image;
-			} else {
-				displayImageUrl = getImageForUrl(item.url);
-			}
-			
+			var displayImageUrl = getDisplayImageUrl(item);
 			urlThumbnailsHtml += "<a href="+item.url+"><img class=itemImage src='"+displayImageUrl+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>" ;
 		}
 		return urlThumbnailsHtml;
+}
+
+function getDisplayImageUrl(item) {
+	var url = item.url;
+	var specialSiteImageUrl = getSpecialSiteUrl(url);
+	if (url.match(".jpg\??") || url.match(/.*jpg/i) || url.match(".gif$")
+			|| url.match(".png\??") || url.match("images.q=tbn:")) {
+		displayImageUrl = url;
+	} else if (specialSiteImageUrl != null) {
+		displayImageUrl = specialSiteImageUrl;
+	} else if (item.user_image != null) {
+		displayImageUrl = item.user_image;
+	} else if (item.biggest_image != null) {
+		displayImageUrl = item.biggest_image;
+	} else {
+		displayImageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="
+				+ encodeURIComponent(url);
+	}
+	return displayImageUrl;
 }
 
 function getImageForUrl(url) {
