@@ -16,6 +16,7 @@
 <script type="text/javascript" src="d3/d3.layout.js"></script>
 <script>
 
+
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
 var parentOfRootId;
@@ -634,8 +635,20 @@ function getImageForUrl(url) {
 		url.match(".png\??") || 
 		url.match("images.q=tbn:")) {
 		imageUrl = url;
-	}
-	else if (url.match("youtube.com/watch")) {
+	} else {
+		var specialSiteImageUrl = getSpecialSiteUrl(url);
+		if (specialSiteImageUrl == null) {
+			imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
+		} else {
+			imageUrl = specialSiteImageUrl;
+		}
+	} 
+	return imageUrl;
+}
+
+function getSpecialSiteUrl(url) {
+	var imageUrl;
+	if (url.match("youtube.com/watch")) {
 		var youtubeId = url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
 		imageUrl = "http://img.youtube.com/vi/"+youtubeId+"/0.jpg";	
 	} else if (url.match("dailymotion.com/video")) {
@@ -650,7 +663,7 @@ function getImageForUrl(url) {
 		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
 		imageUrl = productImageUrl;
 	} else {
-		imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
+		imageUrl = null;
 	}
 	return imageUrl;
 }
@@ -1200,7 +1213,6 @@ function openHtmlTextInNewTab() {
 	newWin.document.write($("#htmlText").val());
 	newWin.document.title = document.title;
 }
-
 
 
 
