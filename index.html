@@ -630,6 +630,14 @@ function getDisplayImageUrl(item) {
 		displayImageUrl = item.user_image;
 	} else if (item.biggest_image != null) {
 		displayImageUrl = item.biggest_image;
+	} else if (url.match(".amazon.co[^/]+\/[^s]")) {
+		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+		asin = asin.replace(/.*dp./,'');
+		asin = asin.replace(/.*gp.aw.d./, '');
+		asin = asin.replace(/.ref_?=.*/, '');
+		asin = asin.replace(/.*offer-listing./, '');
+		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+		displayImageUrl = productImageUrl;
 	} else {
 		displayImageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="
 				+ encodeURIComponent(url);
@@ -664,15 +672,18 @@ function getSpecialSiteUrl(url) {
 	} else if (url.match("dailymotion.com/video")) {
 		var youtubeId = url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
 		imageUrl = "http://dailymotion.com/thumbnail/video/"+youtubeId ;			
-	} else if (url.match(".amazon.co[^/]+\/[^s]")) {
-		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
-		asin = asin.replace(/.*dp./,'');
-		asin = asin.replace(/.*gp.aw.d./, '');
-		asin = asin.replace(/.ref_?=.*/, '');
-		asin = asin.replace(/.*offer-listing./, '');
-		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
-		imageUrl = productImageUrl;
-	} else {
+	}
+	// Too unreliable
+//	else if (url.match(".amazon.co[^/]+\/[^s]")) {
+//		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+//		asin = asin.replace(/.*dp./,'');
+//		asin = asin.replace(/.*gp.aw.d./, '');
+//		asin = asin.replace(/.ref_?=.*/, '');
+//		asin = asin.replace(/.*offer-listing./, '');
+//		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+//		imageUrl = productImageUrl;
+//	} 
+	else {
 		imageUrl = null;
 	}
 	return imageUrl;
