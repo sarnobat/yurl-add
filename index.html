@@ -16,7 +16,6 @@
 <script type="text/javascript" src="d3/d3.layout.js"></script>
 <script>
 
-
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
 var parentOfRootId;
@@ -50,9 +49,10 @@ function initialize() {
 	
 	setCategoriesAndConfigureKeyBindings : {
 		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
-			var originalKeyBindings = $.extend(true, {}, result);// TODO: what does this do?
+			//var originalKeyBindings = 
+				$.extend(true, {}, result);// TODO: what does this do?
 			categories = result;
-			renderIfReady()
+			renderIfReady();
 		});
 	}
 	    
@@ -96,7 +96,7 @@ function initialize() {
     ////
     
     addKeyBindingsUpdateHandler : {
-		var oldKeyBindings;
+		var oldKeyBindings = null;
 		$("#keys").focus(function() {
 			oldKeyBindings = $.trim($("#keys").val());
 		}).blur(function() {
@@ -150,8 +150,8 @@ function renderIfReady() {
 	}
 	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
 	configureKeyBindings();
-	$("#status").text("Populating")
-	var categoryOrdinal = 0;
+	$("#status").text("Populating");
+	//var categoryOrdinal = 0;
 	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
 	var urls = uncategorizedResponse.urls;
 
@@ -161,7 +161,7 @@ function renderIfReady() {
 	{
 		var urlsRootOnly = uncategorizedResponse.urls[rootId];
 		if (urlsRootOnly != null) {
-			var headLength = 10;
+			//var headLength = 10;
 			//var truncated = 
 			// This doesn't return the new list unfortunately. It will cause the thumbnails to also get truncated
 			//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
@@ -206,7 +206,7 @@ function initializeBeforeAjax() {
 	updateURL: {
 		if (rootId == null || rootId == '') {
 			rootId = 45;
-			history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
+			history.pushState(null, null, '/yurl?rootId=' + rootId); // HTML5
 		}
 	}
 	
@@ -221,7 +221,7 @@ function initializeBeforeAjax() {
 	setParentOfRootId(rootId);
 	
 	showLoading : {
-		$("#status").text("Loading")  			
+		$("#status").text("Loading"); 			
 	}
 
 	setColorForCategory : {		
@@ -229,7 +229,7 @@ function initializeBeforeAjax() {
 		$("#rootColor").attr("style", "background-color: #" + rootColor);
 	}
 
-	limit = $.url().param('limit')
+	limit = $.url().param('limit');
 	if (limit == null) {
 		limit = 50;
 		window.history.pushState("object or string", "Title", document.URL + "&limit=50");
@@ -694,7 +694,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		}
 	}
 	
-	var one = $("<td style='background-color:'>1");
+	//var one = $("<td style='background-color:'>1");
 	var two = $("<td style='background-color:' >2");
 	var three = $("<td style='background-color:'>3");
 	var four = $("<td id='categoryButtonsCell' style='background-color:'>4");
@@ -921,7 +921,7 @@ function configureKeyBindings() {
 
 function drawVisualization(data) {
 	console.debug(data);
-	var ua = navigator.userAgent;
+	//var ua = navigator.userAgent;
 	var forceDirectedGraph = new $jit.ForceDirected({
 		injectInto: 'infovis',
 		Node: {
@@ -1056,8 +1056,8 @@ function getCategoryNamesMap(categoriesRecursive) {
 function renderD3Visualization(flareJson) {
 	var w = 680,
 		h = 500,
-		node,
-		link,
+		node = null,
+		link = null,
 		root;
 	
 	
