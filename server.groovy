@@ -399,6 +399,7 @@ public class Yurl {
 							+ "MATCH p = source-[r:CONTAINS*1..2]->u "
 							+ "WHERE (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
 							+ "RETURN distinct ID(u),u.title,u.url, extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal, u.biggest_image, u.user_image "
+// TODO : do not hardcode the limit to 500. Category 38044 doesn't display more than 50 books since there are so many child items.
 							+ "ORDER BY u.ordinal DESC LIMIT 500", ImmutableMap
 							.<String, Object> builder().put("rootId", iRootId)
 							.build(), "getItemsAtLevelAndChildLevels()");
