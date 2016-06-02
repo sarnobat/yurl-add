@@ -460,7 +460,7 @@ public class Yurl {
 						if (isNotNull(val)) {
 							String aValue = (String) val;
 							if ("null".equals(aValue)) {
-								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur?");
+								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
 							}
 							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
 						}
@@ -470,7 +470,7 @@ public class Yurl {
 						if (isNotNull(val)) {
 							String aValue = (String) val;
 							if ("null".equals(aValue)) {
-								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur?");
+								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 2");
 							}
 							anUncategorizedNodeJsonObject.put("user_image", aValue);
 						}
