@@ -126,10 +126,22 @@ public class Yurl {
 				// This is done in a separate thread
 				refreshCategoriesTreeCacheInSeparateThread();
 			}
-			JSONObject retVal = new JSONObject();
 			try {
-				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
-				retVal.put("categoriesRecursive", categoriesTreeJson);
+				JSONObject retVal;
+				if (MongoDbCache.exists(iRootId.toString())) {
+					System.out.println("Yurl.HelloWorldResource.getUrls() - using cache");
+					retVal = new JSONObject(MongoDbCache.get(iRootId.toString()));
+				} else {
+				// If there were multiple clients here, you'd need to block the 2nd onwards
+					System.out.println("Yurl.HelloWorldResource.getUrls() - not using cache");
+					JSONObject retVal1;
+					retVal1 = new JSONObject();
+					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+					retVal1.put("categoriesRecursive", categoriesTreeJson);
+					MongoDbCache.put(iRootId.toString(), retVal1.toString());
+					retVal = retVal1;
+				}
+				
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(retVal.toString())
 						.type("application/json").build();
@@ -470,7 +482,6 @@ public class Yurl {
 						if (isNotNull(val)) {
 							String aValue = (String) val;
 							if ("null".equals(aValue)) {
-								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 2");
 							}
 							anUncategorizedNodeJsonObject.put("user_image", aValue);
 						}
@@ -709,23 +720,19 @@ public class Yurl {
 		public Response stash(@QueryParam("param1") String iUrl,
 				@QueryParam("rootId") Integer iRoodId) throws JSONException,
 				IOException {
-//			System.out.println("stash() - begin");
 			// This will convert
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
-//			System.out.println("stash() - url decoded: " + theHttpUrl);
 			String theTitle = getTitle(new URL(theHttpUrl));
 			try {
 				JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle,
 						new Integer(iRoodId));
-//				System.out.println("stash() - node created");
-//				System.out.println("About to get id");
 				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
 						.get("data")).get(0);
-//				System.out.println("Got array: " + theNewNodeId);
-//				System.out.println(theNewNodeId.get(0));
 				String id = (String) theNewNodeId.get(0);
 				System.out.println(id);
 
+				MongoDbCache.delete(iRoodId.toString());
+				
 				launchAsynchronousTasks(theHttpUrl, id);
 				// TODO: check that it returned successfully (redundant?)
 //				System.out.println(newNodeJsonObject.toString());
@@ -1223,7 +1230,8 @@ public class Yurl {
 				throws JSONException, IOException {
 			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
 					iNewParentId);
-
+			MongoDbCache.delete(iNewParentId.toString());
+			MongoDbCache.delete(iCurrentParentId.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(moveHelper.toString())
 					.type("application/json").build();
@@ -1652,7 +1660,7 @@ public class Yurl {
 		}
 
 		// I hope this is the same as JSONObject.Null (not capitals)
-		public static final Object JSON_OBJECT_NULL = new Null();//JSONObject.Null;
+		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
 
 		private static final class Null {
 
@@ -1708,8 +1716,13 @@ public class Yurl {
 				return table.find(searchQuery).size() > 0;
 			}
 
-			static void put(String key, String value) throws UnknownHostException {
-				MongoClient mongo = new MongoClient(HOST, PORT);
+			static void put(String key, String value) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
 				DB db = mongo.getDB(CACHE);
 				DBCollection collection = db.getCollection(COLLECTION);
 				BasicDBObject document = new BasicDBObject(ID, key);
