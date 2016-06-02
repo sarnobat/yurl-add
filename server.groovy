@@ -77,8 +77,6 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
 public class Yurl {
-	// I hope this is the same as JSONObject.Null (not capitals)
-	public static final Object JSON_OBJECT_NULL = JSONObject.Null;
 	private static final String CHROMEDRIVER_PATH = //"/Users/sarnobat/trash/chromedriver";
 	//"/home/sarnobat/trash/chromedriver";
 	"/home/sarnobat/github/yurl/chromedriver";
@@ -500,7 +498,7 @@ public class Yurl {
 		}
 
 		private static boolean isNotNull(Object val) {
-			return val != null && !("null".equals(val)) && !(val.getClass().equals(Yurl.JSON_OBJECT_NULL));
+			return val != null && !("null".equals(val)) && !(val.getClass().equals(HelloWorldResource.JSON_OBJECT_NULL));
 		}
 
 		// -----------------------------------------------------------------------------
@@ -824,19 +822,6 @@ public class Yurl {
 			return s;
 		}
 
-		private static void execute2(String iCypherQuery, Map<String, Object> of) {
-			String string = "recordBiggestImage()";
-			try {
-				HelloWorldResource.execute(iCypherQuery, of, string);
-			} catch (JSONException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-		}
-
 		private static void downloadImageInSeparateThread(final String iUrl2,
 				final String targetDirPath, final String cypherUri,
 				final String id) {
@@ -972,15 +957,29 @@ public class Yurl {
 				@Override
 				public void run() {
 					_3: {
-						Process p = new ProcessBuilder()
-								.directory(Paths.get(TARGET_DIR_PATH).toFile())
-								.command(ImmutableList.of("/home/sarnobat/bin/youtube_download", iVideoUrl)).inheritIO().start();
-						p.waitFor();
-						if (p.exitValue() == 0) {
-							System.out.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded " + iVideoUrl);
-							writeSuccessToDb(iVideoUrl, id);
-						} else {
-							System.out.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading " + iVideoUrl);
+						try {
+							Process p = new ProcessBuilder()
+									.directory(Paths.get(TARGET_DIR_PATH).toFile())
+									.command(
+											ImmutableList.of("/home/sarnobat/bin/youtube_download",
+													iVideoUrl)).inheritIO().start();
+							p.waitFor();
+							if (p.exitValue() == 0) {
+								System.out
+										.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
+												+ iVideoUrl);
+								writeSuccessToDb(iVideoUrl, id);
+							} else {
+								System.out
+										.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading "
+												+ iVideoUrl);
+							}
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
 				}
@@ -1325,7 +1324,7 @@ public class Yurl {
 
 		// TODO: make this map immutable
 		static JSONObject execute(String iCypherQuery,
-				Map<String, Object> iParams, String... iCommentPrefix) throws IOException, JSONException {
+				Map<String, Object> iParams, String... iCommentPrefix) {
 			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
 //			System.out.println(commentPrefix + "begin");
 			System.out.println(commentPrefix + " - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
@@ -1345,17 +1344,24 @@ public class Yurl {
 			if (theResponse.getStatus() != 200) {
 				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: "
 						+ iParams);
-				throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream()));
+				try {
+					throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream()));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 			String theNeo4jResponse ;
-			_1: {
-				// Do not inline this. We need to close the stream after copying
+			try {
+				// Do not inline this. We need to close the stream after
+				// copying
 				theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream());
 				theResponse.getEntityInputStream().close();
 				theResponse.close();
+				System.out.println(commentPrefix + "end");
+				return new JSONObject(theNeo4jResponse);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-			System.out.println(commentPrefix + "end");
-			return new JSONObject(theNeo4jResponse);
 		}
 
 		// ----------------------------------------------------------------------------
@@ -1489,7 +1495,7 @@ public class Yurl {
 				for (int i = 0; i < cypherRawResults.length(); i++) {
 					JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
 					for (int j = 0; j < treePath.length(); j++) {
-						if (treePath.get(j).getClass().equals(Yurl.JSON_OBJECT_NULL)) {
+						if (treePath.get(j).getClass().equals(HelloWorldResource.JSON_OBJECT_NULL)) {
 							continue;
 						}
 						JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
@@ -1506,7 +1512,7 @@ public class Yurl {
 			
 			private static JSONArray removeNulls(JSONArray iJsonArray) {
 				for(int i = 0; i < iJsonArray.length(); i++) {
-					if (Yurl.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
+					if (HelloWorldResource.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
 						iJsonArray.remove(i);
 						--i;
 					}
@@ -1524,10 +1530,10 @@ public class Yurl {
 					for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
 						JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
 						for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-							if (categoryPath.get(hopNum).getClass().equals(Yurl.JSON_OBJECT_NULL)) {
+							if (categoryPath.get(hopNum).getClass().equals(HelloWorldResource.JSON_OBJECT_NULL)) {
 								continue;
 							}
-							if (categoryPath.get(hopNum + 1).getClass().equals(Yurl.JSON_OBJECT_NULL)) {
+							if (categoryPath.get(hopNum + 1).getClass().equals(HelloWorldResource.JSON_OBJECT_NULL)) {
 								continue;
 							}
 							if (!(categoryPath.get(hopNum + 1) instanceof String)) {
@@ -1794,6 +1800,27 @@ public class Yurl {
 			}
 			return oKeys;
 		}
+		
+
+		// I hope this is the same as JSONObject.Null (not capitals)
+		public static final Object JSON_OBJECT_NULL = new Null();//JSONObject.Null;
+
+		private static final class Null {
+
+		        @Override
+		        protected final Object clone() {
+		            return this;
+		        }
+
+		        @Override
+		        public boolean equals(Object object) {
+		            return object == null || object == this || object.toString() == this.toString();
+		        }
+
+		        public String toString() {
+		            return "null";
+		        }
+		    }
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
