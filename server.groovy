@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
@@ -66,6 +67,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -1516,26 +1523,10 @@ public class Yurl {
 		private static class BiggestImage {
 
 			static String getBiggestImage(String url) throws MalformedURLException, IOException {
-//				System.out.println("HelloWorldResource.BiggestImage.getBiggestImage() - begin");
 				List<String> imagesDescendingSize = getImagesDescendingSize(url);
-//				List<String> imagesOrdered = movePngToEnd(imagesDescendingSize);
 				String biggestImage = imagesDescendingSize.get(0);
 				return biggestImage;
 			}
-
-//			private static List<String> movePngToEnd(List<String> imagesDescendingSize) {
-//				List<String> pngFiles = new LinkedList<String>();
-//				List<String> nonPngFiles = new LinkedList<String>();
-//				for (String filePath : imagesDescendingSize) {
-//					if (filePath.matches("(?i).*png$") || filePath.matches("(?i).*png\\?.*")) {
-//						pngFiles.add(filePath);
-//					} else {
-//						nonPngFiles.add(filePath);
-//					}
-//				}
-//				nonPngFiles.addAll(pngFiles);
-//				return ImmutableList.copyOf(nonPngFiles); 
-//			}
 
 			private static List<String> getImagesDescendingSize(String url) throws MalformedURLException,
 					IOException {
@@ -1557,16 +1548,11 @@ public class Yurl {
 						// We need to let the dynamic content load.
 						Thread.sleep(5000L);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					String source = driver.getPageSource();
-					// System.out.println(source);
 					List<String> out = getAllTags(base + "/", source);
-//					System.out.println("HelloWorldResource.BiggestImage.getImagesDescendingSize() - all img tags: " + out);
 					Multimap<Integer, String> imageSizes = getImageSizes(out);
-//					System.out.println("HelloWorldResource.BiggestImage.getImagesDescendingSize()" + imageSizes);
-					// System.out.println(Joiner.on("\n").join(sortedImages));
 					ret = sortByKey(imageSizes);
 				} finally {
 					driver.quit();
@@ -1626,7 +1612,6 @@ public class Yurl {
 				try {
 					url = new URL(absUrl);
 					int contentLength = url.openConnection().getContentLength();
-					// System.out.println(contentLength + "\t"+ absUrl);
 					return contentLength;
 				} catch (MalformedURLException e) {
 					System.out.println("HelloWorldResource.BiggestImage.getByteSize() - " + absUrl);
@@ -1653,9 +1638,7 @@ public class Yurl {
 			}
 
 			private static List<String> getAllTags(String baseUrl, String source) throws IOException {
-//				System.out.println("HelloWorldResource.BiggestImage.getAllTags() - base URL : " + baseUrl);
 				Document doc = Jsoup.parse(IOUtils.toInputStream(source), "UTF-8", baseUrl);
-//				System.out.println("HelloWorldResource.BiggestImage.getAllTags() - Entire document: " + doc.toString());
 				Elements tags = doc.getElementsByTag("img");
 				return FluentIterable.<Element> from(tags).transform(IMG_TO_SOURCE).toList();
 			}
@@ -1673,20 +1656,82 @@ public class Yurl {
 
 		private static final class Null {
 
-		        @Override
-		        protected final Object clone() {
-		            return this;
-		        }
+			@Override
+			protected final Object clone() {
+				return this;
+			}
 
-		        @Override
-		        public boolean equals(Object object) {
-		            return object == null || object == this || object.toString() == this.toString();
-		        }
+			@Override
+			public boolean equals(Object object) {
+				return object == null || object == this || object.toString() == this.toString();
+			}
 
-		        public String toString() {
-		            return "null";
-		        }
-		    }
+			public String toString() {
+				return "null";
+			}
+		}
+
+		public static class MongoDbCache {
+
+			private static final String HOST = "192.168.1.2";
+			private static final int PORT = 27017;
+
+			private static final String VALUE = "value";
+			private static final String ID = "_id";
+
+			private static final String COLLECTION = "items";
+			private static final String CACHE = "cache";
+
+			static boolean delete(String key) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection table = db.getCollection(COLLECTION);
+				BasicDBObject searchQuery = new BasicDBObject(ID, key);
+				return table.remove(searchQuery).getN() > 0;
+			}
+
+			static boolean exists(String key) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection table = db.getCollection(COLLECTION);
+				BasicDBObject searchQuery = new BasicDBObject(ID, key);
+				return table.find(searchQuery).size() > 0;
+			}
+
+			static void put(String key, String value) throws UnknownHostException {
+				MongoClient mongo = new MongoClient(HOST, PORT);
+				DB db = mongo.getDB(CACHE);
+				DBCollection collection = db.getCollection(COLLECTION);
+				BasicDBObject document = new BasicDBObject(ID, key);
+				document.put(VALUE, value);
+				collection.insert(document);
+			}
+
+			static String get(String key) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection collection = db.getCollection(COLLECTION);
+				BasicDBObject searchQuery = new BasicDBObject(ID, key);
+				DBCursor cursor = collection.find(searchQuery);
+				DBObject next = cursor.next();
+				return (String) next.get(VALUE);
+			}
+		}
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
