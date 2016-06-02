@@ -3,8 +3,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.ProcessBuilder.Redirect;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,7 +23,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -195,19 +192,13 @@ public class Yurl {
 		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
 				@QueryParam("urls") String iUrls) throws Exception {
 			Preconditions.checkArgument(iRootId != null);
-//			System.out.println("batchInsert - " + iRootId);
-			// System.out.println("batchInsert - " + URLDecoder.decode(iUrls,
-			// "UTF-8"));
 			StringBuffer unsuccessfulLines = new StringBuffer();
 
 			String[] lines = iUrls.trim().split("\\n");
 			int i = 0;
 			while (i < lines.length) {
 
-//				System.out.println("1");
 				String first = lines[i];
-				
-				String theHttpUrl;
 				try {
 					if (first.startsWith("http")) {
 						stash(URLEncoder.encode(first, "UTF-8"), iRootId);
@@ -215,14 +206,13 @@ public class Yurl {
 						continue;
 					}
 					// Fails if it sees the string "%)"
-					theHttpUrl = URLDecoder.decode(first, "UTF-8");
+					URLDecoder.decode(first, "UTF-8");
 				} catch (Exception e) {
 					System.out.println(e.getStackTrace());
 					addToUnsuccessful(unsuccessfulLines, first, "");
 					++i;
 					continue;
 				}
-//				System.out.println("decoded: " + theHttpUrl);
 				if (first.startsWith("=")) {
 					++i;
 					addToUnsuccessful(unsuccessfulLines, first, "");
@@ -386,6 +376,7 @@ public class Yurl {
 		//// The main part
 		////
 		// TODO: See if you can turn this into a map-reduce
+		@SuppressWarnings("unused")
 		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 //			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
@@ -794,34 +785,6 @@ public class Yurl {
 			}
 		}
 
-		private static String encode(String value) {
-			String encode = null;
-			try {
-				encode = URLEncoder.encode(value, "UTF-8");
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-			return encode;
-		}
-
-		private static String getValue(FutureTask<String> future) {
-			String s;
-			try {
-				s = future.get();
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-				throw new RuntimeException(e1);
-			} catch (ExecutionException e1) {
-				e1.printStackTrace();
-				throw new RuntimeException(e1);
-			}
-			return s;
-		}
-
 		private static void downloadImageInSeparateThread(final String iUrl2,
 				final String targetDirPath, final String cypherUri,
 				final String id) {
@@ -933,22 +896,9 @@ public class Yurl {
 				final String iVideoUrl, final String TARGET_DIR_PATH,
 				final String cypherUri, final String id) {
 			System.out.println("Yurl.HelloWorldResource.downloadVideoInSeparateThread() - begin: " + iVideoUrl);
-			_1: {
 			// VGet stopped working
-//				Runnable r = new Runnable() {
-//
-//					// @Override
-//					public void run() {
-//						downloadVideo(iVideoUrl, TARGET_DIR_PATH, id);
-//					}
-//				};
-//				new Thread(r).start();
-			}
-			_2: {
-				Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
-				executorService.submit(r2);
-//				new Thread(r2).run();
-			}
+			Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
+			executorService.submit(r2);
 		}
 
 		private static Runnable getVideoDownloadJob(final String iVideoUrl, final String TARGET_DIR_PATH,
@@ -956,57 +906,36 @@ public class Yurl {
 			Runnable r2 = new Runnable() {
 				@Override
 				public void run() {
-					_3: {
-						try {
-							Process p = new ProcessBuilder()
-									.directory(Paths.get(TARGET_DIR_PATH).toFile())
-									.command(
-											ImmutableList.of("/home/sarnobat/bin/youtube_download",
-													iVideoUrl)).inheritIO().start();
-							p.waitFor();
-							if (p.exitValue() == 0) {
-								System.out
-										.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
-												+ iVideoUrl);
-								writeSuccessToDb(iVideoUrl, id);
-							} else {
-								System.out
-										.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading "
-												+ iVideoUrl);
-							}
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+					try {
+						Process p = new ProcessBuilder()
+								.directory(Paths.get(TARGET_DIR_PATH).toFile())
+								.command(
+										ImmutableList.of("/home/sarnobat/bin/youtube_download",
+												iVideoUrl)).inheritIO().start();
+						p.waitFor();
+						if (p.exitValue() == 0) {
+							System.out
+									.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
+											+ iVideoUrl);
+							writeSuccessToDb(iVideoUrl, id);
+						} else {
+							System.out
+									.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading "
+											+ iVideoUrl);
 						}
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
 				}
 			};
 			return r2;
 		}
 
+		@SuppressWarnings("unused")
 		private static void downloadUndownloadedVideosInSeparateThread() {
 			System.out.println("downloadUndownloadedVideosInSeparateThread() - begin");
-//			Timer timer = new Timer ();
-//			TimerTask hourlyTask = new TimerTask() {
-//				@Override
-//				public void run() {
-//					try {
-//						downloadUndownloadedVideosBatch();
-//					} catch (JSONException e) {
-//						e.printStackTrace();
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			};
-//
-//			// schedule the task to run starting now and then every hour...
-//			timer.schedule (hourlyTask, 0l, 1000*60*10);
-			
-//			
 			new Thread() {
 				public void run() {
 					try {
@@ -1028,7 +957,6 @@ public class Yurl {
 			}.start();
 		}
 
-		@SuppressWarnings("unchecked")
 		private static void downloadUndownloadedVideosBatch() throws JSONException, IOException {
 			System.out.println("downloadUndownloadedVideosBatch() - begin");
 			String query = "start root=node(37658)" +
@@ -1050,7 +978,7 @@ public class Yurl {
 						if (id instanceof Integer) {
 							System.out.println("downloadUndownloadedVideosBatch() - Starting retroactively downloading: " + title);
 							try {
-								new SimpleTimeLimiter().callWithTimeout(new Callable() {
+								new SimpleTimeLimiter().callWithTimeout(new Callable<Object>() {
 
 									@Override
 									public Object call() throws Exception {
@@ -1526,33 +1454,33 @@ public class Yurl {
 			private static Multimap<Integer, Integer> buildParentToChildMultimap2(
 					JSONArray cypherRawResults) {
 				Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
-				getParentChildrenMap: {
-					for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
-						JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
-						for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-							if (categoryPath.get(hopNum).getClass().equals(HelloWorldResource.JSON_OBJECT_NULL)) {
-								continue;
-							}
-							if (categoryPath.get(hopNum + 1).getClass().equals(HelloWorldResource.JSON_OBJECT_NULL)) {
-								continue;
-							}
-							if (!(categoryPath.get(hopNum + 1) instanceof String)) {
-								continue;
-							}
-							int childId = new JSONObject(
-									categoryPath.getString(hopNum + 1)).getInt("id");
-							int parentId = checkNotNull(new JSONObject(
-									categoryPath
-											.getString(hopNum)).getInt("id"));
-							Object childrenObj = oParentToChildren.get(parentId);
-							if (childrenObj != null) {
-								Set<?> children = (Set<?>) childrenObj;
-								if (!children.contains(childId)) {
-									oParentToChildren.put(parentId, childId);
-								}
-							} else {
+				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
+					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum)
+							.getJSONArray(0));
+					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
+						if (categoryPath.get(hopNum).getClass()
+								.equals(HelloWorldResource.JSON_OBJECT_NULL)) {
+							continue;
+						}
+						if (categoryPath.get(hopNum + 1).getClass()
+								.equals(HelloWorldResource.JSON_OBJECT_NULL)) {
+							continue;
+						}
+						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
+							continue;
+						}
+						int childId = new JSONObject(categoryPath.getString(hopNum + 1))
+								.getInt("id");
+						int parentId = checkNotNull(new JSONObject(categoryPath.getString(hopNum))
+								.getInt("id"));
+						Object childrenObj = oParentToChildren.get(parentId);
+						if (childrenObj != null) {
+							Set<?> children = (Set<?>) childrenObj;
+							if (!children.contains(childId)) {
 								oParentToChildren.put(parentId, childId);
 							}
+						} else {
+							oParentToChildren.put(parentId, childId);
 						}
 					}
 				}
@@ -1680,25 +1608,12 @@ public class Yurl {
 			private static boolean isJpgFile(String url) {
 				return url.matches("(?i).*\\.jpg") || url.matches("(?i).*\\.jpg\\?.*");
 			}
-			
-			private static boolean isPngFile(String url) {
-				return url.matches("(?i).*\\.png") || url.matches("(?i).*\\.png\\?.*");
-			}
 
 			private static Multimap<Integer, String> getImageSizes(List<String> out) {
-//				ImmutableMap.Builder<Integer, String> builder = ImmutableMap.builder();
 				ImmutableMultimap.Builder<Integer, String> builder = ImmutableMultimap.builder();
-				Set<Integer> taken = new HashSet<Integer>();
 				for (String imgSrc : out) {
 					int size = getByteSize(imgSrc);
-//					System.out.println("BiggestImage.getImageSizes() - " + size + "\t" + imgSrc);
 					builder.put(size, imgSrc);
-//					if (!taken.contains(size)) {
-//						builder.put(size, imgSrc);
-//						taken.add(size);
-//					} else {
-//						System.out.println("HelloWorldResource.BiggestImage.getImageSizes() - size already taken: " + size);
-//					}
 				}
 				return builder.build();
 			}
@@ -1753,55 +1668,6 @@ public class Yurl {
 			};
 		}
 
-		private static class AddChildren implements Function<Map.Entry<Integer, JSONObject>, Map.Entry<Integer,JSONObject>> {
-			private final Multimap<Integer, Integer> parentIdToChildrenIdList;
-			private final Map<Integer, JSONObject> idToCategoryNode; 
-			AddChildren(Multimap<Integer, Integer> parentIdToChildrenIdList, Map<Integer, JSONObject> idToCategoryNode) {
-				this.parentIdToChildrenIdList = parentIdToChildrenIdList;
-				this.idToCategoryNode = idToCategoryNode;
-			}
-			@Override
-			public Map.Entry<Integer,JSONObject> apply(Map.Entry<Integer,JSONObject> categoryNodeWithoutChildren) {
-				Collection<Integer> childCategoryIds = (Collection<Integer>) parentIdToChildrenIdList
-						.get(categoryNodeWithoutChildren.getKey());
-				if (childCategoryIds == null) {
-				} else {
-					JSONArray childCategoryNodes = new JSONArray();
-					for (Integer childId : childCategoryIds) {
-						childCategoryNodes.put(idToCategoryNode.get(childId));
-					}
-					categoryNodeWithoutChildren.getValue().put("children", childCategoryNodes);
-				}
-				return categoryNodeWithoutChildren;
-			}
-		};
-
-		@Deprecated
-		// This gives a flat list
-		private JSONArray getFlatListOfSubcategoriesRecursive(Integer iParentId)
-				throws IOException {
-			System.out.println("DEPRECATED::getFlatListOfSubcategoriesRecursive() - begin");
-			JSONArray theData = (JSONArray) execute(
-					"START parent=node({parentId}) " +
-					"MATCH parent-[c:CONTAINS*]->n " +
-					"WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} " +
-					"RETURN distinct ID(n),n.name",
-					ImmutableMap.<String, Object> of("parentId", iParentId), "getFlatListOfSubcategoriesRecursive()")
-					.get("data");
-			JSONArray oKeys = new JSONArray();
-			for (int i = 0; i < theData.length(); i++) {
-				JSONObject aBindingObject = new JSONObject();
-				JSONArray aBindingArray = theData.getJSONArray(i);
-				String id = (String) aBindingArray.get(0);
-				aBindingObject.put("id", id);
-				String title = (String) aBindingArray.get(1);
-				aBindingObject.put("name", title);
-				oKeys.put(aBindingObject);
-			}
-			return oKeys;
-		}
-		
-
 		// I hope this is the same as JSONObject.Null (not capitals)
 		public static final Object JSON_OBJECT_NULL = new Null();//JSONObject.Null;
 
@@ -1824,14 +1690,6 @@ public class Yurl {
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
-//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.teamtalk.com/liverpool");
-//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.denimblog.com/2015/07/stella-maxwell-in-rag-bone/");
-//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.lfchistory.net/Articles/Article/61");
-//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.imdb.com/title/tt2484460/");
-//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.midatlanticwrestling.net/resourcecenter/gateway_remembers/uswrestlingclub/ringside_1-3.htm");
-//		System.out.println("Biggest image is: " + biggestImageAbsUrl);
-
-		//		HelloWorldResource.downloadVideo("https://www.youtube.com/watch?v=ugf4-sl7tnQ", "/media/sarnobat/Unsorted/Videos/");
 
 		HelloWorldResource.refreshCategoriesTreeCacheInSeparateThread();
 		try {
