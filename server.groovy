@@ -1,30 +1,32 @@
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.AbstractMap;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -33,7 +35,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.collections.map.MultiValueMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
@@ -43,39 +44,136 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 import com.github.axet.vget.VGet;
 import com.github.axet.vget.info.VideoInfo.VideoQuality;
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.base.Strings;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
 public class Yurl {
+	private static final String CHROMEDRIVER_PATH = //"/Users/sarnobat/trash/chromedriver";
+	//"/home/sarnobat/trash/chromedriver";
+	"/home/sarnobat/github/yurl/chromedriver";
+	
 	@Path("yurl")
 	public static class HelloWorldResource { // Must be public
 
-		@Deprecated
 		private static final Integer ROOT_ID = 45;
 		private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 		private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 		private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/Unsorted/images/";
 
 		static {
-			System.out.println("static() begin");
-			refreshCategoriesTreeCache();
+//			System.out.println("static() begin");
+//we can't put this in the constructor because multiple instances will get created
+//			HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		}
 
 		private static JSONObject categoriesTreeCache;
 
-		// This never gets called
+		// This only gets invoked when it receives the first request
+		// Multiple instances get created
 		HelloWorldResource() {
+//			System.out.println("HelloWorldResource() - begin");
+			// We can't put the auto downloader in main()
+			// then either it will be called every time the cron job is executed,
+			// or not until the server terminates unexceptionally (which never happens).
+			
+		}
+		
+		@GET
+		@Path("uncategorized")
+		@Produces("application/json")
+		public Response getUrls(@QueryParam("rootId") Integer iRootId)
+				throws JSONException, IOException {
+			checkNotNull(iRootId);
+			JSONObject categoriesTreeJson;
+			if (categoriesTreeCache == null) {
+				System.out.println("getUrls() - preloaded categories tree not ready");
+				categoriesTreeJson = CategoryTree.getCategoriesTree(ROOT_ID);
+			} else {
+				categoriesTreeJson = categoriesTreeCache;
+				// This is done in a separate thread
+				refreshCategoriesTreeCacheInSeparateThread();
+			}
+			try {
+				JSONObject retVal;
+				if (MongoDbCache.exists(iRootId.toString())) {
+					System.out.println("Yurl.HelloWorldResource.getUrls() - using cache");
+					retVal = new JSONObject(MongoDbCache.get(iRootId.toString()));
+				} else {
+				// If there were multiple clients here, you'd need to block the 2nd onwards
+					System.out.println("Yurl.HelloWorldResource.getUrls() - not using cache");
+					JSONObject retVal1;
+					retVal1 = new JSONObject();
+					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+					retVal1.put("categoriesRecursive", categoriesTreeJson);
+					MongoDbCache.put(iRootId.toString(), retVal1.toString());
+					retVal = retVal1;
+				}
+				
+				return Response.ok().header("Access-Control-Allow-Origin", "*")
+						.entity(retVal.toString())
+						.type("application/json").build();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				return Response.serverError().header("Access-Control-Allow-Origin", "*")
+						.entity(e.getStackTrace())
+						.type("application/text").build();
+			}
+		}
+
+
+		@GET
+		@Path("downloadVideo")
+		@Produces("application/json")
+		public Response downloadVideoSynchronous(@QueryParam("id") Integer iRootId, @QueryParam("url") String iUrl)
+				throws JSONException, IOException {
+			getVideoDownloadJob(iUrl, TARGET_DIR_PATH,
+					Integer.toString(iRootId)).run();
+			JSONObject retVal = new JSONObject();
+			try {
+				return Response.ok().header("Access-Control-Allow-Origin", "*")
+						.entity(retVal.toString())
+						.type("application/json").build();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				return Response.serverError().header("Access-Control-Allow-Origin", "*")
+						.entity(e.getStackTrace())
+						.type("application/text").build();
+			}
 		}
 
 		@GET
@@ -89,7 +187,7 @@ public class Yurl {
 			// way in the UI)
 			JSONObject theParentNodeJson = execute(
 					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)",
-					theParams.build());
+					theParams.build(), "parent()");
 			JSONArray theData = (JSONArray) theParentNodeJson.get("data");
 			JSONArray ret = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
@@ -113,19 +211,13 @@ public class Yurl {
 		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
 				@QueryParam("urls") String iUrls) throws Exception {
 			Preconditions.checkArgument(iRootId != null);
-			System.out.println("batchInsert - " + iRootId);
-			// System.out.println("batchInsert - " + URLDecoder.decode(iUrls,
-			// "UTF-8"));
 			StringBuffer unsuccessfulLines = new StringBuffer();
 
 			String[] lines = iUrls.trim().split("\\n");
 			int i = 0;
 			while (i < lines.length) {
 
-				System.out.println("1");
 				String first = lines[i];
-				
-				String theHttpUrl;
 				try {
 					if (first.startsWith("http")) {
 						stash(URLEncoder.encode(first, "UTF-8"), iRootId);
@@ -133,14 +225,13 @@ public class Yurl {
 						continue;
 					}
 					// Fails if it sees the string "%)"
-					theHttpUrl = URLDecoder.decode(first, "UTF-8");
+					URLDecoder.decode(first, "UTF-8");
 				} catch (Exception e) {
 					System.out.println(e.getStackTrace());
 					addToUnsuccessful(unsuccessfulLines, first, "");
 					++i;
 					continue;
 				}
-				System.out.println("decoded: " + theHttpUrl);
 				if (first.startsWith("=")) {
 					++i;
 					addToUnsuccessful(unsuccessfulLines, first, "");
@@ -151,12 +242,12 @@ public class Yurl {
 					addToUnsuccessful(unsuccessfulLines, first, "");
 					continue;
 				}
-				System.out.println("3");
+//				System.out.println("3");
 				if (first.matches("^\\s*" + '$')) {
 					++i;
 					continue;
 				}
-				System.out.println("4");
+//				System.out.println("4");
 
 				String second = lines[i + 1];
 				if (first.startsWith("\"") && second.startsWith("http")) {
@@ -220,7 +311,7 @@ public class Yurl {
 			theParams.put("nodeId", iRootId);
 			JSONObject theResponse = execute(
 					"start root=node({nodeId}) MATCH root--n RETURN distinct n, id(n)",
-					theParams.build());
+					theParams.build(), "printNode()");
 			JSONArray jsonArray = (JSONArray) theResponse.get("data");
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONArray aNode = (JSONArray) jsonArray.get(i);
@@ -273,7 +364,7 @@ public class Yurl {
 		@GET
 		@Path("count_non_recursive")
 		@Produces("application/json")
-		@Deprecated // Use categoriesRecursive
+		// It's better to do this in a separate Ajax request because it's fast and we can get an idea if database queries are working.
 		public Response countNonRecursive(@QueryParam("rootId") Integer iRootId)
 				throws Exception {
 			checkNotNull(iRootId);
@@ -281,7 +372,7 @@ public class Yurl {
 				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 				theParams.put("rootId", iRootId);
 				JSONObject theQueryResultJson = execute(
-						"start n=node({rootId}) match n-[CONTAINS]->u where has(u.title) return n.name, count(u) as cnt",
+						"start n=node({rootId}) optional match n-[CONTAINS]->u where has(u.title) return n.name, count(u) as cnt",
 						theParams.build());
 				JSONArray outerArray = (JSONArray) theQueryResultJson
 						.get("data");
@@ -300,53 +391,26 @@ public class Yurl {
 			}
 		}
 
-		@GET
-		@Path("uncategorized")
-		@Produces("application/json")
-		public Response getUrls(@QueryParam("rootId") Integer iRootId)
-				throws JSONException, IOException {
-			checkNotNull(iRootId);
-			JSONObject categoriesTreeJson;
-                        if (categoriesTreeCache == null) {
-				System.out.println("getUrls() - preloaded categories tree not ready");
-                                categoriesTreeJson = getCategoriesTree(ROOT_ID);
-                        } else {
-                                categoriesTreeJson = categoriesTreeCache;
-				// This is done in a separate thread 
-                                refreshCategoriesTreeCache();
-                        }
-                        JSONArray ret = getKeys(iRootId);
-			JSONObject retVal = new JSONObject();
-			try {
-//				retVal.put("urlsAtTopLevel", getItemsAtLevel(iRootId));
-				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
-				retVal.put("categoriesRecursive", categoriesTreeJson);
-				retVal.put("categoriesNonRecursive", ret);
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(retVal.toString())
-					.type("application/json").build();
-		}
-
-
-		// The main part
+		////
+		//// The main part
+		////
+		// TODO: See if you can turn this into a map-reduce
+		@SuppressWarnings("unused")
 		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
-			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
+//			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
-				categoriesTreeCache = getCategoriesTree(iRootId);
+				categoriesTreeCache = CategoryTree.getCategoriesTree(ROOT_ID);
 			}
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("rootId", iRootId);
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
-					"start source=node({rootId}) match p = source-[r:CONTAINS*1..2]->u "
-					+ "where (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
-					+ "return distinct ID(u),u.title,u.url,extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal "
-					+ "ORDER BY u.ordinal DESC LIMIT 500",
-					theParams.build());
+					"START source=node({rootId}) "
+							+ "MATCH p = source-[r:CONTAINS*1..2]->u "
+							+ "WHERE (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
+							+ "RETURN distinct ID(u),u.title,u.url, extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal, u.biggest_image, u.user_image "
+// TODO : do not hardcode the limit to 500. Category 38044 doesn't display more than 50 books since there are so many child items.
+							+ "ORDER BY u.ordinal DESC LIMIT 500", ImmutableMap
+							.<String, Object> builder().put("rootId", iRootId)
+							.build(), "getItemsAtLevelAndChildLevels()");
 			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
 			JSONArray theUncategorizedNodesJson = new JSONArray();
 			for (int i = 0; i < theDataJson.length(); i++) {
@@ -381,30 +445,46 @@ public class Yurl {
 										path.get(0));
 							}
 						} catch (Exception e) {
-							// TODO: Add this back
 							e.printStackTrace();
 						}
 					}
 					_15: {
 
 						Object val = anItem.get(4);
-						if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
+						if (isNotNull(val)) {
 							String aValue = (String) val;
 							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
 						}
 					}
 					_16: {
-
-							Object val = anItem.get(6);
-							if ("null".equals(val)) {
-								System.out.println("Is null value");
-							} else if (val == null) {
-                                                                System.out.println("Is null string");
+						Object val = anItem.get(6);
+						if ("null".equals(val)) {
+							System.out.println("Is null value");
+						} else if (val == null) {
+							System.out.println("Is null string");
+						} else if (isNotNull(val)) {
+							Long aValue = (Long) val;
+							anUncategorizedNodeJsonObject.put("created", aValue);
+						}
+					}
+					_17: {
+						Object val = anItem.get(8);
+						if (isNotNull(val)) {
+							String aValue = (String) val;
+							if ("null".equals(aValue)) {
+								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
 							}
-							else if (val != null && !("null".equals(val)) && !(val.getClass().equals(JSONObject.Null))) {
-									Long aValue = (Long) val;
-									anUncategorizedNodeJsonObject.put("created", aValue);
+							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
+						}
+					}
+					_18: {
+						Object val = anItem.get(9);
+						if (isNotNull(val)) {
+							String aValue = (String) val;
+							if ("null".equals(aValue)) {
 							}
+							anUncategorizedNodeJsonObject.put("user_image", aValue);
+						}
 					}
 				}
 				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
@@ -426,36 +506,8 @@ public class Yurl {
 			return ret;
 		}
 
-		@Deprecated
-		private JSONArray getItemsAtLevel(Integer iRootId) throws IOException {
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("rootId", iRootId);
-			// TODO: the source is null clause should be obsoleted
-			JSONObject theQueryResultJson = execute(
-					"start n=node({rootId}) MATCH n<-[r:CONTAINS]-source where (source is null or ID(source) = {rootId}) and not(has(n.type)) AND id(n) > 0 return distinct ID(n),n.title,n.url,n.created,n.ordinal ORDER BY n.ordinal DESC LIMIT 500",
-					theParams.build());
-			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
-			JSONArray theUncategorizedNodesJson = new JSONArray();
-			for (int i = 0; i < theDataJson.length(); i++) {
-				JSONObject anUncategorizedNodeJsonObject = new JSONObject();
-				_1: {
-					JSONArray anItem = theDataJson.getJSONArray(i);
-					_11: {
-						String anId = (String) anItem.get(0);
-						anUncategorizedNodeJsonObject.put("id", anId);
-					}
-					_12: {
-						String aTitle = (String) anItem.get(1);
-						anUncategorizedNodeJsonObject.put("title", aTitle);
-					}
-					_13: {
-						String aUrl = (String) anItem.get(2);
-						anUncategorizedNodeJsonObject.put("url", aUrl);
-					}
-				}
-				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
-			}
-			return theUncategorizedNodesJson;
+		private static boolean isNotNull(Object val) {
+			return val != null && !("null".equals(val)) && !(val.getClass().equals(HelloWorldResource.JSON_OBJECT_NULL));
 		}
 
 		// -----------------------------------------------------------------------------
@@ -473,150 +525,147 @@ public class Yurl {
 				@QueryParam("newKeyBindings") String iNewKeyBindings,
 				@QueryParam("oldKeyBindings") String iOldKeyBindings)
 				throws JSONException, IOException {
-			System.out.println("keysUpdate");
+			System.out.println("keysUpdate() - begin");
+			// Remove duplicates by putting the bindings in a map
+			for (Map.Entry<String, String> pair : FluentIterable
+					.from(difference(iNewKeyBindings, iOldKeyBindings))
+					.filter(Predicates.not(IS_COMMENTED))
+					.transform(LINE_TO_BINDING_ENTRY).toSet()) {
+				deleteBinding(iParentId, pair.getKey(), pair.getValue());
+				// TODO: if it fails, recover and create the remaining ones?
+				createNewKeyBinding(pair.getValue(), pair.getKey(), iParentId);
+			}
+			return Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(getKeys(iParentId).toString())
+					.type("application/json").build();
+		}
 
-			Set<String> theOldKeyBindingsSet = new HashSet<String>();
-			Collections.addAll(theOldKeyBindingsSet, iOldKeyBindings.trim()
-					.split("\n"));
-			Set<String> theNewKeyBindingsSet = new HashSet<String>();
-			Collections.addAll(theNewKeyBindingsSet, iNewKeyBindings.trim()
-					.split("\n"));
+		private static void deleteBinding(Integer iParentId, String key, String name) {
+			try {
+				execute("START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
+						ImmutableMap.<String, Object> builder()
+								.put("parentId", iParentId)
+								.put("key", key).build(), "deleteBinding()");
+				System.out.println("deleteBinding() - Removed keybinding for " + name);
+			} catch (Exception e) {
+				System.out.println("deleteBinding() - Did not removed keybinding for " + name + " since there currently isn't one.");
+			}
+		}
+		
+		private static final Function<String, Map.Entry<String, String>> LINE_TO_BINDING_ENTRY = new Function<String, Map.Entry<String, String>>() {
+			@Override
+			public Entry<String, String> apply(String bindingLine) {
+				String[] aLineElements = bindingLine.split("=");
+				// Ignore trailing comments
+				return new AbstractMap.SimpleEntry<String, String>(aLineElements[0].trim(),
+						aLineElements[1].trim().split("#")[0].trim());
+			}
+		};
 
+		private static final Predicate<String> IS_COMMENTED = new Predicate<String>(){
+			@Override
+			public boolean apply(@Nullable String aNewKeyBinding) {
+				if (aNewKeyBinding == null) {
+					return true;
+				}
+				if (aNewKeyBinding.equals("")){
+					return true;
+				}
+				if (aNewKeyBinding.trim().startsWith("#")
+						&& !aNewKeyBinding.trim().startsWith("#=")) {
+					return true;
+				}
+				if (aNewKeyBinding.trim().startsWith("_")) {
+					// do not allow key binding that is "_". This is reserved
+					// for hiding until refresh
+					return true;
+				}
+				return false;
+			}
+		};
+		
+		private Set<String> difference(String iNewKeyBindings,
+				String iOldKeyBindings) {
 			// NOTE: This is not symmetric (commutative?). If you want to
 			// support removal do that in a separate loop
 			Set<String> theNewKeyBindingLines = Sets.difference(
-					theNewKeyBindingsSet, theOldKeyBindingsSet);
-			_1: {
-				System.out.println("Old: " + theOldKeyBindingsSet);
-				System.out.println("New: " + theNewKeyBindingsSet);
-				System.out.println("Difference: " + theNewKeyBindingLines);
-			}
-
-			// Remove duplicates by putting the bindings in a map
-			Map<String, String> theKeyBindingsNoDuplicates = new HashMap<String, String>();
-			for (String aNewKeyBinding : theNewKeyBindingLines) {
-				if (aNewKeyBinding.trim().startsWith("#")
-						&& !aNewKeyBinding.trim().startsWith("#=")) {
-					continue;// A commented out keybinding
-				}
-				// TODO: do not allow key binding that is "_". This is reserved
-				// for hiding until refresh
-
-				_1: {
-					// Ignore trailing comments
-					String[] aLineElements = aNewKeyBinding.split("=");
-					String aKeyCode = aLineElements[0].trim();
-					String[] aRightHandSideElements = aLineElements[1].trim()
-							.split("#");
-					_2: {
-						String aName = aRightHandSideElements[0].trim();
-						System.out
-								.println("Accepting proposal to create key binding for "
-										+ aName + "(" + aKeyCode + ")");
-						theKeyBindingsNoDuplicates.put(aKeyCode, aName);
-					}
-				}
-
-				// TODO: if it fails, recover and create the remaining ones?
-			}
-
-			for (String aKeyCode : theKeyBindingsNoDuplicates.keySet()) {
-				String aName = theKeyBindingsNoDuplicates.get(aKeyCode);
-				Map<String, Object> aParamValues = new HashMap<String, Object>();
-				_1: {
-					aParamValues.put("parentId", iParentId);
-					aParamValues.put("key", aKeyCode);
-				}
-				System.out
-						.println("About to remove keybinding for " + aKeyCode);
-				try {
-					execute(
-						"START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
-						aParamValues);
-					theKeyBindingsNoDuplicates.remove(aKeyCode);
-					System.out.println("Removed keybinding for " + aName);
-				} catch (Exception e) {
-					System.out.println("Did not removed keybinding for " + aName + " since there currently isn't one.");
-				}
-				createNewKeyBinding(aName, aKeyCode, iParentId);
-			}
-			JSONArray ret = getKeys(iParentId);
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
+					ImmutableSet.copyOf(iNewKeyBindings.trim().split("\n")),
+					ImmutableSet.copyOf(iOldKeyBindings.trim().split("\n")));
+			System.out.println("Difference: " + theNewKeyBindingLines);
+			return theNewKeyBindingLines;
 		}
 
-		private void createNewKeyBinding(String iCategoryName, String iKeyCode,
+		private static void createNewKeyBinding(String iCategoryName, String iKeyCode,
 				Integer iParentId) throws IOException, JSONException {
-			
 			System.out.println("createNewKeyBinding() - begin() : " + String.format("iCategoryName %s\tiKeyCode %s\tiParentId %d", iCategoryName, iKeyCode, iParentId));
 			// TODO: Also create a trash category for each new category key node
+			JSONArray theCategoryNodes = (JSONArray) execute(
+					"START parent=node({parentId})" +
+					" MATCH parent -[r:CONTAINS]-> existingCategory" +
+					" WHERE has(existingCategory.type)" +
+					" and existingCategory.type = 'categoryNode'" +
+					" and existingCategory.name = {aCategoryName}" +
+					" SET existingCategory.key = {aKeyCode}" +
+					" RETURN distinct id(existingCategory)",
+					ImmutableMap.<String, Object> builder()
+							.put("parentId", iParentId)
+							// TODO: change this back
+							.put("aCategoryName", iCategoryName)
+							.put("aKeyCode", iKeyCode).build(), "createNewKeyBinding()").get("data");
+			try {
+				createNewRelation(iParentId,
+						Integer.parseInt(getCategoryNodeIdString(iCategoryName,
+								iKeyCode, theCategoryNodes)));
+				System.out.println("createNewKeyBinding() - end()");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
-			boolean shouldCreateNewCategoryNode = false;
-			String theNewCategoryNodeIdString = "-1";
-			_1: {
-				Map<String, Object> theParamValues = new HashMap<String, Object>();
-				theParamValues.put("parentId", iParentId);
-				// TODO: change this back
-				theParamValues.put("aCategoryName", iCategoryName);
-				theParamValues.put("aKeyCode", iKeyCode);
-				String iCypherQuery = "START parent=node({parentId}) MATCH parent -[r:CONTAINS]-> existingCategory WHERE has(existingCategory.type) and existingCategory.type = 'categoryNode' and existingCategory.name = {aCategoryName} SET existingCategory.key = {aKeyCode} RETURN distinct id(existingCategory)";
-				JSONObject theJson = execute(iCypherQuery, theParamValues);
-				System.out.println("restoring unassociated category: "
-						+ iCypherQuery + "\t" + theParamValues);
-
-				System.out.println(theJson.get("data"));
-				JSONArray theCategoryNodes = (JSONArray) theJson.get("data");
+		/** Get or create the category node that is to be associated with the key code */
+		private static String getCategoryNodeIdString(String iCategoryName,
+				String iKeyCode, JSONArray theCategoryNodes) throws IOException {
+			String theNewCategoryNodeIdString;
+			if (shouldCreateNewCategoryNode(theCategoryNodes, iCategoryName)) {
+				// TODO: first check if there is already a node with this name,
+				// which is for re-associating the keycode with the category
+				theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) execute(
+						"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) "
+								+ "RETURN id(n)",
+						ImmutableMap.<String, Object> builder()
+								.put("name", iCategoryName)
+								.put("key", iKeyCode)
+								.put("type", "categoryNode")
+								.put("created", System.currentTimeMillis())
+								.build(), "getCategoryNodeIdString()").get("data")).get(0)).get(0);
+			} else {
 				if (theCategoryNodes.length() > 0) {
-					System.out.println("createNewKeyBinding() - We already have a category named " + iCategoryName + " underneath " + iParentId);
 					if (theCategoryNodes.length() > 1) {
-						System.out.println("createNewKeyBinding() - Too many subcategories named " + iCategoryName + " underneath " + iParentId + "\n\t" + theCategoryNodes);
 						// Sanity check
 						throw new RuntimeException(
 								"There should never be 2 child categories of the same node with the same name");
 					}
-					theNewCategoryNodeIdString = (String) ((JSONArray)theCategoryNodes
+					theNewCategoryNodeIdString = (String) ((JSONArray) theCategoryNodes
 							.get(0)).get(0);
-					System.out.println("createNewKeyBinding() - Category ID to reattach: "
-							+ theNewCategoryNodeIdString);
 				} else {
-					shouldCreateNewCategoryNode = true;
-					System.out.println("We need to create a category named " + iCategoryName + " underneath " + iParentId);
+					theNewCategoryNodeIdString = "-1";
 				}
-
 			}
-			if (shouldCreateNewCategoryNode) {
-				theNewCategoryNodeIdString = createCategoryWithKeyBinding(
-						iCategoryName, iKeyCode);
-			}
-			try {
-				relateHelper(iParentId, Integer.parseInt(theNewCategoryNodeIdString));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			System.out.println("createNewKeyBinding() - end()");
+			return theNewCategoryNodeIdString;
 		}
 
-		private String createCategoryWithKeyBinding(String iCategoryName,
-				String iKeyCode) throws IOException {
-			String theNewCategoryNodeIdString;
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
-			_1: {
-				theParamValues.put("name", iCategoryName);
-				theParamValues.put("key", iKeyCode);
-				theParamValues.put("type", "categoryNode");
-				theParamValues.put("created", System.currentTimeMillis());
-				System.out.println("cypher params: " + theParamValues);
+		private static boolean shouldCreateNewCategoryNode(JSONArray theCategoryNodes, String iCategoryName) {
+			boolean shouldCreateNewCategoryNode = false;
+			if (theCategoryNodes.length() > 0) {
+				if (theCategoryNodes.length() > 1) {
+					// Sanity check
+					throw new RuntimeException(
+							"There should never be 2 child categories of the same node with the same name");
+				}
+			} else {
+				shouldCreateNewCategoryNode = true;
 			}
-			// TODO: first check if there is already a node with this name,
-			// which is for re-associating the keycode with the category
-			JSONObject theNewKeyBindingResponseJson = execute(
-					"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) RETURN id(n)",
-					theParamValues);
-			System.out.println("createNewKeyBinding() - Success:\n\t" + theNewKeyBindingResponseJson.toString());
-			theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
-					.get("data")).get(0)).get(0);
-			System.out.println("createNewKeyBinding() - got new node");
-			return theNewCategoryNodeIdString;
+			return shouldCreateNewCategoryNode;
 		}
 
 		@GET
@@ -629,46 +678,35 @@ public class Yurl {
 					.entity(ret.toString()).type("application/json").build();
 		}
 
-		public JSONArray getKeys(Integer iParentId) throws IOException,
+		// TODO: Rewrite this as a map-fold?
+		public static JSONArray getKeys(Integer iParentId) throws IOException,
 				JSONException {
-			System.out.println("getKeys() - parent ID: " + iParentId);
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			_1: {
-				theParams.put("parentId", iParentId);
-			}
+//			System.out.println("getKeys() - parent ID: " + iParentId);
 			// Unfortunately, we cannot insist on counting only the URL nodes -
 			// it will prevent category nodes from being returned. See if
-			// there's
-			// a way to do this in Cypher. If there isn't, this is not a huge
-			// compromise.
+			// there's a way to do this in Cypher. If there isn't, this is not a
+			// huge compromise.
 			// TODO: find a way to count the nodes
-			JSONObject theQueryJsonResult = execute(
-					"START parent=node({parentId}) MATCH parent-[c:CONTAINS*1..2]->n WHERE has(n.name)  and n.type = 'categoryNode'  and id(parent) = {parentId}  RETURN distinct ID(n),n.name,n.key,0 as c order by c desc",
-					theParams.build());
-			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
-			System.out.println("getKeys() - length: " + theData.length());
+			JSONArray theData = (JSONArray) execute(
+					"START parent=node({parentId}) " +
+					"MATCH parent-[c:CONTAINS*1..2]->n " +
+					"WHERE has(n.name)  and n.type = 'categoryNode' and id(parent) = {parentId} " +
+					"RETURN distinct ID(n),n.name,n.key,0 as c order by c desc",
+					ImmutableMap.<String, Object> builder()
+							.put("parentId", iParentId).build(), "getKeys()").get("data");
 			JSONArray oKeys = new JSONArray();
 			for (int i = 0; i < theData.length(); i++) {
+				JSONArray aBindingArray = theData.getJSONArray(i);
 				JSONObject aBindingObject = new JSONObject();
-				_1: {
-					JSONArray aBindingArray = theData.getJSONArray(i);
-					String id = (String) aBindingArray.get(0);
-					aBindingObject.put("id", id);
-					String title = (String) aBindingArray.get(1);
-					String aUrl = (String) aBindingArray.get(2);
-					String aCount = ((Integer) aBindingArray.get(3)).toString();
-					_11: {
-						// remove this. Just checking that this is a valid
-						// number
-						Integer.parseInt(aCount);
-					}
-					aBindingObject.put("name", title);
-					aBindingObject.put("key", aUrl);// TODO: this could be null
-					aBindingObject.put("count", aCount);
-					oKeys.put(aBindingObject);
-				}
+				aBindingObject.put("id", (String) aBindingArray.get(0));
+				aBindingObject.put("name", (String) aBindingArray.get(1));
+				// TODO: this could be null
+				aBindingObject.put("key", (String) aBindingArray.get(2));
+				aBindingObject.put("count",
+						((Integer) aBindingArray.get(3)).toString());
+				oKeys.put(aBindingObject);
 			}
-			System.out.println("getKeys() - end. length: " + oKeys.length());
+//			System.out.println("getKeys() - end. length: " + oKeys.length());
 			return oKeys;
 		}
 
@@ -682,26 +720,23 @@ public class Yurl {
 		public Response stash(@QueryParam("param1") String iUrl,
 				@QueryParam("rootId") Integer iRoodId) throws JSONException,
 				IOException {
-			System.out.println("stash() - begin");
 			// This will convert
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
-			System.out.println("stash() - url decoded: " + theHttpUrl);
 			String theTitle = getTitle(new URL(theHttpUrl));
 			try {
 				JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle,
 						new Integer(iRoodId));
-				System.out.println("stash() - node created");
-				System.out.println("About to get id");
 				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
 						.get("data")).get(0);
-				System.out.println("Got array: " + theNewNodeId);
-				System.out.println(theNewNodeId.get(0));
 				String id = (String) theNewNodeId.get(0);
 				System.out.println(id);
 
+				MongoDbCache.delete(iRoodId.toString());
+				
 				launchAsynchronousTasks(theHttpUrl, id);
 				// TODO: check that it returned successfully (redundant?)
-				System.out.println(newNodeJsonObject.toString());
+//				System.out.println(newNodeJsonObject.toString());
+				System.out.println("stash() - node created: " + id);
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(newNodeJsonObject.get("data").toString())
 						.type("application/json").build();
@@ -718,6 +753,50 @@ public class Yurl {
 			downloadImageInSeparateThread(iUrl, TARGET_DIR_PATH_IMAGES,
 					CYPHER_URI, id);
 			downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
+			recordBiggestImage(iUrl, CYPHER_URI, id);
+		}
+		
+		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+		private static void recordBiggestImage(final String iUrl, final String cypherUri, final String id) {
+//			System.out.println("HelloWorldResource.recordBiggestImage() - begin");
+//			Callable<String> callable = new Callable<String>() {
+//				public String call() {
+//					return HelloWorldResource.getBiggestImage(iUrl);
+//				}
+//
+//				
+//			};
+//			String biggestImageAbsUrl = HelloWorldResource.BiggestImage
+//					.getBiggestImage("http://www.denimblog.com/2015/07/stella-maxwell-in-rag-bone/");
+//			System.out.println("HelloWorldResource.recordBiggestImage()" + " - Biggest image is: " + biggestImageAbsUrl);
+			Runnable r = new Runnable() {
+				
+				@Override
+				public void run() {
+					execute("start n=node({id}) SET n.biggest_image = {biggestImage}",
+							ImmutableMap.<String, Object> of("id", Integer.parseInt(id),
+									"biggestImage", HelloWorldResource.getBiggestImage(iUrl)), "recordBiggestImage()");		
+				}
+			};
+//			FutureTask<String> future = new FutureTask<String>(callable);
+			executorService.execute(r);
+			
+		}
+
+		private static String getBiggestImage(final String iUrl2) {
+//			System.out.println("HelloWorldResource.getBiggestImage() - begin");
+			String biggestImageAbsUrl = null;
+			try {
+				biggestImageAbsUrl = BiggestImage.getBiggestImage(iUrl2);
+				return biggestImageAbsUrl;
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
+			}
 		}
 
 		private static void downloadImageInSeparateThread(final String iUrl2,
@@ -730,35 +809,23 @@ public class Yurl {
 					System.out.println("downloadImageInSeparateThread() - "
 							+ iUrl + " :: " + targetDirPath);
 					if (iUrl.toLowerCase().contains(".jpg")) {
-
 					} else if (iUrl.toLowerCase().contains(".jpeg")) {
-
 					} else if (iUrl.toLowerCase().contains(".png")) {
-
 					} else if (iUrl.toLowerCase().contains(".gif")) {
-
 					} else if (iUrl.toLowerCase().contains("gstatic")) {
-
 					} else {
-						System.out
-								.println("downloadImageInSeparateThread() - not an image");
-						return;// not an image
+						return;
 					}
 					try {
-						System.out
-								.println("downloadImageInSeparateThread() - about to save");
 						saveImage(iUrl, targetDirPath);
-						System.out
-								.println("downloadImageInSeparateThread() - success, updating DB");
 						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_image = {date}",
 								ImmutableMap.<String, Object> of("id",
 										Long.valueOf(id), "url", iUrl, "date",
-										System.currentTimeMillis()));
-						System.out
-								.println("downloadImageInSeparateThread() - DB updated");
+										System.currentTimeMillis()), "downloadImageInSeparateThread()");
+						System.out.println("downloadImageInSeparateThread() - DB updated");
 					} catch (Exception e) {
-//						e.printStackTrace();
-                                                System.out.println(e.getMessage());
+						// e.printStackTrace();
+						System.out.println(e.getMessage());
 					}
 				}
 			};
@@ -767,21 +834,21 @@ public class Yurl {
 
 		private static void saveImage(String urlString, String targetDirPath)
 				throws IllegalAccessError, IOException {
-System.out.println("saveImage() - " +urlString + "\t::\t" + targetDirPath);
-			URL url = new URL(urlString);
-			BufferedImage image = ImageIO.read(url);
+			System.out.println("saveImage() - " + urlString + "\t::\t"
+					+ targetDirPath);
 			String extension = FilenameUtils.getExtension(urlString);
-			String baseName = FilenameUtils.getBaseName(urlString).replaceAll("/", "-");
-			System.out.println(baseName);
-			String decoded = URLDecoder.decode(baseName, "UTF-8");
-			String outputFilename = determineDestinationPathAvoidingExisting(
-					targetDirPath + "/" + decoded + "." + extension)
-					.toString();
-//			outputFilename = outputFilename.replaceAll("/", "-");
-System.out.println("saveImage() About to decode");
-//String outputFilenameDecoded = java.net.URLDecoder.decode(outputFilename, "UTF-8");
-System.out.println(outputFilename);
-			ImageIO.write(image, extension, new File(outputFilename));
+			ImageIO.write(
+					ImageIO.read(new URL(urlString)),
+					extension,
+					new File(determineDestinationPathAvoidingExisting(
+							targetDirPath
+									+ "/"
+									+ URLDecoder.decode(
+											FilenameUtils
+													.getBaseName(urlString)
+													.replaceAll("/", "-"),
+											"UTF-8") + "." + extension)
+							.toString()));
 
 		}
 
@@ -805,42 +872,32 @@ System.out.println(outputFilename);
 
 		private JSONObject createNode(String theHttpUrl, String theTitle,
 				Integer rootId) throws IOException, JSONException {
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
-			_1: {
-				theParamValues.put("url", theHttpUrl);
-				theParamValues.put("title", theTitle);
-				long currentTimeMillis = System.currentTimeMillis();
-				theParamValues.put("created", currentTimeMillis);
-				theParamValues.put("ordinal", currentTimeMillis);
-			}
+			long currentTimeMillis = System.currentTimeMillis();
 			JSONObject json = execute(
-					"CREATE (n { title : {title} , url : {url}, created: {created}, ordinal: {ordinal} }) RETURN id(n)",
-					theParamValues);
-			_2: {
-				JSONArray theNewNodeId = (JSONArray) ((JSONArray) json
-						.get("data")).get(0);
-				System.out.println("New node: " + theNewNodeId.get(0));
-				relateHelper(rootId, (Integer) theNewNodeId.get(0));
-			}
+					"CREATE (n { title : {title} , url : {url}, created: {created}, ordinal: {ordinal} }) " +
+					"RETURN id(n)",
+					ImmutableMap.<String, Object> builder()
+							.put("url", theHttpUrl).put("title", theTitle)
+							.put("created", currentTimeMillis)
+							.put("ordinal", currentTimeMillis).build(), "createNode()");
+			createNewRelation(rootId,
+					(Integer) ((JSONArray) ((JSONArray) json.get("data"))
+							.get(0)).get(0));
 			return json;
 		}
 
 		private String getTitle(final URL iUrl) {
 			String title = "";
-			ExecutorService theExecutorService = Executors
-					.newFixedThreadPool(2);
-			Collection<Callable<String>> tasks = new ArrayList<Callable<String>>();
-			Callable<String> callable = new Callable<String>() {
-				public String call() throws Exception {
-					Document doc = Jsoup.connect(iUrl.toString()).get();
-					return doc.title();
-				}
-			};
-			tasks.add(callable);
 			try {
-				List<Future<String>> taskFutures = theExecutorService
-						.invokeAll(tasks, 3000L, TimeUnit.SECONDS);
-				title = taskFutures.get(0).get();
+				title = Executors
+						.newFixedThreadPool(2)
+						.invokeAll(
+								ImmutableSet.<Callable<String>> of(new Callable<String>() {
+									public String call() throws Exception {
+										return Jsoup.connect(iUrl.toString())
+												.get().title();
+									}
+								}), 3000L, TimeUnit.SECONDS).get(0).get();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -852,62 +909,179 @@ System.out.println(outputFilename);
 		private static void downloadVideoInSeparateThread(
 				final String iVideoUrl, final String TARGET_DIR_PATH,
 				final String cypherUri, final String id) {
-			Runnable r = new Runnable() {
+			System.out.println("Yurl.HelloWorldResource.downloadVideoInSeparateThread() - begin: " + iVideoUrl);
+			// VGet stopped working
+			Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
+			executorService.submit(r2);
+		}
 
-				// @Override
+		private static Runnable getVideoDownloadJob(final String iVideoUrl, final String TARGET_DIR_PATH,
+				final String id) {
+			Runnable r2 = new Runnable() {
+				@Override
 				public void run() {
 					try {
-
-						System.out
-								.println("downloadVideoInSeparateThread() - Begin");
-
-						File theTargetDir = new File(TARGET_DIR_PATH);
-						if (!theTargetDir.exists()) {
-							throw new RuntimeException(
-									"Target directory doesn't exist");
+						Process p = new ProcessBuilder()
+								.directory(Paths.get(TARGET_DIR_PATH).toFile())
+								.command(
+										ImmutableList.of("/home/sarnobat/bin/youtube_download",
+												iVideoUrl)).inheritIO().start();
+						p.waitFor();
+						if (p.exitValue() == 0) {
+							System.out
+									.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
+											+ iVideoUrl);
+							writeSuccessToDb(iVideoUrl, id);
+						} else {
+							System.out
+									.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading "
+											+ iVideoUrl);
 						}
-						VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
-						System.out
-								.println("downloadVideoInSeparateThread() - About to start downloading");
-						v.getVideo().setVideoQuality(VideoQuality.p1080);
-
-						System.out.println(v.getVideo().getWeb().toString());
-						System.out.println(v.getVideo().getVideoQuality());
-						v.download();// If this hangs, make sure you are using
-										// vget 1.15. If you use 1.13 I know it
-										// hangs
-						System.out
-								.println("downloadVideoInSeparateThread() - Download successful. Updating database");
-
-						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
-								ImmutableMap.<String, Object> of("id",
-										Long.valueOf(id), "url", iVideoUrl,
-										"date", System.currentTimeMillis()));
-						System.out
-								.println("downloadVideoInSeparateThread() - Download recorded in database");
-
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					} catch (IOException e) {
-                                                System.out.println(e.getMessage());
-						//e.printStackTrace();
-						//throw new RuntimeException(e);
-					} catch (JSONException e) {
-						System.out
-								.println("downloadVideoInSeparateThread() - ERROR recording download in database");
-						// Why won't the compiler let me throw this?
-						//e.printStackTrace();
-					} catch (RuntimeException e) {
-						System.out.println(e.getMessage());
-					}
-					catch (Exception e) {
-                                                System.out.println(e.getMessage());
-						//e.printStackTrace();
+						e.printStackTrace();
 					}
 				}
 			};
-			new Thread(r).start();
-			System.out.println("End");
+			return r2;
 		}
 
+		@SuppressWarnings("unused")
+		private static void downloadUndownloadedVideosInSeparateThread() {
+			System.out.println("downloadUndownloadedVideosInSeparateThread() - begin");
+			new Thread() {
+				public void run() {
+					try {
+						downloadUndownloadedVideosBatch();
+
+				        while(true) {
+				            try {
+				                Thread.sleep(1000*60*60);
+				                //your code here...
+				            } catch (InterruptedException ie) {
+				            }
+				        }
+					} catch (JSONException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}.start();
+		}
+
+		private static void downloadUndownloadedVideosBatch() throws JSONException, IOException {
+			System.out.println("downloadUndownloadedVideosBatch() - begin");
+			String query = "start root=node(37658)" +
+					" match  root-[CONTAINS*]->n" +
+					" where not(has(n.downloaded_video)) OR n.downloaded_video is null " +
+					" return n.title, n.downloaded_video, n.url, ID(n)" +
+					" LIMIT 20;";
+			JSONObject results = execute(query, ImmutableMap.<String, Object>of(), "downloadUndownloadedVideosBatch()");
+			JSONArray jsonArray = results.getJSONArray("data");
+			for (int i = 0; i < jsonArray.length(); i++) {
+				final JSONArray row = jsonArray.getJSONArray(i);
+				System.out.println("downloadUndownloadedVideosBatch() - iteration: " + row);
+				Object title = row.get(0);
+				Object downloaded = row.get(1);
+				Object url =  row.get(2);
+				Object id = row.get(3);
+				if (downloaded == null || downloaded == JSONObject.NULL  || "null".equals(downloaded)) {
+					if (url instanceof String) {
+						if (id instanceof Integer) {
+							System.out.println("downloadUndownloadedVideosBatch() - Starting retroactively downloading: " + title);
+							try {
+								new SimpleTimeLimiter().callWithTimeout(new Callable<Object>() {
+
+									@Override
+									public Object call() throws Exception {
+										downloadVideo(row.getString(2), TARGET_DIR_PATH,
+												Integer.toString(row.getInt(3)));
+										return null;
+
+									}
+								}, 10, TimeUnit.SECONDS, true);
+							} catch (Exception e) {
+								System.out.println("Continuing");
+								continue;
+							}
+							System.out.println("downloadUndownloadedVideosBatch() - Finished retroactively downloading: " + title);
+						} else {
+							System.out.println("id - " + id.getClass());
+						}
+					} else {
+						System.out.println("url - " + url.getClass());
+					}
+				} else  {
+					Long downloaded1 = row.getLong(1);
+					System.out.println("downloadUndownloadedVideosBatch() - Already downloaded: " + title + "\t" + downloaded1);
+				}
+			}
+		}
+		
+		private static void downloadVideo(final String iVideoUrl,
+				String targetDirPath, final String id) {
+			try {
+				downloadVideo(iVideoUrl, targetDirPath);
+				writeSuccessToDb(iVideoUrl, id);
+				
+			} catch (JSONException e) {
+				System.out.println("downloadVideo() - ERROR recording download in database");
+			}
+			catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+
+		private static void writeSuccessToDb(final String iVideoUrl, final String id)
+				throws IOException {
+			execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
+					ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iVideoUrl,
+							"date", System.currentTimeMillis()), "downloadVideo()");
+			System.out.println("downloadVideo() - Download recorded in database");
+		}
+
+		private static void downloadVideo(final String iVideoUrl, String targetDirPath)
+				throws MalformedURLException {
+			System.out.println("downloadVideo() - Begin: " + iVideoUrl);
+			File theTargetDir = new File(targetDirPath);
+			if (!theTargetDir.exists()) {
+				throw new RuntimeException(
+						"Target directory doesn't exist");
+			}
+			final VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
+			v.getVideo().setVideoQuality(VideoQuality.p1080);
+			System.out.println("downloadVideo() - " + v.getVideo().getWeb().toString());
+			System.out.println("downloadVideo() - " + v.getVideo().getVideoQuality());
+			System.out.print("downloadVideo() - If this is the last thing you see, vget is hanging");
+			v.download();// If this hangs, make sure you are using
+			// vget 1.15. If you use 1.13 I know it
+			// hangs
+			System.out.println("\ndownloadVideo() - successfully downloaded video at " + iVideoUrl + " (" + v.getVideo().getTitle() + ")");
+		}
+		
+		@GET
+		@Path("updateImage")
+		@Produces("application/json")
+		public Response changeImage(
+				@QueryParam("url") String imageUrl,
+				@QueryParam("id") Integer nodeIdToChange)
+				throws IOException, JSONException {
+			return Response
+					.ok()
+					.header("Access-Control-Allow-Origin", "*")
+					.entity(execute(
+							"START n=node({nodeIdToChange}) "
+									+ "SET n.user_image =  {imageUrl}"
+									+ "RETURN n",
+							ImmutableMap.<String, Object> of("nodeIdToChange",
+									nodeIdToChange, "imageUrl",
+									imageUrl), "changeImage()")).type("application/json")
+					.build();
+		}
+		
+		// moveup, move up
 		@GET
 		@Path("surpassOrdinal")
 		@Produces("application/json")
@@ -915,19 +1089,16 @@ System.out.println(outputFilename);
 				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
 				@QueryParam("nodeIdToSurpass") Integer nodeIdToSurpass)
 				throws IOException, JSONException {
-
-			System.out.println("surpassOrdinals");
-
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("nodeIdToChange", nodeIdToChange);
-			theParams.put("nodeIdToSurpass", nodeIdToSurpass);
-
-			JSONObject jsonObject = execute(
-					" start n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) set n.ordinal=n2.ordinal + 100 return n.ordinal,n2.ordinal",
-					theParams.build());
-
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(jsonObject.toString()).type("application/json")
+			return Response
+					.ok()
+					.header("Access-Control-Allow-Origin", "*")
+					.entity(execute(
+							"START n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) "
+									+ "SET n.ordinal = n2.ordinal + 100 "
+									+ "RETURN n.ordinal, n2.ordinal",
+							ImmutableMap.<String, Object> of("nodeIdToChange",
+									nodeIdToChange, "nodeIdToSurpass",
+									nodeIdToSurpass), "surpassOrdinal()")).type("application/json")
 					.build();
 		}
 
@@ -938,21 +1109,17 @@ System.out.println(outputFilename);
 				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
 				@QueryParam("nodeIdToUndercut") Integer nodeIdToUndercut)
 				throws IOException, JSONException {
-
-			System.out.println("undercutOrdinal");
-
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("nodeIdToChange", nodeIdToChange);
-			theParams.put("nodeIdToUndercut", nodeIdToUndercut);
-
-			JSONObject jsonObject = execute(
-					" start n=node({nodeIdToChange}),n2=node({nodeIdToUndercut}) set n.ordinal=n2.ordinal - 100 return n.ordinal,n2.ordinal",
-					theParams.build());
-
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(jsonObject.toString()).type("application/json")
-					.build();
-
+			return Response
+					.ok()
+					.header("Access-Control-Allow-Origin", "*")
+					.entity(execute(
+							"START n=node({nodeIdToChange}), n2=node({nodeIdToUndercut}) "
+									+ "SET n.ordinal=n2.ordinal - 100 "
+									+ "RETURN n.ordinal,n2.ordinal",
+							ImmutableMap.<String, Object> of("nodeIdToChange",
+									nodeIdToChange, "nodeIdToUndercut",
+									nodeIdToUndercut), "undercutOrdinal()").toString())
+					.type("application/json").build();
 		}
 
 		@GET
@@ -961,24 +1128,19 @@ System.out.println(outputFilename);
 		public Response swapOrdinals(@QueryParam("firstId") Integer iFirstId,
 				@QueryParam("secondId") Integer iSecondId) throws IOException,
 				JSONException {
-			System.out.println("swapOrdinals");
-
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("id1", iFirstId);
-			theParams.put("id2", iSecondId);
-
-			JSONObject jsonObject = execute(
-					" start n=node({id1}),n2=node({id2}) set n.temp=n2.ordinal, n2.ordinal=n.ordinal,n.ordinal=n.temp  return n.ordinal,n2.ordinal",
-					theParams.build());
-
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(jsonObject.toString()).type("application/json")
-					.build();
+			return Response
+					.ok()
+					.header("Access-Control-Allow-Origin", "*")
+					.entity(execute(
+							"START n=node({id1}), n2=node({id2}) "
+									+ "SET n.temp=n2.ordinal, n2.ordinal=n.ordinal, n.ordinal=n.temp "
+									+ "RETURN n.ordinal, n2.ordinal",
+							ImmutableMap.<String, Object> of("id1", iFirstId,
+									"id2", iSecondId), "swapOrdinals()").toString())
+					.type("application/json").build();
 		}
 
-		/**
-		 * No existing relationships get deleted
-		 */
+		/** No existing relationships get deleted */
 		@GET
 		@Path("relateCategoriesToItem")
 		@Produces("application/json")
@@ -987,15 +1149,14 @@ System.out.println(outputFilename);
 				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo)
 				throws JSONException, IOException {
 			System.out.println("relateCategoriesToItem(): begin");
-			String decode = URLDecoder.decode(iCategoriesToBeAddedTo, "UTF-8");
-			System.out.println(decode);
-			JSONArray theCategoryIdsToBeAddedTo = new JSONArray(decode);
+			JSONArray theCategoryIdsToBeAddedTo = new JSONArray(
+					URLDecoder.decode(iCategoriesToBeAddedTo, "UTF-8"));
 			for (int i = 0; i < theCategoryIdsToBeAddedTo.length(); i++) {
-				Integer aCategoryIdToBeAddedTo = theCategoryIdsToBeAddedTo
-						.getInt(i);
 				System.out.println("relateCategoriesToItem(): "
-						+ aCategoryIdToBeAddedTo + " --> " + iNodeToBeTagged);
-				relateHelper(aCategoryIdToBeAddedTo, iNodeToBeTagged);
+						+ theCategoryIdsToBeAddedTo.getInt(i) + " --> "
+						+ iNodeToBeTagged);
+				createNewRelation(theCategoryIdsToBeAddedTo.getInt(i),
+						iNodeToBeTagged);
 			}
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(new JSONObject().toString())
@@ -1003,24 +1164,17 @@ System.out.println(outputFilename);
 		}
 
 		private Integer createCategory(String iCategoryName) throws IOException {
-			String theNewCategoryNodeIdString;
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
-			_1: {
-				theParamValues.put("name", iCategoryName);
-				theParamValues.put("type", "categoryNode");
-				theParamValues.put("created", System.currentTimeMillis());
-				System.out.println("cypher params: " + theParamValues);
-			}
 			// TODO: first check if there is already a node with this name,
 			// which is for re-associating the keycode with the category
-			JSONObject theNewKeyBindingResponseJson = execute(
-					"CREATE (n { name : {name} , created: {created} , type :{type}}) RETURN id(n)",
-					theParamValues);
-			System.out.println("createNewKeyBinding() - Success:\n\t" + theNewKeyBindingResponseJson.toString());
-			theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) theNewKeyBindingResponseJson
-					.get("data")).get(0)).get(0);
-			System.out.println("createNewKeyBinding() - got new node");
-			return Integer.parseInt(theNewCategoryNodeIdString);
+			return Integer
+					.parseInt((String) ((JSONArray) ((JSONArray) execute(
+							"CREATE (n { name : {name} , created: {created} , type :{type}}) " +
+							"RETURN id(n)",
+							ImmutableMap.<String, Object> builder()
+									.put("name", iCategoryName)
+									.put("type", "categoryNode")
+									.put("created", System.currentTimeMillis())
+									.build(), "createCategory()").get("data")).get(0)).get(0));
 		}
 
 		@GET
@@ -1032,14 +1186,35 @@ System.out.println(outputFilename);
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
 			System.out.println("createSubDirAndMoveItem() - begin");
-			Integer theNewCategoryNodeIdString = createCategory(iNewParentName) ;
-			Response r =  relate(theNewCategoryNodeIdString, iItemId, iCurrentParentId);
-			try {
-				relateHelper(iCurrentParentId, theNewCategoryNodeIdString);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return r;
+			JSONObject relateToExistingCategory = relateToExistingCategory(iItemId,
+					iCurrentParentId,
+					createNewCategoryUnderExistingCategory(iNewParentName, iCurrentParentId));
+			Response rResponse =  Response.ok().header("Access-Control-Allow-Origin", "*")
+					.entity(relateToExistingCategory.toString())
+					.type("application/json").build();
+			return rResponse;
+		}
+
+		private Integer createNewCategoryUnderExistingCategory(String iNewParentName,
+				Integer iCurrentParentId) throws IOException {
+			// Create new category node
+			Integer theNewCategoryNodeIdString = createCategory(iNewParentName);
+
+			// Associate new category with current category
+			createNewRelation(iCurrentParentId, theNewCategoryNodeIdString);
+			return theNewCategoryNodeIdString;
+		}
+
+		private JSONObject relateToExistingCategory(Integer iItemId, Integer iCurrentParentId,
+				Integer theNewCategoryNodeIdString) throws IOException {
+			// delete any existing contains relationship with the
+			// specified existing parent (but not with all parents since we
+			// could have a many-to-one contains)
+			deleteExistingRelationship(iItemId, iCurrentParentId);
+			
+			// Relate the item to the new category
+			JSONObject moveHelper = createNewRelation(theNewCategoryNodeIdString, iItemId);
+			return moveHelper;
 		}
 
 		/**
@@ -1049,38 +1224,25 @@ System.out.println(outputFilename);
 		@GET
 		@Path("relate")
 		@Produces("application/json")
-		public Response relate(@QueryParam("parentId") Integer iNewParentId,
+		public Response move(@QueryParam("parentId") Integer iNewParentId,
 				@QueryParam("childId") Integer iChildId,
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
-			System.out.println("relate() Moving " + iChildId + " from " + iCurrentParentId + " to " + iNewParentId);
-			// first delete any existing contains relationship with the
-			// specified existing parent (but not with all parents since we
-			// could have a many-to-one contains)
-			_1: {
-				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-				theParams.put("currentParentId", iCurrentParentId);
-				theParams.put("childId", iChildId);
-
-				execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
-						theParams.build());
-				System.out
-						.println("Finished trying to delete relationship between "
-								+ iCurrentParentId + " and " + iChildId);
-			}
-			JSONObject theRelateOperationResponseJson;
-			_2: {
-				Map<String, Object> theParamValues = new HashMap<String, Object>();
-				theParamValues.put("childId", iChildId);
-
-				theRelateOperationResponseJson = relateHelper(iNewParentId,
-						iChildId);
-				System.out.println("Finished relating to new category");
-			}
-
+			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
+					iNewParentId);
+			MongoDbCache.delete(iNewParentId.toString());
+			MongoDbCache.delete(iCurrentParentId.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(theRelateOperationResponseJson.toString())
+					.entity(moveHelper.toString())
 					.type("application/json").build();
+		}
+
+		private void deleteExistingRelationship(Integer iChildId, Integer iCurrentParentId)
+				throws IOException {
+			execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
+					ImmutableMap.<String, Object> builder()
+							.put("currentParentId", iCurrentParentId)
+							.put("childId", iChildId).build(), "deleteExistingRelationship()");
 		}
 
 		/**
@@ -1091,61 +1253,58 @@ System.out.println(outputFilename);
 		 *             we try to relate to a newly created category if the
 		 *             system becomes non-deterministic.
 		 */
-		private JSONObject relateHelper(Integer iParentId, Integer iChildId)
+		private static JSONObject createNewRelation(Integer iParentId, Integer iChildId)
 				throws IOException, JSONException {
-			System.out.println("relateHelper() - begin");
-			System.out.println(String.format("relateHelper() iParentId = " + iParentId + ", iChildId = " + iChildId));
-			System.out.println(String.format("relateHelper() begin iParentId = %d\tiChildId = %d)", iParentId, iChildId));
-			Map<String, Object> theParamValues = new HashMap<String, Object>();
-			_1: {
-				theParamValues.put("parentId", iParentId);
-				theParamValues.put("childId", iChildId);
-				theParamValues.put("currentTime", System.currentTimeMillis());
-			}
-			JSONObject theJson = execute(
-					"start a=node({parentId}),b=node({childId}) CREATE a-[r:CONTAINS]->b SET b.accessed = {currentTime} return a,r,b;",
-					theParamValues);
-			System.out.println("relateHelper() - created. " + theJson);
-			System.out.println("relateHelper() - created. Length = " + theJson.length());
-			return theJson;
+			return execute(
+					"START a=node({parentId}),b=node({childId}) "
+							+ "CREATE a-[r:CONTAINS]->b SET b.accessed = {currentTime} return a,r,b;",
+					ImmutableMap.<String, Object> builder()
+							.put("parentId", iParentId)
+							.put("childId", iChildId)
+							.put("currentTime", System.currentTimeMillis())
+							.build(), "createNewRelation()");
 		}
 
 		// TODO: make this map immutable
-		private static JSONObject execute(String iCypherQuery,
-				Map<String, Object> iParams) throws IOException, JSONException {
+		static JSONObject execute(String iCypherQuery,
+				Map<String, Object> iParams, String... iCommentPrefix) {
+			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
+//			System.out.println(commentPrefix + "begin");
+			System.out.println(commentPrefix + " - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
+
 			ClientConfig clientConfig = new DefaultClientConfig();
 			clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
 					Boolean.TRUE);
 	
-			WebResource theWebResource = Client.create(clientConfig).resource(
-					CYPHER_URI);
-			Map<String, Object> thePostBody = new HashMap<String, Object>();
-			thePostBody.put("query", iCypherQuery);
-			thePostBody.put("params", Preconditions.checkNotNull(iParams));
-			System.out.println("\texecute() - query - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
-	
 			// POST {} to the node entry point URI
-			ClientResponse theResponse = theWebResource
+			ClientResponse theResponse = Client.create(clientConfig).resource(
+					CYPHER_URI)
 					.accept(MediaType.APPLICATION_JSON)
 					.type(MediaType.APPLICATION_JSON).entity("{ }")
-					.post(ClientResponse.class, thePostBody);
-                        System.out.println("\texecute() - finished - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
+					.post(ClientResponse.class, ImmutableMap
+							.<String, Object> of("query", iCypherQuery, "params",
+									Preconditions.checkNotNull(iParams)));
 			if (theResponse.getStatus() != 200) {
-				System.out.println("FAILED:\n\t" + iCypherQuery + "\n\tparams: "
+				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: "
 						+ iParams);
-				throw new RuntimeException();
+				try {
+					throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream()));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
-			String theNeo4jResponse = IOUtils.toString(theResponse
-					.getEntityInputStream());
-			_1: {
-//				System.out.println("BEGINNING OF RESPONSE");
-//				System.out.println("RESPONSE" + theNeo4jResponse);
-//				System.out.println("END OF RESPONSE");
+			String theNeo4jResponse ;
+			try {
+				// Do not inline this. We need to close the stream after
+				// copying
+				theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream());
 				theResponse.getEntityInputStream().close();
 				theResponse.close();
+				System.out.println(commentPrefix + "end");
+				return new JSONObject(theNeo4jResponse);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-			JSONObject oJson = new JSONObject(theNeo4jResponse);
-			return oJson;
 		}
 
 		// ----------------------------------------------------------------------------
@@ -1158,31 +1317,27 @@ System.out.println(outputFilename);
 		public Response categoriesRecursive(
 				@QueryParam("parentId") Integer iParentId)
 				throws JSONException, IOException {
-			System.out.println("categoriesRecursive() - begin");
-			JSONArray oKeys = getFlatListOfSubcategoriesRecursive(iParentId);
 			JSONObject ret = new JSONObject();
-			ret.put("flat", oKeys);
+//			ret.put("flat", getFlatListOfSubcategoriesRecursive(iParentId));
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
-				categoriesTreeJson = getCategoriesTree(ROOT_ID);
+				categoriesTreeJson = CategoryTree.getCategoriesTree(ROOT_ID);
 			} else {
 				categoriesTreeJson = categoriesTreeCache;
-				refreshCategoriesTreeCache();
+				refreshCategoriesTreeCacheInSeparateThread();
 			}
 			ret.put("categoriesTree", categoriesTreeJson);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
 		}
 
-		private static void refreshCategoriesTreeCache() {
-			System.out.println("refreshCategoriesTreeCache() - begin");
+		private static void refreshCategoriesTreeCacheInSeparateThread() {
 			new Thread(){
 				@Override
 				public void run() {
-					System.out.println("refreshCategoriesTreeCache() - run - started");
+//					System.out.println("refreshCategoriesTreeCacheInSeparateThread() - run - started");
 					try {
-						categoriesTreeCache = getCategoriesTree(ROOT_ID);
-						System.out.println("refreshCategoriesTreeCache() - run - finished");
+						categoriesTreeCache = CategoryTree.getCategoriesTree(ROOT_ID);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -1191,184 +1346,418 @@ System.out.println(outputFilename);
 				}
 			}.start();
 		}
-
-		private static JSONObject getCategoriesTree(Integer rootId)
-				throws JSONException, IOException {
-			System.out.println("getCategoriesTree() - begin");
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			_1: {
-				theParams.put("parentId", rootId);
+		
+		private static class CategoryTree {
+			static JSONObject getCategoriesTree(Integer rootId)
+					throws JSONException, IOException {
+				return new AddSizes(
+						// This is the expensive query, not the other one
+						getCategorySizes(HelloWorldResource.execute(
+								"START n=node(*) MATCH n-->u WHERE has(n.name) "
+										+ "RETURN id(n),count(u);",
+								ImmutableMap.<String, Object>of(),
+								"getCategoriesTree() [The expensive query]").getJSONArray(
+								"data")))
+						.apply(
+						// Path to JSON conversion done in Cypher
+						createCategoryTreeFromCypherResultPaths(
+								// TODO: I don't think we need each path do we? We just need each parent-child relationship.
+								HelloWorldResource.execute("START n=node({parentId}) "
+										+ "MATCH path=n-[r:CONTAINS*]->c "
+										+ "WHERE has(c.name) "
+										+ "RETURN extract(p in nodes(path)| "
+										+ "'{ " + "id : ' + id(p) + ', "
+										+ "name : \"'+ p.name +'\" , "
+										+ "key : \"' + coalesce(p.key, '') + '\"" + " }'" + ")",
+										ImmutableMap.<String, Object> of(
+												"parentId", rootId),
+										"getCategoriesTree() - [getting all paths 3]"),
+								rootId));
 			}
-			String iCypherQuery = "start n=node({parentId}) match path=n-[r:CONTAINS*]->c WHERE has(c.name) return extract(p in nodes(path)|'{ id : '+id(p)+', name : \"'+ p.name +'\" , key : \"' + p.key + '\"}')";
-			System.out.println(iCypherQuery);
-			JSONObject theQueryJsonResult = execute(
-					iCypherQuery,
-					theParams.build());
-			JSONObject categoriesTree = createCategoryTreeFromCypherResultPaths(theQueryJsonResult, rootId);
-			// Get the number of urls in each category
-			getCounts : {
-				JSONObject counts = execute("start n=node(*) match n-->u where has(n.name) return id(n),count(u);", new HashMap<String, Object>());
-				Map<Integer, Integer> categorySizes = getCategorySizes(counts.getJSONArray("data"));
-//				System.out.println("getCategoriesTree() - sizes of each category" + categorySizes);
-				addSizes(categoriesTree,categorySizes);
-			}
-			System.out.println("getCategoriesTree() - end");
-			return categoriesTree;
-		}
-	
-		private static Map<Integer, Integer> getCategorySizes(JSONArray counts) {
-
-			Map<Integer,Integer> sizesMap = new HashMap<Integer,Integer>();
-			for (int i = 0 ; i < counts.length(); i++) {
-				JSONArray row = counts.getJSONArray(i);
-				sizesMap.put(row.getInt(0), row.getInt(1));
-			}
-			return sizesMap;
-		}
-
-		private static void addSizes(JSONObject categoriesTree,
-				Map<Integer, Integer> categorySizes) {
-			Integer id = categoriesTree.getInt("id");
-			categoriesTree.put("size", categorySizes.get(id));
-			if (categoriesTree.has("children")) {
-				JSONArray children = categoriesTree.getJSONArray("children");
-				for (int i = 0; i < children.length(); i++) {
-					addSizes(children.getJSONObject(i), categorySizes);
+			
+			private static Map<Integer, Integer> getCategorySizes(JSONArray counts) {
+				Map<Integer, Integer> sizesMap = new HashMap<Integer, Integer>();
+				for (int i = 0; i < counts.length(); i++) {
+					JSONArray row = counts.getJSONArray(i);
+					sizesMap.put(row.getInt(0), row.getInt(1));
 				}
+				return ImmutableMap.copyOf(sizesMap);
 			}
-		}
+			
 
-		private static JSONObject createCategoryTreeFromCypherResultPaths(
-				JSONObject theQueryJsonResult, Integer rootId) {
-			JSONArray cypherRawResults = theQueryJsonResult.getJSONArray("data");
-			Preconditions.checkState(cypherRawResults.length() > 0);
-			MultiValueMap parentToChildren = new MultiValueMap();
-			getParentChildrenMap: {
-				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
-					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
-					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-						//	System.out.println(pathNum + "::" + hopNum + categoryPath.get(hopNum));
-							Object left = categoryPath.get(hopNum);
-							Object right = categoryPath.get(hopNum + 1);
-							if (left.getClass().equals(org.json.JSONObject.Null)) {
-								continue;
-							}
-		   					if (right.getClass().equals(org.json.JSONObject.Null)) {
-                                                                continue;
-                                                        }
-							String categoryPathHopString = categoryPath.getString(hopNum);
-							JSONObject parent = new JSONObject(categoryPathHopString);
-							if (!(categoryPath.get(hopNum + 1) instanceof String)) {
-								System.out.println("ERROR 3: " + categoryPath.get(hopNum + 1).getClass() + "\t" + categoryPath);
-								continue;	
-							}
-							JSONObject child = new JSONObject(categoryPath.getString(hopNum + 1));
-							int childId = child.getInt("id");
-							int parentId = checkNotNull(parent.getInt("id"));
-							Object childrenObj = parentToChildren.get(parentId);
-							if (childrenObj != null) {
-								List<?> children = (List<?>) childrenObj;
-								if (!children.contains(childId)) {
-									parentToChildren.put(parentId, childId);
-								}
-							} else {
-								parentToChildren.put(parentId, childId);
-							}
+			private static JSONObject addSizesToCypherJsonResultObjects(JSONObject categoriesTree,
+					Map<Integer, Integer> categorySizes) {
+				Integer id = categoriesTree.getInt("id");
+				categoriesTree.put("size", categorySizes.get(id));
+				if (categoriesTree.has("children")) {
+					JSONArray children = categoriesTree.getJSONArray("children");
+					for (int i = 0; i < children.length(); i++) {
+						addSizesToCypherJsonResultObjects(children.getJSONObject(i), categorySizes);
 					}
 				}
+				return categoriesTree;
 			}
-			Map<Integer, JSONObject> idToJson = new HashMap<Integer, JSONObject>();
-			getIdToJsonNodeMap: {
-				System.out.println("createCategoryTreeFromCypherResultPaths() - getIdToJsonNodeMap - " + cypherRawResults.length());
+			
+			private static class AddSizes implements
+					Function<JSONObject, JSONObject> {
+				private final Map<Integer, Integer> categorySizes;
+
+				AddSizes(Map<Integer, Integer> categorySizes) {
+					this.categorySizes = categorySizes;
+				}
+
+				@Override
+				public JSONObject apply(JSONObject input) {
+					return addSizesToCypherJsonResultObjects(
+							input, categorySizes);
+				}
+			}
+			
+			private static JSONObject createCategoryTreeFromCypherResultPaths(
+					JSONObject theQueryJsonResult, Integer rootId) {
+				JSONArray cypherRawResults = theQueryJsonResult
+						.getJSONArray("data");
+				checkState(cypherRawResults.length() > 0);
+				Multimap<Integer, Integer> parentToChildren = buildParentToChildMultimap2(cypherRawResults);
+				Map<Integer, JSONObject> categoryNodesWithoutChildren = createId(cypherRawResults);
+				JSONObject root = categoryNodesWithoutChildren.get(rootId);
+				root.put(
+						"children",
+						toJsonArray(buildChildren(parentToChildren.get(rootId),
+								categoryNodesWithoutChildren, parentToChildren)));
+				return root;
+			}
+
+			/**
+			 * @return - a pair for each category node
+			 */
+			private static Map<Integer, JSONObject> createId(JSONArray cypherRawResults) {
+				ImmutableMap.Builder<Integer, JSONObject> idToJsonBuilder = ImmutableMap
+						.<Integer, JSONObject> builder();
+				Set<Integer> seen = new HashSet<Integer>();
 				for (int i = 0; i < cypherRawResults.length(); i++) {
-					JSONArray a2 = cypherRawResults.getJSONArray(i).getJSONArray(0);
-					for (int j = 0; j < a2.length(); j++) {
-						if (a2.get(j).getClass().equals(JSONObject.Null)) {
+					JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
+					for (int j = 0; j < treePath.length(); j++) {
+						if (treePath.get(j).getClass().equals(HelloWorldResource.JSON_OBJECT_NULL)) {
 							continue;
 						}
-						JSONObject parent = new JSONObject(a2.getString(j));
-						idToJson.put(parent.getInt("id"), parent);
-						System.out.println("createCategoryTreeFromCypherResultPaths() - " + parent.getInt("id") + "::" + parent);
+						JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
+						int categoryId = pathHopNode.getInt("id");
+						if (!seen.contains(categoryId)){
+							seen.add(categoryId);
+							idToJsonBuilder.put(categoryId,
+									pathHopNode);
+						}
 					}
 				}
+				return idToJsonBuilder.build();
 			}
-	
-			addChildArrayToEachJsonNode: {
-				for (Object parentIdObj : parentToChildren.keySet()) {
-					Integer parentId = (Integer) parentIdObj;
-					JSONObject parentJson = idToJson.get(parentId);
-					parentJson.put("children", new JSONArray());
-				}
-	
-			}
-	
-			connectJsonNodes: {
-				for (Object parentIdObj : parentToChildren.keySet()) {
-					Integer parentId = (Integer) parentIdObj;
-					JSONObject parentJson = idToJson.get(parentId);
-					@SuppressWarnings("unchecked")
-					List<Integer> childrenIds = (List<Integer>) parentToChildren
-							.get(parentId);
-					for (Integer childId : childrenIds) {
-						JSONObject childJson = idToJson.get(childId);
-						parentJson.getJSONArray("children").put(childJson);
+			
+			private static JSONArray removeNulls(JSONArray iJsonArray) {
+				for(int i = 0; i < iJsonArray.length(); i++) {
+					if (HelloWorldResource.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
+						iJsonArray.remove(i);
+						--i;
 					}
 				}
+				return iJsonArray;
 			}
-			System.out.println("createCategoryTreeFromCypherResultPaths() - Category result count: " + idToJson.size());
-			if (idToJson.get(45) == null) {
-				System.out.println("createCategoryTreeFromCypherResultPaths() - 45 not found, but did find:");
-				System.out.println(idToJson);
+
+			/**
+			 * @return Integer to set of Integers
+			 */
+			private static Multimap<Integer, Integer> buildParentToChildMultimap2(
+					JSONArray cypherRawResults) {
+				Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
+				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
+					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum)
+							.getJSONArray(0));
+					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
+						if (categoryPath.get(hopNum).getClass()
+								.equals(HelloWorldResource.JSON_OBJECT_NULL)) {
+							continue;
+						}
+						if (categoryPath.get(hopNum + 1).getClass()
+								.equals(HelloWorldResource.JSON_OBJECT_NULL)) {
+							continue;
+						}
+						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
+							continue;
+						}
+						int childId = new JSONObject(categoryPath.getString(hopNum + 1))
+								.getInt("id");
+						int parentId = checkNotNull(new JSONObject(categoryPath.getString(hopNum))
+								.getInt("id"));
+						Object childrenObj = oParentToChildren.get(parentId);
+						if (childrenObj != null) {
+							Set<?> children = (Set<?>) childrenObj;
+							if (!children.contains(childId)) {
+								oParentToChildren.put(parentId, childId);
+							}
+						} else {
+							oParentToChildren.put(parentId, childId);
+						}
+					}
+				}
+				return oParentToChildren;
 			}
-			Preconditions.checkState(idToJson.size() > 0);
-			JSONObject json = checkNotNull(idToJson.get(rootId));// TODO: use the constant
-			return json;
+
+			private static JSONArray toJsonArray(Collection<JSONObject> children) {
+				JSONArray arr = new JSONArray();
+				for (JSONObject child : children) {
+					arr.put(child);
+				}
+				return arr;
+			}
+
+			private static Set<JSONObject> buildChildren(
+					Collection<Integer> childIds, Map<Integer, JSONObject> nodes,
+					Multimap<Integer, Integer> parentToChildren) {
+				Builder<JSONObject> set = ImmutableSet.builder();
+				for (int childId : childIds) {
+					JSONObject childJson = nodes.get(childId);
+					Collection<Integer> grandchildIds = parentToChildren
+							.get(childId);
+					Collection<JSONObject> grandchildNodes = buildChildren(
+							grandchildIds, nodes, parentToChildren);
+					JSONArray grandchildrenArray = toJsonArray(grandchildNodes);
+					childJson.put("children", grandchildrenArray);
+					set.add(childJson);
+				}
+				return set.build();
+			}			
 		}
 
-		private static JSONArray removeNulls(JSONArray jsonArray) {
-			for(int i = 0; i < jsonArray.length(); i++) {
-				if (JSONObject.Null.equals(jsonArray.get(i))) {
-					jsonArray.remove(i);
-					--i;
-				}
+		private static class BiggestImage {
+
+			static String getBiggestImage(String url) throws MalformedURLException, IOException {
+				List<String> imagesDescendingSize = getImagesDescendingSize(url);
+				String biggestImage = imagesDescendingSize.get(0);
+				return biggestImage;
 			}
-			return jsonArray;
+
+			private static List<String> getImagesDescendingSize(String url) throws MalformedURLException,
+					IOException {
+				String base = getBaseUrl(url);
+				// Don't use the chrome binaries that you browse the web with.
+				System.setProperty("webdriver.chrome.driver", Yurl.CHROMEDRIVER_PATH
+						);
+
+				WebDriver driver = //new  org.openqa.selenium.htmlunit.HtmlUnitDriver(); 
+				//org.openqa.selenium.firefox.FirefoxDriver();
+										new ChromeDriver();
+				//driver.manage().timeouts().implicitlyWait(180, java.util.concurrent.TimeUnit.SECONDS);
+				List<String> ret = ImmutableList.of();
+				try {
+					driver.get(url);
+					// TODO: shame there isn't an input stream, then we wouldn't have to
+					// store the whole page in memory
+					try {
+						// We need to let the dynamic content load.
+						Thread.sleep(5000L);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					String source = driver.getPageSource();
+					List<String> out = getAllTags(base + "/", source);
+					Multimap<Integer, String> imageSizes = getImageSizes(out);
+					ret = sortByKey(imageSizes);
+				} finally {
+					driver.quit();
+				}
+				return ret;
+			}
+
+			private static List<String> sortByKey(Multimap<Integer, String> imageSizes) {
+				ImmutableList.Builder<String> finalList = ImmutableList.builder();
+				
+				// Phase 1: Sort by size descending
+				ImmutableList<Integer> sortedList = FluentIterable.from(imageSizes.keySet())
+						.toSortedList(Ordering.natural().reverse());
+				
+				// Phase 2: Put JPGs first 
+				for (Integer size : sortedList) {
+					for (String url: imageSizes.get(size)) {
+						if (isJpgFile(url)) {
+							finalList.add(url);
+							System.out
+									.println("BiggestImage.sortByKey() - "
+											+ size + "\t" + url);
+						}
+					}
+				}
+				for (Integer size : sortedList) {
+					for (String url: imageSizes.get(size)) {
+						if (!isJpgFile(url)) {
+							finalList.add(url);
+							System.out
+									.println("BiggestImage.sortByKey() - "
+											+ size + "\t" + url);
+						}
+					}
+				}
+				return finalList.build();
+			}
+
+			private static boolean isJpgFile(String url) {
+				return url.matches("(?i).*\\.jpg") || url.matches("(?i).*\\.jpg\\?.*");
+			}
+
+			private static Multimap<Integer, String> getImageSizes(List<String> out) {
+				ImmutableMultimap.Builder<Integer, String> builder = ImmutableMultimap.builder();
+				for (String imgSrc : out) {
+					int size = getByteSize(imgSrc);
+					builder.put(size, imgSrc);
+				}
+				return builder.build();
+			}
+
+			private static int getByteSize(String absUrl) {
+				if (Strings.isNullOrEmpty(absUrl)) {
+					return 0;
+				}
+				URL url;
+				try {
+					url = new URL(absUrl);
+					int contentLength = url.openConnection().getContentLength();
+					return contentLength;
+				} catch (MalformedURLException e) {
+					System.out.println("HelloWorldResource.BiggestImage.getByteSize() - " + absUrl);
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return 0;
+			}
+
+			private static String getBaseUrl(String url1) throws MalformedURLException {
+				System.out.println("HelloWorldResource.BiggestImage.getBaseUrl() -\t"+url1);
+				URL url = new URL(url1);
+				String file = url.getFile();
+				String path;
+				if (file.length() == 0) {
+					path = url1;
+				} else {
+					path = url.getFile().substring(0, file.lastIndexOf('/'));
+				}
+				String string = url.getProtocol() + "://" + url.getHost() + path;
+				System.out.println("HelloWorldResource.BiggestImage.getBaseUrl() -\t"+string);
+				return string;
+			}
+
+			private static List<String> getAllTags(String baseUrl, String source) throws IOException {
+				Document doc = Jsoup.parse(IOUtils.toInputStream(source), "UTF-8", baseUrl);
+				Elements tags = doc.getElementsByTag("img");
+				return FluentIterable.<Element> from(tags).transform(IMG_TO_SOURCE).toList();
+			}
+
+			private static final Function<Element, String> IMG_TO_SOURCE = new Function<Element, String>() {
+				@Override
+				public String apply(Element e) {
+					return e.absUrl("src");
+				}
+			};
 		}
 
-		@Deprecated
-		// This gives a flat list
-		private JSONArray getFlatListOfSubcategoriesRecursive(Integer iParentId)
-				throws IOException {
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			_1: {
-				theParams.put("parentId", iParentId);
+		// I hope this is the same as JSONObject.Null (not capitals)
+		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
+
+		private static final class Null {
+
+			@Override
+			protected final Object clone() {
+				return this;
 			}
-			JSONObject theQueryJsonResult = execute(
-					"START parent=node({parentId}) MATCH parent-[c:CONTAINS*]->n WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} RETURN distinct ID(n),n.name",
-					theParams.build());
-			JSONArray theData = (JSONArray) theQueryJsonResult.get("data");
-			JSONArray oKeys = new JSONArray();
-			for (int i = 0; i < theData.length(); i++) {
-				JSONObject aBindingObject = new JSONObject();
-				_1: {
-					JSONArray aBindingArray = theData.getJSONArray(i);
-					String id = (String) aBindingArray.get(0);
-					aBindingObject.put("id", id);
-					String title = (String) aBindingArray.get(1);
-					aBindingObject.put("name", title);
-					oKeys.put(aBindingObject);
+
+			@Override
+			public boolean equals(Object object) {
+				return object == null || object == this || object.toString() == this.toString();
+			}
+
+			public String toString() {
+				return "null";
+			}
+		}
+
+		public static class MongoDbCache {
+
+			private static final String HOST = "192.168.1.2";
+			private static final int PORT = 27017;
+
+			private static final String VALUE = "value";
+			private static final String ID = "_id";
+
+			private static final String COLLECTION = "items";
+			private static final String CACHE = "cache";
+
+			static boolean delete(String key) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
 				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection table = db.getCollection(COLLECTION);
+				BasicDBObject searchQuery = new BasicDBObject(ID, key);
+				return table.remove(searchQuery).getN() > 0;
 			}
-			return oKeys;
+
+			static boolean exists(String key) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection table = db.getCollection(COLLECTION);
+				BasicDBObject searchQuery = new BasicDBObject(ID, key);
+				return table.find(searchQuery).size() > 0;
+			}
+
+			static void put(String key, String value) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection collection = db.getCollection(COLLECTION);
+				BasicDBObject document = new BasicDBObject(ID, key);
+				document.put(VALUE, value);
+				collection.insert(document);
+			}
+
+			static String get(String key) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection collection = db.getCollection(COLLECTION);
+				BasicDBObject searchQuery = new BasicDBObject(ID, key);
+				DBCursor cursor = collection.find(searchQuery);
+				DBObject next = cursor.next();
+				return (String) next.get(VALUE);
+			}
 		}
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
-		System.err.println("main() - begin");
+
+		HelloWorldResource.refreshCategoriesTreeCacheInSeparateThread();
 		try {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:4447/"), new ResourceConfig(
 							HelloWorldResource.class));
+			// Do not allow this in multiple processes otherwise your hard disk will fill up
+			// or overload the database
+			// Problem - this won't get executed until the server ends
+			//HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		} catch (Exception e) {
 			System.out.println("Not creating server instance");
 		}

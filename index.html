@@ -1,89 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <link rel="shortcut icon" href="http://netgear.rohidekar.com/static/icons/Orb_Icons_005.png" type="image/x-icon" />
-
 <script src="http://www.kryogenix.org/code/browser/sorttable/sorttable.js" type="text/javascript"></script>
-
-
 <link rel="stylesheet" href="http://jqueryui.com/jquery-wp-content/themes/jqueryui.com/style.css">
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
-
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.js"></script>
-
-<!--<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.21.2/js/jquery.tablesorter.min.js"></script>-->
-
-
-<!--<script src="jquery/jquery-1.9.1.js"></script>-->
 <script src="http://netgear.rohidekar.com/yurl/jquery/jquery-ui.js"></script>
-
-<!--<link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" >
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.6.0/bootstrap-table.min.css" rel="stylesheet" >-->
-<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.6.0/bootstrap-table.min.js"></script>-->
-
-
-<!-- WORKS BETTER THAN OTHERS BUT STILL NOT IDEAL <script src="jquery/hover_zoom.min.js"></script> -->
 <script src="http://netgear.rohidekar.com/yurl/js/imagezoom.ssarnobat.js"></script>
 <script type="text/javascript" src="http://netgear.rohidekar.com/yurl/jquery/purl.js"></script>
 <!-- we can't use the kb_shortcuts API because you can't keep the shift key held down in between keypresses -->
 <script src="http://netgear.rohidekar.com/yurl/js/webtoolkit.md5.js"></script>
-<!-- http://www.webtoolkit.info/djs/webtoolkit.md5.js -->
-<!--
-<script src="http://netgear.rohidekar.com/yurl/js/jquery-latest.js"></script> 
-<script src="http://netgear.rohidekar.com/yurl/js/jquery.tablesorter.js"></script> 
--->
-<style type="text/css">
-
-.itemImage {
-	padding : 10px;
-}
-
-.ui-widget {
-	/* Reduces JQUery's default font size */
-    font-size: 90%;
-}
-
-body {
-        background-color : #E7EDE1;
-}
-
-.ui-tabs .ui-tabs-panel {
-	background-color : #E7EDE1;
-}
-
-circle.node {
-  cursor: pointer;
-  stroke: #000;
-  stroke-width: .5px;
-}
-
-line.link {
-  fill: none;
-  stroke: #9ecae1;
-  stroke-width: 1.5px;
-}
-
-.truncate{
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    max-width: 400px;
-    max-height: 51px;
-    text-align: left;
-}
-
-//.urlTable.tbody.tr.td {
-    text-align: left;
-//}
-</style>
-
 <script type="text/javascript" src="d3/d3.js"></script>
 <script type="text/javascript" src="d3/d3.geom.js"></script>
 <script type="text/javascript" src="d3/d3.layout.js"></script>
-    
 <script>
+
 
 var urlBase = "http://netgear.rohidekar.com:4447/yurl";
 var rootId;
@@ -94,75 +26,39 @@ var limit;
 var uncategorizedResponse; // Populated via rest call
 var categories; // Populated via rest call
 var biggestImages = {};
-var IMAGE_SIZE = 100;
+var IMAGE_SIZE = 100; // for thumbnails
+var imageSize = 300; // for cards
 
 function initialize() {
 
+	initializeBeforeAjax();
+	
 	////
-	//// Determine the root ID
+	//// Uncategorized URLs (main part)
 	////
-	{
-		getRootId: {
-			rootId = $.url().param('rootId');
-		}
-	
-		updateURL: {
-			if (rootId == null || rootId == '') {
-				rootId = 45;
-				history.pushState(null, null, '/yurl?rootId=' + rootId) // HTML5
-			}
-		}
-		
-		setCountAndTitle: {
-			$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
-				$("#count").text(result.count);
-				$("#category").text(result.name);
-				document.title = "." + result.name + " (yurl)";
-			});
-		}
-	
-		setParentOfRootId(rootId);
-		
-		showLoading : {
-			$("#status").text("Loading")  			
-		}
-
-		setColorForCategory : {		
-			var rootColor = MD5(rootId.toString()).substring(0,6);
-			$("#rootColor").attr("style", "background-color: #" + rootColor);
-		}
-	
-		limit = $.url().param('limit')
-		if (limit == null) {
-			limit = 50;
-			window.history.pushState("object or string", "Title", document.URL + "&limit=50");
-		}
+    
+	getUrls : {
+		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId, function(result) {
+			uncategorizedResponse = result;
+			renderIfReady();
+		});
 	}
+	
 	////
 	//// Get the key bindings and categories (non-recursive)
 	////
 	
 	setCategoriesAndConfigureKeyBindings : {
 		$.getJSON(urlBase + "/keys?parentId=" + rootId, function(result){
-			var originalKeyBindings = $.extend(true, {}, result);// TODO: what does this do?
+			//var originalKeyBindings = 
+				$.extend(true, {}, result);// TODO: what does this do?
 			categories = result;
-			renderIfReady()
-		});
-	}
-	
-	////
-	//// Uncategorized URLs (main part)
-	////
-    
-    	getUrls : {
-		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId, function(result) {
-			uncategorizedResponse = result;
 			renderIfReady();
 		});
 	}
 	    
     ////
-    //// Get all recursive categories bindings
+    //// Show a complete tree of categories
     ////
     
     // Unfortunately, there is no easy way to get a tree of all category nodes.
@@ -177,11 +73,18 @@ function initialize() {
 					  
 					  renderD3Visualization(data.categoriesTree);
 					  
-					  writeCategoryTree(data.categoriesTree, 0);
+					  //writeCategoryTree(data.categoriesTree, 0);
+
+					  //var children = findCategoryChildren(data.categoriesTree, rootId);
+					  
+					  /*
+					  html += "-------OLD----------";
+					  // TODO: stop using flat
 					  $.each(data.flat, function(a,category,c){
-							$("#categoriesRecursive").append("<input type=checkbox value=false name="+category.id +"><a href='/yurl/?rootId="+category.id+"' style='text-transform:capitalize;'>" + category.name + " (" + category.id + ")</a></input>");
-							$("#categoriesRecursive").append("<br>");
+							html += CATEGORY_TO_LINK("", category);
 						});
+						*/
+					$("#categoriesRecursive").append(CATGORY_TREE_TO_LINKS_HTML(data.categoriesTree));
 				}
 			)
 			.error(function() {  })
@@ -189,40 +92,150 @@ function initialize() {
 		);
 	}
 
-
 	////
-    //// Update the key bindings
+    //// Start listening for changes to the key binding assignments
     ////
     
     addKeyBindingsUpdateHandler : {
-		var oldKeyBindings;
+		var oldKeyBindings = null;
 		$("#keys").focus(function() {
-			console.debug('focus callback begin');
 			oldKeyBindings = $.trim($("#keys").val());
-			console.debug('focus callback');
 		}).blur(function() {
-			console.debug('blur callback');
 			var newKeyBindings = $.trim($("#keys").val());
-			var i = 1;
-			var url;
 			if (oldKeyBindings === newKeyBindings) {
 			} else {
-				url = urlBase + "/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
+				var url = urlBase + "/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
+				$.getJSON(url, function(result){})
+					.success(function(data) {  
+						configureKeyBindings(data);
+					})
+					.error(function() { })
+					.complete(function() { });
 			}
-			console.debug('sending ' + url);
-			$.getJSON(url, function(result){})
-				.success(function(data) {  
-					configureKeyBindings(data);
-				})
-				.error(function() { })
-				.complete(function() { });
 		});
-		console.debug('inside addKeyBindingsUpdateHandler function end...');
-    }
-	console.debug('finished declaring addKeyBindingsUpdateHandler function.');
-    
+    }    
 }
 
+// Map function
+function CATGORY_TREE_TO_LINKS_HTML(categoryNode) {
+	var category = categoryNode;
+	return "<input type=checkbox value=false name=" + category.id + ">"
+		+ "<a href='/yurl/?rootId=" + category.id + "' style='text-transform:capitalize;'>"
+		+ category.name + " (" + category.id + ")"
+		+ "</a>"
+		+ "</input>"
+		+ "<br>"
+		+ "<ul>"
+		+ category.children.map(CATGORY_TREE_TO_LINKS_HTML).join("</li><li>")
+		+ "</ul>"
+		;
+}
+
+// Reduction function
+function CATEGORY_TO_LINK(accumulator, categoryNode) {
+	var category = categoryNode;
+	return accumulator + "<input type=checkbox value=false name=" + category.id + ">"
+		+ "<a href='/yurl/?rootId=" + category.id + "' style='text-transform:capitalize;'>"
+		+ category.name + " (" + category.id + ")"
+		+ "</a>"
+		+ "</input>"
+		+ "<br>";
+}
+	
+function renderIfReady() {
+	if (!uncategorizedResponse) {
+		return;
+	}
+	if (!uncategorizedResponse.categoriesRecursive) {
+		debugger;
+	}
+	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
+	configureKeyBindings();
+	$("#status").text("Populating");
+	//var categoryOrdinal = 0;
+	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
+	var urls = uncategorizedResponse.urls;
+
+	var categoryIdsUnderRootOrdered = putRootAtFront(urls, rootId);
+	
+	var cardsHtml = "";
+	{
+		var urlsRootOnly = uncategorizedResponse.urls[rootId];
+		if (urlsRootOnly != null) {
+			//var headLength = 10;
+			//var truncated = 
+			// This doesn't return the new list unfortunately. It will cause the thumbnails to also get truncated
+			//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
+			//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
+			var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
+			cardsHtml = urlsRootOnly.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
+		}
+	}
+	var urlThumbnailsHtml = "";
+	var urlListHtml = "";
+	var tableHtml = "";
+	var productsHtml = "";
+	var markupHtml = "";
+	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
+		var categoryId = categoryIdsUnderRootOrdered[i];
+		var categoryName = categoryIdsToNames[categoryId];
+		var urlsForCategory = urls[categoryId];
+		
+		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId], limit);
+		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
+		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
+		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
+		markupHtml += "<h1>" + categoryName + "</h1>\n\n" + urlsForCategory.map(ITEM_TO_IMAGE).join("\n");
+	}
+	$("#url_cards").append(cardsHtml);
+	$("#url_thumbnails").append(urlThumbnailsHtml);
+	$("#url_table").append(tableHtml);
+	$("#list").append(urlListHtml);
+	$("#products").append(productsHtml);
+	$("#htmlText").val(markupHtml);
+}
+
+function initializeBeforeAjax() {
+
+	////
+	//// Determine the root ID
+	////
+	getRootId: {
+		rootId = $.url().param('rootId');
+	}
+
+	updateURL: {
+		if (rootId == null || rootId == '') {
+			rootId = 45;
+			history.pushState(null, null, '/yurl?rootId=' + rootId); // HTML5
+		}
+	}
+	
+	setCountAndTitle: {
+		$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
+			$("#count").text(result.count);
+			$("#category").text(result.name);
+			document.title = result.name.charAt(0).toUpperCase() + result.name.slice(1) + " (yurl)";
+		});
+	}
+
+	setParentOfRootId(rootId);
+	
+	showLoading : {
+		$("#status").text("Loading"); 			
+	}
+
+	setColorForCategory : {		
+		var rootColor = MD5(rootId.toString()).substring(0,6);
+		$("#rootColor").attr("style", "background-color: #" + rootColor);
+	}
+
+	limit = $.url().param('limit');
+	if (limit == null) {
+		limit = 50;
+		window.history.pushState("object or string", "Title", document.URL + "&limit=50");
+	}
+}
 
 function fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages, categories) {
 	if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
@@ -231,109 +244,6 @@ function fillThumbnailItem(resultRowNumber, field, result, limit, biggestImages,
 	var toBeAppended = createImageCell(field, biggestImages, IMAGE_SIZE, resultRowNumber);
 	$("#url_thumbnails").append(toBeAppended);
 	
-}
-
-function fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories) {
-	if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
-		return;
-	}
-	
-	var one = $("<td style='background-color:'>1");
-	var two = $("<td style='background-color:' >2");
-	var three = $("<td style='background-color:'>3");
-	var four = $("<td id='categoryButtonsCell' style='background-color:'>4");
-	var five = $("<td style='background-color:'>5");
-	var six = $("<td style='background-color:'>6");
-	
-	var table = $("<table/>");
-	{
-		table.attr('width','100%');
-	
-		{
-			var row1 = $("<tr/>");
-			table.append(row1);
-			row1.append(two);
-			row1.append(three);
-		}
-	
-		{
-			var row2 = $("<tr/>");
-			table.append(row2);
-			row2.append(four);
-			row2.append(five);
-			row2.append(six);
-		}
-	
-		{
-			var listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
-			listItem.append(table);
-			$("#url_cards").append(listItem);
-		}
-	
-	}
-	
-	{
-		var urlElements = field.url.match(/^http:\/\/[^/]+/);
-		if (urlElements != null) {
-			var site = urlElements[0];
-			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
-		}
-		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+(new Date(field.created))+"<br>"+"</sub>");
-	}
-	
-	var imageCell = createImageCell(field, biggestImages, 300, resultRowNumber);
-	three.append(imageCell);
-	
-	if (field.parentId != null) {
-		six.append("Parent ID: " + field.parentId);
-	}
-	
-	{
-		var buttonCell = two;
-		buttonCell.append("<br>");
-		buttonCell.append("<br>");
-		buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
-		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'><br>");			
-		buttonCell.append("<br>");
-		buttonCell.append("<br>");
-		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
-		buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
-		buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
-		buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
-		buttonCell.append("<sub>"+field.id+"</sub>");
-	}
-	
-	{
-		var categoryButtons = four;
-		if (categories && categories.length == 0) {
-			// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
-			debugger;
-		} 
-		if (categories) {
-			$.each(categories, function(a,binding,c){
-				categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+" ("+ binding.key+")' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
-			});
-		}
-		categoryButtons.append("<br>");
-		categoryButtons.append("<br>");
-		categoryButtons.append("<input type=button class='genericButton' value='NEW' onclick='createAndRelate("+field.id+","+rootId+")'>&nbsp;");
-	}
-	
-	{
-		five.append("<input type=button class='genericButton' value='I own this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37373+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Buy this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221013+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Download this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221026+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Downloaded this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 322410 +"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Watched' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Watch this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Documentary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37659+"), this)'><br>");
-
-		five.append("<input type=button class='genericButton' value='Find in Library' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 608592+"), this)'><br>");
-		five.append("<input type=button class='genericButton' value='Priority 3' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'><br><br>");
-		five.append("<input type=button class='genericButton' value='Save Video' onclick='downloadVideo("+field.id+","+field.downloaded_video+", this)' style='background-color : "+getDownloadedVideoColor(field.downloaded_video)+"'><br>");
-
-		
-	}	
 }
 
 function getDownloadedVideoColor(downloaded) {
@@ -345,7 +255,14 @@ function getDownloadedVideoColor(downloaded) {
 	}
 	return "green";
 }
-function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
+
+function ITEM_TO_IMAGE(item) {
+	return createImageCell(item)[0].outerHTML;
+}
+
+// Creates a JQquery DOM element
+// field = item
+function createImageCell(field) {
 
 	var imageCell = "";
 	var hasScreenshot = false;
@@ -355,14 +272,17 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 			field.url.match(".gif$") || 
 			field.url.match(".png\??") || 
 			field.url.match("images.q=tbn:")) {
-			imageCell += ("<img class=itemImage src='"+field.url+"' height="+imageSize+" onmouseenter='zoom(this)'>");
+			imageCell += ("<img class=itemImage src='"+field.url+"' height="+imageSize+" onmouseenter='zoom(this)' title='" +field.title+ "'>");
 			hasScreenshot = true;
 		}
-		if (field.url.match("youtube.com")) {
+		if (field.user_image != null) {
+				imageCell += ("<img class=itemImage src=\""+ field.user_image +"\" class='screenshot' width="+imageSize+" />");
+				hasScreenshot = true;		
+		} else if (field.url.match("youtube.com")) {
 			if (field.url.match("youtube.com/watch")) {
 				var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
 				imageCell += ("");
-				imageCell += ("<img class=itemImage src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+">");
+				imageCell += ("<img class=itemImage src='http://img.youtube.com/vi/"+youtubeId+"/0.jpg' width="+imageSize+" title='" +field.title+ "'>");
 				
 				imageCell += ("");
 				imageCell += ("");
@@ -373,7 +293,7 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 		} else if (field.url.match("dailymotion.com/video")) {
 				var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
 				imageCell += ("");
-				imageCell += ("<img class=itemImage src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+">");
+				imageCell += ("<img class=itemImage src='http://dailymotion.com/thumbnail/video/"+youtubeId +"' width="+imageSize+" title='" +field.title+ "'>");
 				imageCell += ("");
 				imageCell += ("");
 				imageCell += ("");
@@ -388,13 +308,13 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 			asin = asin.replace(/.ref_?=.*/, '');
 			asin = asin.replace(/.*offer-listing./, '');
 			var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
-			imageCell += ("<img class=itemImage src='"+productImageUrl+"' height='280'>");
+			imageCell += ("<img class=itemImage src='"+productImageUrl+"' height='280' title='" +field.title+ "'>");
 			hasScreenshot = true;
 		}
 	}
 	
 	if (!hasScreenshot) {
-		imageCell += ("<img class=itemImage src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" />");
+		imageCell += ("<img class=itemImage src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" title='" +field.title+ "'/>");
 		// Check if the biggest image server is up
 		if (biggestImages != null) {
 			if (biggestImages[field.url] != null) {
@@ -404,7 +324,7 @@ function createImageCell(field, biggestImages, imageSize, resultRowNumber) {
 	}
 
 	// Tooltip
-	var img = $($.parseHTML("<a href='"+field.url+"'>" + imageCell + "</a>"));
+	var img = $($.parseHTML("<a href='"+field.url+"'  title='" +field.title+ "' >" + imageCell + "</a>"));
 /*	img.tooltip({
 		items: "img",
 		content:  field.title + "<br><font style=\"font-size : xx-small \">"+field.url+"</font>",
@@ -472,6 +392,7 @@ function removeTop(parentId, childId) {
 	});	
 }
   
+// Delete. Redundant functionality
 function writeCategoryTree(root, level) {
 	var indent = "";
 	for (var i = 0; i < level; i++) {
@@ -482,7 +403,6 @@ function writeCategoryTree(root, level) {
 	
 	if (root.children != null) {
 		$.each(root.children, function(a,b){
-			
 			writeCategoryTree(b, level + 1);
 		});
 	}
@@ -491,8 +411,6 @@ function writeCategoryTree(root, level) {
 function moveToTop(source) {
 	var idToMove = source;
 	var firstId = $("#url_cards").children().first().attr("id");
-
-
 	if (orderedDescending) {
 		var elem = $("#" + idToMove).remove();
 		$("#url_cards").prepend(elem);
@@ -641,58 +559,26 @@ function getBiggestImages() {
 	});
 }
 
-
-function renderIfReady() {
-	renderIfReadyNew();
-	renderIfReadyOld();
+function findCategoryChildren(categoriesNode, categoryIdToFind) {
+	if (categoriesNode.id == categoryIdToFind || categoriesNode.id == parseInt(categoryIdToFind)) {
+		return categoriesNode.children;
+	}
+	else if (categoriesNode.children != null) {
+		for (var i = 0; i < categoriesNode.children.length; i++ ) {
+			var category = findCategoryChildren(categoriesNode.children[i], categoryIdToFind);
+			if (category != null) {
+				return category;
+			}
+		}
+	} else {
+		return null;
+	}
 }
 
-function renderIfReadyNew() {
-	if (!uncategorizedResponse) {
-		return;
-	}
-	if (!uncategorizedResponse.categoriesRecursive) {
-		debugger;
-	}
-	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
-//	if (!categories) {
-//		alert('Could not find root ' + rootId);
-		//return;
-//	} else if (categories.length == 0) {
-//	//	debugger;
-//	} else {	
-		configureKeyBindings();
-//	}
-	$("#status").text("Populating")
-	var categoryOrdinal = 0;
-	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
-	var urls = uncategorizedResponse.urls;
-
-	var categoryIdsUnderRootOrdered = putRootAtFront(urls, rootId);
-	
-	var urlThumbnailsHtml = "";
-	var urlListHtml = "";
-	var tableHtml = "";
-	var productsHtml = "";
-	var markupHtml = "";
-	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
-		var categoryId = categoryIdsUnderRootOrdered[i];
-		var categoryName = categoryIdsToNames[categoryId];
-		var urlsForCategory = urls[categoryId];
-		urlThumbnailsHtml += getCategoryThumbnailsHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId], limit);
-		urlListHtml += getCategoryListHtml(categoryId, categoryIdsToNames[categoryId], urls[categoryId]);
-		tableHtml += getCategoryTableHtml(categoryId, categoryName, urlsForCategory);
-		productsHtml += getProductsHtml(categoryId, categoryName, urlsForCategory);
-//		markupHtml += getMarkupHtml(categoryId, categoryName, urlsForCategory);
-	}
-	$("#url_thumbnails").append(urlThumbnailsHtml);
-	$("#url_table").append(tableHtml);
-	$("#list").append(urlListHtml);
-	$("#products").append(productsHtml);
-	$("#htmlText").val(productsHtml);
-//        $("#url_thumbnails").append(urlThumbnailsHtml)
-
-//	$(".urlTable").tablesorter(); 
+function ITEM_TO_HTML(categories, currentCategoryId, parentCategoryId, item) {
+	return function (item) {
+		return fillCardItem(null, item, null, null, null, categories);
+	};
 }
 
 function putRootAtFront(urls, rootId) {
@@ -726,9 +612,37 @@ function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, lim
 				break;
 			}
 			var item = urlsInCategory[j];
-			urlThumbnailsHtml += ("<a href="+item.url+"><img class=itemImage src='"+getImageForUrl(item.url)+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>");
+			var displayImageUrl = getDisplayImageUrl(item);
+			urlThumbnailsHtml += "<a href="+item.url+"><img class=itemImage src='"+displayImageUrl+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>" ;
 		}
 		return urlThumbnailsHtml;
+}
+
+function getDisplayImageUrl(item) {
+	var url = item.url;
+	var specialSiteImageUrl = getSpecialSiteUrl(url);
+	if (url.match(".jpg\??") || url.match(/.*jpg/i) || url.match(".gif$")
+			|| url.match(".png\??") || url.match("images.q=tbn:")) {
+		displayImageUrl = url;
+	} else if (specialSiteImageUrl != null) {
+		displayImageUrl = specialSiteImageUrl;
+	} else if (item.user_image != null) {
+		displayImageUrl = item.user_image;
+	} else if (item.biggest_image != null) {
+		displayImageUrl = item.biggest_image;
+	} else if (url.match(".amazon.co[^/]+\/[^s]")) {
+		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+		asin = asin.replace(/.*dp./,'');
+		asin = asin.replace(/.*gp.aw.d./, '');
+		asin = asin.replace(/.ref_?=.*/, '');
+		asin = asin.replace(/.*offer-listing./, '');
+		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+		displayImageUrl = productImageUrl;
+	} else {
+		displayImageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="
+				+ encodeURIComponent(url);
+	}
+	return displayImageUrl;
 }
 
 function getImageForUrl(url) {
@@ -739,53 +653,40 @@ function getImageForUrl(url) {
 		url.match(".png\??") || 
 		url.match("images.q=tbn:")) {
 		imageUrl = url;
-	}
-	else if (url.match("youtube.com/watch")) {
+	} else {
+		var specialSiteImageUrl = getSpecialSiteUrl(url);
+		if (specialSiteImageUrl == null) {
+			imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
+		} else {
+			imageUrl = specialSiteImageUrl;
+		}
+	} 
+	return imageUrl;
+}
+
+function getSpecialSiteUrl(url) {
+	var imageUrl;
+	if (url.match("youtube.com/watch")) {
 		var youtubeId = url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
 		imageUrl = "http://img.youtube.com/vi/"+youtubeId+"/0.jpg";	
 	} else if (url.match("dailymotion.com/video")) {
 		var youtubeId = url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
 		imageUrl = "http://dailymotion.com/thumbnail/video/"+youtubeId ;			
-	} else if (url.match(".amazon.co[^/]+\/[^s]")) {
-		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
-		asin = asin.replace(/.*dp./,'');
-		asin = asin.replace(/.*gp.aw.d./, '');
-		asin = asin.replace(/.ref_?=.*/, '');
-		asin = asin.replace(/.*offer-listing./, '');
-		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
-		imageUrl = productImageUrl;
-	} else {
-		imageUrl = "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(url);
+	}
+	// Too unreliable
+//	else if (url.match(".amazon.co[^/]+\/[^s]")) {
+//		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+//		asin = asin.replace(/.*dp./,'');
+//		asin = asin.replace(/.*gp.aw.d./, '');
+//		asin = asin.replace(/.ref_?=.*/, '');
+//		asin = asin.replace(/.*offer-listing./, '');
+//		var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+//		imageUrl = productImageUrl;
+//	} 
+	else {
+		imageUrl = null;
 	}
 	return imageUrl;
-	/*
-	if (!hasScreenshot) {
-		imageCell += ("<img class=itemImage src=\"http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url)+"\" class='screenshot' width="+imageSize+" />");
-		// Check if the biggest image server is up
-		if (biggestImages != null) {
-			if (biggestImages[field.url] != null) {
-				imageCell += ("<img class=itemImage src=\""+ biggestImages[field.url] +"\" class='screenshot' width="+imageSize+" />");
-			}
-		}
-	}
-
-	// Tooltip
-	var img = $($.parseHTML("<a href='"+field.url+"'>" + imageCell + "</a>"));
-/ *	img.tooltip({
-		items: "img",
-		content:  field.title + "<br><font style=\"font-size : xx-small \">"+field.url+"</font>",
-	});	* /
-	return img;
-	*/
-}
-
-function getMarkupHtml(categoryId, categoryName, urlsInCategory) {
-		var urlThumbnailsHtml = "<h3>" + categoryName + " (" + categoryId + ")</h3>";
-		for (var j = 0; j < urlsInCategory.length; j++) {
-			var item = urlsInCategory[j];
-			urlThumbnailsHtml += item.title +"<br>";
-		}
-		return urlThumbnailsHtml;
 }
 
 function getProductsHtml(categoryId, categoryName, urlsInCategory) {
@@ -820,42 +721,157 @@ function getCategoryListHtml(categoryId, categoryName, urlsInCategory) {
 		return urlThumbnailsHtml;
 }
 
-// delete this
-function renderIfReadyOld() {
-	if (!uncategorizedResponse) {
-		return;
+function fillCardItem(resultRowNumber, field, result, limit, biggestImages, categories) {
+	if (resultRowNumber != null && result != null && limit != null) {	
+		if (resultRowNumber > limit && resultRowNumber < result.length - 10)  {
+			return;
+		}
 	}
-	categories = getCategoriesUnderID2(uncategorizedResponse.categoriesRecursive, rootId);
-	if (!categories) {
-//		return;
-	}
-	else if (categories.length == 0) {
-//		debugger;
-	}	
-//	configureKeyBindings();
-	$("#status").text("Populating")
-	var resultRowNumber = 0;
-	var categoryOrdinal = 0;
-	var categoryIdsToNames = getCategoryNamesMap(uncategorizedResponse.categoriesRecursive);
-	var urls = uncategorizedResponse.urls;
-	var categoryIdsUnderRootOrdered = putRootAtFront(urls, rootId);
 	
-	for (var i = 0; i < categoryIdsUnderRootOrdered.length; ++i) {
-		var categoryID = categoryIdsUnderRootOrdered[i];
-		$("#url_thumbnails").append("<h3>" + categoryIdsToNames[categoryID] + " (" + categoryID +")</h3>")
-		$.each(urls[categoryID], function( resultRowNumber, field ) {
-			if (categoryID == rootId) {
-				fillCardItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
-			}
-			if (resultRowNumber < limit) {
-//				fillThumbnailItem(resultRowNumber, field, uncategorizedResponse, limit, biggestImages, categories);
-			}
-			++resultRowNumber; // why are we mutating a param?
-		});
-		++categoryOrdinal;
+	//var one = $("<td style='background-color:'>1");
+	var two = $("<td style='background-color:' >2");
+	var three = $("<td style='background-color:'>3");
+	var four = $("<td id='categoryButtonsCell' style='background-color:'>4");
+	var five = $("<td style='background-color:'>5");
+	var six = $("<td style='background-color:'>6");
+	
+	var listItem;
+	var table = $("<table/>");
+	{
+		table.attr('width','100%');
+	
+		{
+			var row1 = $("<tr/>");
+			table.append(row1);
+			row1.append(two);
+			row1.append(three);
+		}
+	
+		{
+			var row2 = $("<tr/>");
+			table.append(row2);
+			row2.append(four);
+			row2.append(five);
+			row2.append(six);
+		}
+	
+		{
+			listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
+			listItem.append(table);
+			//$("#url_cards").append(listItem);
+		}
+	
+	}
+	
+	{
+		var urlElements = field.url.match(/^http:\/\/[^\/]+/);
+		if (urlElements != null) {
+			var site = urlElements[0];
+			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
+		}
+		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+(new Date(field.created))+"<br>"+"</sub>");
+	}
+	
+	var imageCell = createImageCell(field, biggestImages, null, resultRowNumber);
+	three.append(imageCell);
+	
+	if (field.parentId != null) {
+		six.append("Parent ID: " + field.parentId);
+	}
+	
+	{
+		var buttonCell = two;
+		buttonCell.append("<br>");
+		buttonCell.append("<br>");
+		buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
+		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'><br>");
+		buttonCell.append("<br>");
+		buttonCell.append("<input type=button class='genericButton' value='Change Image' onClick='changeImage("+field.id+",this)'><br>");
+		buttonCell.append("<br>");
+		buttonCell.append("<br>");
+		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
+		buttonCell.append("<sub>"+field.id+"</sub>");
+	}
+	
+	{
+		var categoryButtons = four;
+		if (categories && categories.length == 0) {
+			// TODO: 'categories' may not yet be set. Really we should add these buttons in the callback where "categories" is set. But we don't know the field ID unless we wait until the item results load
+			debugger;
+		} 
+		if (categories) {
+			var html = categories.sort(COMPARE_OBJ_NAME).map(CATEGORY_TO_BUTTON(field.id, rootId)).join("&nbsp;");
+			categoryButtons.append(html);
+			// TODO: would be nice to use map and fold
+			//$.each(categories, function(a,binding,c){
+			//	categoryButtons.append("<input type=button class='genericButton' value='"+binding.name+" ("+ binding.key+")' onclick='relate("+binding.id+","+field.id+","+rootId+")'>&nbsp;");
+			//});
+		}
+		categoryButtons.append("<br>");
+		categoryButtons.append("<br>");
+		categoryButtons.append("<input type=button class='genericButton' value='NEW' onclick='createAndRelate("+field.id+","+rootId+")'>&nbsp;");
+	}
+	
+	{
+		five.append("<input type=button class='genericButton' value='I own this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37373+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Buy this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221013+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Download this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+221026+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Downloaded this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 322410 +"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Watched' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37652+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Watch this' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37567+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Documentary' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+37659+"), this)'><br>");
+
+		five.append("<input type=button class='genericButton' value='Find in Library' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+ 608592+"), this)'><br>");
+		five.append("<input type=button class='genericButton' value='Priority 3' onclick='tagUrlWithCategoryIds("+field.id+",createArrayWithId("+38907+"), this)'><br><br>");
+//		five.append("<input type=button class='genericButton' value='Save Video' onclick='alert(\"saved\")' style='background-color : blue'><br>");
+		five.append("<input type=button class='genericButton' value='Save Video' onclick='downloadVideo("+field.id+",\""+ field.url +"\", this)' style='background-color : "+getDownloadedVideoColor(field.downloaded_video)+"'><br>");
+//encodeURIComponent(field.url)+
+		
 	}	
-//			$.getScript("jquery/hover_zoom.min.js", function() { console.debug("Ready to zoom images"); });
-	$("#status").text("Done")
+	return listItem[0].outerHTML;
+}
+
+function changeImage(id, button) {
+	var newImageUrl = prompt("Enter a new image URL:", "");
+	if (newImageUrl.length > 0) {
+		$.getJSON(urlBase + '/updateImage?url=' + encodeURIComponent(newImageUrl) + "&id=" + id, 
+			function(result){
+				console.debug(result);
+			})
+			.success(function(data) {
+				button.style.cssText = "background-color : green";
+			})
+			.error(function() { 
+				alert("error occurred "); 
+			})
+			.complete(function() { 
+			}
+		);
+	}
+}
+
+function downloadVideo(id, url, buttonElement) {
+	$.getJSON(urlBase + "/downloadVideo?url=" + encodeURIComponent(url) + "&id=" + id, function(result) {
+		buttonElement.style.backgroundColor = getDownloadedVideoColor(true);
+		console.debug("downloaded");
+	});
+	buttonElement.style.backgroundColor = "orange";
+}
+
+function CATEGORY_TO_BUTTON(itemId, currentCategoryId, categoryNode) {
+	return function(categoryNode) {
+		return "<input type=button class='genericButton' "
+			+ " value='"+categoryNode.name+" ("+ categoryNode.key+")'"
+			+ " onclick='relate("+categoryNode.id+","+itemId+","+currentCategoryId+")'>"
+			+ "";
+	};
+}
+
+function COMPARE_OBJ_NAME(categoryNode1, categoryNode2) {
+	return categoryNode1.name.toUpperCase().charCodeAt(0) - categoryNode2.name.toUpperCase().charCodeAt(0);
 }
 
 function getCategoriesUnderID2(categoryTree, categoryId) {
@@ -939,7 +955,7 @@ function configureKeyBindings() {
 
 function drawVisualization(data) {
 	console.debug(data);
-	var ua = navigator.userAgent;
+	//var ua = navigator.userAgent;
 	var forceDirectedGraph = new $jit.ForceDirected({
 		injectInto: 'infovis',
 		Node: {
@@ -1057,25 +1073,25 @@ function getAdjacencies(category) {
 }
 
 
-        function getCategoryNamesMap(categoriesRecursive) {
-                var categoriesMap = {};
-		if (categoriesRecursive.id == null) {
-			debugger;
-		}
-                categoriesMap[categoriesRecursive.id] = categoriesRecursive.name;
-                for (var category in categoriesRecursive.children) {
-			var categoryNames = getCategoryNamesMap(categoriesRecursive.children[category]);
-			categoriesMap  = $.extend(true, categoriesMap, categoryNames);
+function getCategoryNamesMap(categoriesRecursive) {
+	var categoriesMap = {};
+	if (categoriesRecursive.id == null) {
+		debugger;
+	}
+	categoriesMap[categoriesRecursive.id] = categoriesRecursive.name;
+	for (var category in categoriesRecursive.children) {
+		var categoryNames = getCategoryNamesMap(categoriesRecursive.children[category]);
+		categoriesMap  = $.extend(true, categoriesMap, categoryNames);
 //                        categoriesMap.concat(categoryNames);
-                }
-                return categoriesMap;
-  	}
+	}
+	return categoriesMap;
+}
 
 function renderD3Visualization(flareJson) {
 	var w = 680,
 		h = 500,
-		node,
-		link,
+		node = null,
+		link = null,
 		root;
 	
 	
@@ -1213,7 +1229,59 @@ function renderD3Visualization(flareJson) {
 	}
 }
 
+function openHtmlTextInNewTab() {
+	var newWin = open('url', '_blank', '');
+	newWin.document.write($("#htmlText").val());
+	newWin.document.title = document.title;
+}
+
+
+
 </script>
+<style type="text/css">
+
+.itemImage {
+	padding : 10px;
+}
+
+.ui-widget {
+	/* Reduces JQUery's default font size */
+    font-size: 90%;
+}
+
+body {
+        background-color : #E7EDE1;
+}
+
+.ui-tabs .ui-tabs-panel {
+	background-color : #E7EDE1;
+}
+
+circle.node {
+  cursor: pointer;
+  stroke: #000;
+  stroke-width: .5px;
+}
+
+line.link {
+  fill: none;
+  stroke: #9ecae1;
+  stroke-width: 1.5px;
+}
+
+.truncate{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    max-height: 51px;
+    text-align: left;
+}
+
+//.urlTable.tbody.tr.td {
+    text-align: left;
+//}
+</style>
 <style>
 .ui-effects-transfer { border: 2px dotted gray; }
 
@@ -1279,41 +1347,47 @@ body{
 			<table style="width: 100%;table-layout: fixed;">
 				<tr>
 					<td width="25%" valign=top>
+
 						<a id="up">Up</a>
 						<a href="http://netgear.rohidekar.com:4447/yurl/dumpurls">Export</a>
-						<a href="http://netgear.rohidekar.com/launcher">Netcat Query</a>
+						<strike><a href="http://netgear.rohidekar.com/launcher">Netcat Query</a></strike>
 						<div id=rootColor class="buttonize">
 							<center>
 								<br><h2><span id="category"></span>(<span id="count"></span>)<br></h2><br>
 							</center>
 						</div>
+
 						<!--Favorites-->
-                                                <div id='favorites' class='buttonize'>
+						<div id='favorites' class='buttonize'>
+							<a href='/yurl/?rootId=29196' >Products & Services</a><br>
+							<a href='/yurl/?rootId=221013'>Buy these</a><br>
+							<a href='/yurl/?rootId=230184'>Bought</a><br>
+							<a href='/yurl/?rootId=37373'> Owned</a><br>
+							<a href='/yurl/?rootId=608592'>Library</a><br><br>
+                                                        <a href='/yurl/?rootId=610307'>Audiobooks of interest</a><br><br>
 
-                                                <a href='/yurl/?rootId=29196' >Products & Services</a><br>
-                                                <a href='/yurl/?rootId=221013'> Buy these</a><br>
-                                                <a href='/yurl/?rootId=37373'> Owned</a><br>
-                                                <a href='/yurl/?rootId=608592'>Library</a><br><br>
+							<a href='/yurl/?rootId=469990' >Home (Photos)</a><br>
+							<a href='/yurl/?rootId=37658' >Youtube Playlists (videos)</a><br>
+							<a href='/yurl/?rootId=37567'>Watch these</a><br>
+							<a href='/yurl/?rootId=37652'>Watched</a><br>
+							<a href='/yurl/?rootId=322647'>Atletico Madrid Documentary</a><br><br>
 
-                                                <a href='/yurl/?rootId=469990' >Home (Photos)</a><br>
-                                                <a href='/yurl/?rootId=37658' >Youtube Playlists (videos)</a><br>
-                                                <a href='/yurl/?rootId=37567'>Watch these</a><br>
-												<a href='/yurl/?rootId=37652'>Watched</a><br><br>
+							<a href='/yurl/?rootId=221026'> Download</a><br>
+							<a href='/yurl/?rootId=37581'> Download these</a><br>
+							<a href='/yurl/?rootId=322410'> Downloaded</a><br><br>
 
-                                                <a href='/yurl/?rootId=221026'> Download</a><br>
-                                                <a href='/yurl/?rootId=37581'> Download these</a><br>
-                                                <a href='/yurl/?rootId=322410'> Downloaded</a><br><br>
-                                                <a href='/yurl/?rootId=29172'> Other</a><br>
-                                                </div>
+							<a href='/yurl/?rootId=38907'>Priority 3</a><br>
+							<a href='/yurl/?rootId=29172'>Other</a><br>
+						</div>
+
 						<ol id="keyLinks"  class="buttonize" style="" ></ol>
 						<font color=grey><div id="status">Init</div></font>
 						<textarea id="keys" cols="34" rows="20px" class="buttonize"></textarea>
 						<!-- I don't see a good reason to have both keys and categoriesTree. Hopefully JSON Tree
 							will replace both -->
-						<br>Tree of Categories<br>
-						<div id="categoriesTree" class="buttonize tooBig" ></div>
-						<br>Category tags<br>
+						<br>Tree of Categories / Category tags<br>
 						<div id="categoriesRecursive"  class="buttonize tooBig">
+						<!--<div id="categoriesTree" class="buttonize tooBig" ></div>-->
 						<br><br>
 
 						<br><br>
@@ -1389,7 +1463,6 @@ reading list (pdf))
 							  </div>
 							  <div id="tabs-2">
   									For sorting into subcategories 
-
 								  <ol id="url_cards"></ol>
 							  </div>
 							  <div id="tabs-3">
@@ -1420,15 +1493,17 @@ reading list (pdf))
 								  <ol id="list"></ol>
 							</div>
 							<div id="tabs-7">
-* printed summary for browsing in bedroom when bookshelf isn't big enough (so it must be more compact than the web view for thumbnails of products; if anything, the thumbnails for the web view are too big)<br>
-* for seeing what you own<br>
-* for seeing what you could buy when you're passively shopping<br>
+									* printed summary for browsing in bedroom when bookshelf isn't big enough (so it must be more compact than the web view for thumbnails of products; if anything, the thumbnails for the web view are too big)<br>
+									* for seeing what you own<br>
+									* for seeing what you could buy when you're passively shopping<br>
 							  </div>
 							<div id="tabs-8">
 							  <ol id="products"></ol>
 							</div>
 							<div id="tabs-9">
-							  <textarea id="htmlText"></textarea>
+							  <a href="" onclick="openHtmlTextInNewTab()">Open in new tab</a><br>
+							  <br>
+							  <textarea id="htmlText" rows=20 columns=100 style="white-space: nowrap; overflow: none;"></textarea>
 							</div>
 						</div>
 <!--						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
@@ -1450,13 +1525,13 @@ reading list (pdf))
 	<table>
 <br>
 
- <button type=button onclick='$("#d3").toggle()'>Show visualization</button>
-                                                <div id="d3" style="background-color:grey"></div>
-                                                <!--<div id="infovis" style="background-color : black"></div>    -->
+<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
+<div id="d3" style="background-color:grey"></div>
+<!--<div id="infovis" style="background-color : black"></div>    -->
 
-                                                <input type="button" value="Add URLs" onclick="sendBatch()" /><br>
-                                                <div id="batchStatus"></div>
-                                                <textarea id="urlBatchToSend" rows="20" cols="100"></textarea>
+<input type="button" value="Add URLs" onclick="sendBatch()" /><br>
+<div id="batchStatus"></div>
+<textarea id="urlBatchToSend" rows="20" cols="100"></textarea>
 
 <textarea cols=200>
 javascript:window.location.href = 'http://netgear.rohidekar.com/yurl/stash2.html?url=' + encodeURIComponent(document.URL) + '&nodeId=45'  ;

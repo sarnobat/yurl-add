@@ -24,7 +24,7 @@ main: 45, product: 29196, video: 37658, tech: 46, other: 29172
 		}
 		var url = getParameterByName('url');
 		/* it seems we can't close the tab before executing the rest of the code */
-		document.getElementsByTagName("body")[0].innerHTML = "Saving...<br>" + url;
+		document.getElementsByTagName("body")[0].innerHTML = "Saving...<br><a href='" + url + "'>" + url + "</a>";
 		document.body.style.backgroundColor = "#FFCC66";
 		var x = new XMLHttpRequest();
 		/* main: 45, product: 29196, video: 37658, tech: 46, other: 29172 */
@@ -45,12 +45,12 @@ main: 45, product: 29196, video: 37658, tech: 46, other: 29172
 							var link = document.createElement('link');
 							link.type = 'image/x-icon';
 							link.rel = 'shortcut icon';
-							link.href = 'http://www.favicon.cc/favicon/905/401/favicon.png';
+							link.href = 'http://netgear.rohidekar.com/static/icons/tick.ico';
 							document.getElementsByTagName('head')[0].appendChild(link);
 						}());
 					} else {
 						document.body.style.backgroundColor = "#CC0033";
-						document.getElementsByTagName("body")[0].innerHTML = "Error:<br>" + getParameterByName('url');
+						document.getElementsByTagName("body")[0].innerHTML = "Error:<br><a href='" +  url + "'>" + url + "</a>";
 						// TODO: show the existing title
 						(function() {
 							var link = document.createElement('link');
