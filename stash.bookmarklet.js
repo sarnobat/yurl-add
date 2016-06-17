@@ -1,4 +1,5 @@
 javascript:(
+	// DO NOT USE THIS ANYMORE. Use version 2.
 	function() {
 		if (location.href.match("youtu.*&list=.*") ) {
 			var newLocation=location.href.replace(/&list=[^&]+/,"");
