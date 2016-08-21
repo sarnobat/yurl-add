@@ -29,6 +29,13 @@ var express = require('express');
 
 var app = express();
 
+app.all('/*', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next();
+});
+
+
 getBiggestImage("http://lifehacker.com/5330687/items-you-can-get-great-deals-on-in-a-recession");
 
 >>>>>>> 85aced643fcc9b317f01039680722ec6cae072bd
@@ -118,7 +125,7 @@ function getBiggestImage(urlToFindBiggestImage) {
 
 var db = new neo4j.GraphDatabase('http://netgear.rohidekar.com:7474');
 
-results = db.query ('start n=node(45) match n-->c where has(c.title) return c.url as url,c.title as title limit 50', function(err, result) {
+results = db.query ('start n=node(28974) match n-->c where has(c.title) return c.url as url,c.title as title ', function(err, result) {
         if(err) throw err;
         for (var j = 0; j < result.length; j++) {
         	if (result[j] == null) {
@@ -129,4 +136,4 @@ results = db.query ('start n=node(45) match n-->c where has(c.title) return c.ur
 });
 
 app.listen(3000);
-console.log('Listening on port http://localhost:3000');
+console.log('Listening on port http://localhost:4452');

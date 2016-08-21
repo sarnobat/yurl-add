@@ -3,14 +3,13 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.ProcessBuilder.Redirect;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.AbstractMap;
@@ -25,7 +24,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -69,6 +67,12 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.MongoClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -77,8 +81,6 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
 public class Yurl {
-	// I hope this is the same as JSONObject.Null (not capitals)
-	public static final Object JSON_OBJECT_NULL = JSONObject.Null;
 	private static final String CHROMEDRIVER_PATH = //"/Users/sarnobat/trash/chromedriver";
 	//"/home/sarnobat/trash/chromedriver";
 	"/home/sarnobat/github/yurl/chromedriver";
@@ -124,10 +126,22 @@ public class Yurl {
 				// This is done in a separate thread
 				refreshCategoriesTreeCacheInSeparateThread();
 			}
-			JSONObject retVal = new JSONObject();
 			try {
-				retVal.put("urls", getItemsAtLevelAndChildLevels(iRootId));
-				retVal.put("categoriesRecursive", categoriesTreeJson);
+				JSONObject retVal;
+				if (MongoDbCache.exists(iRootId.toString())) {
+					System.out.println("Yurl.HelloWorldResource.getUrls() - using cache");
+					retVal = new JSONObject(MongoDbCache.get(iRootId.toString()));
+				} else {
+				// If there were multiple clients here, you'd need to block the 2nd onwards
+					System.out.println("Yurl.HelloWorldResource.getUrls() - not using cache");
+					JSONObject retVal1;
+					retVal1 = new JSONObject();
+					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+					retVal1.put("categoriesRecursive", categoriesTreeJson);
+					MongoDbCache.put(iRootId.toString(), retVal1.toString());
+					retVal = retVal1;
+				}
+				
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(retVal.toString())
 						.type("application/json").build();
@@ -197,19 +211,13 @@ public class Yurl {
 		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
 				@QueryParam("urls") String iUrls) throws Exception {
 			Preconditions.checkArgument(iRootId != null);
-//			System.out.println("batchInsert - " + iRootId);
-			// System.out.println("batchInsert - " + URLDecoder.decode(iUrls,
-			// "UTF-8"));
 			StringBuffer unsuccessfulLines = new StringBuffer();
 
 			String[] lines = iUrls.trim().split("\\n");
 			int i = 0;
 			while (i < lines.length) {
 
-//				System.out.println("1");
 				String first = lines[i];
-				
-				String theHttpUrl;
 				try {
 					if (first.startsWith("http")) {
 						stash(URLEncoder.encode(first, "UTF-8"), iRootId);
@@ -217,14 +225,13 @@ public class Yurl {
 						continue;
 					}
 					// Fails if it sees the string "%)"
-					theHttpUrl = URLDecoder.decode(first, "UTF-8");
+					URLDecoder.decode(first, "UTF-8");
 				} catch (Exception e) {
 					System.out.println(e.getStackTrace());
 					addToUnsuccessful(unsuccessfulLines, first, "");
 					++i;
 					continue;
 				}
-//				System.out.println("decoded: " + theHttpUrl);
 				if (first.startsWith("=")) {
 					++i;
 					addToUnsuccessful(unsuccessfulLines, first, "");
@@ -388,6 +395,7 @@ public class Yurl {
 		//// The main part
 		////
 		// TODO: See if you can turn this into a map-reduce
+		@SuppressWarnings("unused")
 		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 //			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
@@ -464,7 +472,7 @@ public class Yurl {
 						if (isNotNull(val)) {
 							String aValue = (String) val;
 							if ("null".equals(aValue)) {
-								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur?");
+								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
 							}
 							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
 						}
@@ -474,7 +482,6 @@ public class Yurl {
 						if (isNotNull(val)) {
 							String aValue = (String) val;
 							if ("null".equals(aValue)) {
-								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur?");
 							}
 							anUncategorizedNodeJsonObject.put("user_image", aValue);
 						}
@@ -500,7 +507,7 @@ public class Yurl {
 		}
 
 		private static boolean isNotNull(Object val) {
-			return val != null && !("null".equals(val)) && !(val.getClass().equals(Yurl.JSON_OBJECT_NULL));
+			return val != null && !("null".equals(val)) && !(val.getClass().equals(HelloWorldResource.JSON_OBJECT_NULL));
 		}
 
 		// -----------------------------------------------------------------------------
@@ -713,23 +720,19 @@ public class Yurl {
 		public Response stash(@QueryParam("param1") String iUrl,
 				@QueryParam("rootId") Integer iRoodId) throws JSONException,
 				IOException {
-//			System.out.println("stash() - begin");
 			// This will convert
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
-//			System.out.println("stash() - url decoded: " + theHttpUrl);
 			String theTitle = getTitle(new URL(theHttpUrl));
 			try {
 				JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle,
 						new Integer(iRoodId));
-//				System.out.println("stash() - node created");
-//				System.out.println("About to get id");
 				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
 						.get("data")).get(0);
-//				System.out.println("Got array: " + theNewNodeId);
-//				System.out.println(theNewNodeId.get(0));
 				String id = (String) theNewNodeId.get(0);
 				System.out.println(id);
 
+				MongoDbCache.delete(iRoodId.toString());
+				
 				launchAsynchronousTasks(theHttpUrl, id);
 				// TODO: check that it returned successfully (redundant?)
 //				System.out.println(newNodeJsonObject.toString());
@@ -788,47 +791,6 @@ public class Yurl {
 				biggestImageAbsUrl = BiggestImage.getBiggestImage(iUrl2);
 				return biggestImageAbsUrl;
 			} catch (MalformedURLException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-		}
-
-		private static String encode(String value) {
-			String encode = null;
-			try {
-				encode = URLEncoder.encode(value, "UTF-8");
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-			return encode;
-		}
-
-		private static String getValue(FutureTask<String> future) {
-			String s;
-			try {
-				s = future.get();
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-				throw new RuntimeException(e1);
-			} catch (ExecutionException e1) {
-				e1.printStackTrace();
-				throw new RuntimeException(e1);
-			}
-			return s;
-		}
-
-		private static void execute2(String iCypherQuery, Map<String, Object> of) {
-			String string = "recordBiggestImage()";
-			try {
-				HelloWorldResource.execute(iCypherQuery, of, string);
-			} catch (JSONException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
 			} catch (IOException e) {
@@ -948,22 +910,9 @@ public class Yurl {
 				final String iVideoUrl, final String TARGET_DIR_PATH,
 				final String cypherUri, final String id) {
 			System.out.println("Yurl.HelloWorldResource.downloadVideoInSeparateThread() - begin: " + iVideoUrl);
-			_1: {
 			// VGet stopped working
-//				Runnable r = new Runnable() {
-//
-//					// @Override
-//					public void run() {
-//						downloadVideo(iVideoUrl, TARGET_DIR_PATH, id);
-//					}
-//				};
-//				new Thread(r).start();
-			}
-			_2: {
-				Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
-				executorService.submit(r2);
-//				new Thread(r2).run();
-			}
+			Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
+			executorService.submit(r2);
 		}
 
 		private static Runnable getVideoDownloadJob(final String iVideoUrl, final String TARGET_DIR_PATH,
@@ -971,43 +920,36 @@ public class Yurl {
 			Runnable r2 = new Runnable() {
 				@Override
 				public void run() {
-					_3: {
+					try {
 						Process p = new ProcessBuilder()
 								.directory(Paths.get(TARGET_DIR_PATH).toFile())
-								.command(ImmutableList.of("/home/sarnobat/bin/youtube_download", iVideoUrl)).inheritIO().start();
+								.command(
+										ImmutableList.of("/home/sarnobat/bin/youtube_download",
+												iVideoUrl)).inheritIO().start();
 						p.waitFor();
 						if (p.exitValue() == 0) {
-							System.out.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded " + iVideoUrl);
+							System.out
+									.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
+											+ iVideoUrl);
 							writeSuccessToDb(iVideoUrl, id);
 						} else {
-							System.out.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading " + iVideoUrl);
+							System.out
+									.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading "
+											+ iVideoUrl);
 						}
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
 				}
 			};
 			return r2;
 		}
 
+		@SuppressWarnings("unused")
 		private static void downloadUndownloadedVideosInSeparateThread() {
 			System.out.println("downloadUndownloadedVideosInSeparateThread() - begin");
-//			Timer timer = new Timer ();
-//			TimerTask hourlyTask = new TimerTask() {
-//				@Override
-//				public void run() {
-//					try {
-//						downloadUndownloadedVideosBatch();
-//					} catch (JSONException e) {
-//						e.printStackTrace();
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			};
-//
-//			// schedule the task to run starting now and then every hour...
-//			timer.schedule (hourlyTask, 0l, 1000*60*10);
-			
-//			
 			new Thread() {
 				public void run() {
 					try {
@@ -1029,7 +971,6 @@ public class Yurl {
 			}.start();
 		}
 
-		@SuppressWarnings("unchecked")
 		private static void downloadUndownloadedVideosBatch() throws JSONException, IOException {
 			System.out.println("downloadUndownloadedVideosBatch() - begin");
 			String query = "start root=node(37658)" +
@@ -1051,7 +992,7 @@ public class Yurl {
 						if (id instanceof Integer) {
 							System.out.println("downloadUndownloadedVideosBatch() - Starting retroactively downloading: " + title);
 							try {
-								new SimpleTimeLimiter().callWithTimeout(new Callable() {
+								new SimpleTimeLimiter().callWithTimeout(new Callable<Object>() {
 
 									@Override
 									public Object call() throws Exception {
@@ -1289,7 +1230,8 @@ public class Yurl {
 				throws JSONException, IOException {
 			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
 					iNewParentId);
-
+			MongoDbCache.delete(iNewParentId.toString());
+			MongoDbCache.delete(iCurrentParentId.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(moveHelper.toString())
 					.type("application/json").build();
@@ -1325,7 +1267,7 @@ public class Yurl {
 
 		// TODO: make this map immutable
 		static JSONObject execute(String iCypherQuery,
-				Map<String, Object> iParams, String... iCommentPrefix) throws IOException, JSONException {
+				Map<String, Object> iParams, String... iCommentPrefix) {
 			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
 //			System.out.println(commentPrefix + "begin");
 			System.out.println(commentPrefix + " - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
@@ -1345,17 +1287,24 @@ public class Yurl {
 			if (theResponse.getStatus() != 200) {
 				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: "
 						+ iParams);
-				throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream()));
+				try {
+					throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream()));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 			String theNeo4jResponse ;
-			_1: {
-				// Do not inline this. We need to close the stream after copying
+			try {
+				// Do not inline this. We need to close the stream after
+				// copying
 				theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream());
 				theResponse.getEntityInputStream().close();
 				theResponse.close();
+				System.out.println(commentPrefix + "end");
+				return new JSONObject(theNeo4jResponse);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-			System.out.println(commentPrefix + "end");
-			return new JSONObject(theNeo4jResponse);
 		}
 
 		// ----------------------------------------------------------------------------
@@ -1489,7 +1438,7 @@ public class Yurl {
 				for (int i = 0; i < cypherRawResults.length(); i++) {
 					JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
 					for (int j = 0; j < treePath.length(); j++) {
-						if (treePath.get(j).getClass().equals(Yurl.JSON_OBJECT_NULL)) {
+						if (treePath.get(j).getClass().equals(HelloWorldResource.JSON_OBJECT_NULL)) {
 							continue;
 						}
 						JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
@@ -1506,7 +1455,7 @@ public class Yurl {
 			
 			private static JSONArray removeNulls(JSONArray iJsonArray) {
 				for(int i = 0; i < iJsonArray.length(); i++) {
-					if (Yurl.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
+					if (HelloWorldResource.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
 						iJsonArray.remove(i);
 						--i;
 					}
@@ -1520,33 +1469,33 @@ public class Yurl {
 			private static Multimap<Integer, Integer> buildParentToChildMultimap2(
 					JSONArray cypherRawResults) {
 				Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
-				getParentChildrenMap: {
-					for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
-						JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum).getJSONArray(0));
-						for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-							if (categoryPath.get(hopNum).getClass().equals(Yurl.JSON_OBJECT_NULL)) {
-								continue;
-							}
-							if (categoryPath.get(hopNum + 1).getClass().equals(Yurl.JSON_OBJECT_NULL)) {
-								continue;
-							}
-							if (!(categoryPath.get(hopNum + 1) instanceof String)) {
-								continue;
-							}
-							int childId = new JSONObject(
-									categoryPath.getString(hopNum + 1)).getInt("id");
-							int parentId = checkNotNull(new JSONObject(
-									categoryPath
-											.getString(hopNum)).getInt("id"));
-							Object childrenObj = oParentToChildren.get(parentId);
-							if (childrenObj != null) {
-								Set<?> children = (Set<?>) childrenObj;
-								if (!children.contains(childId)) {
-									oParentToChildren.put(parentId, childId);
-								}
-							} else {
+				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
+					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum)
+							.getJSONArray(0));
+					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
+						if (categoryPath.get(hopNum).getClass()
+								.equals(HelloWorldResource.JSON_OBJECT_NULL)) {
+							continue;
+						}
+						if (categoryPath.get(hopNum + 1).getClass()
+								.equals(HelloWorldResource.JSON_OBJECT_NULL)) {
+							continue;
+						}
+						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
+							continue;
+						}
+						int childId = new JSONObject(categoryPath.getString(hopNum + 1))
+								.getInt("id");
+						int parentId = checkNotNull(new JSONObject(categoryPath.getString(hopNum))
+								.getInt("id"));
+						Object childrenObj = oParentToChildren.get(parentId);
+						if (childrenObj != null) {
+							Set<?> children = (Set<?>) childrenObj;
+							if (!children.contains(childId)) {
 								oParentToChildren.put(parentId, childId);
 							}
+						} else {
+							oParentToChildren.put(parentId, childId);
 						}
 					}
 				}
@@ -1582,26 +1531,10 @@ public class Yurl {
 		private static class BiggestImage {
 
 			static String getBiggestImage(String url) throws MalformedURLException, IOException {
-//				System.out.println("HelloWorldResource.BiggestImage.getBiggestImage() - begin");
 				List<String> imagesDescendingSize = getImagesDescendingSize(url);
-//				List<String> imagesOrdered = movePngToEnd(imagesDescendingSize);
 				String biggestImage = imagesDescendingSize.get(0);
 				return biggestImage;
 			}
-
-//			private static List<String> movePngToEnd(List<String> imagesDescendingSize) {
-//				List<String> pngFiles = new LinkedList<String>();
-//				List<String> nonPngFiles = new LinkedList<String>();
-//				for (String filePath : imagesDescendingSize) {
-//					if (filePath.matches("(?i).*png$") || filePath.matches("(?i).*png\\?.*")) {
-//						pngFiles.add(filePath);
-//					} else {
-//						nonPngFiles.add(filePath);
-//					}
-//				}
-//				nonPngFiles.addAll(pngFiles);
-//				return ImmutableList.copyOf(nonPngFiles); 
-//			}
 
 			private static List<String> getImagesDescendingSize(String url) throws MalformedURLException,
 					IOException {
@@ -1623,16 +1556,11 @@ public class Yurl {
 						// We need to let the dynamic content load.
 						Thread.sleep(5000L);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					String source = driver.getPageSource();
-					// System.out.println(source);
 					List<String> out = getAllTags(base + "/", source);
-//					System.out.println("HelloWorldResource.BiggestImage.getImagesDescendingSize() - all img tags: " + out);
 					Multimap<Integer, String> imageSizes = getImageSizes(out);
-//					System.out.println("HelloWorldResource.BiggestImage.getImagesDescendingSize()" + imageSizes);
-					// System.out.println(Joiner.on("\n").join(sortedImages));
 					ret = sortByKey(imageSizes);
 				} finally {
 					driver.quit();
@@ -1674,25 +1602,12 @@ public class Yurl {
 			private static boolean isJpgFile(String url) {
 				return url.matches("(?i).*\\.jpg") || url.matches("(?i).*\\.jpg\\?.*");
 			}
-			
-			private static boolean isPngFile(String url) {
-				return url.matches("(?i).*\\.png") || url.matches("(?i).*\\.png\\?.*");
-			}
 
 			private static Multimap<Integer, String> getImageSizes(List<String> out) {
-//				ImmutableMap.Builder<Integer, String> builder = ImmutableMap.builder();
 				ImmutableMultimap.Builder<Integer, String> builder = ImmutableMultimap.builder();
-				Set<Integer> taken = new HashSet<Integer>();
 				for (String imgSrc : out) {
 					int size = getByteSize(imgSrc);
-//					System.out.println("BiggestImage.getImageSizes() - " + size + "\t" + imgSrc);
 					builder.put(size, imgSrc);
-//					if (!taken.contains(size)) {
-//						builder.put(size, imgSrc);
-//						taken.add(size);
-//					} else {
-//						System.out.println("HelloWorldResource.BiggestImage.getImageSizes() - size already taken: " + size);
-//					}
 				}
 				return builder.build();
 			}
@@ -1705,7 +1620,6 @@ public class Yurl {
 				try {
 					url = new URL(absUrl);
 					int contentLength = url.openConnection().getContentLength();
-					// System.out.println(contentLength + "\t"+ absUrl);
 					return contentLength;
 				} catch (MalformedURLException e) {
 					System.out.println("HelloWorldResource.BiggestImage.getByteSize() - " + absUrl);
@@ -1732,9 +1646,7 @@ public class Yurl {
 			}
 
 			private static List<String> getAllTags(String baseUrl, String source) throws IOException {
-//				System.out.println("HelloWorldResource.BiggestImage.getAllTags() - base URL : " + baseUrl);
 				Document doc = Jsoup.parse(IOUtils.toInputStream(source), "UTF-8", baseUrl);
-//				System.out.println("HelloWorldResource.BiggestImage.getAllTags() - Entire document: " + doc.toString());
 				Elements tags = doc.getElementsByTag("img");
 				return FluentIterable.<Element> from(tags).transform(IMG_TO_SOURCE).toList();
 			}
@@ -1747,64 +1659,95 @@ public class Yurl {
 			};
 		}
 
-		private static class AddChildren implements Function<Map.Entry<Integer, JSONObject>, Map.Entry<Integer,JSONObject>> {
-			private final Multimap<Integer, Integer> parentIdToChildrenIdList;
-			private final Map<Integer, JSONObject> idToCategoryNode; 
-			AddChildren(Multimap<Integer, Integer> parentIdToChildrenIdList, Map<Integer, JSONObject> idToCategoryNode) {
-				this.parentIdToChildrenIdList = parentIdToChildrenIdList;
-				this.idToCategoryNode = idToCategoryNode;
-			}
-			@Override
-			public Map.Entry<Integer,JSONObject> apply(Map.Entry<Integer,JSONObject> categoryNodeWithoutChildren) {
-				Collection<Integer> childCategoryIds = (Collection<Integer>) parentIdToChildrenIdList
-						.get(categoryNodeWithoutChildren.getKey());
-				if (childCategoryIds == null) {
-				} else {
-					JSONArray childCategoryNodes = new JSONArray();
-					for (Integer childId : childCategoryIds) {
-						childCategoryNodes.put(idToCategoryNode.get(childId));
-					}
-					categoryNodeWithoutChildren.getValue().put("children", childCategoryNodes);
-				}
-				return categoryNodeWithoutChildren;
-			}
-		};
+		// I hope this is the same as JSONObject.Null (not capitals)
+		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
 
-		@Deprecated
-		// This gives a flat list
-		private JSONArray getFlatListOfSubcategoriesRecursive(Integer iParentId)
-				throws IOException {
-			System.out.println("DEPRECATED::getFlatListOfSubcategoriesRecursive() - begin");
-			JSONArray theData = (JSONArray) execute(
-					"START parent=node({parentId}) " +
-					"MATCH parent-[c:CONTAINS*]->n " +
-					"WHERE has(n.name) and n.type = 'categoryNode' and id(parent) = {parentId} " +
-					"RETURN distinct ID(n),n.name",
-					ImmutableMap.<String, Object> of("parentId", iParentId), "getFlatListOfSubcategoriesRecursive()")
-					.get("data");
-			JSONArray oKeys = new JSONArray();
-			for (int i = 0; i < theData.length(); i++) {
-				JSONObject aBindingObject = new JSONObject();
-				JSONArray aBindingArray = theData.getJSONArray(i);
-				String id = (String) aBindingArray.get(0);
-				aBindingObject.put("id", id);
-				String title = (String) aBindingArray.get(1);
-				aBindingObject.put("name", title);
-				oKeys.put(aBindingObject);
+		private static final class Null {
+
+			@Override
+			protected final Object clone() {
+				return this;
 			}
-			return oKeys;
+
+			@Override
+			public boolean equals(Object object) {
+				return object == null || object == this || object.toString() == this.toString();
+			}
+
+			public String toString() {
+				return "null";
+			}
+		}
+
+		public static class MongoDbCache {
+
+			private static final String HOST = "192.168.1.2";
+			private static final int PORT = 27017;
+
+			private static final String VALUE = "value";
+			private static final String ID = "_id";
+
+			private static final String COLLECTION = "items";
+			private static final String CACHE = "cache";
+
+			static boolean delete(String key) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection table = db.getCollection(COLLECTION);
+				BasicDBObject searchQuery = new BasicDBObject(ID, key);
+				return table.remove(searchQuery).getN() > 0;
+			}
+
+			static boolean exists(String key) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection table = db.getCollection(COLLECTION);
+				BasicDBObject searchQuery = new BasicDBObject(ID, key);
+				return table.find(searchQuery).size() > 0;
+			}
+
+			static void put(String key, String value) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection collection = db.getCollection(COLLECTION);
+				BasicDBObject document = new BasicDBObject(ID, key);
+				document.put(VALUE, value);
+				collection.insert(document);
+			}
+
+			static String get(String key) {
+				MongoClient mongo;
+				try {
+					mongo = new MongoClient(HOST, PORT);
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				DB db = mongo.getDB(CACHE);
+				DBCollection collection = db.getCollection(COLLECTION);
+				BasicDBObject searchQuery = new BasicDBObject(ID, key);
+				DBCursor cursor = collection.find(searchQuery);
+				DBObject next = cursor.next();
+				return (String) next.get(VALUE);
+			}
 		}
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
-//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.teamtalk.com/liverpool");
-//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.denimblog.com/2015/07/stella-maxwell-in-rag-bone/");
-//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.lfchistory.net/Articles/Article/61");
-//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.imdb.com/title/tt2484460/");
-//		String biggestImageAbsUrl = HelloWorldResource.BiggestImage.getBiggestImage("http://www.midatlanticwrestling.net/resourcecenter/gateway_remembers/uswrestlingclub/ringside_1-3.htm");
-//		System.out.println("Biggest image is: " + biggestImageAbsUrl);
-
-		//		HelloWorldResource.downloadVideo("https://www.youtube.com/watch?v=ugf4-sl7tnQ", "/media/sarnobat/Unsorted/Videos/");
 
 		HelloWorldResource.refreshCategoriesTreeCacheInSeparateThread();
 		try {
