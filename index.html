@@ -787,7 +787,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'><br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<input type=button class='genericButton' value='Change Image' onClick='changeImage("+field.id+",this,\"" +field.url+ "\")'><br>");
-                buttonCell.append("<input type=button class='genericButton' value='Remove Custom Image' onClick='removeImage("+field.id+",this,\"" +field.url+ "\")'><br>");
+                buttonCell.append("<input type=button class='genericButton' value='Remove Custom Image' onClick='removeImage("+field.id+",this,\"" +field.url +"\"," + rootId + ")'><br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
@@ -836,9 +836,9 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 }
 
 
-function removeImage(id, button, url) {
+function removeImage(id, button, url, parentId) {
         // TODO : prepopulate with the computed thumbnail
-                $.getJSON(urlBase + '/removeImage?id=' + id, 
+                $.getJSON(urlBase + '/removeImage?id=' + id + "&parentId=" + parentId, 
                         function(result){
                                 console.debug(result);
                         })
