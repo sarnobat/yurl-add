@@ -116,9 +116,8 @@ public class Yurl {
 		@Path("uncategorized")
 		@Produces("application/json")
 		public Response getUrls(@QueryParam("rootId") Integer iRootId,
-					@QueryParam("enableCache") @DefaultValue("true") Boolean iMongoDbCacheLookupEnabled)
+								@QueryParam("enableCache") @DefaultValue("true") Boolean iMongoDbCacheLookupEnabled)
 				throws JSONException, IOException {
-			System.out.println("getUrls() - iMongoDbCacheLookupEnabled : "+ iMongoDbCacheLookupEnabled);
 			checkNotNull(iRootId);
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
@@ -292,7 +291,6 @@ public class Yurl {
 		@Produces("application/text")
 		public Response dumpUrls(@QueryParam("rootId") Integer iRootId)
 				throws IOException, JSONException {
-			System.out.println("dumpUrls() - begin");
 			Set<String> visitedInternalNodes = new HashSet<String>();
 			Integer startId = iRootId;
 			if (startId == null) {
@@ -310,7 +308,6 @@ public class Yurl {
 		private void printNode(Integer iRootId, StringBuffer json,
 				StringBuffer plainText, Set<String> visitedInternalNodes)
 				throws IOException, JSONException {
-			System.out.println("printNode() - begin (what are we using this for?)");
 			json.append("bar");
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("nodeId", iRootId);
