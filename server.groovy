@@ -82,11 +82,13 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
 public class Yurl {
+	private static final boolean MONGODB_ENABLED = HelloWorldResource.MongoDbCache.ENABLED;
 	private static final String CHROMEDRIVER_PATH = //"/Users/sarnobat/trash/chromedriver";
 	//"/home/sarnobat/trash/chromedriver";
 	"/home/sarnobat/github/yurl/chromedriver";
 	
 	@Path("yurl")
+	// TODO: Rename to YurlResource
 	public static class HelloWorldResource { // Must be public
 
 		private static final Integer ROOT_ID = 45;
@@ -116,9 +118,8 @@ public class Yurl {
 		@Path("uncategorized")
 		@Produces("application/json")
 		public Response getUrls(@QueryParam("rootId") Integer iRootId,
-					@QueryParam("enableCache") @DefaultValue("true") Boolean iMongoDbCacheLookupEnabled)
+								@QueryParam("enableCache") @DefaultValue("true") Boolean iMongoDbCacheLookupEnabled)
 				throws JSONException, IOException {
-			System.out.println("getUrls() - iMongoDbCacheLookupEnabled : "+ iMongoDbCacheLookupEnabled);
 			checkNotNull(iRootId);
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
@@ -131,7 +132,7 @@ public class Yurl {
 			}
 			try {
 				JSONObject retVal;
-				if (MongoDbCache.exists(iRootId.toString())) {
+				if (MONGODB_ENABLED && MongoDbCache.exists(iRootId.toString())) {
 					System.out.println("Yurl.HelloWorldResource.getUrls() - using cache");
 					retVal = new JSONObject(MongoDbCache.get(iRootId.toString()));
 				} else {
@@ -141,7 +142,9 @@ public class Yurl {
 					retVal1 = new JSONObject();
 					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
 					retVal1.put("categoriesRecursive", categoriesTreeJson);
-					MongoDbCache.put(iRootId.toString(), retVal1.toString());
+					if (MONGODB_ENABLED) {
+						MongoDbCache.put(iRootId.toString(), retVal1.toString());
+					}
 					retVal = retVal1;
 				}
 				
@@ -292,7 +295,6 @@ public class Yurl {
 		@Produces("application/text")
 		public Response dumpUrls(@QueryParam("rootId") Integer iRootId)
 				throws IOException, JSONException {
-			System.out.println("dumpUrls() - begin");
 			Set<String> visitedInternalNodes = new HashSet<String>();
 			Integer startId = iRootId;
 			if (startId == null) {
@@ -310,7 +312,6 @@ public class Yurl {
 		private void printNode(Integer iRootId, StringBuffer json,
 				StringBuffer plainText, Set<String> visitedInternalNodes)
 				throws IOException, JSONException {
-			System.out.println("printNode() - begin (what are we using this for?)");
 			json.append("bar");
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("nodeId", iRootId);
@@ -1071,8 +1072,16 @@ public class Yurl {
 		@Produces("application/json")
 		public Response changeImage(
 				@QueryParam("url") String imageUrl,
-				@QueryParam("id") Integer nodeIdToChange)
+				@QueryParam("id") Integer nodeIdToChange,
+				@QueryParam("parentId") Integer parentId)
 				throws IOException, JSONException {
+
+			if (parentId == null) {
+				System.err.println("HelloWorldResource.changeImage() - Warning: cache not updated, because parentId was not passed");
+			} else {
+				MongoDbCache.delete(parentId.toString());
+			}
+
 			return Response
 					.ok()
 					.header("Access-Control-Allow-Origin", "*")
@@ -1085,7 +1094,37 @@ public class Yurl {
 									imageUrl), "changeImage()")).type("application/json")
 					.build();
 		}
-		
+
+
+		@GET
+		@Path("removeImage")
+		@Produces("application/json")
+		public Response removeImage(
+				@QueryParam("id") Integer nodeIdToChange,
+				@QueryParam("parentId") Integer parentId) throws IOException, JSONException {
+	
+			System.out.println("removeImage() - begin");
+			try {
+				Response r = Response
+						.ok()
+						.header("Access-Control-Allow-Origin", "*")
+						.entity(execute("START n=node({nodeIdToChange}) "
+								+ "REMOVE n.user_image, n.biggest_image " + "RETURN n",
+								ImmutableMap.<String, Object> of("nodeIdToChange", nodeIdToChange),
+								"removeImage()")).type("application/json").build();
+				if (parentId == null) {
+					System.err.println("HelloWorldResource.removeImage() - Warning: cache not updated, because parentId was not passed");
+				} else {
+					MongoDbCache.delete(parentId.toString());
+				}
+				return r;
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw e;
+			}
+		}
+
+	
 		// moveup, move up
 		@GET
 		@Path("surpassOrdinal")
@@ -1686,6 +1725,8 @@ public class Yurl {
 
 		public static class MongoDbCache {
 
+
+			public static final boolean ENABLED = false;
 			private static final String HOST = "192.168.1.2";
 			private static final int PORT = 27017;
 
@@ -1695,6 +1736,10 @@ public class Yurl {
 			private static final String COLLECTION = "items";
 			private static final String CACHE = "cache";
 
+			static boolean invalidate(String key) {
+				
+			
+			}
 			static boolean delete(String key) {
 				MongoClient mongo;
 				try {
