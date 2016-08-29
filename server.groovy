@@ -1082,7 +1082,35 @@ public class Yurl {
 									imageUrl), "changeImage()")).type("application/json")
 					.build();
 		}
-		
+
+
+		@GET
+                @Path("removeImage")
+                @Produces("application/json")
+                public Response removeImage(
+                                @QueryParam("id") Integer nodeIdToChange)
+                                throws IOException, JSONException {
+			System.out.println("removeImage() - begin");
+			try {
+                        Response r = Response
+                                        .ok()
+                                        .header("Access-Control-Allow-Origin", "*")
+                                        .entity(execute(
+                                                        "START n=node({nodeIdToChange}) "
+                                                                        + "REMOVE n.user_image, n.biggest_image "
+                                                                        + "RETURN n",
+                                                        ImmutableMap.<String, Object> of("nodeIdToChange",
+                                                                        nodeIdToChange
+                                                                        ), "changeImage()")).type("application/json")
+                                        .build();
+			return r;
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw e;
+}
+                }	
+
+	
 		// moveup, move up
 		@GET
 		@Path("surpassOrdinal")
