@@ -82,31 +82,31 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
 public class Yurl {
+
 	// Gets stored here: http://192.168.1.2:28017/cache/items/
-	private static final boolean MONGODB_ENABLED = HelloWorldResource.MongoDbCache.ENABLED;
-	private static final String CHROMEDRIVER_PATH = //"/Users/sarnobat/trash/chromedriver";
-	//"/home/sarnobat/trash/chromedriver";
-	"/home/sarnobat/github/yurl/chromedriver";
+	private static final boolean MONGODB_ENABLED = YurlResource.MongoDbCache.ENABLED;
+	private static final String CHROMEDRIVER_PATH = "/home/sarnobat/github/yurl/chromedriver";
+	private static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
+	private static final Integer ROOT_ID = 45;
+	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
+	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
+	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/Unsorted/images/";
 	
 	@Path("yurl")
 	// TODO: Rename to YurlResource
-	public static class HelloWorldResource { // Must be public
+	public static class YurlResource { // Must be public
 
-		private static final Integer ROOT_ID = 45;
-		private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
-		private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
-		private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/Unsorted/images/";
 
 		static {
 			// We can't put this in the constructor because multiple instances will get created
-			// HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
+			// YurlWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		}
 
 		private static JSONObject categoriesTreeCache;
 
 		// This only gets invoked when it receives the first request
 		// Multiple instances get created
-		HelloWorldResource() {
+		YurlResource() {
 			// We can't put the auto downloader in main()
 			// then either it will be called every time the cron job is executed,
 			// or not until the server terminates unexceptionally (which never happens).
@@ -133,11 +133,11 @@ public class Yurl {
 				// We're not getting up to date pages when things change. But we need to
 				// start using this again if we dream of scaling this app.
 				if (MONGODB_ENABLED && MongoDbCache.exists(iRootId.toString())) {
-					System.out.println("HelloWorldResource.getUrls() - using cache");
+					System.out.println("YurlWorldResource.getUrls() - using cache");
 					oUrlsUnderCategory = new JSONObject(MongoDbCache.get(iRootId.toString()));
 				} else {
 					// If there were multiple clients here, you'd need to block the 2nd onwards
-					System.out.println("HelloWorldResource.getUrls() - not using cache");
+					System.out.println("YurlWorldResource.getUrls() - not using cache");
 					JSONObject retVal1;
 					retVal1 = new JSONObject();
 					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
@@ -476,7 +476,7 @@ public class Yurl {
 						if (isNotNull(val)) {
 							String aValue = (String) val;
 							if ("null".equals(aValue)) {
-								System.out.println("HelloWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
+								System.out.println("YurlWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
 							}
 							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
 						}
@@ -511,7 +511,7 @@ public class Yurl {
 		}
 
 		private static boolean isNotNull(Object val) {
-			return val != null && !("null".equals(val)) && !(val.getClass().equals(HelloWorldResource.JSON_OBJECT_NULL));
+			return val != null && !("null".equals(val)) && !(val.getClass().equals(YurlResource.JSON_OBJECT_NULL));
 		}
 
 		// -----------------------------------------------------------------------------
@@ -749,45 +749,18 @@ public class Yurl {
 		}
 
 		private static void launchAsynchronousTasks(String iUrl, String id) {
+
 			DownloadImage.downloadImageInSeparateThread(iUrl, TARGET_DIR_PATH_IMAGES,
 					CYPHER_URI, id);
 			DownloadVideo.downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
 			if (!iUrl.contains("amazon")) {
 				// We end up with garbage images if we try to screen-scrape Amazon.
 				// The static rules result in better images.  
-				recordBiggestImage(iUrl, CYPHER_URI, id);
+				BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
 			}
 		}
 		
 		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
-
-		private static void recordBiggestImage(final String iUrl, final String cypherUri,
-				final String id) {
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					execute("start n=node({id}) SET n.biggest_image = {biggestImage}",
-							ImmutableMap.<String, Object> of("id", Integer.parseInt(id),
-									"biggestImage", HelloWorldResource.getBiggestImage(iUrl)),
-							"recordBiggestImage()");
-				}
-			};
-			executorService.execute(r);
-		}
-
-		private static String getBiggestImage(final String iUrl2) {
-			String biggestImageAbsUrl = null;
-			try {
-				biggestImageAbsUrl = BiggestImage.getBiggestImage(iUrl2);
-				return biggestImageAbsUrl;
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-		}
 
 		private static class DownloadImage {
 			private static void downloadImageInSeparateThread(final String iUrl2,
@@ -813,10 +786,10 @@ public class Yurl {
 											iUrl, "date", System.currentTimeMillis()),
 									"downloadImageInSeparateThread()");
 							System.out
-									.println("HelloWorldResource.downloadImageInSeparateThread() - DB updated");
+									.println("YurlWorldResource.downloadImageInSeparateThread() - DB updated");
 						} catch (Exception e) {
 							System.out
-									.println("HelloWorldResource.downloadImageInSeparateThread(): Biggest image couldn't be determined"
+									.println("YurlWorldResource.downloadImageInSeparateThread(): Biggest image couldn't be determined"
 											+ e.getMessage());
 						}
 					}
@@ -895,7 +868,7 @@ public class Yurl {
 		private static class DownloadVideo {
 			static void downloadVideoInSeparateThread(String iVideoUrl,
 					String TARGET_DIR_PATH, String cypherUri, String id) {
-				System.out.println("HelloWorldResource.downloadVideoInSeparateThread() - begin: "
+				System.out.println("YurlWorldResource.downloadVideoInSeparateThread() - begin: "
 						+ iVideoUrl);
 				// VGet stopped working, so now we use a shell callout
 				Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
@@ -911,17 +884,17 @@ public class Yurl {
 							Process p = new ProcessBuilder()
 									.directory(Paths.get(TARGET_DIR_PATH).toFile())
 									.command(
-											ImmutableList.of("/home/sarnobat/bin/youtube_download",
+											ImmutableList.of(YOUTUBE_DOWNLOAD,
 													iVideoUrl)).inheritIO().start();
 							p.waitFor();
 							if (p.exitValue() == 0) {
 								System.out
-										.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
+										.println("YurlWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
 												+ iVideoUrl);
 								writeSuccessToDb(iVideoUrl, id);
 							} else {
 								System.out
-										.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading "
+										.println("YurlWorldResource.downloadVideoInSeparateThread() - error downloading "
 												+ iVideoUrl);
 							}
 						} catch (InterruptedException e) {
@@ -1063,7 +1036,7 @@ public class Yurl {
 				throws IOException, JSONException {
 
 			if (parentId == null) {
-				System.err.println("HelloWorldResource.changeImage() - Warning: cache not updated, because parentId was not passed");
+				System.err.println("YurlWorldResource.changeImage() - Warning: cache not updated, because parentId was not passed");
 			} else {
 				MongoDbCache.invalidate(parentId.toString());
 			}
@@ -1099,7 +1072,7 @@ public class Yurl {
 								ImmutableMap.<String, Object> of("nodeIdToChange", nodeIdToChange),
 								"removeImage()")).type("application/json").build();
 				if (parentId == null) {
-					System.err.println("HelloWorldResource.removeImage() - Warning: cache not updated, because parentId was not passed");
+					System.err.println("YurlWorldResource.removeImage() - Warning: cache not updated, because parentId was not passed");
 				} else {
 					MongoDbCache.invalidate(parentId.toString());
 				}
@@ -1379,7 +1352,7 @@ public class Yurl {
 					throws JSONException, IOException {
 				return new AddSizes(
 						// This is the expensive query, not the other one
-						getCategorySizes(HelloWorldResource.execute(
+						getCategorySizes(YurlResource.execute(
 								"START n=node(*) MATCH n-->u WHERE has(n.name) "
 										+ "RETURN id(n),count(u);",
 								ImmutableMap.<String, Object>of(),
@@ -1389,7 +1362,7 @@ public class Yurl {
 						// Path to JSON conversion done in Cypher
 						createCategoryTreeFromCypherResultPaths(
 								// TODO: I don't think we need each path do we? We just need each parent-child relationship.
-								HelloWorldResource.execute("START n=node({parentId}) "
+								YurlResource.execute("START n=node({parentId}) "
 										+ "MATCH path=n-[r:CONTAINS*]->c "
 										+ "WHERE has(c.name) "
 										+ "RETURN extract(p in nodes(path)| "
@@ -1465,7 +1438,7 @@ public class Yurl {
 				for (int i = 0; i < cypherRawResults.length(); i++) {
 					JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
 					for (int j = 0; j < treePath.length(); j++) {
-						if (treePath.get(j).getClass().equals(HelloWorldResource.JSON_OBJECT_NULL)) {
+						if (treePath.get(j).getClass().equals(YurlResource.JSON_OBJECT_NULL)) {
 							continue;
 						}
 						JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
@@ -1482,7 +1455,7 @@ public class Yurl {
 			
 			private static JSONArray removeNulls(JSONArray iJsonArray) {
 				for(int i = 0; i < iJsonArray.length(); i++) {
-					if (HelloWorldResource.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
+					if (YurlResource.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
 						iJsonArray.remove(i);
 						--i;
 					}
@@ -1501,11 +1474,11 @@ public class Yurl {
 							.getJSONArray(0));
 					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
 						if (categoryPath.get(hopNum).getClass()
-								.equals(HelloWorldResource.JSON_OBJECT_NULL)) {
+								.equals(YurlResource.JSON_OBJECT_NULL)) {
 							continue;
 						}
 						if (categoryPath.get(hopNum + 1).getClass()
-								.equals(HelloWorldResource.JSON_OBJECT_NULL)) {
+								.equals(YurlResource.JSON_OBJECT_NULL)) {
 							continue;
 						}
 						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
@@ -1557,7 +1530,7 @@ public class Yurl {
 
 		private static class BiggestImage {
 
-			static String getBiggestImage(String url) throws MalformedURLException, IOException {
+			private static String getBiggestImage(String url) throws MalformedURLException, IOException {
 				List<String> imagesDescendingSize = getImagesDescendingSize(url);
 				String biggestImage = imagesDescendingSize.get(0);
 				return biggestImage;
@@ -1570,10 +1543,8 @@ public class Yurl {
 				System.setProperty("webdriver.chrome.driver", Yurl.CHROMEDRIVER_PATH
 						);
 
-				WebDriver driver = //new  org.openqa.selenium.htmlunit.HtmlUnitDriver(); 
-				//org.openqa.selenium.firefox.FirefoxDriver();
-										new ChromeDriver();
-				//driver.manage().timeouts().implicitlyWait(180, java.util.concurrent.TimeUnit.SECONDS);
+				// HtmlUnitDriver and FirefoxDriver didn't work. Thankfully ChromeDriver does
+				WebDriver driver = new ChromeDriver();
 				List<String> ret = ImmutableList.of();
 				try {
 					driver.get(url);
@@ -1649,7 +1620,7 @@ public class Yurl {
 					int contentLength = url.openConnection().getContentLength();
 					return contentLength;
 				} catch (MalformedURLException e) {
-					System.out.println("HelloWorldResource.BiggestImage.getByteSize() - " + absUrl);
+					System.out.println("YurlWorldResource.BiggestImage.getByteSize() - " + absUrl);
 					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -1658,7 +1629,7 @@ public class Yurl {
 			}
 
 			private static String getBaseUrl(String url1) throws MalformedURLException {
-				System.out.println("HelloWorldResource.BiggestImage.getBaseUrl() -\t"+url1);
+				System.out.println("YurlWorldResource.BiggestImage.getBaseUrl() -\t"+url1);
 				URL url = new URL(url1);
 				String file = url.getFile();
 				String path;
@@ -1668,7 +1639,7 @@ public class Yurl {
 					path = url.getFile().substring(0, file.lastIndexOf('/'));
 				}
 				String string = url.getProtocol() + "://" + url.getHost() + path;
-				System.out.println("HelloWorldResource.BiggestImage.getBaseUrl() -\t"+string);
+				System.out.println("YurlWorldResource.BiggestImage.getBaseUrl() -\t"+string);
 				return string;
 			}
 
@@ -1684,6 +1655,34 @@ public class Yurl {
 					return e.absUrl("src");
 				}
 			};
+
+			private static String getBiggestImage2(final String iUrl2) {
+				String biggestImageAbsUrl = null;
+				try {
+					biggestImageAbsUrl = BiggestImage.getBiggestImage(iUrl2);
+					return biggestImageAbsUrl;
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				}
+			}
+
+			static void recordBiggestImage(final String iUrl, final String cypherUri,
+					final String id) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						execute("start n=node({id}) SET n.biggest_image = {biggestImage}",
+								ImmutableMap.<String, Object> of("id", Integer.parseInt(id),
+										"biggestImage", getBiggestImage2(iUrl)),
+								"recordBiggestImage()");
+					}
+				};
+				executorService.execute(r);
+			}
 		}
 
 		// I hope this is the same as JSONObject.Null (not capitals)
@@ -1766,15 +1765,15 @@ public class Yurl {
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 
-		HelloWorldResource.refreshCategoriesTreeCacheInSeparateThread();
+		YurlResource.refreshCategoriesTreeCacheInSeparateThread();
 		try {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:4447/"), new ResourceConfig(
-							HelloWorldResource.class));
+							YurlResource.class));
 			// Do not allow this in multiple processes otherwise your hard disk will fill up
 			// or overload the database
 			// Problem - this won't get executed until the server ends
-			//HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
+			//YurlWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		} catch (Exception e) {
 			System.out.println("Not creating server instance");
 		}
