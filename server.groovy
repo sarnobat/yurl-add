@@ -122,7 +122,7 @@ public class Yurl {
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
 				System.out.println("getUrls() - preloaded categories tree not ready");
-				categoriesTreeJson = CategoryTree.getCategoriesTree(ROOT_ID);
+				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(ROOT_ID);
 			} else {
 				categoriesTreeJson = categoriesTreeCache;
 				// This is done in a separate thread
@@ -165,7 +165,7 @@ public class Yurl {
 		@Produces("application/json")
 		public Response downloadVideoSynchronous(@QueryParam("id") Integer iRootId, @QueryParam("url") String iUrl)
 				throws JSONException, IOException {
-			getVideoDownloadJob(iUrl, TARGET_DIR_PATH,
+			DownloadVideo.getVideoDownloadJob(iUrl, TARGET_DIR_PATH,
 					Integer.toString(iRootId)).run();
 			JSONObject retVal = new JSONObject();
 			try {
@@ -403,7 +403,7 @@ public class Yurl {
 		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 //			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
-				categoriesTreeCache = CategoryTree.getCategoriesTree(ROOT_ID);
+				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(ROOT_ID);
 			}
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
@@ -749,9 +749,9 @@ public class Yurl {
 		}
 
 		private static void launchAsynchronousTasks(String iUrl, String id) {
-			downloadImageInSeparateThread(iUrl, TARGET_DIR_PATH_IMAGES,
+			DownloadImage.downloadImageInSeparateThread(iUrl, TARGET_DIR_PATH_IMAGES,
 					CYPHER_URI, id);
-			downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
+			DownloadVideo.downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
 			if (!iUrl.contains("amazon")) {
 				// We end up with garbage images if we try to screen-scrape Amazon.
 				// The static rules result in better images.  
@@ -761,13 +761,15 @@ public class Yurl {
 		
 		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-		private static void recordBiggestImage(final String iUrl, final String cypherUri, final String id) {
+		private static void recordBiggestImage(final String iUrl, final String cypherUri,
+				final String id) {
 			Runnable r = new Runnable() {
 				@Override
 				public void run() {
 					execute("start n=node({id}) SET n.biggest_image = {biggestImage}",
 							ImmutableMap.<String, Object> of("id", Integer.parseInt(id),
-									"biggestImage", HelloWorldResource.getBiggestImage(iUrl)), "recordBiggestImage()");		
+									"biggestImage", HelloWorldResource.getBiggestImage(iUrl)),
+							"recordBiggestImage()");
 				}
 			};
 			executorService.execute(r);
@@ -787,76 +789,73 @@ public class Yurl {
 			}
 		}
 
-		private static void downloadImageInSeparateThread(final String iUrl2,
-				final String targetDirPath, final String cypherUri,
-				final String id) {
-			final String iUrl = iUrl2.replaceAll("\\?.*","");
-			Runnable r = new Runnable() {
-				// @Override
-				public void run() {
-					System.out.println("downloadImageInSeparateThread() - "
-							+ iUrl + " :: " + targetDirPath);
-					if (iUrl.toLowerCase().contains(".jpg")) {
-					} else if (iUrl.toLowerCase().contains(".jpeg")) {
-					} else if (iUrl.toLowerCase().contains(".png")) {
-					} else if (iUrl.toLowerCase().contains(".gif")) {
-					} else if (iUrl.toLowerCase().contains("gstatic")) {
-					} else {
-						return;
+		private static class DownloadImage {
+			private static void downloadImageInSeparateThread(final String iUrl2,
+					final String targetDirPath, final String cypherUri, final String id) {
+				final String iUrl = iUrl2.replaceAll("\\?.*", "");
+				Runnable r = new Runnable() {
+					// @Override
+					public void run() {
+						System.out.println("downloadImageInSeparateThread() - " + iUrl + " :: "
+								+ targetDirPath);
+						if (iUrl.toLowerCase().contains(".jpg")) {
+						} else if (iUrl.toLowerCase().contains(".jpeg")) {
+						} else if (iUrl.toLowerCase().contains(".png")) {
+						} else if (iUrl.toLowerCase().contains(".gif")) {
+						} else if (iUrl.toLowerCase().contains("gstatic")) {
+						} else {
+							return;
+						}
+						try {
+							saveImage(iUrl, targetDirPath);
+							execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_image = {date}",
+									ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url",
+											iUrl, "date", System.currentTimeMillis()),
+									"downloadImageInSeparateThread()");
+							System.out
+									.println("HelloWorldResource.downloadImageInSeparateThread() - DB updated");
+						} catch (Exception e) {
+							System.out
+									.println("HelloWorldResource.downloadImageInSeparateThread(): Biggest image couldn't be determined"
+											+ e.getMessage());
+						}
 					}
-					try {
-						saveImage(iUrl, targetDirPath);
-						execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_image = {date}",
-								ImmutableMap.<String, Object> of("id",
-										Long.valueOf(id), "url", iUrl, "date",
-										System.currentTimeMillis()), "downloadImageInSeparateThread()");
-						System.out.println("HelloWorldResource.downloadImageInSeparateThread() - DB updated");
-					} catch (Exception e) {
-						System.out
-								.println("HelloWorldResource.downloadImageInSeparateThread(): Biggest image couldn't be determined" + e.getMessage());
-					}
+				};
+				new Thread(r).start();
+			}
+
+			private static void saveImage(String urlString, String targetDirPath)
+					throws IllegalAccessError, IOException {
+				System.out.println("saveImage() - " + urlString + "\t::\t" + targetDirPath);
+				String extension = FilenameUtils.getExtension(urlString);
+				ImageIO.write(
+						ImageIO.read(new URL(urlString)),
+						extension,
+						new File(determineDestinationPathAvoidingExisting(
+								targetDirPath
+										+ "/"
+										+ URLDecoder.decode(FilenameUtils.getBaseName(urlString)
+												.replaceAll("/", "-"), "UTF-8") + "." + extension)
+								.toString()));
+			}
+
+			private static java.nio.file.Path determineDestinationPathAvoidingExisting(
+					String iDestinationFilePath) throws IllegalAccessError {
+				String theDestinationFilePathWithoutExtension = iDestinationFilePath.substring(0,
+						iDestinationFilePath.lastIndexOf('.'));
+				String extension = FilenameUtils.getExtension(iDestinationFilePath);
+				java.nio.file.Path oDestinationFile = Paths.get(iDestinationFilePath);
+				while (Files.exists(oDestinationFile)) {
+					theDestinationFilePathWithoutExtension += "1";
+					iDestinationFilePath = theDestinationFilePathWithoutExtension + "." + extension;
+					oDestinationFile = Paths.get(iDestinationFilePath);
 				}
-			};
-			new Thread(r).start();
-		}
-
-		private static void saveImage(String urlString, String targetDirPath)
-				throws IllegalAccessError, IOException {
-			System.out.println("saveImage() - " + urlString + "\t::\t"
-					+ targetDirPath);
-			String extension = FilenameUtils.getExtension(urlString);
-			ImageIO.write(
-					ImageIO.read(new URL(urlString)),
-					extension,
-					new File(determineDestinationPathAvoidingExisting(
-							targetDirPath
-									+ "/"
-									+ URLDecoder.decode(
-											FilenameUtils
-													.getBaseName(urlString)
-													.replaceAll("/", "-"),
-											"UTF-8") + "." + extension)
-							.toString()));
-		}
-
-		private static java.nio.file.Path determineDestinationPathAvoidingExisting(
-				String iDestinationFilePath) throws IllegalAccessError {
-			String theDestinationFilePathWithoutExtension = iDestinationFilePath
-					.substring(0, iDestinationFilePath.lastIndexOf('.'));
-			String extension = FilenameUtils.getExtension(iDestinationFilePath);
-			java.nio.file.Path oDestinationFile = Paths.get(iDestinationFilePath);
-			while (Files.exists(oDestinationFile)) {
-				theDestinationFilePathWithoutExtension += "1";
-				iDestinationFilePath = theDestinationFilePathWithoutExtension + "." + extension;
-				oDestinationFile = Paths.get(iDestinationFilePath);
+				if (Files.exists(oDestinationFile)) {
+					throw new IllegalAccessError("an existing file will get overwritten");
+				}
+				return oDestinationFile;
 			}
-			if (Files.exists(oDestinationFile)) {
-				throw new IllegalAccessError(
-						"an existing file will get overwritten");
-			}
-			return oDestinationFile;
 		}
-
 		private static JSONObject createNode(String theHttpUrl, String theTitle,
 				Integer rootId) throws IOException, JSONException {
 			long currentTimeMillis = System.currentTimeMillis();
@@ -893,48 +892,51 @@ public class Yurl {
 			return title;
 		}
 
-		private static void downloadVideoInSeparateThread(String iVideoUrl, String TARGET_DIR_PATH,
-				String cypherUri, String id) {
-			System.out.println("HelloWorldResource.downloadVideoInSeparateThread() - begin: " + iVideoUrl);
-			// VGet stopped working, so now we use a shell callout
-			Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
-			executorService.submit(r2);
-		}
+		private static class DownloadVideo {
+			static void downloadVideoInSeparateThread(String iVideoUrl,
+					String TARGET_DIR_PATH, String cypherUri, String id) {
+				System.out.println("HelloWorldResource.downloadVideoInSeparateThread() - begin: "
+						+ iVideoUrl);
+				// VGet stopped working, so now we use a shell callout
+				Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
+				executorService.submit(r2);
+			}
 
-		private static Runnable getVideoDownloadJob(final String iVideoUrl, final String TARGET_DIR_PATH,
-				final String id) {
-			Runnable videoDownloadJob = new Runnable() {
-				@Override
-				public void run() {
-					try {
-						Process p = new ProcessBuilder()
-								.directory(Paths.get(TARGET_DIR_PATH).toFile())
-								.command(
-										ImmutableList.of("/home/sarnobat/bin/youtube_download",
-												iVideoUrl)).inheritIO().start();
-						p.waitFor();
-						if (p.exitValue() == 0) {
-							System.out
-									.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
-											+ iVideoUrl);
-							writeSuccessToDb(iVideoUrl, id);
-						} else {
-							System.out
-									.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading "
-											+ iVideoUrl);
+			static Runnable getVideoDownloadJob(final String iVideoUrl, final String TARGET_DIR_PATH,
+					final String id) {
+				Runnable videoDownloadJob = new Runnable() {
+					@Override
+					public void run() {
+						try {
+							Process p = new ProcessBuilder()
+									.directory(Paths.get(TARGET_DIR_PATH).toFile())
+									.command(
+											ImmutableList.of("/home/sarnobat/bin/youtube_download",
+													iVideoUrl)).inheritIO().start();
+							p.waitFor();
+							if (p.exitValue() == 0) {
+								System.out
+										.println("HelloWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
+												+ iVideoUrl);
+								writeSuccessToDb(iVideoUrl, id);
+							} else {
+								System.out
+										.println("HelloWorldResource.downloadVideoInSeparateThread() - error downloading "
+												+ iVideoUrl);
+							}
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
 					}
-				}
-			};
-			return videoDownloadJob;
+				};
+				return videoDownloadJob;
+			}
 		}
 
 		@SuppressWarnings("unused")
-		private static class UndownloadedVideosBatchJob {
+		private static class DownloadVideosBatch {
 			@SuppressWarnings("unused")
 			private static void downloadUndownloadedVideosInSeparateThread() {
 				new Thread() {
@@ -1017,7 +1019,7 @@ public class Yurl {
 					downloadVideo(iVideoUrl, targetDirPath);
 					writeSuccessToDb(iVideoUrl, id);
 				} catch (JSONException e) {
-					System.out.println("downloadVideo() - ERROR recording download in database");
+					System.out.println("UndownloadedVideosBatchJob.downloadVideo() - ERROR recording download in database");
 				} catch (Exception e) {
 					System.out.println(e.getMessage());
 				}
@@ -1025,7 +1027,7 @@ public class Yurl {
 
 			private static void downloadVideo(final String iVideoUrl, String targetDirPath)
 					throws MalformedURLException {
-				System.out.println("downloadVideo() - Begin: " + iVideoUrl);
+				System.out.println("UndownloadedVideosBatchJob.downloadVideo() - Begin: " + iVideoUrl);
 				File theTargetDir = new File(targetDirPath);
 				if (!theTargetDir.exists()) {
 					throw new RuntimeException(
@@ -1039,7 +1041,7 @@ public class Yurl {
 				v.download();// If this hangs, make sure you are using
 				// vget 1.15. If you use 1.13 I know it
 				// hangs
-				System.out.println("\ndownloadVideo() - successfully downloaded video at " + iVideoUrl + " (" + v.getVideo().getTitle() + ")");
+				System.out.println("\nUndownloadedVideosBatchJob.downloadVideo() - successfully downloaded video at " + iVideoUrl + " (" + v.getVideo().getTitle() + ")");
 			}
 		}
 
@@ -1347,7 +1349,7 @@ public class Yurl {
 			JSONObject ret = new JSONObject();
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
-				categoriesTreeJson = CategoryTree.getCategoriesTree(ROOT_ID);
+				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(ROOT_ID);
 			} else {
 				categoriesTreeJson = categoriesTreeCache;
 				refreshCategoriesTreeCacheInSeparateThread();
@@ -1362,7 +1364,7 @@ public class Yurl {
 				@Override
 				public void run() {
 					try {
-						categoriesTreeCache = CategoryTree.getCategoriesTree(ROOT_ID);
+						categoriesTreeCache = ReadCategoryTree.getCategoriesTree(ROOT_ID);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -1372,7 +1374,7 @@ public class Yurl {
 			}.start();
 		}
 		
-		private static class CategoryTree {
+		private static class ReadCategoryTree {
 			static JSONObject getCategoriesTree(Integer rootId)
 					throws JSONException, IOException {
 				return new AddSizes(
@@ -1687,23 +1689,6 @@ public class Yurl {
 		// I hope this is the same as JSONObject.Null (not capitals)
 		@Deprecated // Does not compile in Eclipse, but does compile in groovy
 		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
-
-		private static final class Null {
-
-			@Override
-			protected final Object clone() {
-				return this;
-			}
-
-			@Override
-			public boolean equals(Object object) {
-				return object == null || object == this || object.toString() == this.toString();
-			}
-
-			public String toString() {
-				return "null";
-			}
-		}
 
 		private static class MongoDbCache {
 
