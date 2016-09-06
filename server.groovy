@@ -97,9 +97,8 @@ public class Yurl {
 		private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/Unsorted/images/";
 
 		static {
-//			System.out.println("static() begin");
-//we can't put this in the constructor because multiple instances will get created
-//			HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
+			// We can't put this in the constructor because multiple instances will get created
+			// HelloWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		}
 
 		private static JSONObject categoriesTreeCache;
@@ -107,11 +106,9 @@ public class Yurl {
 		// This only gets invoked when it receives the first request
 		// Multiple instances get created
 		HelloWorldResource() {
-//			System.out.println("HelloWorldResource() - begin");
 			// We can't put the auto downloader in main()
 			// then either it will be called every time the cron job is executed,
 			// or not until the server terminates unexceptionally (which never happens).
-			
 		}
 		
 		@GET
@@ -248,12 +245,10 @@ public class Yurl {
 					addToUnsuccessful(unsuccessfulLines, first, "");
 					continue;
 				}
-//				System.out.println("3");
 				if (first.matches("^\\s*" + '$')) {
 					++i;
 					continue;
 				}
-//				System.out.println("4");
 
 				String second = lines[i + 1];
 				if (first.startsWith("\"") && second.startsWith("http")) {
@@ -276,6 +271,7 @@ public class Yurl {
 		}
 
 		// TODO : remove mutable state
+		@Deprecated
 		public void addToUnsuccessful(StringBuffer unsuccessfulLines,
 				String first, String second) {
 			unsuccessfulLines.append(first);
@@ -741,16 +737,13 @@ public class Yurl {
 				
 				launchAsynchronousTasks(theHttpUrl, id);
 				// TODO: check that it returned successfully (redundant?)
-//				System.out.println(newNodeJsonObject.toString());
 				System.out.println("stash() - node created: " + id);
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(newNodeJsonObject.get("data").toString())
 						.type("application/json").build();
 			} catch (Exception e) {
-				System.out.println("error");
-				System.out.println(e);
+				System.out.println("error: " + e);
 				e.printStackTrace();
-				//return null;
 				throw new JSONException(e);
 			}
 		}
@@ -759,23 +752,23 @@ public class Yurl {
 			downloadImageInSeparateThread(iUrl, TARGET_DIR_PATH_IMAGES,
 					CYPHER_URI, id);
 			downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
-			recordBiggestImage(iUrl, CYPHER_URI, id);
+			if (!iUrl.contains("amazon")) {
+				// We end up with garbage images if we try to screen-scrape Amazon.
+				// The static rules result in better images.  
+				recordBiggestImage(iUrl, CYPHER_URI, id);
+			}
 		}
 		
 		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
 		private static void recordBiggestImage(final String iUrl, final String cypherUri, final String id) {
-//			System.out.println("HelloWorldResource.recordBiggestImage() - begin");
 //			Callable<String> callable = new Callable<String>() {
 //				public String call() {
 //					return HelloWorldResource.getBiggestImage(iUrl);
 //				}
-//
-//				
 //			};
 //			String biggestImageAbsUrl = HelloWorldResource.BiggestImage
 //					.getBiggestImage("http://www.denimblog.com/2015/07/stella-maxwell-in-rag-bone/");
-//			System.out.println("HelloWorldResource.recordBiggestImage()" + " - Biggest image is: " + biggestImageAbsUrl);
 			Runnable r = new Runnable() {
 				
 				@Override
