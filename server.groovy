@@ -128,13 +128,15 @@ public class Yurl {
 				refreshCategoriesTreeCacheInSeparateThread();
 			}
 			try {
-				JSONObject retVal;
+				JSONObject oUrlsUnderCategory;
+				// We're not getting up to date pages when things change. But we need to
+				// start using this again if we dream of scaling this app.
 				if (MONGODB_ENABLED && MongoDbCache.exists(iRootId.toString())) {
-					System.out.println("Yurl.HelloWorldResource.getUrls() - using cache");
-					retVal = new JSONObject(MongoDbCache.get(iRootId.toString()));
+					System.out.println("HelloWorldResource.getUrls() - using cache");
+					oUrlsUnderCategory = new JSONObject(MongoDbCache.get(iRootId.toString()));
 				} else {
-				// If there were multiple clients here, you'd need to block the 2nd onwards
-					System.out.println("Yurl.HelloWorldResource.getUrls() - not using cache");
+					// If there were multiple clients here, you'd need to block the 2nd onwards
+					System.out.println("HelloWorldResource.getUrls() - not using cache");
 					JSONObject retVal1;
 					retVal1 = new JSONObject();
 					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
@@ -142,11 +144,11 @@ public class Yurl {
 					if (MONGODB_ENABLED) {
 						MongoDbCache.put(iRootId.toString(), retVal1.toString());
 					}
-					retVal = retVal1;
+					oUrlsUnderCategory = retVal1;
 				}
 				
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(retVal.toString())
+						.entity(oUrlsUnderCategory.toString())
 						.type("application/json").build();
 			}
 			catch (Exception e) {
@@ -156,7 +158,6 @@ public class Yurl {
 						.type("application/text").build();
 			}
 		}
-
 
 		@GET
 		@Path("downloadVideo")
@@ -840,24 +841,24 @@ public class Yurl {
 		}
 
 		private static java.nio.file.Path determineDestinationPathAvoidingExisting(
-				String destinationFilePath) throws IllegalAccessError {
-			String destinationFilePathWithoutExtension = destinationFilePath
-					.substring(0, destinationFilePath.lastIndexOf('.'));
-			String extension = FilenameUtils.getExtension(destinationFilePath);
-			java.nio.file.Path destinationFile = Paths.get(destinationFilePath);
-			while (Files.exists(destinationFile)) {
-				destinationFilePathWithoutExtension += "1";
-				destinationFilePath = destinationFilePathWithoutExtension + "." + extension;
-				destinationFile = Paths.get(destinationFilePath);
+				String iDestinationFilePath) throws IllegalAccessError {
+			String theDestinationFilePathWithoutExtension = iDestinationFilePath
+					.substring(0, iDestinationFilePath.lastIndexOf('.'));
+			String extension = FilenameUtils.getExtension(iDestinationFilePath);
+			java.nio.file.Path oDestinationFile = Paths.get(iDestinationFilePath);
+			while (Files.exists(oDestinationFile)) {
+				theDestinationFilePathWithoutExtension += "1";
+				iDestinationFilePath = theDestinationFilePathWithoutExtension + "." + extension;
+				oDestinationFile = Paths.get(iDestinationFilePath);
 			}
-			if (Files.exists(destinationFile)) {
+			if (Files.exists(oDestinationFile)) {
 				throw new IllegalAccessError(
 						"an existing file will get overwritten");
 			}
-			return destinationFile;
+			return oDestinationFile;
 		}
 
-		private JSONObject createNode(String theHttpUrl, String theTitle,
+		private static JSONObject createNode(String theHttpUrl, String theTitle,
 				Integer rootId) throws IOException, JSONException {
 			long currentTimeMillis = System.currentTimeMillis();
 			JSONObject json = execute(
@@ -893,18 +894,17 @@ public class Yurl {
 			return title;
 		}
 
-		private static void downloadVideoInSeparateThread(
-				final String iVideoUrl, final String TARGET_DIR_PATH,
-				final String cypherUri, final String id) {
-			System.out.println("Yurl.HelloWorldResource.downloadVideoInSeparateThread() - begin: " + iVideoUrl);
-			// VGet stopped working
+		private static void downloadVideoInSeparateThread(String iVideoUrl, String TARGET_DIR_PATH,
+				String cypherUri, String id) {
+			System.out.println("HelloWorldResource.downloadVideoInSeparateThread() - begin: " + iVideoUrl);
+			// VGet stopped working, so now we use a shell callout
 			Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
 			executorService.submit(r2);
 		}
 
 		private static Runnable getVideoDownloadJob(final String iVideoUrl, final String TARGET_DIR_PATH,
 				final String id) {
-			Runnable r2 = new Runnable() {
+			Runnable videoDownloadJob = new Runnable() {
 				@Override
 				public void run() {
 					try {
@@ -931,93 +931,116 @@ public class Yurl {
 					}
 				}
 			};
-			return r2;
+			return videoDownloadJob;
 		}
 
 		@SuppressWarnings("unused")
-		private static void downloadUndownloadedVideosInSeparateThread() {
-			System.out.println("downloadUndownloadedVideosInSeparateThread() - begin");
-			new Thread() {
-				public void run() {
-					try {
-						downloadUndownloadedVideosBatch();
+		private static class UndownloadedVideosBatchJob {
+			@SuppressWarnings("unused")
+			private static void downloadUndownloadedVideosInSeparateThread() {
+				new Thread() {
+					public void run() {
+						try {
+							downloadUndownloadedVideosBatch();
 
-				        while(true) {
-				            try {
-				                Thread.sleep(1000*60*60);
-				                //your code here...
-				            } catch (InterruptedException ie) {
-				            }
-				        }
-					} catch (JSONException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}.start();
-		}
-
-		private static void downloadUndownloadedVideosBatch() throws JSONException, IOException {
-			System.out.println("downloadUndownloadedVideosBatch() - begin");
-			String query = "start root=node(37658)" +
-					" match  root-[CONTAINS*]->n" +
-					" where not(has(n.downloaded_video)) OR n.downloaded_video is null " +
-					" return n.title, n.downloaded_video, n.url, ID(n)" +
-					" LIMIT 20;";
-			JSONObject results = execute(query, ImmutableMap.<String, Object>of(), "downloadUndownloadedVideosBatch()");
-			JSONArray jsonArray = results.getJSONArray("data");
-			for (int i = 0; i < jsonArray.length(); i++) {
-				final JSONArray row = jsonArray.getJSONArray(i);
-				System.out.println("downloadUndownloadedVideosBatch() - iteration: " + row);
-				Object title = row.get(0);
-				Object downloaded = row.get(1);
-				Object url =  row.get(2);
-				Object id = row.get(3);
-				if (downloaded == null || downloaded == JSONObject.NULL  || "null".equals(downloaded)) {
-					if (url instanceof String) {
-						if (id instanceof Integer) {
-							System.out.println("downloadUndownloadedVideosBatch() - Starting retroactively downloading: " + title);
-							try {
-								new SimpleTimeLimiter().callWithTimeout(new Callable<Object>() {
-
-									@Override
-									public Object call() throws Exception {
-										downloadVideo(row.getString(2), TARGET_DIR_PATH,
-												Integer.toString(row.getInt(3)));
-										return null;
-
-									}
-								}, 10, TimeUnit.SECONDS, true);
-							} catch (Exception e) {
-								System.out.println("Continuing");
-								continue;
+							// I don't remember what this is for
+							while (true) {
+								try {
+									Thread.sleep(1000 * 60 * 60);
+								} catch (InterruptedException ie) {
+								}
 							}
-							System.out.println("downloadUndownloadedVideosBatch() - Finished retroactively downloading: " + title);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				}.start();
+			}
+
+			private static void downloadUndownloadedVideosBatch() throws JSONException, IOException {
+				String query = "start root=node(37658)" + " match  root-[CONTAINS*]->n"
+						+ " where not(has(n.downloaded_video)) OR n.downloaded_video is null "
+						+ " return n.title, n.downloaded_video, n.url, ID(n)" + " LIMIT 20;";
+				JSONObject results = execute(query, ImmutableMap.<String, Object> of(),
+						"downloadUndownloadedVideosBatch()");
+				JSONArray jsonArray = results.getJSONArray("data");
+				for (int i = 0; i < jsonArray.length(); i++) {
+					final JSONArray row = jsonArray.getJSONArray(i);
+					System.out.println("downloadUndownloadedVideosBatch() - iteration: " + row);
+					Object title = row.get(0);
+					Object downloaded = row.get(1);
+					Object url = row.get(2);
+					Object id = row.get(3);
+					if (downloaded == null || downloaded == JSONObject.NULL
+							|| "null".equals(downloaded)) {
+						if (url instanceof String) {
+							if (id instanceof Integer) {
+								System.out
+										.println("downloadUndownloadedVideosBatch() - Starting retroactively downloading: "
+												+ title);
+								try {
+									new SimpleTimeLimiter().callWithTimeout(new Callable<Object>() {
+
+										@Override
+										public Object call() throws Exception {
+											downloadVideo(row.getString(2), TARGET_DIR_PATH,
+													Integer.toString(row.getInt(3)));
+											return null;
+
+										}
+									}, 10, TimeUnit.SECONDS, true);
+								} catch (Exception e) {
+									System.out.println("Continuing");
+									continue;
+								}
+								System.out
+										.println("downloadUndownloadedVideosBatch() - Finished retroactively downloading: "
+												+ title);
+							} else {
+								System.out.println("id - " + id.getClass());
+							}
 						} else {
-							System.out.println("id - " + id.getClass());
+							System.out.println("url - " + url.getClass());
 						}
 					} else {
-						System.out.println("url - " + url.getClass());
+						Long downloaded1 = row.getLong(1);
+						System.out
+								.println("downloadUndownloadedVideosBatch() - Already downloaded: "
+										+ title + "\t" + downloaded1);
 					}
-				} else  {
-					Long downloaded1 = row.getLong(1);
-					System.out.println("downloadUndownloadedVideosBatch() - Already downloaded: " + title + "\t" + downloaded1);
 				}
 			}
-		}
-		
-		private static void downloadVideo(final String iVideoUrl,
-				String targetDirPath, final String id) {
-			try {
-				downloadVideo(iVideoUrl, targetDirPath);
-				writeSuccessToDb(iVideoUrl, id);
-				
-			} catch (JSONException e) {
-				System.out.println("downloadVideo() - ERROR recording download in database");
+
+			private static void downloadVideo(String iVideoUrl, String targetDirPath, String id) {
+				try {
+					downloadVideo(iVideoUrl, targetDirPath);
+					writeSuccessToDb(iVideoUrl, id);
+				} catch (JSONException e) {
+					System.out.println("downloadVideo() - ERROR recording download in database");
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
 			}
-			catch (Exception e) {
-				System.out.println(e.getMessage());
+
+			private static void downloadVideo(final String iVideoUrl, String targetDirPath)
+					throws MalformedURLException {
+				System.out.println("downloadVideo() - Begin: " + iVideoUrl);
+				File theTargetDir = new File(targetDirPath);
+				if (!theTargetDir.exists()) {
+					throw new RuntimeException(
+							"Target directory doesn't exist");
+				}
+				final VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
+				v.getVideo().setVideoQuality(VideoQuality.p1080);
+				System.out.println("downloadVideo() - " + v.getVideo().getWeb().toString());
+				System.out.println("downloadVideo() - " + v.getVideo().getVideoQuality());
+				System.out.print("downloadVideo() - If this is the last thing you see, vget is hanging");
+				v.download();// If this hangs, make sure you are using
+				// vget 1.15. If you use 1.13 I know it
+				// hangs
+				System.out.println("\ndownloadVideo() - successfully downloaded video at " + iVideoUrl + " (" + v.getVideo().getTitle() + ")");
 			}
 		}
 
@@ -1029,25 +1052,6 @@ public class Yurl {
 			System.out.println("downloadVideo() - Download recorded in database");
 		}
 
-		private static void downloadVideo(final String iVideoUrl, String targetDirPath)
-				throws MalformedURLException {
-			System.out.println("downloadVideo() - Begin: " + iVideoUrl);
-			File theTargetDir = new File(targetDirPath);
-			if (!theTargetDir.exists()) {
-				throw new RuntimeException(
-						"Target directory doesn't exist");
-			}
-			final VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
-			v.getVideo().setVideoQuality(VideoQuality.p1080);
-			System.out.println("downloadVideo() - " + v.getVideo().getWeb().toString());
-			System.out.println("downloadVideo() - " + v.getVideo().getVideoQuality());
-			System.out.print("downloadVideo() - If this is the last thing you see, vget is hanging");
-			v.download();// If this hangs, make sure you are using
-			// vget 1.15. If you use 1.13 I know it
-			// hangs
-			System.out.println("\ndownloadVideo() - successfully downloaded video at " + iVideoUrl + " (" + v.getVideo().getTitle() + ")");
-		}
-		
 		@GET
 		@Path("updateImage")
 		@Produces("application/json")
@@ -1294,7 +1298,6 @@ public class Yurl {
 		static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams, String... iCommentPrefix) {
 			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
-//			System.out.println(commentPrefix + "begin");
 			System.out.println(commentPrefix + " - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
 
 			ClientConfig clientConfig = new DefaultClientConfig();
@@ -1343,7 +1346,6 @@ public class Yurl {
 				@QueryParam("parentId") Integer iParentId)
 				throws JSONException, IOException {
 			JSONObject ret = new JSONObject();
-//			ret.put("flat", getFlatListOfSubcategoriesRecursive(iParentId));
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
 				categoriesTreeJson = CategoryTree.getCategoriesTree(ROOT_ID);
@@ -1360,7 +1362,6 @@ public class Yurl {
 			new Thread(){
 				@Override
 				public void run() {
-//					System.out.println("refreshCategoriesTreeCacheInSeparateThread() - run - started");
 					try {
 						categoriesTreeCache = CategoryTree.getCategoriesTree(ROOT_ID);
 					} catch (JSONException e) {
@@ -1381,7 +1382,7 @@ public class Yurl {
 								"START n=node(*) MATCH n-->u WHERE has(n.name) "
 										+ "RETURN id(n),count(u);",
 								ImmutableMap.<String, Object>of(),
-								"getCategoriesTree() [The expensive query]").getJSONArray(
+								"getCategoriesTree() - Getting sizes [The expensive query]").getJSONArray(
 								"data")))
 						.apply(
 						// Path to JSON conversion done in Cypher
@@ -1396,7 +1397,7 @@ public class Yurl {
 										+ "key : \"' + coalesce(p.key, '') + '\"" + " }'" + ")",
 										ImmutableMap.<String, Object> of(
 												"parentId", rootId),
-										"getCategoriesTree() - [getting all paths 3]"),
+										"getCategoriesTree() - Getting all paths"),
 								rootId));
 			}
 			
