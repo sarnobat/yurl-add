@@ -733,9 +733,8 @@ public class Yurl {
 				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
 						.get("data")).get(0);
 				String id = (String) theNewNodeId.get(0);
-				System.out.println(id);
 
-				MongoDbCache.delete(iRoodId.toString());
+				MongoDbCache.invalidate(iRoodId.toString());
 				
 				launchAsynchronousTasks(theHttpUrl, id);
 				// TODO: check that it returned successfully (redundant?)
@@ -744,7 +743,6 @@ public class Yurl {
 						.entity(newNodeJsonObject.get("data").toString())
 						.type("application/json").build();
 			} catch (Exception e) {
-				System.out.println("error: " + e);
 				e.printStackTrace();
 				throw new JSONException(e);
 			}
@@ -812,7 +810,7 @@ public class Yurl {
 								ImmutableMap.<String, Object> of("id",
 										Long.valueOf(id), "url", iUrl, "date",
 										System.currentTimeMillis()), "downloadImageInSeparateThread()");
-						System.out.println("downloadImageInSeparateThread() - DB updated");
+						System.out.println("HelloWorldResource.downloadImageInSeparateThread() - DB updated");
 					} catch (Exception e) {
 						System.out
 								.println("HelloWorldResource.downloadImageInSeparateThread(): Biggest image couldn't be determined" + e.getMessage());
@@ -1065,7 +1063,7 @@ public class Yurl {
 			if (parentId == null) {
 				System.err.println("HelloWorldResource.changeImage() - Warning: cache not updated, because parentId was not passed");
 			} else {
-				MongoDbCache.delete(parentId.toString());
+				MongoDbCache.invalidate(parentId.toString());
 			}
 
 			return Response
@@ -1101,7 +1099,7 @@ public class Yurl {
 				if (parentId == null) {
 					System.err.println("HelloWorldResource.removeImage() - Warning: cache not updated, because parentId was not passed");
 				} else {
-					MongoDbCache.delete(parentId.toString());
+					MongoDbCache.invalidate(parentId.toString());
 				}
 				return r;
 			} catch (Exception e) {
@@ -1260,8 +1258,8 @@ public class Yurl {
 				throws JSONException, IOException {
 			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
 					iNewParentId);
-			MongoDbCache.delete(iNewParentId.toString());
-			MongoDbCache.delete(iCurrentParentId.toString());
+			MongoDbCache.invalidate(iNewParentId.toString());
+			MongoDbCache.invalidate(iCurrentParentId.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(moveHelper.toString())
 					.type("application/json").build();
@@ -1707,7 +1705,7 @@ public class Yurl {
 			}
 		}
 
-		public static class MongoDbCache {
+		private static class MongoDbCache {
 
 
 			public static final boolean ENABLED = false;
@@ -1720,11 +1718,7 @@ public class Yurl {
 			private static final String COLLECTION = "items";
 			private static final String CACHE = "cache";
 
-			static boolean invalidate(String key) {
-				
-			
-			}
-			static boolean delete(String key) {
+			private static boolean delete(String key) {
 				MongoClient mongo;
 				try {
 					mongo = new MongoClient(HOST, PORT);
@@ -1735,6 +1729,10 @@ public class Yurl {
 				DBCollection table = db.getCollection(COLLECTION);
 				BasicDBObject searchQuery = new BasicDBObject(ID, key);
 				return table.remove(searchQuery).getN() > 0;
+			}
+
+			static boolean invalidate(String key) {
+				delete(key);
 			}
 
 			static boolean exists(String key) {
