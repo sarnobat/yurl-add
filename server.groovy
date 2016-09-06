@@ -762,15 +762,7 @@ public class Yurl {
 		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
 		private static void recordBiggestImage(final String iUrl, final String cypherUri, final String id) {
-//			Callable<String> callable = new Callable<String>() {
-//				public String call() {
-//					return HelloWorldResource.getBiggestImage(iUrl);
-//				}
-//			};
-//			String biggestImageAbsUrl = HelloWorldResource.BiggestImage
-//					.getBiggestImage("http://www.denimblog.com/2015/07/stella-maxwell-in-rag-bone/");
 			Runnable r = new Runnable() {
-				
 				@Override
 				public void run() {
 					execute("start n=node({id}) SET n.biggest_image = {biggestImage}",
@@ -778,13 +770,10 @@ public class Yurl {
 									"biggestImage", HelloWorldResource.getBiggestImage(iUrl)), "recordBiggestImage()");		
 				}
 			};
-//			FutureTask<String> future = new FutureTask<String>(callable);
 			executorService.execute(r);
-			
 		}
 
 		private static String getBiggestImage(final String iUrl2) {
-//			System.out.println("HelloWorldResource.getBiggestImage() - begin");
 			String biggestImageAbsUrl = null;
 			try {
 				biggestImageAbsUrl = BiggestImage.getBiggestImage(iUrl2);
@@ -823,8 +812,8 @@ public class Yurl {
 										System.currentTimeMillis()), "downloadImageInSeparateThread()");
 						System.out.println("downloadImageInSeparateThread() - DB updated");
 					} catch (Exception e) {
-						// e.printStackTrace();
-						System.out.println(e.getMessage());
+						System.out
+								.println("HelloWorldResource.downloadImageInSeparateThread(): Biggest image couldn't be determined" + e.getMessage());
 					}
 				}
 			};
@@ -848,7 +837,6 @@ public class Yurl {
 													.replaceAll("/", "-"),
 											"UTF-8") + "." + extension)
 							.toString()));
-
 		}
 
 		private static java.nio.file.Path determineDestinationPathAvoidingExisting(
