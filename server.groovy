@@ -82,6 +82,7 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
 public class Yurl {
+	// Gets stored here: http://192.168.1.2:28017/cache/items/
 	private static final boolean MONGODB_ENABLED = HelloWorldResource.MongoDbCache.ENABLED;
 	private static final String CHROMEDRIVER_PATH = //"/Users/sarnobat/trash/chromedriver";
 	//"/home/sarnobat/trash/chromedriver";
