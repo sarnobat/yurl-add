@@ -1704,6 +1704,7 @@ public class Yurl {
 		}
 
 		// I hope this is the same as JSONObject.Null (not capitals)
+		@Deprecated // Does not compile in Eclipse, but does compile in groovy
 		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
 
 		private static final class Null {
