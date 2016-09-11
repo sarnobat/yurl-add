@@ -122,7 +122,7 @@ public class Yurl {
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
 				System.out.println("getUrls() - preloaded categories tree not ready");
-				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(ROOT_ID);
+				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
 			} else {
 				categoriesTreeJson = categoriesTreeCache;
 				// This is done in a separate thread
@@ -301,21 +301,21 @@ public class Yurl {
 			StringBuffer sb = new StringBuffer();
 			StringBuffer plainText = new StringBuffer();
 			sb.append("foo\n");
-			printNode(startId, sb, plainText, visitedInternalNodes);
+			printNode(startId, sb, plainText, visitedInternalNodes, "dumpUrls() - ");
 			System.out.println("dumpUrls");
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(plainText.toString()).type("text/plain").build();
 		}
 
 		private void printNode(Integer iRootId, StringBuffer json,
-				StringBuffer plainText, Set<String> visitedInternalNodes)
+				StringBuffer plainText, Set<String> visitedInternalNodes, String sourceMeth)
 				throws IOException, JSONException {
 			json.append("bar");
 			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
 			theParams.put("nodeId", iRootId);
 			JSONObject theResponse = execute(
 					"start root=node({nodeId}) MATCH root--n RETURN distinct n, id(n)",
-					theParams.build(), "printNode()");
+					theParams.build(), sourceMeth + ": " + "printNode()");
 			JSONArray jsonArray = (JSONArray) theResponse.get("data");
 			for (int i = 0; i < jsonArray.length(); i++) {
 				JSONArray aNode = (JSONArray) jsonArray.get(i);
@@ -326,7 +326,7 @@ public class Yurl {
 				if (visitedInternalNodes.contains(id)) {
 					continue;
 				}
-				System.out.println("1.5");
+				System.out.println(sourceMeth + "printNode() - 1.5");
 
 				if (object.has("type") && object.get("type") != null
 						&& object.get("type").equals("categoryNode")) {
@@ -353,11 +353,11 @@ public class Yurl {
 				}
 
 				json.append(object);
-				System.out.println("2");
+				System.out.println(sourceMeth + "printNode() - 2");
 				visitedInternalNodes.add(id);
 
 				printNode(Integer.parseInt(id), json, plainText,
-						visitedInternalNodes);
+						visitedInternalNodes, sourceMeth);
 			}
 		}
 
@@ -403,7 +403,7 @@ public class Yurl {
 		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 //			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
-				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(ROOT_ID);
+				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
 			}
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
@@ -1268,12 +1268,19 @@ public class Yurl {
 							.build(), "createNewRelation()");
 		}
 
-		// TODO: make this map immutable
 		static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams, String... iCommentPrefix) {
-			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
-			System.out.println(commentPrefix + " - \n\t" + iCypherQuery + "\n\tparams - " + iParams);
+			execute(iCypherQuery, iParams, true, iCommentPrefix);
+		}
 
+		// TODO: make this map immutable
+		static JSONObject execute(String iCypherQuery,
+				Map<String, Object> iParams, boolean doLogging, String... iCommentPrefix) {
+			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
+			if (doLogging) {
+				System.out.println(commentPrefix + " - \t" + iCypherQuery);
+				System.out.println(commentPrefix + "- \tparams - " + iParams);
+			}
 			ClientConfig clientConfig = new DefaultClientConfig();
 			clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
 					Boolean.TRUE);
@@ -1302,7 +1309,9 @@ public class Yurl {
 				theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream());
 				theResponse.getEntityInputStream().close();
 				theResponse.close();
-				System.out.println(commentPrefix + "end");
+				if (doLogging) {
+					System.out.println(commentPrefix + "end");
+				}
 				return new JSONObject(theNeo4jResponse);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -1322,7 +1331,7 @@ public class Yurl {
 			JSONObject ret = new JSONObject();
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
-				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(ROOT_ID);
+				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
 			} else {
 				categoriesTreeJson = categoriesTreeCache;
 				refreshCategoriesTreeCacheInSeparateThread();
@@ -1337,7 +1346,7 @@ public class Yurl {
 				@Override
 				public void run() {
 					try {
-						categoriesTreeCache = ReadCategoryTree.getCategoriesTree(ROOT_ID);
+						categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -1371,6 +1380,7 @@ public class Yurl {
 										+ "key : \"' + coalesce(p.key, '') + '\"" + " }'" + ")",
 										ImmutableMap.<String, Object> of(
 												"parentId", rootId),
+												false,
 										"getCategoriesTree() - Getting all paths"),
 								rootId));
 			}
@@ -1766,6 +1776,9 @@ public class Yurl {
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 
 		YurlResource.refreshCategoriesTreeCacheInSeparateThread();
+		// Turn off that stupid Jersey logger.
+		// This works in Java but not in Groovy.
+		//java.util.Logger.getLogger("org.glassfish.jersey").setLevel(java.util.Level.SEVERE);
 		try {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:4447/"), new ResourceConfig(
