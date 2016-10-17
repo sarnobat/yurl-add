@@ -878,8 +878,12 @@ public class Yurl {
 						.invokeAll(
 								ImmutableSet.<Callable<String>> of(new Callable<String>() {
 									public String call() throws Exception {
-										return Jsoup.connect(iUrl.toString())
-												.get().title();
+										try {
+											return Jsoup.connect(iUrl.toString()).get().title();
+										} catch (org.jsoup.UnsupportedMimeTypeException e) {
+											System.out.println("YurlResource.getTitle() - " + e.getMessage());
+											return "";
+										}
 									}
 								}), 3000L, TimeUnit.SECONDS).get(0).get();
 			} catch (InterruptedException e) {
