@@ -90,6 +90,8 @@ public class Yurl {
 	private static final Integer ROOT_ID = 45;
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
+	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
+	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
 	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/Unsorted/images/";
 	
 	@Path("yurl")
@@ -750,6 +752,7 @@ public class Yurl {
 
 		private static void launchAsynchronousTasks(String iUrl, String id) {
 
+			appendToTextFile(iUrl, id, QUEUE_FILE);
 			DownloadImage.downloadImageInSeparateThread(iUrl, TARGET_DIR_PATH_IMAGES,
 					CYPHER_URI, id);
 			DownloadVideo.downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
@@ -757,6 +760,28 @@ public class Yurl {
 				// We end up with garbage images if we try to screen-scrape Amazon.
 				// The static rules result in better images.  
 				BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
+			}
+		}
+
+		private static void appendToTextFile(String iUrl, String id, String dir) throws IOException,
+				InterruptedException {
+			String queueFile = dir + "/" + QUEUE_FILE_TXT;
+			File file = Paths.get(dir).toFile();
+			if (!file.exists()) {
+				throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+			}
+			Process p = new ProcessBuilder()
+					.directory(file)
+					.command("echo","hello world")
+					.command("/bin/sh", "-c", "echo '" + id + ":" + iUrl + "' | tee -a '" + queueFile + "'")
+							//"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
+									.inheritIO().start();
+			p.waitFor();
+			if (p.exitValue() == 0) {
+				System.out.println("launchAsynchronousTasks() - successfully downloaded "
+						+ iUrl);
+			} else {
+				System.out.println("launchAsynchronousTasks() - error downloading " + iUrl);
 			}
 		}
 		
@@ -875,14 +900,14 @@ public class Yurl {
 				executorService.submit(r2);
 			}
 
-			static Runnable getVideoDownloadJob(final String iVideoUrl, final String TARGET_DIR_PATH,
+			static Runnable getVideoDownloadJob(final String iVideoUrl, final String targetDirPath,
 					final String id) {
 				Runnable videoDownloadJob = new Runnable() {
 					@Override
 					public void run() {
 						try {
 							Process p = new ProcessBuilder()
-									.directory(Paths.get(TARGET_DIR_PATH).toFile())
+									.directory(Paths.get(targetDirPath).toFile())
 									.command(
 											ImmutableList.of(YOUTUBE_DOWNLOAD,
 													iVideoUrl)).inheritIO().start();
@@ -1268,8 +1293,7 @@ public class Yurl {
 							.build(), "createNewRelation()");
 		}
 
-		static JSONObject execute(String iCypherQuery,
-				Map<String, Object> iParams, String... iCommentPrefix) {
+		static JSONObject execute(String iCypherQuery, Map<String, Object> iParams, String... iCommentPrefix) {
 			execute(iCypherQuery, iParams, true, iCommentPrefix);
 		}
 
@@ -1685,10 +1709,9 @@ public class Yurl {
 				Runnable r = new Runnable() {
 					@Override
 					public void run() {
-						execute("start n=node({id}) SET n.biggest_image = {biggestImage}",
-								ImmutableMap.<String, Object> of("id", Integer.parseInt(id),
-										"biggestImage", getBiggestImage2(iUrl)),
-								"recordBiggestImage()");
+						String iCypherQuery = "start n=node({id}) SET n.biggest_image = {biggestImage}";
+						Map<String, Object> of = ImmutableMap.<String, Object> of("id", Integer.parseInt(id), "biggestImage", getBiggestImage2(iUrl));
+						execute(iCypherQuery, of, "recordBiggestImage()");
 					}
 				};
 				executorService.execute(r);
