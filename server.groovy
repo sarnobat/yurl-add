@@ -763,26 +763,32 @@ public class Yurl {
 			}
 		}
 
-		private static void appendToTextFile(String iUrl, String id, String dir) throws IOException,
+		private static void appendToTextFile(final String iUrl, final String id, final String dir) throws IOException,
 				InterruptedException {
-			String queueFile = dir + "/" + QUEUE_FILE_TXT;
-			File file = Paths.get(dir).toFile();
-			if (!file.exists()) {
-				throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
-			}
-			Process p = new ProcessBuilder()
-					.directory(file)
-					.command("echo","hello world")
-					.command("/bin/sh", "-c", "echo '" + id + ":" + iUrl + "' | tee -a '" + queueFile + "'")
-							//"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
-									.inheritIO().start();
-			p.waitFor();
-			if (p.exitValue() == 0) {
-				System.out.println("launchAsynchronousTasks() - successfully downloaded "
-						+ iUrl);
-			} else {
-				System.out.println("launchAsynchronousTasks() - error downloading " + iUrl);
-			}
+			Runnable r = new Runnable() {
+				// @Override
+				public void run() {
+					String queueFile = dir + "/" + Yurl.QUEUE_FILE_TXT;
+					File file = Paths.get(dir).toFile();
+					if (!file.exists()) {
+						throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+					}
+					Process p = new ProcessBuilder()
+							.directory(file)
+							.command("echo","hello world")
+							.command("/bin/sh", "-c", "echo '" + id + ":" + iUrl + "' | tee -a '" + queueFile + "'")
+									//"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
+											.inheritIO().start();
+					p.waitFor();
+					if (p.exitValue() == 0) {
+						System.out.println("launchAsynchronousTasks() - successfully downloaded "
+								+ iUrl);
+					} else {
+						System.out.println("launchAsynchronousTasks() - error downloading " + iUrl);
+					}
+				}
+			};
+			new Thread(r).start();
 		}
 		
 		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
@@ -1585,6 +1591,7 @@ public class Yurl {
 				WebDriver driver = new ChromeDriver();
 				List<String> ret = ImmutableList.of();
 				try {
+					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 1");
 					driver.get(url);
 					// TODO: shame there isn't an input stream, then we wouldn't have to
 					// store the whole page in memory
@@ -1594,12 +1601,22 @@ public class Yurl {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 2");
 					String source = driver.getPageSource();
+					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 3");
 					List<String> out = getAllTags(base + "/", source);
+					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 4");
 					Multimap<Integer, String> imageSizes = getImageSizes(out);
+					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 5");
 					ret = sortByKey(imageSizes);
+					if (ret.size() < 1) {
+						throw new RuntimeException("2 We're going to get a nullpointerexception later");
+					}
 				} finally {
 					driver.quit();
+				}
+				if (ret.size() < 1) {
+					throw new RuntimeException("1 We're going to get a nullpointerexception later");
 				}
 				return ret;
 			}
@@ -1713,9 +1730,19 @@ public class Yurl {
 				Runnable r = new Runnable() {
 					@Override
 					public void run() {
+						if (iUrl.contains(".pdf")) {
+							// This will throw an exception because we can't get a DOM
+							return;
+						}
 						String iCypherQuery = "start n=node({id}) SET n.biggest_image = {biggestImage}";
-						Map<String, Object> of = ImmutableMap.<String, Object> of("id", Integer.parseInt(id), "biggestImage", getBiggestImage2(iUrl));
-						execute(iCypherQuery, of, "recordBiggestImage()");
+						try {
+							String biggestImage = getBiggestImage2(iUrl);
+							Map<String, Object> of = ImmutableMap.<String, Object> of("id",
+									Integer.parseInt(id), "biggestImage", biggestImage);
+							execute(iCypherQuery, of, "recordBiggestImage()");
+						} catch (RuntimeException e) {
+							System.out.println("Yurl.YurlResource.BiggestImage.recordBiggestImage() - " + e.getMessage());
+						}
 					}
 				};
 				executorService.execute(r);
