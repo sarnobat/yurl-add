@@ -289,7 +289,7 @@ public class Yurl {
 		// ------------------------------------------------------------------------------------
 
 		@GET
-		@Path("dumpurls")
+		@Path("dumpurls.disabled")
 		@Produces("application/text")
 		public Response dumpUrls(@QueryParam("rootId") Integer iRootId)
 				throws IOException, JSONException {
