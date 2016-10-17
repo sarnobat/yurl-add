@@ -724,23 +724,23 @@ public class Yurl {
 		@Path("stash")
 		@Produces("application/json")
 		public Response stash(@QueryParam("param1") String iUrl,
-				@QueryParam("rootId") Integer iRoodId) throws JSONException,
+				@QueryParam("rootId") Integer iRootId) throws JSONException,
 				IOException {
 			// This will convert
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 			String theTitle = getTitle(new URL(theHttpUrl));
 			try {
 				JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle,
-						new Integer(iRoodId));
+						new Integer(iRootId));
 				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
 						.get("data")).get(0);
-				String id = (String) theNewNodeId.get(0);
+				String nodeId = (String) theNewNodeId.get(0);
 
-				MongoDbCache.invalidate(iRoodId.toString());
+				MongoDbCache.invalidate(iRootId.toString());
 				
-				launchAsynchronousTasks(theHttpUrl, id);
+				launchAsynchronousTasks(theHttpUrl, nodeId, iRootId);
 				// TODO: check that it returned successfully (redundant?)
-				System.out.println("stash() - node created: " + id);
+				System.out.println("stash() - node created: " + nodeId);
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(newNodeJsonObject.get("data").toString())
 						.type("application/json").build();
@@ -750,9 +750,9 @@ public class Yurl {
 			}
 		}
 
-		private static void launchAsynchronousTasks(String iUrl, String id) {
+		private static void launchAsynchronousTasks(String iUrl, String id, Integer iRootId) {
 
-			appendToTextFile(iUrl, id, QUEUE_FILE);
+			appendToTextFile(iUrl, iRootId.toString(), QUEUE_FILE);
 			DownloadImage.downloadImageInSeparateThread(iUrl, TARGET_DIR_PATH_IMAGES,
 					CYPHER_URI, id);
 			DownloadVideo.downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
