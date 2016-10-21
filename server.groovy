@@ -36,6 +36,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
@@ -1364,11 +1365,24 @@ public class Yurl {
 				throws JSONException, IOException {
 			JSONObject ret = new JSONObject();
 			JSONObject categoriesTreeJson;
-			if (categoriesTreeCache == null) {
-				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+			java.nio.file.Path path = Paths.get("/home/sarnobat/github/.cache/" + Yurl.ROOT_ID + ".json");
+			if (Files.exists(path)) {
+				System.out.println("Yurl.YurlResource.categoriesRecursive() reading categories from file");
+				categoriesTreeJson = new JSONObject(FileUtils.readFileToString(path.toFile()));
+				System.out.println("Yurl.YurlResource.categoriesRecursive() read categories from file");
 			} else {
-				categoriesTreeJson = categoriesTreeCache;
-				refreshCategoriesTreeCacheInSeparateThread();
+				System.out.println("Yurl.YurlResource.categoriesRecursive() 2");
+				if (categoriesTreeCache == null) {
+					System.out.println("Yurl.YurlResource.categoriesRecursive() 3");
+					categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+				} else {
+					System.out.println("Yurl.YurlResource.categoriesRecursive() 4");
+					categoriesTreeJson = categoriesTreeCache;
+					refreshCategoriesTreeCacheInSeparateThread();
+				}
+				System.out.println("Yurl.YurlResource.categoriesRecursive() writing to file");
+				FileUtils.writeStringToFile(path.toFile(), categoriesTreeJson.toString(2));
+				System.out.println("Yurl.YurlResource.categoriesRecursive() written");
 			}
 			ret.put("categoriesTree", categoriesTreeJson);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
