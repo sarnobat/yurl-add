@@ -1610,13 +1610,13 @@ public class Yurl {
 					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 5");
 					ret = sortByKey(imageSizes);
 					if (ret.size() < 1) {
-						throw new RuntimeException("2 We're going to get a nullpointerexception later");
+						throw new RuntimeException("2 We're going to get a nullpointerexception later: " + url);
 					}
 				} finally {
 					driver.quit();
 				}
 				if (ret.size() < 1) {
-					throw new RuntimeException("1 We're going to get a nullpointerexception later");
+					throw new RuntimeException("1 We're going to get a nullpointerexception later: " + url);
 				}
 				return ret;
 			}
