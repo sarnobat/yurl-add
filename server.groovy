@@ -777,7 +777,7 @@ public class Yurl {
 					Process p = new ProcessBuilder()
 							.directory(file)
 							.command("echo","hello world")
-							.command("/bin/sh", "-c", "echo '" + id + ":" + iUrl + "' | tee -a '" + queueFile + "'")
+							.command("/bin/sh", "-c", "echo '" + id + ":" + iUrl + ":'date +%s` | tee -a '" + queueFile + "'")
 									//"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
 											.inheritIO().start();
 					p.waitFor();

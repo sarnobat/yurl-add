@@ -34,9 +34,6 @@ public class VideoDownloadNeo4j {
 									iVideoUrl)).inheritIO().start();
 			p.waitFor();
 			if (p.exitValue() == 0) {
-				System.out
-						.println("YurlWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
-								+ iVideoUrl);
 				writeSuccessToDb(iVideoUrl);
 			} else {
 				System.err
