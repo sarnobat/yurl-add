@@ -87,8 +87,8 @@ public class Yurl {
 	// Gets stored here: http://192.168.1.2:28017/cache/items/
 	private static final boolean MONGODB_ENABLED = YurlResource.MongoDbCache.ENABLED;
 	private static final String CHROMEDRIVER_PATH = "/home/sarnobat/github/yurl/chromedriver";
-	private static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
-	private static final Integer ROOT_ID = 45;
+	public static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
+	public static final Integer ROOT_ID = 45;
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
@@ -920,7 +920,7 @@ public class Yurl {
 							Process p = new ProcessBuilder()
 									.directory(Paths.get(targetDirPath).toFile())
 									.command(
-											ImmutableList.of(YOUTUBE_DOWNLOAD,
+											ImmutableList.of(Yurl.YOUTUBE_DOWNLOAD,
 													iVideoUrl)).inheritIO().start();
 							p.waitFor();
 							if (p.exitValue() == 0) {
