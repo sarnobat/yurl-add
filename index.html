@@ -786,7 +786,8 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
 		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'><br>");
 		buttonCell.append("<br>");
-		buttonCell.append("<input type=button class='genericButton' value='Change Image' onClick='changeImage("+field.id+",this)'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Change Image' onClick='changeImage("+field.id+",this,\"" +field.url+ "\")'><br>");
+                buttonCell.append("<input type=button class='genericButton' value='Remove Custom Image' onClick='removeImage("+field.id+",this,\"" +field.url +"\"," + rootId + ")'><br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
@@ -834,8 +835,27 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 	return listItem[0].outerHTML;
 }
 
-function changeImage(id, button) {
-	var newImageUrl = prompt("Enter a new image URL:", "");
+
+function removeImage(id, button, url, parentId) {
+        // TODO : prepopulate with the computed thumbnail
+                $.getJSON(urlBase + '/removeImage?id=' + id + "&parentId=" + parentId, 
+                        function(result){
+                                console.debug(result);
+                        })
+                        .success(function(data) {
+                                button.style.cssText = "background-color : green";
+                        })
+                        .error(function() { 
+                                alert("error occurred "); 
+                        })
+                        .complete(function() { 
+                        }
+                );
+}
+
+function changeImage(id, button, url) {
+	// TODO : prepopulate with the computed thumbnail
+	var newImageUrl = prompt("Enter a new image URL:", prepopulatedImage(url));
 	if (newImageUrl.length > 0) {
 		$.getJSON(urlBase + '/updateImage?url=' + encodeURIComponent(newImageUrl) + "&id=" + id, 
 			function(result){
@@ -851,6 +871,43 @@ function changeImage(id, button) {
 			}
 		);
 	}
+}
+
+// This can be refactored, but whatever
+function prepopulatedImage(url) {
+
+	var prepopulated = "";
+
+	if (url.match(".jpg\??") || 
+		url.match(/.*jpg/i) ||
+		url.match(".gif$") || 
+		url.match(".png\??") || 
+		url.match("images.q=tbn:")) {
+		
+		// nothing to do
+
+	}
+	if (url.match("youtube.com")) {
+		if (url.match("youtube.com/watch")) {
+			var youtubeId = url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
+			prepopulated = "http://img.youtube.com/vi/"+youtubeId+"/0.jpg";
+			
+		}
+		
+	} else if (url.match("dailymotion.com/video")) {
+			var youtubeId = url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+			prepopulated = "http://dailymotion.com/thumbnail/video/"+youtubeId;
+		
+	} else if (url.match(".amazon.co[^/]+\/[^s]")) {
+
+		var asin = url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+		asin = asin.replace(/.*dp./,'');
+		asin = asin.replace(/.*gp.aw.d./, '');
+		asin = asin.replace(/.ref_?=.*/, '');
+		asin = asin.replace(/.*offer-listing./, '');
+		prepopulated = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+	}
+	return prepopulated;
 }
 
 function downloadVideo(id, url, buttonElement) {
@@ -1458,6 +1515,7 @@ reading list (pdf))
 							  <div id="tabs-1">
 									To identify and open what you're looking for most (e.g. videos)<br>
 									Video storyboarding
+									Before buying, remember that it is better to want than own.
 								  <ol id="url_thumbnails"></ol>
 								  
 							  </div>

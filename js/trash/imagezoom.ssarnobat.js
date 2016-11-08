@@ -22,7 +22,8 @@ function zoom(img) {
 	}
 	imgClone.onmouseenter = null;
 	imgClone.onmouseleave = null;
-	$(imgClone).css('height', $(window).height() * 2/3).css('width','auto');
+	//$(imgClone).css('height', $(window).height() * 2/3).css('width','auto');
+        $(imgClone).css('height', '300').css('width','auto');
 	overlay.appendChild(imgClone);
 	overlay.innerHTML += "<br><textarea cols=40>" + url +"</textarea>";
 }
