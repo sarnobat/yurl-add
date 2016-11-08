@@ -36,6 +36,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
@@ -86,8 +87,8 @@ public class Yurl {
 	// Gets stored here: http://192.168.1.2:28017/cache/items/
 	private static final boolean MONGODB_ENABLED = YurlResource.MongoDbCache.ENABLED;
 	private static final String CHROMEDRIVER_PATH = "/home/sarnobat/github/yurl/chromedriver";
-	private static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
-	private static final Integer ROOT_ID = 45;
+	public static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
+	public static final Integer ROOT_ID = 45;
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
@@ -776,7 +777,7 @@ public class Yurl {
 					Process p = new ProcessBuilder()
 							.directory(file)
 							.command("echo","hello world")
-							.command("/bin/sh", "-c", "echo '" + id + ":" + iUrl + "' | tee -a '" + queueFile + "'")
+							.command("/bin/sh", "-c", "echo '" + id + ":" + iUrl + ":'date +%s` | tee -a '" + queueFile + "'")
 									//"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
 											.inheritIO().start();
 					p.waitFor();
@@ -919,7 +920,7 @@ public class Yurl {
 							Process p = new ProcessBuilder()
 									.directory(Paths.get(targetDirPath).toFile())
 									.command(
-											ImmutableList.of(YOUTUBE_DOWNLOAD,
+											ImmutableList.of(Yurl.YOUTUBE_DOWNLOAD,
 													iVideoUrl)).inheritIO().start();
 							p.waitFor();
 							if (p.exitValue() == 0) {
@@ -1364,11 +1365,17 @@ public class Yurl {
 				throws JSONException, IOException {
 			JSONObject ret = new JSONObject();
 			JSONObject categoriesTreeJson;
-			if (categoriesTreeCache == null) {
-				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+			java.nio.file.Path path = Paths.get("/home/sarnobat/github/.cache/" + Yurl.ROOT_ID + ".json");
+			if (Files.exists(path)) {
+				categoriesTreeJson = new JSONObject(FileUtils.readFileToString(path.toFile()));
 			} else {
-				categoriesTreeJson = categoriesTreeCache;
-				refreshCategoriesTreeCacheInSeparateThread();
+				if (categoriesTreeCache == null) {
+					categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+				} else {
+					categoriesTreeJson = categoriesTreeCache;
+					refreshCategoriesTreeCacheInSeparateThread();
+				}
+				FileUtils.writeStringToFile(path.toFile(), categoriesTreeJson.toString(2));
 			}
 			ret.put("categoriesTree", categoriesTreeJson);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
