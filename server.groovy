@@ -774,10 +774,12 @@ public class Yurl {
 					if (!file.exists()) {
 						throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
 					}
+					String command =  "echo '" + id + "::" + iUrl + "::'`date +%s` | tee -a '" + queueFile + "'";
+					System.out.println("appendToTextFile() - " + command);
 					Process p = new ProcessBuilder()
 							.directory(file)
 							.command("echo","hello world")
-							.command("/bin/sh", "-c", "echo '" + id + ":" + iUrl + ":'date +%s` | tee -a '" + queueFile + "'")
+							.command("/bin/sh", "-c", command)
 									//"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
 											.inheritIO().start();
 					p.waitFor();
