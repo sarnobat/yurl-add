@@ -94,6 +94,7 @@ public class Yurl {
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
 	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/Unsorted/images/";
+	private static final String TARGET_DIR_PATH_IMAGES_OTHER = "/media/sarnobat/Unsorted/images/other";
 	
 	@Path("yurl")
 	// TODO: Rename to YurlResource
@@ -725,21 +726,21 @@ public class Yurl {
 		@Path("stash")
 		@Produces("application/json")
 		public Response stash(@QueryParam("param1") String iUrl,
-				@QueryParam("rootId") Integer iRootId) throws JSONException,
+				@QueryParam("rootId") Integer iCategoryId) throws JSONException,
 				IOException {
 			// This will convert
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 			String theTitle = getTitle(new URL(theHttpUrl));
 			try {
 				JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle,
-						new Integer(iRootId));
+						new Integer(iCategoryId));
 				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
 						.get("data")).get(0);
 				String nodeId = (String) theNewNodeId.get(0);
 
-				MongoDbCache.invalidate(iRootId.toString());
+				MongoDbCache.invalidate(iCategoryId.toString());
 				
-				launchAsynchronousTasks(theHttpUrl, nodeId, iRootId);
+				launchAsynchronousTasks(theHttpUrl, nodeId, iCategoryId);
 				// TODO: check that it returned successfully (redundant?)
 				System.out.println("stash() - node created: " + nodeId);
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -751,11 +752,16 @@ public class Yurl {
 			}
 		}
 
-		private static void launchAsynchronousTasks(String iUrl, String id, Integer iRootId) {
+		private static void launchAsynchronousTasks(String iUrl, String id, Integer iCategoryId) {
 
-			appendToTextFile(iUrl, iRootId.toString(), QUEUE_FILE);
-			DownloadImage.downloadImageInSeparateThread(iUrl, TARGET_DIR_PATH_IMAGES,
-					CYPHER_URI, id);
+			appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
+			String targetDirPathImages;
+			if (iCategoryId.longValue() == 29172) {
+				targetDirPathImages = TARGET_DIR_PATH_IMAGES_OTHER;
+			} else {
+				targetDirPathImages = TARGET_DIR_PATH_IMAGES;
+			}
+			DownloadImage.downloadImageInSeparateThread(iUrl, targetDirPathImages, CYPHER_URI, id);
 			DownloadVideo.downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
 			if (!iUrl.contains("amazon")) {
 				// We end up with garbage images if we try to screen-scrape Amazon.
@@ -803,8 +809,7 @@ public class Yurl {
 				Runnable r = new Runnable() {
 					// @Override
 					public void run() {
-						System.out.println("downloadImageInSeparateThread() - " + iUrl + " :: "
-								+ targetDirPath);
+						System.out.println("downloadImageInSeparateThread() - " + iUrl + " :: "	+ targetDirPath);
 						if (iUrl.toLowerCase().contains(".jpg")) {
 						} else if (iUrl.toLowerCase().contains(".jpeg")) {
 						} else if (iUrl.toLowerCase().contains(".png")) {
@@ -813,18 +818,18 @@ public class Yurl {
 						} else {
 							return;
 						}
+						System.out
+								.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThread() Is of image type");
 						try {
+							System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThread() About to call saveimage");
 							saveImage(iUrl, targetDirPath);
-							execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_image = {date}",
-									ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url",
-											iUrl, "date", System.currentTimeMillis()),
-									"downloadImageInSeparateThread()");
+							System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThread() About to call execute");
+							execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_image = {date}", ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iUrl, "date", System.currentTimeMillis()), "downloadImageInSeparateThread()");
 							System.out
 									.println("YurlWorldResource.downloadImageInSeparateThread() - DB updated");
 						} catch (Exception e) {
 							System.out
-									.println("YurlWorldResource.downloadImageInSeparateThread(): Biggest image couldn't be determined"
-											+ e.getMessage());
+									.println("YurlWorldResource.downloadImageInSeparateThread(): 1 Biggest image couldn't be determined"	+ e.getMessage());
 						}
 					}
 				};
@@ -839,11 +844,10 @@ public class Yurl {
 						ImageIO.read(new URL(urlString)),
 						extension,
 						new File(determineDestinationPathAvoidingExisting(
-								targetDirPath
-										+ "/"
-										+ URLDecoder.decode(FilenameUtils.getBaseName(urlString)
+								targetDirPath										+ "/"										+ URLDecoder.decode(FilenameUtils.getBaseName(urlString)
 												.replaceAll("/", "-"), "UTF-8") + "." + extension)
 								.toString()));
+				System.out.println("saveImage() - SUCCESS: " + urlString + "\t::\t" + targetDirPath);
 			}
 
 			private static java.nio.file.Path determineDestinationPathAvoidingExisting(
@@ -1331,8 +1335,7 @@ public class Yurl {
 							.<String, Object> of("query", iCypherQuery, "params",
 									Preconditions.checkNotNull(iParams)));
 			if (theResponse.getStatus() != 200) {
-				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: "
-						+ iParams);
+				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: " + iParams);
 				try {
 					throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream()));
 				} catch (IOException e) {
