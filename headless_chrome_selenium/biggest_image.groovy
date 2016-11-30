@@ -76,9 +76,9 @@ public class BiggestImage {
 	private static List<String> sortByKey(Multimap<Integer, String> imageSizes, String pageUrl) {
 		ImmutableList.Builder<String> finalList = ImmutableList.builder();
 
-		// Phase 1: Sort by size descending
+		// Phase 1: Sort by size ascending
 		ImmutableList<Integer> sortedList = FluentIterable.from(imageSizes.keySet()).toSortedList(
-				Ordering.natural().reverse());
+				Ordering.natural());
 
 		// Phase 2: Put non-JPGs first
 		for (Integer size : sortedList) {
@@ -86,7 +86,7 @@ public class BiggestImage {
 				if (!isJpgFile(url)) {
 					if (url.length() > 0) {
 						finalList.add(url);
-						System.out.println(pageUrl + ":\t" + url);
+						System.out.println(size + "\t" + url);
 					}
 				}
 			}
@@ -96,7 +96,7 @@ public class BiggestImage {
 			for (String url : imageSizes.get(size)) {
 				if (isJpgFile(url)) {
 					finalList.add(url);
-					System.out.println(pageUrl + ":\t" + url);
+					System.out.println(size + "\t" + url);
 				}
 			}
 		}
