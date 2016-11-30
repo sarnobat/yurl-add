@@ -21,6 +21,10 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 
+/**
+ * Ideally this should be done in composition with headless.groovy, and not bother with the headless browser itself.
+ *
+ */
 public class BiggestImage {
 
 	private static final String CHROMEDRIVER_PATH = "/sarnobat.garagebandbroken/trash/chromedriver";
