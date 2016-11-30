@@ -1,2 +1,2 @@
-BiggestImage.sortByKey()	0:	
-BiggestImage.sortByKey()	-1:	http://www.google.comhttp:/logos/doodles/2016/louisa-may-alcotts-184th-birthday-5111070415912960-res.png
+http://www.google.com:	http://www.google.com/logos/doodles/2016/louisa-may-alcotts-184th-birthday-5111070415912960-res.png
+http://www.google.com:	http://www.google.com/logos/doodles/2016/louisa-may-alcotts-184th-birthday-5111070415912960-hp.jpg
