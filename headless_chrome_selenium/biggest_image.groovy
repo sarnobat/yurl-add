@@ -62,7 +62,7 @@ public class Headless {
 			Runnable r = new Runnable() {
 				// @Override
 				public void run() {
-					System.err.println("downloadImageInSeparateThread() - " + iUrl + " :: " + targetDirPath);
+					//System.err.println("downloadImageInSeparateThread() - " + iUrl + " :: " + targetDirPath);
 					if (iUrl.toLowerCase().contains(".jpg")) {
 					} else if (iUrl.toLowerCase().contains(".jpeg")) {
 					} else if (iUrl.toLowerCase().contains(".png")) {
@@ -74,8 +74,7 @@ public class Headless {
 					try {
 						saveImage(iUrl, targetDirPath);
 					} catch (Exception e) {
-						System.err.println("YurlWorldResource.downloadImageInSeparateThread(): 1 Biggest image couldn't be determined"
-										+ e.getMessage());
+						//System.err.println("YurlWorldResource.downloadImageInSeparateThread(): 1 Biggest image couldn't be determined" + e.getMessage());
 					}
 				}
 			};
@@ -84,7 +83,7 @@ public class Headless {
 
 		private static void saveImage(String urlString, String targetDirPath)
 				throws IllegalAccessError, IOException {
-			System.out.println("saveImage() - " + urlString + "\t::\t" + targetDirPath);
+			//System.out.println("saveImage() - " + urlString + "\t::\t" + targetDirPath);
 			String extension = FilenameUtils.getExtension(urlString);
 			ImageIO.write(
 					ImageIO.read(new URL(urlString)),
@@ -95,7 +94,7 @@ public class Headless {
 									+ URLDecoder.decode(FilenameUtils.getBaseName(urlString)
 											.replaceAll("/", "-"), "UTF-8") + "." + extension)
 							.toString()));
-			System.out.println("saveImage() - SUCCESS: " + urlString + "\t::\t" + targetDirPath);
+			//System.out.println("saveImage() - SUCCESS: " + urlString + "\t::\t" + targetDirPath);
 		}
 
 		private static java.nio.file.Path determineDestinationPathAvoidingExisting(
@@ -144,7 +143,7 @@ public class Headless {
 					e.printStackTrace();
 				}
 				String source = driver.getPageSource();
-				System.out.println(source);
+				//System.out.println(source);
 				List<String> out = getAllTags(base + "/", source);
 				Multimap<Integer, String> imageSizes = getImageSizes(out);
 				ret = sortByKey(imageSizes);
@@ -174,7 +173,7 @@ public class Headless {
 				for (String url : imageSizes.get(size)) {
 					if (isJpgFile(url)) {
 						finalList.add(url);
-						System.out.println("BiggestImage.sortByKey() - " + size + "\t" + url);
+						//System.out.println("BiggestImage.sortByKey() - " + size + "\t" + url);
 					}
 				}
 			}
@@ -182,7 +181,7 @@ public class Headless {
 				for (String url : imageSizes.get(size)) {
 					if (!isJpgFile(url)) {
 						finalList.add(url);
-						System.out.println("BiggestImage.sortByKey() - " + size + "\t" + url);
+						System.out.println("BiggestImage.sortByKey()\t" + size + ":\t" + url);
 					}
 				}
 			}
