@@ -41,6 +41,10 @@ public class BiggestImage {
 		String base = getBaseUrl(url);
 		// Don't use the chrome binaries that you browse the web with.
 		System.setProperty("webdriver.chrome.driver", BiggestImage.CHROMEDRIVER_PATH);
+		System.setProperty("webdriver.chrome.logfile", "/dev/null");
+		System.setProperty("webdriver.chrome.args", "disable-logging");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+
 
 		// HtmlUnitDriver and FirefoxDriver didn't work. Thankfully
 		// ChromeDriver does
