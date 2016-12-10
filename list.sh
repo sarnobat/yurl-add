@@ -1,5 +1,1 @@
-curl -X POST -H 'Content-type: application/json' \
-  'http://netgear.rohidekar.com:7474/db/data/cypher' -d '
-  {
-     "query": "START n=node(37658) MATCH n-->c WHERE HAS(c.url) RETURN c.created,c.url order by c.created asc", "params":{}
-  }'
+sh list_neo4j.sh  45 | jq --raw-output '.data[][0]'
