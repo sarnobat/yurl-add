@@ -1276,8 +1276,8 @@ public class Yurl {
 				throws JSONException, IOException {
 			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
 					iNewParentId);
-			MongoDbCache.invalidate(iNewParentId.toString());
-			MongoDbCache.invalidate(iCurrentParentId.toString());
+//			MongoDbCache.invalidate(iNewParentId.toString());
+//			MongoDbCache.invalidate(iCurrentParentId.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(moveHelper.toString())
 					.type("application/json").build();
