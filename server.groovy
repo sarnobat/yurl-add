@@ -738,7 +738,7 @@ public class Yurl {
 						.get("data")).get(0);
 				String nodeId = (String) theNewNodeId.get(0);
 
-				MongoDbCache.invalidate(iCategoryId.toString());
+//				MongoDbCache.invalidate(iCategoryId.toString());
 				
 				launchAsynchronousTasks(theHttpUrl, nodeId, iCategoryId);
 				// TODO: check that it returned successfully (redundant?)
@@ -790,10 +790,10 @@ public class Yurl {
 											.inheritIO().start();
 					p.waitFor();
 					if (p.exitValue() == 0) {
-						System.out.println("launchAsynchronousTasks() - successfully downloaded "
+						System.out.println("appendToTextFile() - successfully appended "
 								+ iUrl);
 					} else {
-						System.out.println("launchAsynchronousTasks() - error downloading " + iUrl);
+						System.out.println("appendToTextFile() - error appending " + iUrl);
 					}
 				}
 			};
@@ -824,6 +824,7 @@ public class Yurl {
 							System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThread() About to call saveimage");
 							saveImage(iUrl, targetDirPath);
 							System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThread() About to call execute");
+//!!!!!!!!!!!!!!!!! FIX THIS METHOD CALL, IT'S NOT GETTING FOUND IN GROOVY
 							execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_image = {date}", ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iUrl, "date", System.currentTimeMillis()), "downloadImageInSeparateThread()");
 							System.out
 									.println("YurlWorldResource.downloadImageInSeparateThread() - DB updated");
@@ -1275,8 +1276,8 @@ public class Yurl {
 				throws JSONException, IOException {
 			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
 					iNewParentId);
-			MongoDbCache.invalidate(iNewParentId.toString());
-			MongoDbCache.invalidate(iCurrentParentId.toString());
+//			MongoDbCache.invalidate(iNewParentId.toString());
+//			MongoDbCache.invalidate(iCurrentParentId.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(moveHelper.toString())
 					.type("application/json").build();
