@@ -93,8 +93,10 @@ public class Yurl {
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
-	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/Unsorted/images/";
-	private static final String TARGET_DIR_PATH_IMAGES_OTHER = "/media/sarnobat/Unsorted/images/other";
+	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/3TB/new/move_to_unsorted/images/";
+// usually full and we get zero size files: "/media/sarnobat/Unsorted/images/";
+	private static final String TARGET_DIR_PATH_IMAGES_OTHER = "/media/sarnobat/3TB/new/move_to_unsorted/images/other";
+// usually full and images don't get saved "/media/sarnobat/Unsorted/images/other";
 	
 	@Path("yurl")
 	// TODO: Rename to YurlResource

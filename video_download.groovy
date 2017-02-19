@@ -21,14 +21,15 @@ public class VideoDownloadNeo4j {
 	private static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
 	private static final Integer ROOT_ID = 45;
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
-	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
+//	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 	
 	public static void main(String[] args) {
-		String iVideoUrl = args[0];
+		String iTargetDirPath = args[0];
+		String iVideoUrl = args[1];
 
 		try {
 			Process p = new ProcessBuilder()
-					.directory(Paths.get(TARGET_DIR_PATH).toFile())
+					.directory(Paths.get(iTargetDirPath).toFile())
 					.command(
 							ImmutableList.of(YOUTUBE_DOWNLOAD,
 									iVideoUrl)).inheritIO().start();
