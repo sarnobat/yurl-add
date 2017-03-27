@@ -1,0 +1,1 @@
+../chrome_headless/update_indexes.sh
