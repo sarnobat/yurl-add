@@ -10,6 +10,7 @@
 612875  No longer interested
 524629  Partially watched
 37652  watched
+641643  trash
 506262  incomplete
 37651  trash
 239431  career
