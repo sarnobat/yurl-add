@@ -49,18 +49,19 @@ public class VideoDownloadNeo4j {
 	}
 	private static void writeSuccessToDb(final String iVideoUrl)
 			throws IOException {
+                        System.out.println("writeSuccessToDb() - Attempting to record successful download in database...");
 		execute("start n=node(*) WHERE n.url = {url} SET n.downloaded_video = {date}",
 				ImmutableMap.<String, Object> of("url", iVideoUrl,
-						"date", new Long(System.currentTimeMillis())), true, "downloadVideo()");
-		System.out.println("downloadVideo() - Download recorded in database");
+						"date", new Long(System.currentTimeMillis())), true, "writeSuccessToDb()");
+		System.out.println("writeSuccessToDb() - Download recorded in database");
 	}
 
 	private static JSONObject execute(String iCypherQuery,
 			Map<String, Object> iParams, boolean doLogging, String... iCommentPrefix) {
 		String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
 		if (doLogging) {
-			System.out.println(commentPrefix + " - \t" + iCypherQuery);
-			System.out.println(commentPrefix + "- \tparams - " + iParams);
+			System.out.println(commentPrefix + "-\t" + iCypherQuery);
+			System.out.println(commentPrefix + "-\tparams - " + iParams);
 		}
 		ClientConfig clientConfig = new DefaultClientConfig();
 		clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
@@ -75,14 +76,14 @@ public class VideoDownloadNeo4j {
 						.<String, Object> of("query", iCypherQuery, "params",
 								Preconditions.checkNotNull(iParams)));
 		if (theResponse.getStatus() != 200) {
-			System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: "
+			System.out.println(commentPrefix + "-\tFAILED:\n\t" + iCypherQuery + "\n\tparams: "
 					+ iParams);
 			try {
 				throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream()));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-		}
+		} else {
 		String theNeo4jResponse ;
 		try {
 			// Do not inline this. We need to close the stream after
@@ -91,11 +92,12 @@ public class VideoDownloadNeo4j {
 			theResponse.getEntityInputStream().close();
 			theResponse.close();
 			if (doLogging) {
-				System.out.println(commentPrefix + "end");
+				System.out.println(commentPrefix + "-\tSUCCESS - end");
 			}
 			return new JSONObject(theNeo4jResponse);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		}
 		}
 	}
 }
