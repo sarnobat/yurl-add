@@ -1065,10 +1065,11 @@ public class Yurl {
 
 		private static void writeSuccessToDb(final String iVideoUrl, final String id)
 				throws IOException {
+                        System.out.println("writeSuccessToDb() - Attempting to record successful download in database...");
 			execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
 					ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iVideoUrl,
 							"date", System.currentTimeMillis()), "downloadVideo()");
-			System.out.println("downloadVideo() - Download recorded in database");
+			System.out.println("writeSuccessToDb() - Download recorded in database");
 		}
 
 		@GET
