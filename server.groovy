@@ -121,6 +121,8 @@ public class Yurl {
 		@GET
 		@Path("uncategorized")
 		@Produces("application/json")
+		@Deprecated // We aren't using this anymore, we moved it to server_list.groovy.
+					// this should undo some of the bloated nature of this file.
 		public Response getUrls(@QueryParam("rootId") Integer iRootId,
 								@QueryParam("enableCache") @DefaultValue("true") Boolean iMongoDbCacheLookupEnabled)
 				throws JSONException, IOException {
