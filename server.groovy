@@ -1341,7 +1341,7 @@ public class Yurl {
 			if (theResponse.getStatus() != 200) {
 				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: " + iParams);
 				try {
-					throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream()));
+					throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream(), "UTF-8"));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -1350,7 +1350,7 @@ public class Yurl {
 			try {
 				// Do not inline this. We need to close the stream after
 				// copying
-				theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream());
+				theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream(), "UTF-8");
 				theResponse.getEntityInputStream().close();
 				theResponse.close();
 				if (doLogging) {
@@ -1376,7 +1376,7 @@ public class Yurl {
 			JSONObject categoriesTreeJson;
 			java.nio.file.Path path = Paths.get("/home/sarnobat/github/.cache/" + Yurl.ROOT_ID + ".json");
 			if (Files.exists(path)) {
-				categoriesTreeJson = new JSONObject(FileUtils.readFileToString(path.toFile()));
+				categoriesTreeJson = new JSONObject(FileUtils.readFileToString(path.toFile(), "UTF-8"));
 			} else {
 				if (categoriesTreeCache == null) {
 					categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
@@ -1384,7 +1384,7 @@ public class Yurl {
 					categoriesTreeJson = categoriesTreeCache;
 					refreshCategoriesTreeCacheInSeparateThread();
 				}
-				FileUtils.writeStringToFile(path.toFile(), categoriesTreeJson.toString(2));
+				FileUtils.writeStringToFile(path.toFile(), categoriesTreeJson.toString(2), "UTF-8");
 			}
 			ret.put("categoriesTree", categoriesTreeJson);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -1715,7 +1715,7 @@ public class Yurl {
 			}
 
 			private static List<String> getAllTags(String baseUrl, String source) throws IOException {
-				Document doc = Jsoup.parse(IOUtils.toInputStream(source), "UTF-8", baseUrl);
+				Document doc = Jsoup.parse(IOUtils.toInputStream(source, "UTF-8"), "UTF-8", baseUrl);
 				Elements tags = doc.getElementsByTag("img");
 				return FluentIterable.<Element> from(tags).transform(IMG_TO_SOURCE).toList();
 			}
