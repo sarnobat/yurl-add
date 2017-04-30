@@ -18,6 +18,7 @@
 
 
 var urlBase = "http://netgear.rohidekar.com:44447/yurl";
+var urlBaseList = "http://netgear.rohidekar.com:44443/yurl";
 var rootId;
 var parentOfRootId;
 var orderedDescending = true;
@@ -38,7 +39,7 @@ function initialize() {
 	////
     
 	getUrls : {
-		$.getJSON(urlBase + "/uncategorized?rootId=" +rootId, function(result) {
+		$.getJSON(urlBaseList + "/uncategorized?rootId=" +rootId, function(result) {
 			uncategorizedResponse = result;
 			renderIfReady();
 		});

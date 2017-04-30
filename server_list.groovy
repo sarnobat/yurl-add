@@ -166,117 +166,11 @@ public class YurlList {
 			}
 		}
 
-		@GET
-		@Path("downloadVideo")
-		@Produces("application/json")
-		public Response downloadVideoSynchronous(@QueryParam("id") Integer iRootId, @QueryParam("url") String iUrl)
-				throws JSONException, IOException {
-			DownloadVideo.getVideoDownloadJob(iUrl, TARGET_DIR_PATH,
-					Integer.toString(iRootId)).run();
-			JSONObject retVal = new JSONObject();
-			try {
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(retVal.toString())
-						.type("application/json").build();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				return Response.serverError().header("Access-Control-Allow-Origin", "*")
-						.entity(e.getStackTrace())
-						.type("application/text").build();
-			}
-		}
-
-		@GET
-		@Path("parent")
-		@Produces("application/json")
-		public Response parent(@QueryParam("nodeId") Integer iNodeId)
-				throws JSONException, IOException {
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("nodeId", iNodeId);
-			// TODO: order these by most recent-first (so that they appear this
-			// way in the UI)
-			JSONObject theParentNodeJson = execute(
-					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)",
-					theParams.build(), "parent()");
-			JSONArray theData = (JSONArray) theParentNodeJson.get("data");
-			JSONArray ret = new JSONArray();
-			for (int i = 0; i < theData.length(); i++) {
-				JSONArray a = theData.getJSONArray(i);
-				JSONObject o = new JSONObject();
-				String id = (String) a.get(0);
-				o.put("id", id);
-				ret.put(o);
-			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
-		}
+		
 
 		//
 		// Batch
 		//
-
-		@GET
-		@Path("batchInsert")
-		@Produces("application/json")
-		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
-				@QueryParam("urls") String iUrls) throws Exception {
-			Preconditions.checkArgument(iRootId != null);
-			StringBuffer unsuccessfulLines = new StringBuffer();
-
-			String[] lines = iUrls.trim().split("\\n");
-			int i = 0;
-			while (i < lines.length) {
-
-				String first = lines[i];
-				try {
-					if (first.startsWith("http")) {
-						stash(URLEncoder.encode(first, "UTF-8"), iRootId);
-						++i;
-						continue;
-					}
-					// Fails if it sees the string "%)"
-					URLDecoder.decode(first, "UTF-8");
-				} catch (Exception e) {
-					System.out.println(e.getStackTrace());
-					addToUnsuccessful(unsuccessfulLines, first, "");
-					++i;
-					continue;
-				}
-				if (first.startsWith("=")) {
-					++i;
-					addToUnsuccessful(unsuccessfulLines, first, "");
-					continue;
-				}
-				if (first.startsWith("http")) {
-					++i;
-					addToUnsuccessful(unsuccessfulLines, first, "");
-					continue;
-				}
-				if (first.matches("^\\s*" + '$')) {
-					++i;
-					continue;
-				}
-
-				String second = lines[i + 1];
-				if (first.startsWith("\"") && second.startsWith("http")) {
-
-					System.out.println("to be processed: " + first);
-					System.out.println("to be processed: " + second);
-
-					stash(second, iRootId);
-
-				} else {
-					addToUnsuccessful(unsuccessfulLines, first, second);
-				}
-				i += 2;
-
-			}
-			JSONObject entity = new JSONObject();
-			entity.put("unsuccessful", unsuccessfulLines.toString());
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(entity.toString()).type("application/json").build();
-		}
 
 		// TODO : remove mutable state
 		@Deprecated
@@ -1851,7 +1745,7 @@ public class YurlList {
 		//java.util.Logger.getLogger("org.glassfish.jersey").setLevel(java.util.Level.SEVERE);
 		try {
 			JdkHttpServerFactory.createHttpServer(
-					new URI("http://localhost:44473/"), new ResourceConfig(
+					new URI("http://localhost:4443/"), new ResourceConfig(
 							YurlResource.class));
 			// Do not allow this in multiple processes otherwise your hard disk will fill up
 			// or overload the database
