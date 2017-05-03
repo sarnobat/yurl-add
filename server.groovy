@@ -296,6 +296,7 @@ public class Yurl {
 		// Backup
 		// ------------------------------------------------------------------------------------
 
+		@Deprecated
 		@GET
 		@Path("dumpurls.disabled")
 		@Produces("application/text")
