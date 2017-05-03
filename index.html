@@ -67,7 +67,7 @@ function initialize() {
     // toy app like this it's not worth the effort.
     var nodeIdZero = 0;
     getCategoriesTree : {
-		var url = urlBase + "/categoriesRecursive?parentId=" + nodeIdZero;
+		var url = "http://netgear.rohidekar.com:44441/yurl/categoriesRecursive?parentId=" + nodeIdZero;
 		$.getJSON(url, function(result){})
 			.success(
 				function(data) { 

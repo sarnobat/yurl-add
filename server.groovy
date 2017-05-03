@@ -28,14 +28,20 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -330,7 +336,7 @@ public class Yurl {
 		////
 		// TODO: See if you can turn this into a map-reduce
 		@SuppressWarnings("unused")
-		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
+		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 //			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
 				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
@@ -1767,15 +1773,48 @@ public class Yurl {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 
+		String port = null;
+		_parseOptions: {
+
+		  Options options = new Options()
+			  .addOption("h", "help", false, "show help.");
+
+		  Option option = Option.builder("f").longOpt("file").desc("use FILE to write incoming data to").hasArg()
+			  .argName("FILE").build();
+		  options.addOption(option);
+
+		  // This doesn't work with java 7
+		  // "hasarg" is needed when the option takes a value
+		  options.addOption(Option.builder("p").longOpt("port").hasArg().required().build());
+
+		  try {
+			CommandLine cmd = new DefaultParser().parse(options, args);
+			port = cmd.getOptionValue("p", "4447");
+
+			if (cmd.hasOption("h")) {
+		
+			  // This prints out some help
+			  HelpFormatter formater = new HelpFormatter();
+
+			  formater.printHelp("yurl", options);
+			  System.exit(0);
+			}
+		  } catch (ParseException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		  }
+		}
+    
 		YurlResource.refreshCategoriesTreeCacheInSeparateThread();
 		// Turn off that stupid Jersey logger.
 		// This works in Java but not in Groovy.
 		//java.util.Logger.getLogger("org.glassfish.jersey").setLevel(java.util.Level.SEVERE);
 		try {
 			JdkHttpServerFactory.createHttpServer(
-					new URI("http://localhost:4447/"), new ResourceConfig(
+					new URI("http://localhost:" + port + "/"), new ResourceConfig(
 							YurlResource.class));
 			// Do not allow this in multiple processes otherwise your hard disk will fill up
 			// or overload the database
