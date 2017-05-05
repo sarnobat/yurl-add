@@ -454,6 +454,7 @@ public class Yurl {
 		// Key bindings
 		// -----------------------------------------------------------------------------
 
+		@Deprecated
 		@GET
 		@Path("keysUpdate")
 		@Produces("application/json")
@@ -608,6 +609,7 @@ public class Yurl {
 			return shouldCreateNewCategoryNode;
 		}
 
+		@Deprecated
 		@GET
 		@Path("keys")
 		@Produces("application/json")
@@ -618,6 +620,7 @@ public class Yurl {
 					.entity(ret.toString()).type("application/json").build();
 		}
 
+		@Deprecated
 		// TODO: Rewrite this as a map-fold?
 		public static JSONArray getKeys(Integer iParentId) throws IOException,
 				JSONException {
