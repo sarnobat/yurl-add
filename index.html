@@ -417,7 +417,7 @@ function moveToTop(source) {
 		var elem = $("#" + idToMove).remove();
 		$("#url_cards").prepend(elem);
 		// 1 more than latest timestamp
-		$.getJSON(urlBase + "/surpassOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToSurpass=" + firstId,
+		$.getJSON(urlBase + ":4439/yurl/surpassOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToSurpass=" + firstId,
 			function(result){
 			})
 			.success(function(data) {  
@@ -439,7 +439,7 @@ function moveToBottom(source) {
 	if (orderedDescending) {
 		var elem = $("#" + idToMove).remove();
 		$("#url_cards").append(elem);
-		$.getJSON(urlBase + "/undercutOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToUndercut=" + lastId, 
+		$.getJSON(urlBase + ":4439/yurl/undercutOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToUndercut=" + lastId, 
 			function(result){
 			})
 			.success(function(data) {  
@@ -466,7 +466,7 @@ function moveDown(source) {
 }
 
 function swap(firstId, secondId) {
-	$.getJSON(urlBase + "/swapOrdinals?firstId=" + firstId + "&secondId=" + secondId, 
+	$.getJSON(urlBase + ":4439/yurl/swapOrdinals?firstId=" + firstId + "&secondId=" + secondId, 
 		function(result){
 		})
 		.success(function(data) {  
