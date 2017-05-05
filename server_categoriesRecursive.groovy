@@ -1,80 +1,45 @@
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 
-import com.github.axet.vget.VGet;
-import com.github.axet.vget.info.VideoInfo.VideoQuality;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.base.Strings;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -183,12 +148,12 @@ public class YurlCategoriesRecursive {
 				throws JSONException, IOException {
 			JSONObject ret = new JSONObject();
 			JSONObject categoriesTreeJson;
-			java.nio.file.Path path = Paths.get("/home/sarnobat/github/.cache/" + Yurl.ROOT_ID + ".json");
+			java.nio.file.Path path = Paths.get("/home/sarnobat/github/.cache/" + YurlCategoriesRecursive.ROOT_ID + ".json");
 			if (Files.exists(path)) {
 				categoriesTreeJson = new JSONObject(FileUtils.readFileToString(path.toFile(), "UTF-8"));
 			} else {
 				if (categoriesTreeCache == null) {
-					categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+					categoriesTreeJson = ReadCategoryTree.getCategoriesTree(YurlCategoriesRecursive.ROOT_ID);
 				} else {
 					categoriesTreeJson = categoriesTreeCache;
 					refreshCategoriesTreeCacheInSeparateThread();
@@ -205,7 +170,7 @@ public class YurlCategoriesRecursive {
 				@Override
 				public void run() {
 					try {
-						categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+						categoriesTreeCache = ReadCategoryTree.getCategoriesTree(YurlCategoriesRecursive.ROOT_ID);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -402,15 +367,48 @@ public class YurlCategoriesRecursive {
 		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
 	}
 
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 
+		String port = "4441";
+		_parseOptions: {
+
+		  Options options = new Options()
+			  .addOption("h", "help", false, "show help.");
+
+		  Option option = Option.builder("f").longOpt("file").desc("use FILE to write incoming data to").hasArg()
+			  .argName("FILE").build();
+		  options.addOption(option);
+
+		  // This doesn't work with java 7
+		  // "hasarg" is needed when the option takes a value
+		  options.addOption(Option.builder("p").longOpt("port").hasArg().required().build());
+
+		  try {
+			CommandLine cmd = new DefaultParser().parse(options, args);
+			port = cmd.getOptionValue("p", "4444");
+
+			if (cmd.hasOption("h")) {
+		
+			  // This prints out some help
+			  HelpFormatter formater = new HelpFormatter();
+
+			  formater.printHelp("yurl", options);
+			  System.exit(0);
+			}
+		  } catch (ParseException e) {
+			e.printStackTrace();
+			System.exit(-1);
+		  }
+		}
+    
 		YurlResource.refreshCategoriesTreeCacheInSeparateThread();
 		// Turn off that stupid Jersey logger.
 		// This works in Java but not in Groovy.
 		//java.util.Logger.getLogger("org.glassfish.jersey").setLevel(java.util.Level.SEVERE);
 		try {
 			JdkHttpServerFactory.createHttpServer(
-					new URI("http://localhost:4441/"), new ResourceConfig(
+					new URI("http://localhost:" + port + "/"), new ResourceConfig(
 							YurlResource.class));
 			// Do not allow this in multiple processes otherwise your hard disk will fill up
 			// or overload the database
