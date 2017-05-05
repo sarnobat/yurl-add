@@ -1251,7 +1251,7 @@ public class Yurl {
 		}
 
 		static JSONObject execute(String iCypherQuery, Map<String, Object> iParams, String... iCommentPrefix) {
-			execute(iCypherQuery, iParams, true, iCommentPrefix);
+			return execute(iCypherQuery, iParams, true, iCommentPrefix);
 		}
 
 		// TODO: make this map immutable
