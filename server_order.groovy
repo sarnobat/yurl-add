@@ -88,10 +88,9 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
-public class Yurl {
+public class YurlOrder {
 
 	// Gets stored here: http://192.168.1.2:28017/cache/items/
-	private static final boolean MONGODB_ENABLED = YurlResource.MongoDbCache.ENABLED;
 	private static final String CHROMEDRIVER_PATH = "/home/sarnobat/github/yurl/chromedriver";
 	public static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
 	public static final Integer ROOT_ID = 45;
@@ -100,9 +99,7 @@ public class Yurl {
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
 	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/3TB/new/move_to_unsorted/images/";
-// usually full and we get zero size files: "/media/sarnobat/Unsorted/images/";
 	private static final String TARGET_DIR_PATH_IMAGES_OTHER = "/media/sarnobat/3TB/new/move_to_unsorted/images/other";
-// usually full and images don't get saved "/media/sarnobat/Unsorted/images/other";
 	
 	@Path("yurl")
 	// TODO: Rename to YurlResource
@@ -124,212 +121,17 @@ public class Yurl {
 			// or not until the server terminates unexceptionally (which never happens).
 		}
 		
-		@GET
-		@Path("uncategorized")
-		@Produces("application/json")
-		@Deprecated // We aren't using this anymore, we moved it to server_list.groovy.
-					// this should undo some of the bloated nature of this file.
-		public Response getUrls(@QueryParam("rootId") Integer iRootId,
-								@QueryParam("enableCache") @DefaultValue("true") Boolean iMongoDbCacheLookupEnabled)
-				throws JSONException, IOException {
-			checkNotNull(iRootId);
-			JSONObject categoriesTreeJson;
-			if (categoriesTreeCache == null) {
-				System.out.println("getUrls() - preloaded categories tree not ready");
-				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
-			} else {
-				categoriesTreeJson = categoriesTreeCache;
-				// This is done in a separate thread
-				refreshCategoriesTreeCacheInSeparateThread();
-			}
-			try {
-				JSONObject oUrlsUnderCategory;
-				// We're not getting up to date pages when things change. But we need to
-				// start using this again if we dream of scaling this app.
-				if (MONGODB_ENABLED && MongoDbCache.exists(iRootId.toString())) {
-					System.out.println("YurlWorldResource.getUrls() - using cache");
-					oUrlsUnderCategory = new JSONObject(MongoDbCache.get(iRootId.toString()));
-				} else {
-					// If there were multiple clients here, you'd need to block the 2nd onwards
-					System.out.println("YurlWorldResource.getUrls() - not using cache");
-					JSONObject retVal1;
-					retVal1 = new JSONObject();
-					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
-					retVal1.put("categoriesRecursive", categoriesTreeJson);
-					if (MONGODB_ENABLED) {
-						MongoDbCache.put(iRootId.toString(), retVal1.toString());
-					}
-					oUrlsUnderCategory = retVal1;
-				}
-				
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(oUrlsUnderCategory.toString())
-						.type("application/json").build();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				return Response.serverError().header("Access-Control-Allow-Origin", "*")
-						.entity(e.getStackTrace())
-						.type("application/text").build();
-			}
-		}
-
-		@GET
-		@Path("downloadVideo")
-		@Produces("application/json")
-		public Response downloadVideoSynchronous(@QueryParam("id") Integer iRootId, @QueryParam("url") String iUrl)
-				throws JSONException, IOException {
-			DownloadVideo.getVideoDownloadJob(iUrl, TARGET_DIR_PATH,
-					Integer.toString(iRootId)).run();
-			JSONObject retVal = new JSONObject();
-			try {
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(retVal.toString())
-						.type("application/json").build();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				return Response.serverError().header("Access-Control-Allow-Origin", "*")
-						.entity(e.getStackTrace())
-						.type("application/text").build();
-			}
-		}
-
-		@GET
-		@Path("parent")
-		@Produces("application/json")
-		public Response parent(@QueryParam("nodeId") Integer iNodeId)
-				throws JSONException, IOException {
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("nodeId", iNodeId);
-			// TODO: order these by most recent-first (so that they appear this
-			// way in the UI)
-			JSONObject theParentNodeJson = execute(
-					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)",
-					theParams.build(), "parent()");
-			JSONArray theData = (JSONArray) theParentNodeJson.get("data");
-			JSONArray ret = new JSONArray();
-			for (int i = 0; i < theData.length(); i++) {
-				JSONArray a = theData.getJSONArray(i);
-				JSONObject o = new JSONObject();
-				String id = (String) a.get(0);
-				o.put("id", id);
-				ret.put(o);
-			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
-		}
+		
 
 		//
 		// Batch
 		//
 
-		@GET
-		@Path("batchInsert")
-		@Produces("application/json")
-		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
-				@QueryParam("urls") String iUrls) throws Exception {
-			Preconditions.checkArgument(iRootId != null);
-			StringBuffer unsuccessfulLines = new StringBuffer();
-
-			String[] lines = iUrls.trim().split("\\n");
-			int i = 0;
-			while (i < lines.length) {
-
-				String first = lines[i];
-				try {
-					if (first.startsWith("http")) {
-						stash(URLEncoder.encode(first, "UTF-8"), iRootId);
-						++i;
-						continue;
-					}
-					// Fails if it sees the string "%)"
-					URLDecoder.decode(first, "UTF-8");
-				} catch (Exception e) {
-					System.out.println(e.getStackTrace());
-					addToUnsuccessful(unsuccessfulLines, first, "");
-					++i;
-					continue;
-				}
-				if (first.startsWith("=")) {
-					++i;
-					addToUnsuccessful(unsuccessfulLines, first, "");
-					continue;
-				}
-				if (first.startsWith("http")) {
-					++i;
-					addToUnsuccessful(unsuccessfulLines, first, "");
-					continue;
-				}
-				if (first.matches("^\\s*" + '$')) {
-					++i;
-					continue;
-				}
-
-				String second = lines[i + 1];
-				if (first.startsWith("\"") && second.startsWith("http")) {
-
-					System.out.println("to be processed: " + first);
-					System.out.println("to be processed: " + second);
-
-					stash(second, iRootId);
-
-				} else {
-					addToUnsuccessful(unsuccessfulLines, first, second);
-				}
-				i += 2;
-
-			}
-			JSONObject entity = new JSONObject();
-			entity.put("unsuccessful", unsuccessfulLines.toString());
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(entity.toString()).type("application/json").build();
-		}
-
-		// TODO : remove mutable state
-		@Deprecated
-		public void addToUnsuccessful(StringBuffer unsuccessfulLines,
-				String first, String second) {
-			unsuccessfulLines.append(first);
-			unsuccessfulLines.append("\n");
-			unsuccessfulLines.append(second);
-			unsuccessfulLines.append("\n");
-			unsuccessfulLines.append("\n");
-		}
+		
 
 		// ------------------------------------------------------------------------------------
 		// Page operations
 		// ------------------------------------------------------------------------------------
-
-		@GET
-		@Path("count_non_recursive")
-		@Produces("application/json")
-		// It's better to do this in a separate Ajax request because it's fast and we can get an idea if database queries are working.
-		public Response countNonRecursive(@QueryParam("rootId") Integer iRootId)
-				throws Exception {
-			checkNotNull(iRootId);
-			try {
-				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-				theParams.put("rootId", iRootId);
-				JSONObject theQueryResultJson = execute(
-						"start n=node({rootId}) optional match n-[CONTAINS]->u where has(u.title) return n.name, count(u) as cnt",
-						theParams.build());
-				JSONArray outerArray = (JSONArray) theQueryResultJson
-						.get("data");
-				JSONArray innerArray = (JSONArray) outerArray.get(0);
-				String name = (String) innerArray.get(0);
-				Integer count = (Integer) innerArray.get(1);
-				JSONObject result = new JSONObject();
-				result.put("count", count);
-				result.put("name", name);
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(result.toString()).type("application/json")
-						.build();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw e;
-			}
-		}
 
 		////
 		//// The main part
@@ -339,7 +141,7 @@ public class Yurl {
 		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 //			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
-				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(YurlOrder.ROOT_ID);
 			}
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
@@ -453,33 +255,6 @@ public class Yurl {
 		// -----------------------------------------------------------------------------
 		// Key bindings
 		// -----------------------------------------------------------------------------
-
-		@Deprecated
-		@GET
-		@Path("keysUpdate")
-		@Produces("application/json")
-		// Ideally we should wrap this method inside a transaction but over REST
-		// I don't know how to do that.
-		// TODO: we will have to start supporting disassociation of key bindings
-		// with child categories
-		public Response keysUpdate(@QueryParam("parentId") Integer iParentId,
-				@QueryParam("newKeyBindings") String iNewKeyBindings,
-				@QueryParam("oldKeyBindings") String iOldKeyBindings)
-				throws JSONException, IOException {
-			System.out.println("keysUpdate() - begin");
-			// Remove duplicates by putting the bindings in a map
-			for (Map.Entry<String, String> pair : FluentIterable
-					.from(difference(iNewKeyBindings, iOldKeyBindings))
-					.filter(Predicates.not(IS_COMMENTED))
-					.transform(LINE_TO_BINDING_ENTRY).toSet()) {
-				deleteBinding(iParentId, pair.getKey(), pair.getValue());
-				// TODO: if it fails, recover and create the remaining ones?
-				createNewKeyBinding(pair.getValue(), pair.getKey(), iParentId);
-			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(getKeys(iParentId).toString())
-					.type("application/json").build();
-		}
 
 		private static void deleteBinding(Integer iParentId, String key, String name) {
 			try {
@@ -609,83 +384,11 @@ public class Yurl {
 			return shouldCreateNewCategoryNode;
 		}
 
-		@Deprecated
-		@GET
-		@Path("keys")
-		@Produces("application/json")
-		public Response keys(@QueryParam("parentId") Integer iParentId)
-				throws JSONException, IOException {
-			JSONArray ret = getKeys(iParentId);
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
-		}
-
-		@Deprecated
-		// TODO: Rewrite this as a map-fold?
-		public static JSONArray getKeys(Integer iParentId) throws IOException,
-				JSONException {
-//			System.out.println("getKeys() - parent ID: " + iParentId);
-			// Unfortunately, we cannot insist on counting only the URL nodes -
-			// it will prevent category nodes from being returned. See if
-			// there's a way to do this in Cypher. If there isn't, this is not a
-			// huge compromise.
-			// TODO: find a way to count the nodes
-			JSONArray theData = (JSONArray) execute(
-					"START parent=node({parentId}) " +
-					"MATCH parent-[c:CONTAINS*1..2]->n " +
-					"WHERE has(n.name)  and n.type = 'categoryNode' and id(parent) = {parentId} " +
-					"RETURN distinct ID(n),n.name,n.key,0 as c order by c desc",
-					ImmutableMap.<String, Object> builder()
-							.put("parentId", iParentId).build(), "getKeys()").get("data");
-			JSONArray oKeys = new JSONArray();
-			for (int i = 0; i < theData.length(); i++) {
-				JSONArray aBindingArray = theData.getJSONArray(i);
-				JSONObject aBindingObject = new JSONObject();
-				aBindingObject.put("id", (String) aBindingArray.get(0));
-				aBindingObject.put("name", (String) aBindingArray.get(1));
-				// TODO: this could be null
-				aBindingObject.put("key", (String) aBindingArray.get(2));
-				aBindingObject.put("count",
-						((Integer) aBindingArray.get(3)).toString());
-				oKeys.put(aBindingObject);
-			}
-//			System.out.println("getKeys() - end. length: " + oKeys.length());
-			return oKeys;
-		}
+		
 
 		// --------------------------------------------------------------------------------------
 		// Write operations
 		// --------------------------------------------------------------------------------------
-
-		@GET
-		@Path("stash")
-		@Produces("application/json")
-		public Response stash(@QueryParam("param1") String iUrl,
-				@QueryParam("rootId") Integer iCategoryId) throws JSONException,
-				IOException {
-			// This will convert
-			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
-			String theTitle = getTitle(new URL(theHttpUrl));
-			try {
-				JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle,
-						new Integer(iCategoryId));
-				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
-						.get("data")).get(0);
-				String nodeId = (String) theNewNodeId.get(0);
-
-//				MongoDbCache.invalidate(iCategoryId.toString());
-				
-				launchAsynchronousTasks(theHttpUrl, nodeId, iCategoryId);
-				// TODO: check that it returned successfully (redundant?)
-				System.out.println("stash() - node created: " + nodeId);
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(newNodeJsonObject.get("data").toString())
-						.type("application/json").build();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new JSONException(e);
-			}
-		}
 
 		private static void launchAsynchronousTasks(String iUrl, String id, Integer iCategoryId) {
 
@@ -710,7 +413,7 @@ public class Yurl {
 			Runnable r = new Runnable() {
 				// @Override
 				public void run() {
-					String queueFile = dir + "/" + Yurl.QUEUE_FILE_TXT;
+					String queueFile = dir + "/" + YurlOrder.QUEUE_FILE_TXT;
 					File file = Paths.get(dir).toFile();
 					if (!file.exists()) {
 						throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
@@ -862,7 +565,7 @@ public class Yurl {
 							Process p = new ProcessBuilder()
 									.directory(Paths.get(targetDirPath).toFile())
 									.command(
-											ImmutableList.of(Yurl.YOUTUBE_DOWNLOAD,
+											ImmutableList.of(YurlOrder.YOUTUBE_DOWNLOAD,
 													iVideoUrl)).inheritIO().start();
 							p.waitFor();
 							if (p.exitValue() == 0) {
@@ -1005,66 +708,7 @@ public class Yurl {
 			System.out.println("writeSuccessToDb() - Download recorded in database");
 		}
 
-		@GET
-		@Path("updateImage")
-		@Produces("application/json")
-		public Response changeImage(
-				@QueryParam("url") String imageUrl,
-				@QueryParam("id") Integer nodeIdToChange,
-				@QueryParam("parentId") Integer parentId)
-				throws IOException, JSONException {
-
-			if (parentId == null) {
-				System.err.println("YurlWorldResource.changeImage() - Warning: cache not updated, because parentId was not passed");
-			} else {
-				MongoDbCache.invalidate(parentId.toString());
-			}
-
-			return Response
-					.ok()
-					.header("Access-Control-Allow-Origin", "*")
-					.entity(execute(
-							"START n=node({nodeIdToChange}) "
-									+ "SET n.user_image =  {imageUrl}"
-									+ "RETURN n",
-							ImmutableMap.<String, Object> of("nodeIdToChange",
-									nodeIdToChange, "imageUrl",
-									imageUrl), "changeImage()")).type("application/json")
-					.build();
-		}
-
-
-		@GET
-		@Path("removeImage")
-		@Produces("application/json")
-		public Response removeImage(
-				@QueryParam("id") Integer nodeIdToChange,
-				@QueryParam("parentId") Integer parentId) throws IOException, JSONException {
-	
-			System.out.println("removeImage() - begin");
-			try {
-				Response r = Response
-						.ok()
-						.header("Access-Control-Allow-Origin", "*")
-						.entity(execute("START n=node({nodeIdToChange}) "
-								+ "REMOVE n.user_image, n.biggest_image " + "RETURN n",
-								ImmutableMap.<String, Object> of("nodeIdToChange", nodeIdToChange),
-								"removeImage()")).type("application/json").build();
-				if (parentId == null) {
-					System.err.println("YurlWorldResource.removeImage() - Warning: cache not updated, because parentId was not passed");
-				} else {
-					MongoDbCache.invalidate(parentId.toString());
-				}
-				return r;
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw e;
-			}
-		}
-
-	
 		// moveup, move up
-		@Deprecated
 		@GET
 		@Path("surpassOrdinal")
 		@Produces("application/json")
@@ -1085,7 +729,6 @@ public class Yurl {
 					.build();
 		}
 
-		@Deprecated
 		@GET
 		@Path("undercutOrdinal")
 		@Produces("application/json")
@@ -1106,7 +749,6 @@ public class Yurl {
 					.type("application/json").build();
 		}
 
-		@Deprecated
 		@GET
 		@Path("swapOrdinals")
 		@Produces("application/json")
@@ -1125,29 +767,6 @@ public class Yurl {
 					.type("application/json").build();
 		}
 
-		/** No existing relationships get deleted */
-		@GET
-		@Path("relateCategoriesToItem")
-		@Produces("application/json")
-		public Response relateCategoriesToItem(
-				@QueryParam("nodeId") Integer iNodeToBeTagged,
-				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo)
-				throws JSONException, IOException {
-			System.out.println("relateCategoriesToItem(): begin");
-			JSONArray theCategoryIdsToBeAddedTo = new JSONArray(
-					URLDecoder.decode(iCategoriesToBeAddedTo, "UTF-8"));
-			for (int i = 0; i < theCategoryIdsToBeAddedTo.length(); i++) {
-				System.out.println("relateCategoriesToItem(): "
-						+ theCategoryIdsToBeAddedTo.getInt(i) + " --> "
-						+ iNodeToBeTagged);
-				createNewRelation(theCategoryIdsToBeAddedTo.getInt(i),
-						iNodeToBeTagged);
-			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(new JSONObject().toString())
-					.type("application/json").build();
-		}
-
 		private Integer createCategory(String iCategoryName) throws IOException {
 			// TODO: first check if there is already a node with this name,
 			// which is for re-associating the keycode with the category
@@ -1160,24 +779,6 @@ public class Yurl {
 									.put("type", "categoryNode")
 									.put("created", System.currentTimeMillis())
 									.build(), "createCategory()").get("data")).get(0)).get(0));
-		}
-
-		@GET
-		@Path("createAndRelate")
-		@Produces("application/json")
-		public Response createSubDirAndMoveItem(
-				@QueryParam("newParentName") String iNewParentName,
-				@QueryParam("childId") Integer iItemId,
-				@QueryParam("currentParentId") Integer iCurrentParentId)
-				throws JSONException, IOException {
-			System.out.println("createSubDirAndMoveItem() - begin");
-			JSONObject relateToExistingCategory = relateToExistingCategory(iItemId,
-					iCurrentParentId,
-					createNewCategoryUnderExistingCategory(iNewParentName, iCurrentParentId));
-			Response rResponse =  Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(relateToExistingCategory.toString())
-					.type("application/json").build();
-			return rResponse;
 		}
 
 		private Integer createNewCategoryUnderExistingCategory(String iNewParentName,
@@ -1200,26 +801,6 @@ public class Yurl {
 			// Relate the item to the new category
 			JSONObject moveHelper = createNewRelation(theNewCategoryNodeIdString, iItemId);
 			return moveHelper;
-		}
-
-		/**
-		 * This MOVES a node to a new subcategory. It deletes the relationship
-		 * with the existing parent
-		 */
-		@GET
-		@Path("relate")
-		@Produces("application/json")
-		public Response move(@QueryParam("parentId") Integer iNewParentId,
-				@QueryParam("childId") Integer iChildId,
-				@QueryParam("currentParentId") Integer iCurrentParentId)
-				throws JSONException, IOException {
-			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
-					iNewParentId);
-//			MongoDbCache.invalidate(iNewParentId.toString());
-//			MongoDbCache.invalidate(iCurrentParentId.toString());
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(moveHelper.toString())
-					.type("application/json").build();
 		}
 
 		private void deleteExistingRelationship(Integer iChildId, Integer iCurrentParentId)
@@ -1302,37 +883,12 @@ public class Yurl {
 		// Read operations
 		// ----------------------------------------------------------------------------
 		
-		@GET
-		@Path("categoriesRecursive")
-		@Produces("application/json")
-		public Response categoriesRecursive(
-				@QueryParam("parentId") Integer iParentId)
-				throws JSONException, IOException {
-			JSONObject ret = new JSONObject();
-			JSONObject categoriesTreeJson;
-			java.nio.file.Path path = Paths.get("/home/sarnobat/github/.cache/" + Yurl.ROOT_ID + ".json");
-			if (Files.exists(path)) {
-				categoriesTreeJson = new JSONObject(FileUtils.readFileToString(path.toFile(), "UTF-8"));
-			} else {
-				if (categoriesTreeCache == null) {
-					categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
-				} else {
-					categoriesTreeJson = categoriesTreeCache;
-					refreshCategoriesTreeCacheInSeparateThread();
-				}
-				FileUtils.writeStringToFile(path.toFile(), categoriesTreeJson.toString(2), "UTF-8");
-			}
-			ret.put("categoriesTree", categoriesTreeJson);
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
-		}
-
 		private static void refreshCategoriesTreeCacheInSeparateThread() {
 			new Thread(){
 				@Override
 				public void run() {
 					try {
-						categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+						categoriesTreeCache = ReadCategoryTree.getCategoriesTree(YurlOrder.ROOT_ID);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -1536,7 +1092,7 @@ public class Yurl {
 					IOException {
 				String base = getBaseUrl(url);
 				// Don't use the chrome binaries that you browse the web with.
-				System.setProperty("webdriver.chrome.driver", Yurl.CHROMEDRIVER_PATH
+				System.setProperty("webdriver.chrome.driver", YurlOrder.CHROMEDRIVER_PATH
 						);
 
 				// HtmlUnitDriver and FirefoxDriver didn't work. Thankfully ChromeDriver does
@@ -1798,7 +1354,7 @@ public class Yurl {
 
 		  try {
 			CommandLine cmd = new DefaultParser().parse(options, args);
-			port = cmd.getOptionValue("p", "4447");
+			port = cmd.getOptionValue("p", "4439");
 
 			if (cmd.hasOption("h")) {
 		
