@@ -51,7 +51,7 @@ function initialize() {
 	////
 	
 	setCategoriesAndConfigureKeyBindings : {
-		$.getJSON(host + ":4440/yurl/keys?parentId=" + rootId, function(result){
+		$.getJSON(host + ":44440/yurl/keys?parentId=" + rootId, function(result){
 			//var originalKeyBindings = 
 				$.extend(true, {}, result);// TODO: what does this do?
 			categories = result;
@@ -106,7 +106,7 @@ function initialize() {
 			var newKeyBindings = $.trim($("#keys").val());
 			if (oldKeyBindings === newKeyBindings) {
 			} else {
-				var url = host + ":4440/yurl/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
+				var url = host + ":44440/yurl/keysUpdate?parentId=" + $.url().param('rootId') + "&newKeyBindings=" + encodeURIComponent(newKeyBindings) + "&oldKeyBindings=" + encodeURIComponent(oldKeyBindings);
 				$.getJSON(url, function(result){})
 					.success(function(data) {  
 						configureKeyBindings(data);
@@ -417,7 +417,7 @@ function moveToTop(source) {
 		var elem = $("#" + idToMove).remove();
 		$("#url_cards").prepend(elem);
 		// 1 more than latest timestamp
-		$.getJSON(urlBase + ":4439/yurl/surpassOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToSurpass=" + firstId,
+		$.getJSON(host + ":44439/yurl/surpassOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToSurpass=" + firstId,
 			function(result){
 			})
 			.success(function(data) {  
@@ -439,7 +439,7 @@ function moveToBottom(source) {
 	if (orderedDescending) {
 		var elem = $("#" + idToMove).remove();
 		$("#url_cards").append(elem);
-		$.getJSON(urlBase + ":4439/yurl/undercutOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToUndercut=" + lastId, 
+		$.getJSON(host + ":44439/yurl/undercutOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToUndercut=" + lastId, 
 			function(result){
 			})
 			.success(function(data) {  
@@ -466,7 +466,7 @@ function moveDown(source) {
 }
 
 function swap(firstId, secondId) {
-	$.getJSON(urlBase + ":4439/yurl/swapOrdinals?firstId=" + firstId + "&secondId=" + secondId, 
+	$.getJSON(host + ":44439/yurl/swapOrdinals?firstId=" + firstId + "&secondId=" + secondId, 
 		function(result){
 		})
 		.success(function(data) {  
