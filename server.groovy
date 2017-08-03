@@ -87,6 +87,9 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
+/**
+ * Neo4j dependencies removed.
+ */
 // TODO: Use javax.json.* for immutability
 public class Yurl {
 
@@ -99,6 +102,7 @@ public class Yurl {
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
+        private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";// Started using this in Aug 2017. Older data is not yet in this file.
 	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/3TB/new/move_to_unsorted/images/";
 // usually full and we get zero size files: "/media/sarnobat/Unsorted/images/";
 	private static final String TARGET_DIR_PATH_IMAGES_OTHER = "/media/sarnobat/3TB/new/move_to_unsorted/images/other";
@@ -667,17 +671,18 @@ public class Yurl {
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 			String theTitle = getTitle(new URL(theHttpUrl));
 			try {
-				JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle,
-						new Integer(iCategoryId));
-				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
-						.get("data")).get(0);
-				String nodeId = (String) theNewNodeId.get(0);
+				// TODO: append synchronously to new yurl master queue 
+	                        appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
 
-//				MongoDbCache.invalidate(iCategoryId.toString());
+//				JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle,
+//						new Integer(iCategoryId));
+//				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
+//						.get("data")).get(0);
+//				String nodeId = (String) theNewNodeId.get(0);
 				
-				launchAsynchronousTasks(theHttpUrl, nodeId, iCategoryId);
+				launchAsynchronousTasksNoNeo4j(theHttpUrl, iCategoryId);
 				// TODO: check that it returned successfully (redundant?)
-				System.out.println("stash() - node created: " + nodeId);
+//				System.out.println("stash() - node created: " + nodeId);
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(newNodeJsonObject.get("data").toString())
 						.type("application/json").build();
@@ -687,8 +692,31 @@ public class Yurl {
 			}
 		}
 
+
+                private static void launchAsynchronousTasksNoNeo4j(String iUrl, Integer iCategoryId) {
+
+                        // This is not (yet) the master file. The master file is written to synchronously.
+                        appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
+                        String targetDirPathImages;
+                        if (iCategoryId.longValue() == 29172) {
+                                targetDirPathImages = TARGET_DIR_PATH_IMAGES_OTHER;
+                        } else {
+                                targetDirPathImages = TARGET_DIR_PATH_IMAGES;
+                        }
+                        DownloadImage.downloadImageInSeparateThreadNoNeo4j(iUrl, targetDirPathImages, CYPHER_URI);
+                        DownloadVideo.downloadVideoInSeparateThreadNoNeo4j(iUrl, TARGET_DIR_PATH, CYPHER_URI);
+                        if (!iUrl.contains("amazon")) {
+                                // We end up with garbage images if we try to screen-scrape Amazon.
+                                // The static rules result in better images.
+				// TODO: Store this outside Neo4j
+                                //BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
+                        }
+                }
+
+		@Deprecated
 		private static void launchAsynchronousTasks(String iUrl, String id, Integer iCategoryId) {
 
+			// This is not (yet) the master file. The master file is written to synchronously.
 			appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
 			String targetDirPathImages;
 			if (iCategoryId.longValue() == 29172) {
@@ -704,6 +732,31 @@ public class Yurl {
 				BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
 			}
 		}
+
+
+                private static void appendToTextFileSync(final String iUrl, final String id, final String dir, String file2) throws IOException,
+                                InterruptedException {
+                                        String queueFile = dir + "/" + file2;
+                                        File file = Paths.get(dir).toFile();
+                                        if (!file.exists()) {
+                                                throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+                                        }
+                                        String command =  "echo '" + id + "::" + iUrl + "::'`date +%s` | tee -a '" + queueFile + "'";
+                                        System.out.println("appendToTextFileSync() - " + command);
+                                        Process p = new ProcessBuilder()
+                                                        .directory(file)
+                                                        .command("echo","hello world")
+                                                        .command("/bin/sh", "-c", command)
+                                                                        //"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
+                                                                                        .inheritIO().start();
+                                        p.waitFor();
+                                        if (p.exitValue() == 0) {
+                                                System.out.println("appendToTextFileSync() - successfully appended "
+                                                                + iUrl);
+                                        } else {
+                                                System.out.println("appendToTextFileSync() - error appending " + iUrl);
+                                        }
+                }
 
 		private static void appendToTextFile(final String iUrl, final String id, final String dir) throws IOException,
 				InterruptedException {
@@ -738,6 +791,7 @@ public class Yurl {
 		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
 		private static class DownloadImage {
+			@Deprecated
 			private static void downloadImageInSeparateThread(final String iUrl2,
 					final String targetDirPath, final String cypherUri, final String id) {
 				final String iUrl = iUrl2.replaceAll("\\?.*", "");
@@ -772,6 +826,38 @@ public class Yurl {
 				new Thread(r).start();
 			}
 
+private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
+                                        final String targetDirPath, final String cypherUri) {
+                                final String iUrl = iUrl2.replaceAll("\\?.*", "");
+                                Runnable r = new Runnable() {
+                                        // @Override
+                                        public void run() {
+                                                System.out.println("downloadImageInSeparateThreadNoNeo4j() - " + iUrl + " :: " + targetDirPath);
+                                                if (iUrl.toLowerCase().contains(".jpg")) {
+                                                } else if (iUrl.toLowerCase().contains(".jpeg")) {
+                                                } else if (iUrl.toLowerCase().contains(".png")) {
+                                                } else if (iUrl.toLowerCase().contains(".gif")) {
+                                                } else if (iUrl.toLowerCase().contains("gstatic")) {
+                                                } else {
+                                                        return;
+                                                }
+                                                System.out
+                                                                .println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadNoNeo4j() Is of image type");
+                                                try {
+                                                        System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadNoNeo4j() About to call saveimage");
+                                                        saveImage(iUrl, targetDirPath);
+                                                        System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadNoNeo4j() About to call execute: TODO - record the fact that we downloaded the image somwhere");
+                                                        System.out
+                                                                        .println("YurlWorldResource.downloadImageInSeparateThreadNoNeo4j() - image download recorded");
+                                                } catch (Exception e) {
+                                                        System.out
+                                                                        .println("YurlWorldResource.downloadImageInSeparateThreadNoNeo4j(): 1 Biggest image couldn't be determined"    + e.getMessage());
+                                                }
+                                        }
+                                };
+                                new Thread(r).start();
+                        }
+
 			private static void saveImage(String urlString, String targetDirPath)
 					throws IllegalAccessError, IOException {
 				System.out.println("saveImage() - " + urlString + "\t::\t" + targetDirPath);
@@ -803,6 +889,8 @@ public class Yurl {
 				return oDestinationFile;
 			}
 		}
+
+		@Deprecated // We are no longer writing new data to Neo4j. TXT only. Neo4j can be created in a read-only mode periodically.
 		private static JSONObject createNode(String theHttpUrl, String theTitle,
 				Integer rootId) throws IOException, JSONException {
 			long currentTimeMillis = System.currentTimeMillis();
@@ -853,6 +941,15 @@ public class Yurl {
 				executorService.submit(r2);
 			}
 
+                        static void downloadVideoInSeparateThreadNoNeo4j(String iVideoUrl,
+                                        String TARGET_DIR_PATH, String cypherUri) {
+                                System.out.println("YurlWorldResource.downloadVideoInSeparateThreadNoNeo4j() - begin: "
+                                                + iVideoUrl);
+                                // VGet stopped working, so now we use a shell callout
+                                Runnable r2 = getVideoDownloadJobNoNeo4j(iVideoUrl, TARGET_DIR_PATH);
+                                executorService.submit(r2);
+                        }
+
 			static Runnable getVideoDownloadJob(final String iVideoUrl, final String targetDirPath,
 					final String id) {
 				Runnable videoDownloadJob = new Runnable() {
@@ -884,6 +981,41 @@ public class Yurl {
 				};
 				return videoDownloadJob;
 			}
+
+
+                       static Runnable getVideoDownloadJobNoNeo4j(final String iVideoUrl, final String targetDirPath
+                                       ) {
+                                Runnable videoDownloadJob = new Runnable() {
+                                        @Override
+                                        public void run() {
+                                                try {
+                                                        Process p = new ProcessBuilder()
+                                                                        .directory(Paths.get(targetDirPath).toFile())
+                                                                        .command(
+                                                                                        ImmutableList.of(Yurl.YOUTUBE_DOWNLOAD,
+                                                                                                        iVideoUrl)).inheritIO().start();
+                                                        p.waitFor();
+                                                        if (p.exitValue() == 0) {
+                                                                System.out
+                                                                                .println("YurlWorldResource.downloadVideoInSeparateThreadNoNeo4j() - successfully downloaded "
+                                                                                                + iVideoUrl);
+								// TODO : write successful video download to file
+                                                                //writeSuccessToDb(iVideoUrl, id);
+                                                        } else {
+                                                                System.out
+                                                                                .println("YurlWorldResource.downloadVideoInSeparateThreadNoNeo4j() - error downloading "
+                                                                                                + iVideoUrl);
+                                                        }
+                                                } catch (InterruptedException e) {
+                                                        e.printStackTrace();
+                                                } catch (IOException e) {
+                                                        e.printStackTrace();
+                                                }
+                                        }
+                                };
+                                return videoDownloadJob;
+                        }
+
 		}
 
 		@SuppressWarnings("unused")
@@ -1332,7 +1464,7 @@ public class Yurl {
 				@Override
 				public void run() {
 					try {
-						categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+						//categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -1827,6 +1959,7 @@ public class Yurl {
 			// Problem - this won't get executed until the server ends
 			//YurlWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		} catch (Exception e) {
+	e.printStackTrace();
 			System.out.println("Not creating server instance");
 		}
 	}
