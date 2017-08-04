@@ -684,7 +684,7 @@ public class Yurl {
 				// TODO: check that it returned successfully (redundant?)
 //				System.out.println("stash() - node created: " + nodeId);
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(newNodeJsonObject.get("data").toString())
+						.entity(new JSONObject().toString())
 						.type("application/json").build();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1959,7 +1959,7 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
 			// Problem - this won't get executed until the server ends
 			//YurlWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		} catch (Exception e) {
-	e.printStackTrace();
+//	e.printStackTrace();
 			System.out.println("Not creating server instance");
 		}
 	}
