@@ -169,8 +169,7 @@ public class Yurl {
 		@Produces("application/json")
 		public Response downloadVideoSynchronous(@QueryParam("id") Integer iRootId, @QueryParam("url") String iUrl)
 				throws JSONException, IOException {
-			DownloadVideo.getVideoDownloadJob(iUrl, TARGET_DIR_PATH,
-					Integer.toString(iRootId)).run();
+			DownloadVideo.getVideoDownloadJobHttpcat(iUrl, TARGET_DIR_PATH).run();
 			JSONObject retVal = new JSONObject();
 			try {
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -660,12 +659,6 @@ public class Yurl {
 				// TODO: append synchronously to new yurl master queue 
 	                        appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
 
-//				JSONObject newNodeJsonObject = createNode(theHttpUrl, theTitle,
-//						new Integer(iCategoryId));
-//				JSONArray theNewNodeId = (JSONArray) ((JSONArray) newNodeJsonObject
-//						.get("data")).get(0);
-//				String nodeId = (String) theNewNodeId.get(0);
-				
 				launchAsynchronousTasksHttpcat(theHttpUrl, iCategoryId);
 				// TODO: check that it returned successfully (redundant?)
 //				System.out.println("stash() - node created: " + nodeId);
@@ -698,26 +691,6 @@ public class Yurl {
                                 //BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
                         }
                 }
-
-		@Deprecated
-		private static void launchAsynchronousTasks(String iUrl, String id, Integer iCategoryId) {
-
-			// This is not (yet) the master file. The master file is written to synchronously.
-			appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
-			String targetDirPathImages;
-			if (iCategoryId.longValue() == 29172) {
-				targetDirPathImages = TARGET_DIR_PATH_IMAGES_OTHER;
-			} else {
-				targetDirPathImages = TARGET_DIR_PATH_IMAGES;
-			}
-			DownloadImage.downloadImageInSeparateThread(iUrl, targetDirPathImages, CYPHER_URI, id);
-			DownloadVideo.downloadVideoInSeparateThread(iUrl, TARGET_DIR_PATH, CYPHER_URI, id);
-			if (!iUrl.contains("amazon")) {
-				// We end up with garbage images if we try to screen-scrape Amazon.
-				// The static rules result in better images.  
-				BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
-			}
-		}
 
 
                 private static void appendToTextFileSync(final String iUrl, final String id, final String dir, String file2) throws IOException,
@@ -777,42 +750,7 @@ public class Yurl {
 		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
 		private static class DownloadImage {
-			@Deprecated
-			private static void downloadImageInSeparateThread(final String iUrl2,
-					final String targetDirPath, final String cypherUri, final String id) {
-				final String iUrl = iUrl2.replaceAll("\\?.*", "");
-				Runnable r = new Runnable() {
-					// @Override
-					public void run() {
-						System.out.println("downloadImageInSeparateThread() - " + iUrl + " :: "	+ targetDirPath);
-						if (iUrl.toLowerCase().contains(".jpg")) {
-						} else if (iUrl.toLowerCase().contains(".jpeg")) {
-						} else if (iUrl.toLowerCase().contains(".png")) {
-						} else if (iUrl.toLowerCase().contains(".gif")) {
-						} else if (iUrl.toLowerCase().contains("gstatic")) {
-						} else {
-							return;
-						}
-						System.out
-								.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThread() Is of image type");
-						try {
-							System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThread() About to call saveimage");
-							saveImage(iUrl, targetDirPath);
-							System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThread() About to call execute");
-//!!!!!!!!!!!!!!!!! FIX THIS METHOD CALL, IT'S NOT GETTING FOUND IN GROOVY
-							execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_image = {date}", ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iUrl, "date", System.currentTimeMillis()), "downloadImageInSeparateThread()");
-							System.out
-									.println("YurlWorldResource.downloadImageInSeparateThread() - DB updated");
-						} catch (Exception e) {
-							System.out
-									.println("YurlWorldResource.downloadImageInSeparateThread(): 1 Biggest image couldn't be determined"	+ e.getMessage());
-						}
-					}
-				};
-				new Thread(r).start();
-			}
-
-private static void downloadImageInSeparateThreadHttpcat(final String iUrl2,
+			private static void downloadImageInSeparateThreadHttpcat(final String iUrl2,
                                         final String targetDirPath, final String cypherUri) {
                                 final String iUrl = iUrl2.replaceAll("\\?.*", "");
                                 Runnable r = new Runnable() {
@@ -874,23 +812,6 @@ private static void downloadImageInSeparateThreadHttpcat(final String iUrl2,
 			}
 		}
 
-		@Deprecated // We are no longer writing new data to Neo4j. TXT only. Neo4j can be created in a read-only mode periodically.
-		private static JSONObject createNode(String theHttpUrl, String theTitle,
-				Integer rootId) throws IOException, JSONException {
-			long currentTimeMillis = System.currentTimeMillis();
-			JSONObject json = execute(
-					"CREATE (n { title : {title} , url : {url}, created: {created}, ordinal: {ordinal} }) " +
-					"RETURN id(n)",
-					ImmutableMap.<String, Object> builder()
-							.put("url", theHttpUrl).put("title", theTitle)
-							.put("created", currentTimeMillis)
-							.put("ordinal", currentTimeMillis).build(), "createNode()");
-			createNewRelation(rootId,
-					(Integer) ((JSONArray) ((JSONArray) json.get("data"))
-							.get(0)).get(0));
-			return json;
-		}
-
 		private String getTitle(final URL iUrl) {
 			String title = "";
 			try {
@@ -916,15 +837,6 @@ private static void downloadImageInSeparateThreadHttpcat(final String iUrl2,
 		}
 
 		private static class DownloadVideo {
-			@Deprecated
-			static void downloadVideoInSeparateThread(String iVideoUrl,
-					String TARGET_DIR_PATH, String cypherUri, String id) {
-				System.out.println("YurlWorldResource.downloadVideoInSeparateThread() - begin: "
-						+ iVideoUrl);
-				// VGet stopped working, so now we use a shell callout
-				Runnable r2 = getVideoDownloadJob(iVideoUrl, TARGET_DIR_PATH, id);
-				executorService.submit(r2);
-			}
 
 	        static void downloadVideoInSeparateThreadHttpcat(String iVideoUrl,
 	                        String TARGET_DIR_PATH, String cypherUri) {
@@ -935,41 +847,7 @@ private static void downloadImageInSeparateThreadHttpcat(final String iUrl2,
 	                executorService.submit(r2);
 	        }
 
-	        @Deprecated
-			static Runnable getVideoDownloadJob(final String iVideoUrl, final String targetDirPath,
-					final String id) {
-				Runnable videoDownloadJob = new Runnable() {
-					@Override
-					public void run() {
-						try {
-							Process p = new ProcessBuilder()
-									.directory(Paths.get(targetDirPath).toFile())
-									.command(
-											ImmutableList.of(Yurl.YOUTUBE_DOWNLOAD,
-													iVideoUrl)).inheritIO().start();
-							p.waitFor();
-							if (p.exitValue() == 0) {
-								System.out
-										.println("YurlWorldResource.downloadVideoInSeparateThread() - successfully downloaded "
-												+ iVideoUrl);
-								writeSuccessToDb(iVideoUrl, id);
-							} else {
-								System.out
-										.println("YurlWorldResource.downloadVideoInSeparateThread() - error downloading "
-												+ iVideoUrl);
-							}
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				};
-				return videoDownloadJob;
-			}
-
-
-                       static Runnable getVideoDownloadJobHttpcat(final String iVideoUrl, final String targetDirPath
+	        static Runnable getVideoDownloadJobHttpcat(final String iVideoUrl, final String targetDirPath
                                        ) {
                                 Runnable videoDownloadJob = new Runnable() {
                                         @Override
