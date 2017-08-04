@@ -76,11 +76,6 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -93,11 +88,10 @@ import com.sun.jersey.api.json.JSONConfiguration;
 // TODO: Use javax.json.* for immutability
 public class Yurl {
 
-	// Gets stored here: http://192.168.1.2:28017/cache/items/
-	private static final boolean MONGODB_ENABLED = YurlResource.MongoDbCache.ENABLED;
 	private static final String CHROMEDRIVER_PATH = "/home/sarnobat/github/yurl/chromedriver";
 	public static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
 	public static final Integer ROOT_ID = 45;
+	@Deprecated
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
@@ -150,21 +144,13 @@ public class Yurl {
 				JSONObject oUrlsUnderCategory;
 				// We're not getting up to date pages when things change. But we need to
 				// start using this again if we dream of scaling this app.
-				if (MONGODB_ENABLED && MongoDbCache.exists(iRootId.toString())) {
-					System.out.println("YurlWorldResource.getUrls() - using cache");
-					oUrlsUnderCategory = new JSONObject(MongoDbCache.get(iRootId.toString()));
-				} else {
-					// If there were multiple clients here, you'd need to block the 2nd onwards
-					System.out.println("YurlWorldResource.getUrls() - not using cache");
-					JSONObject retVal1;
-					retVal1 = new JSONObject();
-					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
-					retVal1.put("categoriesRecursive", categoriesTreeJson);
-					if (MONGODB_ENABLED) {
-						MongoDbCache.put(iRootId.toString(), retVal1.toString());
-					}
-					oUrlsUnderCategory = retVal1;
-				}
+				// If there were multiple clients here, you'd need to block the 2nd onwards
+				System.out.println("YurlWorldResource.getUrls() - not using cache");
+				JSONObject retVal1;
+				retVal1 = new JSONObject();
+				retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+				retVal1.put("categoriesRecursive", categoriesTreeJson);
+				oUrlsUnderCategory = retVal1;
 				
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(oUrlsUnderCategory.toString())
@@ -708,7 +694,7 @@ public class Yurl {
                         if (!iUrl.contains("amazon")) {
                                 // We end up with garbage images if we try to screen-scrape Amazon.
                                 // The static rules result in better images.
-				// TODO: Store this outside Neo4j
+                        		// TODO: Store this outside Neo4j
                                 //BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
                         }
                 }
@@ -847,11 +833,9 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
                                                         System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadNoNeo4j() About to call saveimage");
                                                         saveImage(iUrl, targetDirPath);
                                                         System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadNoNeo4j() About to call execute: TODO - record the fact that we downloaded the image somwhere");
-                                                        System.out
-                                                                        .println("YurlWorldResource.downloadImageInSeparateThreadNoNeo4j() - image download recorded");
+                                                        System.out.println("YurlWorldResource.downloadImageInSeparateThreadNoNeo4j() - image download recorded");
                                                 } catch (Exception e) {
-                                                        System.out
-                                                                        .println("YurlWorldResource.downloadImageInSeparateThreadNoNeo4j(): 1 Biggest image couldn't be determined"    + e.getMessage());
+                                                        System.out.println("YurlWorldResource.downloadImageInSeparateThreadNoNeo4j(): 1 Biggest image couldn't be determined"    + e.getMessage());
                                                 }
                                         }
                                 };
@@ -932,6 +916,7 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
 		}
 
 		private static class DownloadVideo {
+			@Deprecated
 			static void downloadVideoInSeparateThread(String iVideoUrl,
 					String TARGET_DIR_PATH, String cypherUri, String id) {
 				System.out.println("YurlWorldResource.downloadVideoInSeparateThread() - begin: "
@@ -941,15 +926,16 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
 				executorService.submit(r2);
 			}
 
-                        static void downloadVideoInSeparateThreadNoNeo4j(String iVideoUrl,
-                                        String TARGET_DIR_PATH, String cypherUri) {
-                                System.out.println("YurlWorldResource.downloadVideoInSeparateThreadNoNeo4j() - begin: "
-                                                + iVideoUrl);
-                                // VGet stopped working, so now we use a shell callout
-                                Runnable r2 = getVideoDownloadJobNoNeo4j(iVideoUrl, TARGET_DIR_PATH);
-                                executorService.submit(r2);
-                        }
+	        static void downloadVideoInSeparateThreadNoNeo4j(String iVideoUrl,
+	                        String TARGET_DIR_PATH, String cypherUri) {
+	                System.out.println("YurlWorldResource.downloadVideoInSeparateThreadNoNeo4j() - begin: "
+	                                + iVideoUrl);
+	                // VGet stopped working, so now we use a shell callout
+	                Runnable r2 = getVideoDownloadJobNoNeo4j(iVideoUrl, TARGET_DIR_PATH);
+	                executorService.submit(r2);
+	        }
 
+	        @Deprecated
 			static Runnable getVideoDownloadJob(final String iVideoUrl, final String targetDirPath,
 					final String id) {
 				Runnable videoDownloadJob = new Runnable() {
@@ -1149,7 +1135,6 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
 			if (parentId == null) {
 				System.err.println("YurlWorldResource.changeImage() - Warning: cache not updated, because parentId was not passed");
 			} else {
-				MongoDbCache.invalidate(parentId.toString());
 			}
 
 			return Response
@@ -1185,7 +1170,6 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
 				if (parentId == null) {
 					System.err.println("YurlWorldResource.removeImage() - Warning: cache not updated, because parentId was not passed");
 				} else {
-					MongoDbCache.invalidate(parentId.toString());
 				}
 				return r;
 			} catch (Exception e) {
@@ -1382,10 +1366,12 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
 							.build(), "createNewRelation()");
 		}
 
+		@Deprecated
 		static JSONObject execute(String iCypherQuery, Map<String, Object> iParams, String... iCommentPrefix) {
 			return execute(iCypherQuery, iParams, true, iCommentPrefix);
 		}
 
+		@Deprecated
 		// TODO: make this map immutable
 		static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams, boolean doLogging, String... iCommentPrefix) {
@@ -1836,79 +1822,6 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
 		// I hope this is the same as JSONObject.Null (not capitals)
 		@Deprecated // Does not compile in Eclipse, but does compile in groovy
 		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
-
-		private static class MongoDbCache {
-
-
-			public static final boolean ENABLED = false;
-			private static final String HOST = "192.168.1.2";
-			private static final int PORT = 27017;
-
-			private static final String VALUE = "value";
-			private static final String ID = "_id";
-
-			private static final String COLLECTION = "items";
-			private static final String CACHE = "cache";
-
-			private static boolean delete(String key) {
-				MongoClient mongo;
-				try {
-					mongo = new MongoClient(HOST, PORT);
-				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
-				}
-				DB db = mongo.getDB(CACHE);
-				DBCollection table = db.getCollection(COLLECTION);
-				BasicDBObject searchQuery = new BasicDBObject(ID, key);
-				return table.remove(searchQuery).getN() > 0;
-			}
-
-			static boolean invalidate(String key) {
-				delete(key);
-			}
-
-			static boolean exists(String key) {
-				MongoClient mongo;
-				try {
-					mongo = new MongoClient(HOST, PORT);
-				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
-				}
-				DB db = mongo.getDB(CACHE);
-				DBCollection table = db.getCollection(COLLECTION);
-				BasicDBObject searchQuery = new BasicDBObject(ID, key);
-				return table.find(searchQuery).size() > 0;
-			}
-
-			static void put(String key, String value) {
-				MongoClient mongo;
-				try {
-					mongo = new MongoClient(HOST, PORT);
-				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
-				}
-				DB db = mongo.getDB(CACHE);
-				DBCollection collection = db.getCollection(COLLECTION);
-				BasicDBObject document = new BasicDBObject(ID, key);
-				document.put(VALUE, value);
-				collection.insert(document);
-			}
-
-			static String get(String key) {
-				MongoClient mongo;
-				try {
-					mongo = new MongoClient(HOST, PORT);
-				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
-				}
-				DB db = mongo.getDB(CACHE);
-				DBCollection collection = db.getCollection(COLLECTION);
-				BasicDBObject searchQuery = new BasicDBObject(ID, key);
-				DBCursor cursor = collection.find(searchQuery);
-				DBObject next = cursor.next();
-				return (String) next.get(VALUE);
-			}
-		}
 	}
 
 	@SuppressWarnings("unused")
