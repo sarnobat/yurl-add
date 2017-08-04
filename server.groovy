@@ -666,7 +666,7 @@ public class Yurl {
 //						.get("data")).get(0);
 //				String nodeId = (String) theNewNodeId.get(0);
 				
-				launchAsynchronousTasksNoNeo4j(theHttpUrl, iCategoryId);
+				launchAsynchronousTasksHttpcat(theHttpUrl, iCategoryId);
 				// TODO: check that it returned successfully (redundant?)
 //				System.out.println("stash() - node created: " + nodeId);
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
@@ -679,7 +679,7 @@ public class Yurl {
 		}
 
 
-                private static void launchAsynchronousTasksNoNeo4j(String iUrl, Integer iCategoryId) {
+                private static void launchAsynchronousTasksHttpcat(String iUrl, Integer iCategoryId) {
 
                         // This is not (yet) the master file. The master file is written to synchronously.
                         appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
@@ -689,8 +689,8 @@ public class Yurl {
                         } else {
                                 targetDirPathImages = TARGET_DIR_PATH_IMAGES;
                         }
-                        DownloadImage.downloadImageInSeparateThreadNoNeo4j(iUrl, targetDirPathImages, CYPHER_URI);
-                        DownloadVideo.downloadVideoInSeparateThreadNoNeo4j(iUrl, TARGET_DIR_PATH, CYPHER_URI);
+                        DownloadImage.downloadImageInSeparateThreadHttpcat(iUrl, targetDirPathImages, CYPHER_URI);
+                        DownloadVideo.downloadVideoInSeparateThreadHttpcat(iUrl, TARGET_DIR_PATH, CYPHER_URI);
                         if (!iUrl.contains("amazon")) {
                                 // We end up with garbage images if we try to screen-scrape Amazon.
                                 // The static rules result in better images.
@@ -812,13 +812,13 @@ public class Yurl {
 				new Thread(r).start();
 			}
 
-private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
+private static void downloadImageInSeparateThreadHttpcat(final String iUrl2,
                                         final String targetDirPath, final String cypherUri) {
                                 final String iUrl = iUrl2.replaceAll("\\?.*", "");
                                 Runnable r = new Runnable() {
                                         // @Override
                                         public void run() {
-                                                System.out.println("downloadImageInSeparateThreadNoNeo4j() - " + iUrl + " :: " + targetDirPath);
+                                                System.out.println("downloadImageInSeparateThreadHttpcat() - " + iUrl + " :: " + targetDirPath);
                                                 if (iUrl.toLowerCase().contains(".jpg")) {
                                                 } else if (iUrl.toLowerCase().contains(".jpeg")) {
                                                 } else if (iUrl.toLowerCase().contains(".png")) {
@@ -828,14 +828,14 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
                                                         return;
                                                 }
                                                 System.out
-                                                                .println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadNoNeo4j() Is of image type");
+                                                                .println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadHttpcat() Is of image type");
                                                 try {
-                                                        System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadNoNeo4j() About to call saveimage");
+                                                        System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadHttpcat() About to call saveimage");
                                                         saveImage(iUrl, targetDirPath);
-                                                        System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadNoNeo4j() About to call execute: TODO - record the fact that we downloaded the image somwhere");
-                                                        System.out.println("YurlWorldResource.downloadImageInSeparateThreadNoNeo4j() - image download recorded");
+                                                        System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadHttpcat() About to call execute: TODO - record the fact that we downloaded the image somwhere");
+                                                        System.out.println("YurlWorldResource.downloadImageInSeparateThreadHttpcat() - image download recorded");
                                                 } catch (Exception e) {
-                                                        System.out.println("YurlWorldResource.downloadImageInSeparateThreadNoNeo4j(): 1 Biggest image couldn't be determined"    + e.getMessage());
+                                                        System.out.println("YurlWorldResource.downloadImageInSeparateThreadHttpcat(): 1 Biggest image couldn't be determined"    + e.getMessage());
                                                 }
                                         }
                                 };
@@ -926,12 +926,12 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
 				executorService.submit(r2);
 			}
 
-	        static void downloadVideoInSeparateThreadNoNeo4j(String iVideoUrl,
+	        static void downloadVideoInSeparateThreadHttpcat(String iVideoUrl,
 	                        String TARGET_DIR_PATH, String cypherUri) {
-	                System.out.println("YurlWorldResource.downloadVideoInSeparateThreadNoNeo4j() - begin: "
+	                System.out.println("YurlWorldResource.downloadVideoInSeparateThreadHttpcat() - begin: "
 	                                + iVideoUrl);
 	                // VGet stopped working, so now we use a shell callout
-	                Runnable r2 = getVideoDownloadJobNoNeo4j(iVideoUrl, TARGET_DIR_PATH);
+	                Runnable r2 = getVideoDownloadJobHttpcat(iVideoUrl, TARGET_DIR_PATH);
 	                executorService.submit(r2);
 	        }
 
@@ -969,7 +969,7 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
 			}
 
 
-                       static Runnable getVideoDownloadJobNoNeo4j(final String iVideoUrl, final String targetDirPath
+                       static Runnable getVideoDownloadJobHttpcat(final String iVideoUrl, final String targetDirPath
                                        ) {
                                 Runnable videoDownloadJob = new Runnable() {
                                         @Override
@@ -983,13 +983,13 @@ private static void downloadImageInSeparateThreadNoNeo4j(final String iUrl2,
                                                         p.waitFor();
                                                         if (p.exitValue() == 0) {
                                                                 System.out
-                                                                                .println("YurlWorldResource.downloadVideoInSeparateThreadNoNeo4j() - successfully downloaded "
+                                                                                .println("YurlWorldResource.downloadVideoInSeparateThreadHttpcat() - successfully downloaded "
                                                                                                 + iVideoUrl);
 								// TODO : write successful video download to file
                                                                 //writeSuccessToDb(iVideoUrl, id);
                                                         } else {
                                                                 System.out
-                                                                                .println("YurlWorldResource.downloadVideoInSeparateThreadNoNeo4j() - error downloading "
+                                                                                .println("YurlWorldResource.downloadVideoInSeparateThreadHttpcat() - error downloading "
                                                                                                 + iVideoUrl);
                                                         }
                                                 } catch (InterruptedException e) {
