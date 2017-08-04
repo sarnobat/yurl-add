@@ -694,7 +694,7 @@ public class Yurl {
                         if (!iUrl.contains("amazon")) {
                                 // We end up with garbage images if we try to screen-scrape Amazon.
                                 // The static rules result in better images.
-                        		// TODO: Store this outside Neo4j
+                        		// TODO: Store this successful image download outside Neo4j.
                                 //BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
                         }
                 }
