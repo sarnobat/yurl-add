@@ -96,6 +96,7 @@ public class Yurl {
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
+	private static final String TITLE_FILE_TXT = "yurl_titles_2017.txt";
         private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";// Started using this in Aug 2017. Older data is not yet in this file.
 	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/3TB/new/move_to_unsorted/images/";
 // usually full and we get zero size files: "/media/sarnobat/Unsorted/images/";
@@ -654,7 +655,6 @@ public class Yurl {
 				IOException {
 			// This will convert
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
-			String theTitle = getTitle(new URL(theHttpUrl));
 			try {
 				// TODO: append synchronously to new yurl master queue 
 	            appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
@@ -672,7 +672,7 @@ public class Yurl {
 		}
 
 
-        private static void launchAsynchronousTasksHttpcat(String iUrl, Integer iCategoryId) {
+        private static void launchAsynchronousTasksHttpcat(final String iUrl, Integer iCategoryId) {
 		
 			// Delete the url cache file for this category. It will get
 			// regenrated next time we load that category page.
@@ -680,6 +680,39 @@ public class Yurl {
 			java.nio.file.Path path = Paths.get(string);
 			path.toFile().delete();
         	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path);
+        	
+        	// Get the title
+			
+			_10: {
+
+				final String theTitle = getTitle(new URL(iUrl));
+				Runnable r = new Runnable() {
+					// @Override
+					public void run() {
+						String titleFileStr = Yurl.QUEUE_FILE + "/" + Yurl.TITLE_FILE_TXT;
+						File file = Paths.get(titleFileStr).toFile();
+						File file2 = Paths.get(Yurl.QUEUE_FILE).toFile();
+						if (!file2.exists()) {
+							throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+						}
+						String command = "echo '" + iUrl + "::" + theTitle + "' | tee -a '" + titleFileStr + "'";
+						System.out.println("appendToTextFile() - " + command);
+						Process p = new ProcessBuilder()
+								.directory(file2)
+								.command("echo","hello world")
+								.command("/bin/sh", "-c", command)
+								.inheritIO().start();
+						p.waitFor();
+						if (p.exitValue() == 0) {
+							System.out.println("appendToTextFile() - successfully appended "
+									+ iUrl);
+						} else {
+							System.out.println("appendToTextFile() - error appending " + iUrl);
+						}
+					}
+				};
+				new Thread(r).start();
+			}
         	
             // This is not (yet) the master file. The master file is written to synchronously.
             appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
@@ -819,7 +852,7 @@ public class Yurl {
 			}
 		}
 
-		private String getTitle(final URL iUrl) {
+		private static String getTitle(final URL iUrl) {
 			String title = "";
 			try {
 				title = Executors
