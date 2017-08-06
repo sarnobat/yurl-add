@@ -16,6 +16,7 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -85,8 +86,10 @@ import com.sun.jersey.api.json.JSONConfiguration;
 public class YurlList {
 
 	// Gets stored here: http://192.168.1.2:28017/cache/items/
+	@Deprecated
 	private static final boolean MONGODB_ENABLED = YurlResource.MongoDbCache.ENABLED;
 	public static final Integer ROOT_ID = 45;
+	@Deprecated
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 	
 	@Path("yurl")
@@ -119,7 +122,7 @@ public class YurlList {
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
 				System.out.println("getUrls() - preloaded categories tree not ready");
-				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(YurlList.ROOT_ID);
+				categoriesTreeJson = ReadCategoryTree.getCategoriesTreeNeo4j(YurlList.ROOT_ID);
 			} else {
 				categoriesTreeJson = categoriesTreeCache;
 				// This is done in a separate thread
@@ -137,7 +140,8 @@ public class YurlList {
 					System.out.println("YurlWorldResource.getUrls() - not using cache");
 					JSONObject retVal1;
 					retVal1 = new JSONObject();
-					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+					retVal1.put("urls", getItemsAtLevelAndChildLevelsNeo4j(iRootId));
+					retVal1.put("urlsNotNeo4j", getItemsAtLevelAndChildLevels(iRootId));
 					retVal1.put("categoriesRecursive", categoriesTreeJson);
 					if (MONGODB_ENABLED) {
 						MongoDbCache.put(iRootId.toString(), retVal1.toString());
@@ -163,15 +167,90 @@ public class YurlList {
 		// Page operations
 		// ------------------------------------------------------------------------------------
 
+		
+		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
+			JSONObject urls = new JSONObject();
+			
+			Collection<String> categoriesToGetUrlsFrom = ImmutableList
+					.<String> builder().add(iRootId.toString())
+					.addAll(getChildCategories(iRootId.toString())).build();
+
+			for (String categoryId : categoriesToGetUrlsFrom) {
+				JSONArray urlsInCategory = getUrlsInCategory(categoryId);
+				urls.put(categoryId, urlsInCategory);
+			}
+			return urls;
+		}
+
+		private static JSONArray getUrlsInCategory(String categoryId) {
+			// Create the file if it doesn't exist
+			java.nio.file.Path urlsInCategoryJsonFile = Paths.get(System
+					.getProperty("user.home")
+					+ "/github/yurl/tmp/urls/"
+					+ categoryId + ".json");
+
+			if (!urlsInCategoryJsonFile.toFile().exists()) {
+				
+				JSONArray urlsInCategory = new JSONArray();
+
+				List<String> lines = FileUtils.readLines(
+						Paths.get(
+								System.getProperty("user.home")
+										+ "/sarnobat.git/yurl_master.txt")
+								.toFile(), "UTF-8");
+
+				for (String line : filterByCategory(lines, categoryId)) {
+					JSONObject urlObj = new JSONObject();
+					String[] elements = line.split("::");
+					if (elements.length < 3) {
+						continue;
+					}
+					System.err
+							.println("YurlList.YurlResource.getUrlsInCategory(): " + line);
+					String categoryIdElement = elements[0];
+					String url = elements[1];
+					String timestamp = elements[2];
+					
+					JSONObject urlObj1 = new JSONObject();
+					urlObj1.put("id", "STOP_RELYING_ON_THIS");// TODO: moving a url will need reimplementing on the client and server
+					urlObj1.put("url", url);
+					urlObj1.put("created", timestamp);
+					urlObj1.put("parentId", categoryId);
+					urlObj1.put("title", "<fill this in>");
+					
+					urlsInCategory.put(urlObj1);
+				}
+				
+				FileUtils.write(urlsInCategoryJsonFile.toFile(), urlsInCategory.toString(2), "UTF-8");
+			}
+			return new JSONArray(FileUtils.readFileToString(
+					urlsInCategoryJsonFile.toFile(), "UTF-8"));
+		}
+
+		private static List<String> filterByCategory(List<String> lines,
+				final String categoryId) {
+			return FluentIterable.from(lines).filter(new Predicate<String>() {
+				@Override
+				public boolean apply(@Nullable String input) {
+					return input.startsWith(categoryId);
+				}
+			}).toList();
+		}
+
+		private static Collection<String> getChildCategories(String iRootId) {
+			// TODO Auto-generated method stub
+			return ImmutableList.of("612197", "611800");
+		}
+
 		////
 		//// The main part
 		////
 		// TODO: See if you can turn this into a map-reduce
 		@SuppressWarnings("unused")
-		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
+		private static JSONObject getItemsAtLevelAndChildLevelsNeo4j(Integer iRootId) throws JSONException, IOException {
 //			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
-				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(YurlList.ROOT_ID);
+				categoriesTreeCache = ReadCategoryTree.getCategoriesTreeNeo4j(YurlList.ROOT_ID);
 			}
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
@@ -293,6 +372,7 @@ public class YurlList {
 		}
 
 		// TODO: make this map immutable
+		@Deprecated
 		static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams, boolean doLogging, String... iCommentPrefix) {
 			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
@@ -345,7 +425,7 @@ public class YurlList {
 				@Override
 				public void run() {
 					try {
-						categoriesTreeCache = ReadCategoryTree.getCategoriesTree(YurlList.ROOT_ID);
+						categoriesTreeCache = ReadCategoryTree.getCategoriesTreeNeo4j(YurlList.ROOT_ID);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -356,7 +436,8 @@ public class YurlList {
 		}
 		
 		private static class ReadCategoryTree {
-			static JSONObject getCategoriesTree(Integer rootId)
+			@Deprecated
+			static JSONObject getCategoriesTreeNeo4j(Integer rootId)
 					throws JSONException, IOException {
 				return new AddSizes(
 						// This is the expensive query, not the other one
@@ -541,6 +622,7 @@ public class YurlList {
 		@Deprecated // Does not compile in Eclipse, but does compile in groovy
 		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
 
+		@Deprecated
 		private static class MongoDbCache {
 
 
