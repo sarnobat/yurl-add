@@ -264,7 +264,7 @@ public class YurlList {
 						sb.append("\n");
 					}
 				}
-				FileUtils.writeLines(file, childCategories, "UTF-8");
+				FileUtils.writeLines(file, "UTF-8", childCategories);
 			}
 			System.out.println("YurlList.YurlResource.getChildCategories() file = " + file.getPath());
 			List<String> categoryLines = FileUtils.readLines(file, "UTF-8");
