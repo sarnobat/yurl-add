@@ -217,7 +217,7 @@ public class YurlList {
 					JSONObject urlObj1 = new JSONObject();
 					urlObj1.put("id", "STOP_RELYING_ON_THIS");// TODO: moving a url will need reimplementing on the client and server
 					urlObj1.put("url", url);
-					urlObj1.put("created", Integer.parseInt(timestamp));
+					urlObj1.put("created", Long.parseLong(timestamp));
 					urlObj1.put("parentId", categoryId);
 					urlObj1.put("title", "<fill this in>");
 					

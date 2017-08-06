@@ -170,7 +170,7 @@ function renderIfReady() {
 			//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
 			//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
 			var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
-			cardsHtml = urlsRootOnly.sort(function (u1, u2) {return parseInt(u1.created) > parseInt(u2.created);}).map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
+			cardsHtml = urlsRootOnly.sort(function (u1, u2) {return u2.created - u1.created ;}).map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
 		}
 	}
 	var urlThumbnailsHtml = "";
