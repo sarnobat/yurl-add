@@ -676,6 +676,10 @@ public class Yurl {
 		
 			// Delete the url cache file for this category. It will get
 			// regenrated next time we load that category page.
+        	String string = System.getProperty("user.home") + "/github/yurl/tmp/urls/" + iCategoryId + ".json";
+			java.nio.file.Path path = Paths.get(string);
+			path.toFile().delete();
+        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path);
         	
             // This is not (yet) the master file. The master file is written to synchronously.
             appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
