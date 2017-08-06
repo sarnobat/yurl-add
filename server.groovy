@@ -657,7 +657,7 @@ public class Yurl {
 			String theTitle = getTitle(new URL(theHttpUrl));
 			try {
 				// TODO: append synchronously to new yurl master queue 
-	                        appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
+	            appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
 
 				launchAsynchronousTasksHttpcat(theHttpUrl, iCategoryId);
 				// TODO: check that it returned successfully (redundant?)
