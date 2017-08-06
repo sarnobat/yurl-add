@@ -170,7 +170,7 @@ function renderIfReady() {
 			//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
 			//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
 			var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
-			cardsHtml = urlsRootOnly.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
+			cardsHtml = urlsRootOnly.sort(function (u1, u2) {return parseInt(u1.created) > parseInt(u2.created);}).map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
 		}
 	}
 	var urlThumbnailsHtml = "";
@@ -771,7 +771,8 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 			var site = urlElements[0];
 			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
 		}
-		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+(new Date(field.created))+"<br>"+"</sub>");
+		var dddd = (new Date(parseInt(field.created))).toString();
+		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+field.created+" - "+dddd+"<br>"+"</sub>");
 	}
 	
 	var imageCell = createImageCell(field, biggestImages, null, resultRowNumber);
