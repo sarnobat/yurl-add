@@ -176,6 +176,11 @@ public class YurlList {
 					.addAll(getChildCategories(iRootId.toString())).build();
 
 			for (String categoryId : categoriesToGetUrlsFrom) {
+				System.out
+						.println("YurlList.YurlResource.getItemsAtLevelAndChildLevels() " + categoryId);
+				if (categoryId.length() > 10) {
+					throw new RuntimeException("Not a category ID: " + categoryId);
+				}
 				JSONArray urlsInCategory = getUrlsInCategory(categoryId);
 				urls.put(categoryId, urlsInCategory);
 			}
@@ -185,9 +190,7 @@ public class YurlList {
 		private static JSONArray getUrlsInCategory(String categoryId) {
 			// Create the file if it doesn't exist
 			java.nio.file.Path urlsInCategoryJsonFile = Paths.get(System
-					.getProperty("user.home")
-					+ "/github/yurl/tmp/urls/"
-					+ categoryId + ".json");
+					.getProperty("user.home") + "/github/yurl/tmp/urls/" + categoryId + ".json");
 
 			if (!urlsInCategoryJsonFile.toFile().exists()) {
 				
@@ -238,8 +241,39 @@ public class YurlList {
 		}
 
 		private static Collection<String> getChildCategories(String iRootId) {
-			// TODO Auto-generated method stub
-			return ImmutableList.of("612197", "611800");
+			
+			File file = Paths.get("/home/sarnobat/github/yurl/tmp/categories/topology/" + iRootId + ".txt").toFile();
+			if (!file.exists()) {
+				java.nio.file.Path p = Paths.get("/home/sarnobat/github/yurl/yurl_category_topology.txt.2017-07-29.columns_reordered");
+				List<String> childCategories = new LinkedList<String>();
+				for (String line : FileUtils.readLines(p.toFile(), "UTF-8")) {
+					String[] elements = line.split("::");
+					System.out
+							.println("YurlList.YurlResource.getChildCategories() 1 " + line);
+					if (elements.length < 2) {
+						continue;
+					}
+					System.out
+					.println("YurlList.YurlResource.getChildCategories() 2 " + line);
+					String categoryId = elements[0];
+					String childCategoryId = elements[1];
+					if (categoryId.equals(iRootId)) {
+						childCategories.add(childCategoryId);
+					}
+				}
+				FileUtils.writeLines(file, childCategories, "UTF-8");
+			}
+			System.out.println("YurlList.YurlResource.getChildCategories() file = " + file.getPath());
+			List<String> categoryLines = FileUtils.readLines(file, "UTF-8");
+			return ImmutableList.copyOf(categoryLines);
+		}
+
+		private static List<String> filter(List<String> categoryLines, final String iRootId) {
+			return FluentIterable.from(categoryLines).filter(new Predicate<String>(){
+				@Override
+				public boolean apply(@Nullable String input) {
+					return input.startsWith(iRootId);
+				}}).toList();
 		}
 
 		////
