@@ -246,6 +246,7 @@ public class YurlList {
 			if (!file.exists()) {
 				java.nio.file.Path p = Paths.get("/home/sarnobat/github/yurl/yurl_category_topology.txt.2017-07-29.columns_reordered");
 				List<String> childCategories = new LinkedList<String>();
+				StringBuffer sb = new StringBuffer();
 				for (String line : FileUtils.readLines(p.toFile(), "UTF-8")) {
 					String[] elements = line.split("::");
 					System.out
@@ -259,6 +260,8 @@ public class YurlList {
 					String childCategoryId = elements[1];
 					if (categoryId.equals(iRootId)) {
 						childCategories.add(childCategoryId);
+						sb.append(childCategoryId);
+						sb.append("\n");
 					}
 				}
 				FileUtils.writeLines(file, childCategories, "UTF-8");
