@@ -672,27 +672,28 @@ public class Yurl {
 		}
 
 
-                private static void launchAsynchronousTasksHttpcat(String iUrl, Integer iCategoryId) {
-
-                	//
-                	
-                    // This is not (yet) the master file. The master file is written to synchronously.
-                    appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
-                    String targetDirPathImages;
-                    if (iCategoryId.longValue() == 29172) {
-                            targetDirPathImages = TARGET_DIR_PATH_IMAGES_OTHER;
-                    } else {
-                            targetDirPathImages = TARGET_DIR_PATH_IMAGES;
-                    }
-                    DownloadImage.downloadImageInSeparateThreadHttpcat(iUrl, targetDirPathImages, CYPHER_URI);
-                    DownloadVideo.downloadVideoInSeparateThreadHttpcat(iUrl, TARGET_DIR_PATH, CYPHER_URI);
-                    if (!iUrl.contains("amazon")) {
-                            // We end up with garbage images if we try to screen-scrape Amazon.
-                            // The static rules result in better images.
-                    		// TODO: Store this successful image download outside Neo4j.
-                            //BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
-                    }
-                }
+        private static void launchAsynchronousTasksHttpcat(String iUrl, Integer iCategoryId) {
+		
+			// Delete the url cache file for this category. It will get
+			// regenrated next time we load that category page.
+        	
+            // This is not (yet) the master file. The master file is written to synchronously.
+            appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
+            String targetDirPathImages;
+            if (iCategoryId.longValue() == 29172) {
+                    targetDirPathImages = TARGET_DIR_PATH_IMAGES_OTHER;
+            } else {
+                    targetDirPathImages = TARGET_DIR_PATH_IMAGES;
+            }
+            DownloadImage.downloadImageInSeparateThreadHttpcat(iUrl, targetDirPathImages, CYPHER_URI);
+            DownloadVideo.downloadVideoInSeparateThreadHttpcat(iUrl, TARGET_DIR_PATH, CYPHER_URI);
+            if (!iUrl.contains("amazon")) {
+                    // We end up with garbage images if we try to screen-scrape Amazon.
+                    // The static rules result in better images.
+            		// TODO: Store this successful image download outside Neo4j.
+                    //BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
+            }
+        }
 
 
                 private static void appendToTextFileSync(final String iUrl, final String id, final String dir, String file2) throws IOException,
