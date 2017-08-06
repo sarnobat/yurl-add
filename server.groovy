@@ -686,32 +686,34 @@ public class Yurl {
 			_10: {
 
 				final String theTitle = getTitle(new URL(iUrl));
-				Runnable r = new Runnable() {
-					// @Override
-					public void run() {
-						String titleFileStr = Yurl.QUEUE_FILE + "/" + Yurl.TITLE_FILE_TXT;
-						File file = Paths.get(titleFileStr).toFile();
-						File file2 = Paths.get(Yurl.QUEUE_FILE).toFile();
-						if (!file2.exists()) {
-							throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+				if (theTitle != null && theTitle.length() > 0) {
+					Runnable r = new Runnable() {
+						// @Override
+						public void run() {
+							String titleFileStr = Yurl.QUEUE_FILE + "/" + Yurl.TITLE_FILE_TXT;
+							File file = Paths.get(titleFileStr).toFile();
+							File file2 = Paths.get(Yurl.QUEUE_FILE).toFile();
+							if (!file2.exists()) {
+								throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+							}
+							String command = "echo '" + iUrl + "::" + theTitle + "' | tee -a '" + titleFileStr + "'";
+							System.out.println("appendToTextFile() - " + command);
+							Process p = new ProcessBuilder()
+									.directory(file2)
+									.command("echo","hello world")
+									.command("/bin/sh", "-c", command)
+									.inheritIO().start();
+							p.waitFor();
+							if (p.exitValue() == 0) {
+								System.out.println("appendToTextFile() - successfully appended "
+										+ iUrl);
+							} else {
+								System.out.println("appendToTextFile() - error appending " + iUrl);
+							}
 						}
-						String command = "echo '" + iUrl + "::" + theTitle + "' | tee -a '" + titleFileStr + "'";
-						System.out.println("appendToTextFile() - " + command);
-						Process p = new ProcessBuilder()
-								.directory(file2)
-								.command("echo","hello world")
-								.command("/bin/sh", "-c", command)
-								.inheritIO().start();
-						p.waitFor();
-						if (p.exitValue() == 0) {
-							System.out.println("appendToTextFile() - successfully appended "
-									+ iUrl);
-						} else {
-							System.out.println("appendToTextFile() - error appending " + iUrl);
-						}
-					}
-				};
-				new Thread(r).start();
+					};
+					new Thread(r).start();
+				}
 			}
         	
             // This is not (yet) the master file. The master file is written to synchronously.
