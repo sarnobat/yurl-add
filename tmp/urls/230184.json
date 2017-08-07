@@ -1891,13 +1891,6 @@
     "parentId": "230184"
   },
   {
-    "created": 1500696435,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Triangle-Bulbs-T40144-4-Pack-Daylight/dp/B00XNVD5E6/ref=sr_1_3?ie=UTF8&qid=1500696361&sr=8-3&keywords=daylight spiral 5000k 100W",
-    "parentId": "230184"
-  },
-  {
     "created": 1500831918,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1905,6 +1898,7 @@
     "parentId": "230184"
   },
   {
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/61ljUBAcsrL._SL1000_.jpg",
     "created": 1501177028,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1919,6 +1913,7 @@
     "parentId": "230184"
   },
   {
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/51FarxoqT1L._SL1500_.jpg",
     "created": 1501263917,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1926,17 +1921,11 @@
     "parentId": "230184"
   },
   {
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/41rdScURqxL._SL1000_.jpg",
     "created": 1501263949,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Hiware-12-piece-Extra-Fine-Stainless-Restaurant/dp/B01KEV935W/ref=pd_bxgy_79_2?_encoding=UTF8&pd_rd_i=B01KEV935W&pd_rd_r=A0Y5PFACDKP101GVKXWP&pd_rd_w=wupRS&pd_rd_wg=qvRaj&psc=1&refRID=A0Y5PFACDKP101GVKXWP",
-    "parentId": "230184"
-  },
-  {
-    "created": 1501800024,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Listerine-Antiseptic-Mouthwash-Original-Liters/dp/B00013TQOM/ref=sr_1_9_a_it?ie=UTF8&qid=1501776501&sr=8-9&keywords=listerine&th=1",
     "parentId": "230184"
   }
 ]
