@@ -170,7 +170,7 @@ function renderIfReady() {
 			//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
 			//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
 			var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
-			cardsHtml = urlsRootOnly.sort(function (u1, u2) {return u2.created - u1.created ;}).map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
+			cardsHtml = urlsRootOnly.map(function(i){ if (i.created < 9999999999) { i.created = i.created * 1000; }; return i;}).sort(function (u1, u2) {return u2.created - u1.created ;}).map(function(i){ console.debug(new Date(i.created) + " :: " + i.created + " :: " + i.url); return i;}).map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
 		}
 	}
 	var urlThumbnailsHtml = "";
@@ -607,7 +607,8 @@ function getCategoryTableHtml(categoryId, categoryName, urlsInCategory) {
 		return html;
 }
 
-function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, limit) {
+function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory1, limit) {
+		var urlsInCategory = urlsInCategory1.map(function(i){ if (i.created < 9999999999) { i.created = i.created * 1000; }; return i;}).sort(function (u1, u2) {return u2.created - u1.created ;}).map(function(i){ console.debug(new Date(i.created) + " :: " + i.created + " :: " + i.url); return i;});
 		var urlThumbnailsHtml = "<h3><a href='/yurl/?rootId="+categoryId+"'>" + categoryName + " (" + categoryId + ")</a></h3>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
 			if (j > limit) {
