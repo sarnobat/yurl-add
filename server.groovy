@@ -677,13 +677,7 @@ public class Yurl {
 		
 			// Delete the url cache file for this category. It will get
 			// regenrated next time we load that category page.
-        	java.nio.file.Path path1 = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/urls/" + iCategoryId + ".json");
-			path1.toFile().delete();
-        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path1);
-        	
-        	java.nio.file.Path path = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/categories/topology/" + iCategoryId + ".txt");
-			path.toFile().delete();
-        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path);
+        	removeCategoryCache(iCategoryId);
         	
         	// Get the title
 			
@@ -737,6 +731,16 @@ public class Yurl {
                     //BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
             }
         }
+
+		private static void removeCategoryCache(Integer iCategoryId) {
+			java.nio.file.Path path1 = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/urls/" + iCategoryId + ".json");
+			path1.toFile().delete();
+        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path1);
+        	
+        	java.nio.file.Path path = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/categories/topology/" + iCategoryId + ".txt");
+			path.toFile().delete();
+        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path);
+		}
 
 
         private static void appendToTextFileSync(final String iUrl, final String id, final String dir, String file2) throws IOException,
@@ -1052,13 +1056,15 @@ public class Yurl {
 		@Produces("application/json")
 		public Response changeImage(
 				@QueryParam("url") String imageUrl,
-				@QueryParam("linkUrl") String iUrl)
+				@QueryParam("linkUrl") String iUrl,
+				@QueryParam("categoryId") String iCategoryId)
 				throws IOException, JSONException {
 			System.err.println("Yurl.YurlResource.changeImage() begin");
 			
 			FileUtils.write(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt").toFile(), iUrl + "::" + imageUrl + "\n", "UTF-8", true);
 			System.err.println("Yurl.YurlResource.changeImage() - " + iUrl + " :: " + imageUrl);
 
+			removeCategoryCacheAsync(iCategoryId);
 			// TODO: remove the Neo4j part
 //			JSONObject execute = execute(
 //					"START n=node({nodeIdToChange}) "
@@ -1074,6 +1080,14 @@ public class Yurl {
 					.build();
 		}
 
+		private void removeCategoryCacheAsync(final String iCategoryId) {
+			new Thread() {
+				@Override
+				public void run() {
+					removeCategoryCache(Integer.parseInt(iCategoryId));
+				}
+			}.start();
+		}
 
 		// I don't think this is of any use anymore
 		@GET

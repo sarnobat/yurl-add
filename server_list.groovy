@@ -212,8 +212,7 @@ public class YurlList {
 					if (elements.length < 3) {
 						continue;
 					}
-					System.err
-							.println("YurlList.YurlResource.getUrlsInCategory(): " + line);
+					//System.err.println("YurlList.YurlResource.getUrlsInCategory(): " + line);
 					String categoryIdElement = elements[0];
 					String url = elements[1];
 					String timestamp = elements[2];
