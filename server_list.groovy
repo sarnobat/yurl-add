@@ -203,6 +203,8 @@ public class YurlList {
 								System.getProperty("user.home")
 										+ "/sarnobat.git/yurl_master.txt")
 								.toFile(), "UTF-8");
+				
+				Map<String, String> userImages = getUserImages(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt"));
 
 				for (String line : filterByCategory(lines, categoryId)) {
 					JSONObject urlObj = new JSONObject();
@@ -222,6 +224,9 @@ public class YurlList {
 					urlObj1.put("created", Long.parseLong(timestamp));
 					urlObj1.put("parentId", categoryId);
 					urlObj1.put("title", "<fill this in>");
+					if (userImages.keySet().contains(url)) {
+						urlObj1.put("user_image", userImages.get(url));
+					}
 					
 					urlsInCategory.put(urlObj1);
 				}
@@ -230,6 +235,19 @@ public class YurlList {
 			}
 			return new JSONArray(FileUtils.readFileToString(
 					urlsInCategoryJsonFile.toFile(), "UTF-8"));
+		}
+
+		private static Map<String, String> getUserImages(java.nio.file.Path path) {
+
+			List<String> lines = FileUtils.readLines(path.toFile(), "UTF-8");
+			Map<String, String> ret = new HashMap<String, String>();
+			for (String line : lines) {
+				String[] elements = line.split("::");
+				String url = elements[0];
+				String imageUrl = elements[1];
+				ret.put(url, imageUrl);
+			}
+			return ImmutableMap.copyOf(ret);
 		}
 
 		private static List<String> filterByCategory(List<String> lines,
