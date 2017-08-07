@@ -1056,7 +1056,7 @@ public class Yurl {
 				throws IOException, JSONException {
 			System.err.println("Yurl.YurlResource.changeImage() begin");
 			
-			FileUtils.write(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt").toFile(), iUrl + "::" + imageUrl, "UTF-8", true);
+			FileUtils.write(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt").toFile(), iUrl + "::" + imageUrl + "\n", "UTF-8", true);
 			System.err.println("Yurl.YurlResource.changeImage() - " + iUrl + " :: " + imageUrl);
 
 			// TODO: remove the Neo4j part
