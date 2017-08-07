@@ -861,7 +861,7 @@ function changeImage(id, button, url) {
 	// TODO : prepopulate with the computed thumbnail
 	var newImageUrl = prompt("Enter a new image URL:", prepopulatedImage(url));
 	if (newImageUrl.length > 0) {
-		$.getJSON(urlBase + '/updateImage?url=' + encodeURIComponent(newImageUrl) + "&id=" + id, 
+		$.getJSON(urlBase + '/updateImage?linkUrl='+encodeURIComponent(url)+'&url=' + encodeURIComponent(newImageUrl) + "&id=null", 
 			function(result){
 				console.debug(result);
 			})

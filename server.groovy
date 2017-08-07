@@ -54,6 +54,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.jvnet.hk2.annotations.Optional;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
@@ -676,8 +677,11 @@ public class Yurl {
 		
 			// Delete the url cache file for this category. It will get
 			// regenrated next time we load that category page.
-        	String string = System.getProperty("user.home") + "/github/yurl/tmp/urls/" + iCategoryId + ".json";
-			java.nio.file.Path path = Paths.get(string);
+        	java.nio.file.Path path1 = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/urls/" + iCategoryId + ".json");
+			path1.toFile().delete();
+        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path1);
+        	
+        	java.nio.file.Path path = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/categories/topology/" + iCategoryId + ".txt");
 			path.toFile().delete();
         	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path);
         	
@@ -735,29 +739,29 @@ public class Yurl {
         }
 
 
-                private static void appendToTextFileSync(final String iUrl, final String id, final String dir, String file2) throws IOException,
-                                InterruptedException {
-                                        String queueFile = dir + "/" + file2;
-                                        File file = Paths.get(dir).toFile();
-                                        if (!file.exists()) {
-                                                throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
-                                        }
-                                        String command =  "echo '" + id + "::" + iUrl + "::'`date +%s` | tee -a '" + queueFile + "'";
-                                        System.out.println("appendToTextFileSync() - " + command);
-                                        Process p = new ProcessBuilder()
-                                                        .directory(file)
-                                                        .command("echo","hello world")
-                                                        .command("/bin/sh", "-c", command)
-                                                                        //"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
-                                                                                        .inheritIO().start();
-                                        p.waitFor();
-                                        if (p.exitValue() == 0) {
-                                                System.out.println("appendToTextFileSync() - successfully appended "
-                                                                + iUrl);
-                                        } else {
-                                                System.out.println("appendToTextFileSync() - error appending " + iUrl);
-                                        }
-                }
+        private static void appendToTextFileSync(final String iUrl, final String id, final String dir, String file2) throws IOException,
+                        InterruptedException {
+            String queueFile = dir + "/" + file2;
+            File file = Paths.get(dir).toFile();
+            if (!file.exists()) {
+                    throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+            }
+            String command =  "echo '" + id + "::" + iUrl + "::'`date +%s` | tee -a '" + queueFile + "'";
+            System.out.println("appendToTextFileSync() - " + command);
+            Process p = new ProcessBuilder()
+                            .directory(file)
+                            .command("echo","hello world")
+                            .command("/bin/sh", "-c", command)
+                                            //"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
+                                                            .inheritIO().start();
+            p.waitFor();
+            if (p.exitValue() == 0) {
+                    System.out.println("appendToTextFileSync() - successfully appended "
+                                    + iUrl);
+            } else {
+                    System.out.println("appendToTextFileSync() - error appending " + iUrl);
+            }
+        }
 
 		private static void appendToTextFile(final String iUrl, final String id, final String dir) throws IOException,
 				InterruptedException {
@@ -1048,29 +1052,30 @@ public class Yurl {
 		@Produces("application/json")
 		public Response changeImage(
 				@QueryParam("url") String imageUrl,
-				@QueryParam("id") Integer nodeIdToChange,
-				@QueryParam("parentId") Integer parentId)
+				@QueryParam("linkUrl") String iUrl)
 				throws IOException, JSONException {
+			System.err.println("Yurl.YurlResource.changeImage() begin");
+			
+			FileUtils.write(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt").toFile(), iUrl + "::" + imageUrl, "UTF-8", true);
+			System.err.println("Yurl.YurlResource.changeImage() - " + iUrl + " :: " + imageUrl);
 
-			if (parentId == null) {
-				System.err.println("YurlWorldResource.changeImage() - Warning: cache not updated, because parentId was not passed");
-			} else {
-			}
-
+			// TODO: remove the Neo4j part
+//			JSONObject execute = execute(
+//					"START n=node({nodeIdToChange}) "
+//							+ "SET n.user_image =  {imageUrl}"
+//							+ "RETURN n",
+//					ImmutableMap.<String, Object> of("nodeIdToChange",
+//							nodeIdToChange, "imageUrl",
+//							imageUrl), "changeImage()");
 			return Response
 					.ok()
 					.header("Access-Control-Allow-Origin", "*")
-					.entity(execute(
-							"START n=node({nodeIdToChange}) "
-									+ "SET n.user_image =  {imageUrl}"
-									+ "RETURN n",
-							ImmutableMap.<String, Object> of("nodeIdToChange",
-									nodeIdToChange, "imageUrl",
-									imageUrl), "changeImage()")).type("application/json")
+					.entity(new JSONObject()).type("application/json")
 					.build();
 		}
 
 
+		// I don't think this is of any use anymore
 		@GET
 		@Path("removeImage")
 		@Produces("application/json")
@@ -1142,13 +1147,14 @@ public class Yurl {
 					.type("application/json").build();
 		}
 
-		@Deprecated
+		@Deprecated // Move to separate microservice
 		@GET
 		@Path("swapOrdinals")
 		@Produces("application/json")
 		public Response swapOrdinals(@QueryParam("firstId") Integer iFirstId,
 				@QueryParam("secondId") Integer iSecondId) throws IOException,
 				JSONException {
+			// TODO: implement this without neo4j
 			return Response
 					.ok()
 					.header("Access-Control-Allow-Origin", "*")

@@ -140,7 +140,9 @@ public class YurlList {
 					System.out.println("YurlWorldResource.getUrls() - not using cache");
 					JSONObject retVal1;
 					retVal1 = new JSONObject();
+					// TODO: Remove this
 					retVal1.put("urlsNeo4j", getItemsAtLevelAndChildLevelsNeo4j(iRootId));
+					
 					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
 					retVal1.put("categoriesRecursive", categoriesTreeJson);
 					if (MONGODB_ENABLED) {
