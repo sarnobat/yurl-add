@@ -2262,5 +2262,53 @@
     "url": "https://www.amazon.com/gp/product/B004TEW3KS/ref=oh_aui_detailpage_o01_s00?ie=UTF8&psc=1",
     "parentId": "230184",
     "ordinal": 1502088328
+  },
+  {
+    "created": 1502165615,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/ACCO-Binder-Clips-Large-A7072100B-AZ/dp/B072HSWP1Q/ref=redir_mobile_desktop?_encoding=UTF8&dpID=51D3xhazcjL&dpPl=1&keywords=large%20binder%20clips&pi=AC_SX236_SY340_QL65&qid=1501984323&ref=plSrch&ref_=mp_s_a_1_4&sr=8-4",
+    "parentId": "230184",
+    "ordinal": 1502165615
+  },
+  {
+    "created": 1502167972,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/ACCO-Binder-Clips-Large-A7072100B-AZ/dp/B072HSWP1Q/ref=redir_mobile_desktop?_encoding=UTF8&dpID=51D3xhazcjL&dpPl=1&keywords=large%20binder%20clips&pi=AC_SX236_SY340_QL65&qid=1501984323&ref=plSrch&ref_=mp_s_a_1_4&sr=8-4",
+    "parentId": "230184",
+    "ordinal": 1502167972
+  },
+  {
+    "created": 1502169015,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/dp/0596008643/ref=olp_product_details?_encoding=UTF8&me=",
+    "parentId": "230184",
+    "ordinal": 1502169015
+  },
+  {
+    "created": 1502169333,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Paper-Mate-Flair-Medium-12-Count/dp/B00006IFFJ/ref=sr_1_1?ie=UTF8&qid=1501776516&sr=8-1&keywords=blue+felt+papermate",
+    "parentId": "230184",
+    "ordinal": 1502169333
+  },
+  {
+    "created": 1502169355,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Just-Hibernate-Lightweight-Introduction-Framework/dp/1449334377/ref=sr_1_5?ie=UTF8&qid=1500579190&sr=8-5&keywords=hibernate",
+    "parentId": "230184",
+    "ordinal": 1502169355
+  },
+  {
+    "created": 1502169358,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/StarTech-com-4-Bay-Docking-Station-SDOCK4U33E/dp/B00MA1N8GA/ref=sr_1_1?ie=UTF8&qid=1500424956&sr=8-1&keywords=startech%2B4%2Bbay%2Busb&th=1",
+    "parentId": "230184",
+    "ordinal": 1502169358
   }
 ]

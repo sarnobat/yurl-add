@@ -338,16 +338,20 @@ function createImageCell(field) {
 }
 
 function relateNew(newParentId, currentRootId, button) {
+	if (newParentId == null) {
+		alert("newParentId = " + newParentId);
+		return;
+	}
 
 	var liElem = button.parentElement.parentElement.parentElement.parentElement.parentElement;
 	var url 		= $(liElem).attr("url");
 	var created 	= $(liElem).attr("created");
 	var categoryId 	= $(liElem).attr("categoryId");
 	
-	
-	debugger;
-	var url = urlBase + "/relate?parentId=" +newParentId+"&url=" +  encodeURIComponent(url) + "&currentParentId=" + categoryId;	
+	var url = urlBase + "/relate?parentId=" +newParentId+"&url=" +  encodeURIComponent(url) + "&currentParentId=" + categoryId + "&created=" + created;	
 	var parentId = newParentId;
+	
+	removeTopNew(newParentId, liElem);
 	//
 	// The main part
 	//
@@ -414,6 +418,20 @@ function removeTopNoDest(childId) {
 
 		$($("#" + childId)).effect( "blind",null, 5, function() { $(this).remove(); });
 
+}
+
+// This part just performs frontend changes, nothing backend
+function removeTopNew(parentId, itemElem) {
+	var target;
+	if (parentId == parentOfRootId) {
+		target = "#up";
+	} else {
+		target = "#list_"+parentId;
+	}
+	var options = { to: target, className: "ui-effects-transfer" };
+	$($(itemElem)).effect('transfer', options, 50, function() { // !!!!!!!! TODO : Wrong. remove the one specified by child ID
+		$($(itemElem)).effect( "blind",null, 5, function() { $(this).remove(); });
+	});	
 }
 
 // This part just performs frontend changes, nothing backend
@@ -842,7 +860,7 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		buttonCell.append("<br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
-		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relateNew("+parentOfRootId+","+rootId+",this)'><br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<input type=button class='genericButton' value='Change Image' onClick='changeImage("+field.id+",this,\"" +field.url+ "\")'><br>");
 		buttonCell.append("<input type=button class='genericButton' value='Remove Custom Image' onClick='removeImage("+field.id+",this,\"" +field.url +"\"," + rootId + ")'><br>");

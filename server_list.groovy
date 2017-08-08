@@ -93,6 +93,8 @@ public class YurlList {
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 
 	private static final String YURL_ORDINALS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_ordinals.txt";
+    private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
+	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 
 	@Path("yurl")
 	// TODO: Rename to YurlResource
@@ -215,13 +217,18 @@ public class YurlList {
 				
 				JSONArray urlsInCategory = new JSONArray();
 
+				List<String> lines1 = FileUtils.readLines(
+						Paths.get(QUEUE_DIR + "/" + QUEUE_FILE_TXT_DELETE)
+								.toFile(), "UTF-8");
+				
+				List<String> remove = getRemoveLines(lines1);
+				
 				List<String> lines = FileUtils.readLines(
 						Paths.get(
 								System.getProperty("user.home")
 										+ "/sarnobat.git/yurl_master.txt")
 								.toFile(), "UTF-8");
 				
-				List<String> remove = getRemoveLines(lines);
 				
 				Map<String, String> userImages = getUserImages(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt"));
 
@@ -261,6 +268,7 @@ public class YurlList {
 		}
 
 		private static List<String> getRemoveLines(List<String> lines) {
+			System.out.println("YurlList.YurlResource.getRemoveLines()");
 			List<String> ret = new LinkedList<String>();
 			for (String line : lines) {
 				if (line.startsWith("-")) {
@@ -271,16 +279,47 @@ public class YurlList {
 		}
 
 		private static List<String> filterToBeRemovedLines(List<String> lines,
-				List<String> remove) {
+				List<String> remove1) { // TODO: this should be a HashSet
+			List<String> remove = removeField(remove1, 3);
+			System.out
+					.println("YurlList.YurlResource.filterToBeRemovedLines() remove = " + remove);
 			List<String> ret = new LinkedList<String>();
 			for (String line : lines) {
-				if (remove.contains("-" + line)) {
+				String lineWithout3rdField = removeField(line, 2);
+				if (remove.contains("-" + lineWithout3rdField)) {
 					System.out.println("YurlList.YurlResource.filterToBeRemovedLines() was removed: " + line);
 				} else {
+					if (line.startsWith("221013::https://www.amazon.com/ACCO-Binder-Cli")) {
+						System.out
+								.println("YurlList.YurlResource.filterToBeRemovedLines() ERROR 1: " + line);
+						System.out
+								.println("YurlList.YurlResource.filterToBeRemovedLines() ERROR 2: " + remove.get(0));
+					}
 					ret.add(line);
 				}
 			}
 			return ImmutableList.copyOf(ret);
+		}
+
+		private static List<String> removeField(List<String> remove1,
+				final int i) {
+			return FluentIterable.from(remove1)
+					.transform(new Function<String, String>() {
+						@Override
+						@Nullable
+						public String apply(@Nullable String input) {
+							return removeField(input, i);
+						}
+					}).toList();
+		}
+
+		private static String removeField(String line, int i) {
+			String[] e = line.split("::");
+			if (e.length < 3) {
+				System.err.println("YurlList.YurlResource.removeField() bad line: " + line);
+				return line;
+			}
+			return e[0] + "::" + e[1];
 		}
 
 		private static Map<String, String> getUserImages(java.nio.file.Path path) {
@@ -315,13 +354,13 @@ public class YurlList {
 				StringBuffer sb = new StringBuffer();
 				for (String line : FileUtils.readLines(p.toFile(), "UTF-8")) {
 					String[] elements = line.split("::");
-					System.out
-							.println("YurlList.YurlResource.getChildCategories() 1 " + line);
+//					System.out
+//							.println("YurlList.YurlResource.getChildCategories() 1 " + line);
 					if (elements.length < 2) {
 						continue;
 					}
-					System.out
-					.println("YurlList.YurlResource.getChildCategories() 2 " + line);
+//					System.out
+//					.println("YurlList.YurlResource.getChildCategories() 2 " + line);
 					String categoryId = elements[0];
 					String childCategoryId = elements[1];
 					if (categoryId.equals(iRootId)) {

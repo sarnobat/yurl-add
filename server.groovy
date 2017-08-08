@@ -97,10 +97,10 @@ public class Yurl {
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 	@Deprecated
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
-	private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
 	private static final String TITLE_FILE_TXT = "yurl_titles_2017.txt";
     private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";// Started using this in Aug 2017. Older data is not yet in this file.
+    private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/3TB/new/move_to_unsorted/images/";
 // usually full and we get zero size files: "/media/sarnobat/Unsorted/images/";
@@ -745,7 +745,32 @@ public class Yurl {
         	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path);
 		}
 
+		private static void appendToTextFileSync(final String iUrl,
+				final String id, final String dir, String file2, long created)
+				throws IOException, InterruptedException {
 
+			String queueFile = dir + "/" + file2;
+			File file = Paths.get(dir).toFile();
+			if (!file.exists()) {
+			    throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+			}
+			String command =  "echo '" + id + "::" + iUrl + "::"+created+"' | tee -a '" + queueFile + "'";
+			System.out.println("appendToTextFileSync() - " + command);
+			Process p = new ProcessBuilder()
+			            .directory(file)
+			            .command("echo","hello world")
+			            .command("/bin/sh", "-c", command)
+			                            //"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
+			                                            .inheritIO().start();
+			p.waitFor();
+			if (p.exitValue() == 0) {
+			    System.out.println("appendToTextFileSync() - successfully appended "
+			                    + iUrl);
+			} else {
+			    System.out.println("appendToTextFileSync() - error appending " + iUrl);
+			}
+		}
+		
         private static void appendToTextFileSync(final String iUrl, final String id, final String dir, String file2) throws IOException,
                         InterruptedException {
             String queueFile = dir + "/" + file2;
@@ -1269,13 +1294,32 @@ public class Yurl {
 		@GET
 		@Path("relate")
 		@Produces("application/json")
-		public Response move(@QueryParam("parentId") Integer iNewParentId,
+		public Response move(@QueryParam("parentId") final Integer iNewParentId,
 				@QueryParam("url") String iUrl,
-				@QueryParam("currentParentId") Integer iCurrentParentId)
+				@QueryParam("currentParentId") final Integer iCurrentParentId,
+				@QueryParam("created") Long created)
 				throws JSONException, IOException {
 			
-			appendToTextFileSync(iUrl, iNewParentId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
-			appendToTextFileSync(iUrl, "-" + iNewParentId.toString(), QUEUE_DIR, Yurl.QUEUE_FILE_TXT_DELETE);
+			System.out.println("Yurl.YurlResource.move() begin");
+			
+			appendToTextFileSync(iUrl, iNewParentId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER, created);
+			
+			System.out.println("Yurl.YurlResource.move() 2");
+			appendToTextFileSync(iUrl, "-" + iCurrentParentId.toString(), QUEUE_DIR, Yurl.QUEUE_FILE_TXT_DELETE, created);
+			System.out.println("Yurl.YurlResource.move() 4");
+			
+			new Thread() {
+				@Override
+				public void run() {
+					removeCategoryCache(iNewParentId);
+				}
+			}.start();
+			new Thread() {
+				@Override
+				public void run() {
+					removeCategoryCache(iCurrentParentId);
+				}
+			}.start();
 			
 //			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
 //					iNewParentId);
