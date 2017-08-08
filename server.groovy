@@ -95,10 +95,13 @@ public class Yurl {
 	@Deprecated
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
+	@Deprecated
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
+	private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
 	private static final String TITLE_FILE_TXT = "yurl_titles_2017.txt";
-        private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";// Started using this in Aug 2017. Older data is not yet in this file.
+    private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";// Started using this in Aug 2017. Older data is not yet in this file.
+	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/3TB/new/move_to_unsorted/images/";
 // usually full and we get zero size files: "/media/sarnobat/Unsorted/images/";
 	private static final String TARGET_DIR_PATH_IMAGES_OTHER = "/media/sarnobat/3TB/new/move_to_unsorted/images/other";
@@ -1246,6 +1249,7 @@ public class Yurl {
 			return theNewCategoryNodeIdString;
 		}
 
+		@Deprecated // Uses Neo4j
 		private JSONObject relateToExistingCategory(Integer iItemId, Integer iCurrentParentId,
 				Integer theNewCategoryNodeIdString) throws IOException {
 			// delete any existing contains relationship with the
@@ -1266,15 +1270,19 @@ public class Yurl {
 		@Path("relate")
 		@Produces("application/json")
 		public Response move(@QueryParam("parentId") Integer iNewParentId,
-				@QueryParam("childId") Integer iChildId,
+				@QueryParam("url") String iUrl,
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
-			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
-					iNewParentId);
+			
+			appendToTextFileSync(iUrl, iNewParentId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
+			appendToTextFileSync(iUrl, "-" + iNewParentId.toString(), QUEUE_DIR, Yurl.QUEUE_FILE_TXT_DELETE);
+			
+//			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
+//					iNewParentId);
 //			MongoDbCache.invalidate(iNewParentId.toString());
 //			MongoDbCache.invalidate(iCurrentParentId.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(moveHelper.toString())
+					.entity(new JSONObject())
 					.type("application/json").build();
 		}
 

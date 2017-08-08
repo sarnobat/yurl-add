@@ -337,6 +337,39 @@ function createImageCell(field) {
 	return img;
 }
 
+function relateNew(newParentId, currentRootId, button) {
+
+	var liElem = button.parentElement.parentElement.parentElement.parentElement.parentElement;
+	var url 		= $(liElem).attr("url");
+	var created 	= $(liElem).attr("created");
+	var categoryId 	= $(liElem).attr("categoryId");
+	
+	
+	debugger;
+	var url = urlBase + "/relate?parentId=" +newParentId+"&url=" +  encodeURIComponent(url) + "&currentParentId=" + categoryId;	
+	var parentId = newParentId;
+	//
+	// The main part
+	//
+	$.getJSON(url, function(result){})
+		.success(function() { 
+
+			$("#list_"+parentId).effect("highlight", null, 4000, function() {});
+			
+			// Change the destination category count
+			var count = parseInt($("#count_"+parentId).text()) + 1;
+			$("#count_"+parentId).text(count);
+			$("#count_"+parentId).css("font-weight","Bold");
+			
+			// Decrement the number of items in this category that is displayed
+			var newCount = parseInt($("#count").text());
+			newCount -= 1;
+			$("#count").text(newCount);
+		})
+		.error(function() { alert("error occurred "); })
+		.complete(function() { });
+}
+
 function relate(parentId, childId, currentRootId) {
 	removeTop(parentId, childId);
 	var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;	
@@ -947,7 +980,7 @@ function CATEGORY_TO_BUTTON(itemId, currentCategoryId, categoryNode) {
 	return function(categoryNode) {
 		return "<input type=button class='genericButton' "
 			+ " value='"+categoryNode.name+" ("+ categoryNode.key+")'"
-			+ " onclick='relate("+categoryNode.id+","+itemId+","+currentCategoryId+")'>"
+			+ " onclick='relateNew("+categoryNode.id+","+currentCategoryId+", this)'>"
 			+ "";
 	};
 }
@@ -1015,20 +1048,21 @@ function configureKeyBindings() {
 		});
 	}
 	$(window).keypress(function(event) {
-		var key = String.fromCharCode(event.which);
-		if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
-			var idOfTop = $("#url_cards").children()[0].id;
-			moveToBottom(idOfTop);
-		}
-		if (String.fromCharCode(event.which) == '<') {
-			var parentId = parentOfRootId;
-			var childId = $("#url_cards").children()[0].id;
-			var currentRootId = rootId;
-			relate(parentId, childId, currentRootId);
-		}
-		if (String.fromCharCode(event.which) == '>') {
-			console.debug("remove from list (deal with it later)");
-		}
+		alert("Needs reimplementing: key bindings");
+// 		var key = String.fromCharCode(event.which);
+// 		if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
+// 			var idOfTop = $("#url_cards").children()[0].id;
+// 			moveToBottom(idOfTop);
+// 		}
+// 		if (String.fromCharCode(event.which) == '<') {
+// 			var parentId = parentOfRootId;
+// 			var childId = $("#url_cards").children()[0].id;
+// 			var currentRootId = rootId;
+// 			relate(parentId, childId, currentRootId);
+// 		}
+// 		if (String.fromCharCode(event.which) == '>') {
+// 			console.debug("remove from list (deal with it later)");
+// 		}
 	});
 }
 //----------------------------------------------------------------------------------------

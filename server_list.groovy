@@ -221,9 +221,11 @@ public class YurlList {
 										+ "/sarnobat.git/yurl_master.txt")
 								.toFile(), "UTF-8");
 				
+				List<String> remove = getRemoveLines(lines);
+				
 				Map<String, String> userImages = getUserImages(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt"));
 
-				for (String line : filterByCategory(lines, categoryId)) {
+				for (String line : filterByCategory(filterToBeRemovedLines(lines, remove), categoryId)) {
 					JSONObject urlObj = new JSONObject();
 					String[] elements = line.split("::");
 					if (elements.length < 3) {
@@ -256,6 +258,29 @@ public class YurlList {
 			}
 			return new JSONArray(FileUtils.readFileToString(
 					urlsInCategoryJsonFile.toFile(), "UTF-8"));
+		}
+
+		private static List<String> getRemoveLines(List<String> lines) {
+			List<String> ret = new LinkedList<String>();
+			for (String line : lines) {
+				if (line.startsWith("-")) {
+					ret.add(line);
+				}
+			}
+			return ImmutableList.copyOf(ret);
+		}
+
+		private static List<String> filterToBeRemovedLines(List<String> lines,
+				List<String> remove) {
+			List<String> ret = new LinkedList<String>();
+			for (String line : lines) {
+				if (remove.contains("-" + line)) {
+					System.out.println("YurlList.YurlResource.filterToBeRemovedLines() was removed: " + line);
+				} else {
+					ret.add(line);
+				}
+			}
+			return ImmutableList.copyOf(ret);
 		}
 
 		private static Map<String, String> getUserImages(java.nio.file.Path path) {
