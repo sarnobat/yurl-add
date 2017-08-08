@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import javax.ws.rs.GET;
@@ -16,11 +17,13 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jvnet.hk2.annotations.Optional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
@@ -32,6 +35,8 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
 public class YurlOrder {
+	
+	private static final String YURL_ORDINALS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_ordinals.txt";
 
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 	
@@ -57,10 +62,11 @@ public class YurlOrder {
 		// --------------------------------------------------------------------------------------
 
 		// moveup, move up
+		@Deprecated // No longer used, remove
 		@GET
-		@Path("surpassOrdinal")
+		@Path("surpassOrdinalNeo4j")
 		@Produces("application/json")
-		public Response surpassOrdinal(
+		public Response surpassOrdinalNeo4j(
 				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
 				@QueryParam("nodeIdToSurpass") Integer nodeIdToSurpass)
 				throws IOException, JSONException {
@@ -76,7 +82,47 @@ public class YurlOrder {
 									nodeIdToSurpass), "surpassOrdinal()")).type("application/json")
 					.build();
 		}
+		
+		@GET
+		@Path("surpassOrdinal")
+		@Produces("application/json")
+		public Response surpassOrdinal(
+				@QueryParam("url") String iUrl,
+				@QueryParam("categoryId") final String categoryId,
+				@Optional @QueryParam("created") String iCreated)
+				throws IOException, JSONException {
+			
+			System.out.println("YurlOrder.YurlResource.surpassOrdinal()");
+			
+			FileUtils
+					.write(Paths
+							.get(YURL_ORDINALS).toFile(),
+							categoryId + "::" + iUrl + "::" + System.currentTimeMillis() +"\n", "UTF-8", true);
 
+			new Thread() {
+				@Override
+				public void run() {
+					removeCategoryCache(Integer.parseInt(categoryId));
+				}
+			}.start();
+			
+			return Response
+					.ok()
+					.header("Access-Control-Allow-Origin", "*")
+					.entity(new JSONObject()).type("application/json")
+					.build();
+		}
+
+		private static void removeCategoryCache(Integer iCategoryId) {
+			java.nio.file.Path path1 = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/urls/" + iCategoryId + ".json");
+			path1.toFile().delete();
+        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path1);
+        	
+        	java.nio.file.Path path = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/categories/topology/" + iCategoryId + ".txt");
+			path.toFile().delete();
+        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path);
+		}
+		
 		@GET
 		@Path("undercutOrdinal")
 		@Produces("application/json")

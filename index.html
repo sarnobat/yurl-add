@@ -170,7 +170,10 @@ function renderIfReady() {
 			//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
 			//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
 			var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
-			cardsHtml = urlsRootOnly.map(function(i){ if (i.created < 9999999999) { i.created = i.created * 1000; }; return i;}).sort(function (u1, u2) {return u2.created - u1.created ;}).map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
+			cardsHtml = urlsRootOnly
+				.map(function(i){ if (i.ordinal < 9999999999) { i.ordinal = i.ordinal * 1000; }; return i;})
+				.sort(function (u1, u2) {return u2.ordinal - u1.ordinal ;})
+				.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
 		}
 	}
 	var urlThumbnailsHtml = "";
@@ -410,14 +413,20 @@ function writeCategoryTree(root, level) {
 	}
 }
 
-function moveToTop(source) {
+function moveToTop(source, button) {
 	var idToMove = source;
 	var firstId = $("#url_cards").children().first().attr("id");
+
+	var liElement = button.parentElement.parentElement.parentElement.parentElement.parentElement;
+
+	var url = liElement.getAttribute('url');
+	var categoryId = liElement.getAttribute('categoryId');
+	var created = liElement.getAttribute('created');
 	if (orderedDescending) {
-		var elem = $("#" + idToMove).remove();
+		var elem = $(liElement).remove();
 		$("#url_cards").prepend(elem);
 		// 1 more than latest timestamp
-		$.getJSON(host + ":44439/yurl/surpassOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToSurpass=" + firstId,
+		$.getJSON(host + ":44439/yurl/surpassOrdinal?url=" + encodeURIComponent(url) + "&categoryId=" + categoryId + "&created=" + created,
 			function(result){
 			})
 			.success(function(data) {  
@@ -454,29 +463,34 @@ function moveToBottom(source) {
 }
 
 function moveUp(source) {
-	var first = $("#" + source).prev().attr('id');
-	var second = source;
-	swap(first, second);
+// 	var first = $("#" + source).prev().attr('id');
+// 	var second = source;
+// 	swap(first, second);
+	alert("Needs reimplementing 1");
 }
 
 function moveDown(source) {
-	var first = source;
-	var second = $("#" + source).next().attr('id');
-	swap(first, second);
+// 	var first = source;
+// 	var second = $("#" + source).next().attr('id');
+// 	swap(first, second);
+
+	alert("Needs reimplementing 2");
 }
 
 function swap(firstId, secondId) {
-	$.getJSON(host + ":44439/yurl/swapOrdinals?firstId=" + firstId + "&secondId=" + secondId, 
-		function(result){
-		})
-		.success(function(data) {  
-			$("#" + secondId).after($("#" + firstId));
-		})
-		.error(function() { 
-			alert("error occurred "); 
-		})
-		.complete(function() { 
-		});
+// 	$.getJSON(host + ":44439/yurl/swapOrdinals?firstId=" + firstId + "&secondId=" + secondId, 
+// 		function(result){
+// 		})
+// 		.success(function(data) {  
+// 			$("#" + secondId).after($("#" + firstId));
+// 		})
+// 		.error(function() { 
+// 			alert("error occurred "); 
+// 		})
+// 		.complete(function() { 
+// 		});
+
+	alert("Needs reimplementing 3");
 
 }
 
@@ -608,7 +622,7 @@ function getCategoryTableHtml(categoryId, categoryName, urlsInCategory) {
 }
 
 function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory1, limit) {
-		var urlsInCategory = urlsInCategory1.map(function(i){ if (i.created < 9999999999) { i.created = i.created * 1000; }; return i;}).sort(function (u1, u2) {return u2.created - u1.created ;});
+		var urlsInCategory = urlsInCategory1.map(function(i){ if (i.ordinal < 9999999999) { i.ordinal = i.ordinal * 1000; }; return i;}).sort(function (u1, u2) {return u2.ordinal - u1.ordinal ;});
 		var urlThumbnailsHtml = "<h3><a href='/yurl/?rootId="+categoryId+"'>" + categoryName + " (" + categoryId + ")</a></h3>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
 			if (j > limit) {
@@ -759,7 +773,10 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		}
 	
 		{
-			listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
+			listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96')
+				.attr('url',field.url)
+				.attr('created',field.created)
+				.attr('categoryId',rootId);
 			listItem.append(table);
 			//$("#url_cards").append(listItem);
 		}
@@ -772,7 +789,11 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 			var site = urlElements[0];
 			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
 		}
-		var dddd = (new Date(parseInt(field.created))).toString();
+		var date;
+		if (field.created < 9999999999) {
+			field.created = field.created * 1000;
+		} 
+		var dddd = (new Date(field.created)).toString();
 		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+field.created+" - "+dddd+"<br>"+"</sub>");
 	}
 	
@@ -791,10 +812,10 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'><br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<input type=button class='genericButton' value='Change Image' onClick='changeImage("+field.id+",this,\"" +field.url+ "\")'><br>");
-                buttonCell.append("<input type=button class='genericButton' value='Remove Custom Image' onClick='removeImage("+field.id+",this,\"" +field.url +"\"," + rootId + ")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Remove Custom Image' onClick='removeImage("+field.id+",this,\"" +field.url +"\"," + rootId + ")'><br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<br>");
-		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+", this)'><br>");
 		buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
 		buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
 		buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");

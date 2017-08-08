@@ -91,7 +91,9 @@ public class YurlList {
 	public static final Integer ROOT_ID = 45;
 	@Deprecated
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
-	
+
+	private static final String YURL_ORDINALS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_ordinals.txt";
+
 	@Path("yurl")
 	// TODO: Rename to YurlResource
 	public static class YurlResource { // Must be public
@@ -141,7 +143,7 @@ public class YurlList {
 					JSONObject retVal1;
 					retVal1 = new JSONObject();
 					// TODO: Remove this
-					retVal1.put("urlsNeo4j", getItemsAtLevelAndChildLevelsNeo4j(iRootId));
+					//retVal1.put("urlsNeo4j", getItemsAtLevelAndChildLevelsNeo4j(iRootId));
 					
 					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
 					retVal1.put("categoriesRecursive", categoriesTreeJson);
@@ -176,6 +178,8 @@ public class YurlList {
 			Collection<String> categoriesToGetUrlsFrom = ImmutableList
 					.<String> builder().add(iRootId.toString())
 					.addAll(getChildCategories(iRootId.toString())).build();
+			
+			Map<String, String> orderMap = buildOrderMap(YURL_ORDINALS,iRootId);
 
 			for (String categoryId : categoriesToGetUrlsFrom) {
 				System.out
@@ -183,13 +187,26 @@ public class YurlList {
 				if (categoryId.length() > 10) {
 					throw new RuntimeException("Not a category ID: " + categoryId);
 				}
-				JSONArray urlsInCategory = getUrlsInCategory(categoryId);
+				JSONArray urlsInCategory = getUrlsInCategory(categoryId, orderMap);
 				urls.put(categoryId, urlsInCategory);
 			}
 			return urls;
 		}
 
-		private static JSONArray getUrlsInCategory(String categoryId) {
+		private static Map<String, String> buildOrderMap(String yurlOrdinals,
+				Integer iRootId) {
+
+			List<String> lines = FileUtils.readLines(Paths.get(yurlOrdinals).toFile(), "UTF-8");
+			Map<String, String> ret = new HashMap<String, String>();
+			for (String line : filter(lines, iRootId.toString())) {
+				String[] elements = line.split("::");
+				ret.put(elements[1], elements[2]);
+			}
+			
+			return ImmutableMap.copyOf(ret);
+		}
+
+		private static JSONArray getUrlsInCategory(String categoryId, Map<String, String> orderMap) {
 			// Create the file if it doesn't exist
 			java.nio.file.Path urlsInCategoryJsonFile = Paths.get(System
 					.getProperty("user.home") + "/github/yurl/tmp/urls/" + categoryId + ".json");
@@ -221,6 +238,11 @@ public class YurlList {
 					urlObj1.put("id", "STOP_RELYING_ON_THIS");// TODO: moving a url will need reimplementing on the client and server
 					urlObj1.put("url", url);
 					urlObj1.put("created", Long.parseLong(timestamp));
+					if (orderMap.containsKey(url)) {
+						urlObj1.put("ordinal", orderMap.get(url));
+					} else {
+						urlObj1.put("ordinal", Long.parseLong(timestamp));
+					}
 					urlObj1.put("parentId", categoryId);
 					urlObj1.put("title", "<fill this in>");
 					if (userImages.keySet().contains(url)) {
