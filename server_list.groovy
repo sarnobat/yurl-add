@@ -93,6 +93,7 @@ public class YurlList {
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 
 	private static final String YURL_ORDINALS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_ordinals.txt";
+	private static final String DOWNLOADED_VIDEOS = System.getProperty("user.home") + "/sarnobat.git/db/auto/yurl_queue_httpcat_videos_downloaded.json";
     private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 
@@ -147,7 +148,8 @@ public class YurlList {
 					// TODO: Remove this
 					//retVal1.put("urlsNeo4j", getItemsAtLevelAndChildLevelsNeo4j(iRootId));
 					
-					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+					Collection<String> downloadedVideos = new HashSet(getDownloadedVideos(DOWNLOADED_VIDEOS));
+					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId, downloadedVideos));
 					retVal1.put("categoriesRecursive", categoriesTreeJson);
 					if (MONGODB_ENABLED) {
 						MongoDbCache.put(iRootId.toString(), retVal1.toString());
@@ -174,7 +176,11 @@ public class YurlList {
 		// ------------------------------------------------------------------------------------
 
 		
-		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
+		private Collection<String> getDownloadedVideos(String downloadedVideos) {
+			return FileUtils.readLines(Paths.get(downloadedVideos).toFile(), "UTF-8");
+		}
+
+		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId, Collection<String> downloadedVideos) throws JSONException, IOException {
 			JSONObject urls = new JSONObject();
 			
 			Collection<String> categoriesToGetUrlsFrom = ImmutableList
@@ -189,7 +195,7 @@ public class YurlList {
 				if (categoryId.length() > 10) {
 					throw new RuntimeException("Not a category ID: " + categoryId);
 				}
-				JSONArray urlsInCategory = getUrlsInCategory(categoryId, orderMap);
+				JSONArray urlsInCategory = getUrlsInCategory(categoryId, orderMap, downloadedVideos);
 				urls.put(categoryId, urlsInCategory);
 			}
 			return urls;
@@ -208,7 +214,7 @@ public class YurlList {
 			return ImmutableMap.copyOf(ret);
 		}
 
-		private static JSONArray getUrlsInCategory(String categoryId, Map<String, String> orderMap) {
+		private static JSONArray getUrlsInCategory(String categoryId, Map<String, String> orderMap, Collection<String> downloadedVideos) {
 			// Create the file if it doesn't exist
 			java.nio.file.Path urlsInCategoryJsonFile = Paths.get(System
 					.getProperty("user.home") + "/github/yurl/tmp/urls/" + categoryId + ".json");
@@ -251,6 +257,11 @@ public class YurlList {
 						urlObj1.put("ordinal", orderMap.get(url));
 					} else {
 						urlObj1.put("ordinal", Long.parseLong(timestamp));
+					}
+					if (downloadedVideos.contains(url)) {
+						urlObj1.put("downloaded_video", true);
+					} else {
+						urlObj1.put("downloaded_video", false);
 					}
 					urlObj1.put("parentId", categoryId);
 					urlObj1.put("title", "<fill this in>");
