@@ -131,47 +131,6 @@ public class Yurl {
 		}
 		
 		@GET
-		@Path("uncategorized")
-		@Produces("application/json")
-		@Deprecated // We aren't using this anymore, we moved it to server_list.groovy.
-					// this should undo some of the bloated nature of this file.
-		public Response getUrls(@QueryParam("rootId") Integer iRootId,
-								@QueryParam("enableCache") @DefaultValue("true") Boolean iMongoDbCacheLookupEnabled)
-				throws JSONException, IOException {
-			checkNotNull(iRootId);
-			JSONObject categoriesTreeJson;
-			if (categoriesTreeCache == null) {
-				System.out.println("getUrls() - preloaded categories tree not ready");
-			} else {
-				categoriesTreeJson = categoriesTreeCache;
-				// This is done in a separate thread
-				refreshCategoriesTreeCacheInSeparateThread();
-			}
-			try {
-				JSONObject oUrlsUnderCategory;
-				// We're not getting up to date pages when things change. But we need to
-				// start using this again if we dream of scaling this app.
-				// If there were multiple clients here, you'd need to block the 2nd onwards
-				System.out.println("YurlWorldResource.getUrls() - not using cache");
-				JSONObject retVal1;
-				retVal1 = new JSONObject();
-				retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
-				retVal1.put("categoriesRecursive", categoriesTreeJson);
-				oUrlsUnderCategory = retVal1;
-				
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(oUrlsUnderCategory.toString())
-						.type("application/json").build();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				return Response.serverError().header("Access-Control-Allow-Origin", "*")
-						.entity(e.getStackTrace())
-						.type("application/text").build();
-			}
-		}
-
-		@GET
 		@Path("downloadVideo")
 		@Produces("application/json")
 		public Response downloadVideoSynchronous(@QueryParam("id") Integer iRootId, @QueryParam("url") String iUrl)
@@ -291,119 +250,6 @@ public class Yurl {
 			unsuccessfulLines.append(second);
 			unsuccessfulLines.append("\n");
 			unsuccessfulLines.append("\n");
-		}
-
-		////
-		//// The main part
-		////
-		// TODO: See if you can turn this into a map-reduce
-		@Deprecated
-		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
-			if (categoriesTreeCache == null) {
-			}
-			// TODO: the source is null clause should be obsoleted
-			JSONObject theQueryResultJson = execute(
-					"START source=node({rootId}) "
-							+ "MATCH p = source-[r:CONTAINS*1..2]->u "
-							+ "WHERE (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
-							+ "RETURN distinct ID(u),u.title,u.url, extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal, u.biggest_image, u.user_image "
-// TODO : do not hardcode the limit to 500. Category 38044 doesn't display more than 50 books since there are so many child items.
-							+ "ORDER BY u.ordinal DESC LIMIT 500", ImmutableMap
-							.<String, Object> builder().put("rootId", iRootId)
-							.build(), "getItemsAtLevelAndChildLevels()");
-			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
-			JSONArray theUncategorizedNodesJson = new JSONArray();
-			for (int i = 0; i < theDataJson.length(); i++) {
-				JSONObject anUncategorizedNodeJsonObject = new JSONObject();
-				_1: {
-					JSONArray anItem = theDataJson.getJSONArray(i);
-					_11: {
-						String anId = (String) anItem.get(0);
-						anUncategorizedNodeJsonObject.put("id", anId);
-					}
-					_12: {
-						String aTitle = (String) anItem.get(1);
-						anUncategorizedNodeJsonObject.put("title", aTitle);
-					}
-					_13: {
-						String aUrl = (String) anItem.get(2);
-						anUncategorizedNodeJsonObject.put("url", aUrl);
-					}
-					_14: {
-						try {
-							JSONArray path = (JSONArray) anItem.get(3);
-							if (path.length() == 3) {
-								anUncategorizedNodeJsonObject.put("parentId",
-										path.get(1));
-							} else if (path.length() == 2) {
-								anUncategorizedNodeJsonObject.put("parentId",
-										iRootId);
-							}
-							else if (path.length() == 1) {
-								// This should never happen
-								anUncategorizedNodeJsonObject.put("parentId",
-										path.get(0));
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-					_15: {
-
-						Object val = anItem.get(4);
-						if (isNotNull(val)) {
-							String aValue = (String) val;
-							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
-						}
-					}
-					_16: {
-						Object val = anItem.get(6);
-						if ("null".equals(val)) {
-							System.out.println("Is null value");
-						} else if (val == null) {
-							System.out.println("Is null string");
-						} else if (isNotNull(val)) {
-							Long aValue = (Long) val;
-							anUncategorizedNodeJsonObject.put("created", aValue);
-						}
-					}
-					_17: {
-						Object val = anItem.get(8);
-						if (isNotNull(val)) {
-							String aValue = (String) val;
-							if ("null".equals(aValue)) {
-								System.out.println("YurlWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
-							}
-							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
-						}
-					}
-					_18: {
-						Object val = anItem.get(9);
-						if (isNotNull(val)) {
-							String aValue = (String) val;
-							if ("null".equals(aValue)) {
-							}
-							anUncategorizedNodeJsonObject.put("user_image", aValue);
-						}
-					}
-				}
-				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
-			}
-			
-			JSONObject ret = new JSONObject();
-			transform : {
-				for (int i = 0; i < theUncategorizedNodesJson.length(); i++) {
-					JSONObject jsonObject = (JSONObject) theUncategorizedNodesJson
-							.get(i);
-					String parentId = (String) jsonObject.get("parentId");
-					if (!ret.has(parentId)) {
-						ret.put(parentId, new JSONArray());
-					}
-					JSONArray target = (JSONArray) ret.get(parentId);
-					target.put(jsonObject);
-				}
-			}
-			return ret;
 		}
 
 		private static boolean isNotNull(Object val) {
@@ -1397,29 +1243,12 @@ public class Yurl {
 				if (categoriesTreeCache == null) {
 				} else {
 					categoriesTreeJson = categoriesTreeCache;
-					refreshCategoriesTreeCacheInSeparateThread();
 				}
-				FileUtils.writeStringToFile(path.toFile(), categoriesTreeJson.toString(2), "UTF-8");
+				//FileUtils.writeStringToFile(path.toFile(), categoriesTreeJson.toString(2), "UTF-8");
 			}
 			ret.put("categoriesTree", categoriesTreeJson);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
-		}
-
-		@Deprecated
-		private static void refreshCategoriesTreeCacheInSeparateThread() {
-			new Thread(){
-				@Override
-				public void run() {
-					try {
-						//categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
-					} catch (JSONException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}.start();
 		}
 
 		private static class BiggestImage {
@@ -1639,7 +1468,6 @@ public class Yurl {
 		  }
 		}
     
-		YurlResource.refreshCategoriesTreeCacheInSeparateThread();
 		// Turn off that stupid Jersey logger.
 		// This works in Java but not in Groovy.
 		//java.util.Logger.getLogger("org.glassfish.jersey").setLevel(java.util.Level.SEVERE);
