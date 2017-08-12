@@ -129,48 +129,6 @@ public class Yurl {
 		}
 		
 		@GET
-		@Path("uncategorized")
-		@Produces("application/json")
-		@Deprecated // We aren't using this anymore, we moved it to server_list.groovy.
-					// this should undo some of the bloated nature of this file.
-		public Response getUrls(@QueryParam("rootId") Integer iRootId,
-								@QueryParam("enableCache") @DefaultValue("true") Boolean iMongoDbCacheLookupEnabled)
-				throws JSONException, IOException {
-			checkNotNull(iRootId);
-			JSONObject categoriesTreeJson;
-			if (categoriesTreeCache == null) {
-				System.out.println("getUrls() - preloaded categories tree not ready");
-				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
-			} else {
-				categoriesTreeJson = categoriesTreeCache;
-				// This is done in a separate thread
-				refreshCategoriesTreeCacheInSeparateThread();
-			}
-			try {
-				JSONObject oUrlsUnderCategory;
-				// We're not getting up to date pages when things change. But we need to
-				// start using this again if we dream of scaling this app.
-				// If there were multiple clients here, you'd need to block the 2nd onwards
-				System.out.println("YurlWorldResource.getUrls() - not using cache");
-				JSONObject retVal1;
-				retVal1 = new JSONObject();
-				retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
-				retVal1.put("categoriesRecursive", categoriesTreeJson);
-				oUrlsUnderCategory = retVal1;
-				
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(oUrlsUnderCategory.toString())
-						.type("application/json").build();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				return Response.serverError().header("Access-Control-Allow-Origin", "*")
-						.entity(e.getStackTrace())
-						.type("application/text").build();
-			}
-		}
-
-		@GET
 		@Path("downloadVideo")
 		@Produces("application/json")
 		public Response downloadVideoSynchronous(@QueryParam("id") Integer iRootId, @QueryParam("url") String iUrl)
