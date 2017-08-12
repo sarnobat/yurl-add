@@ -449,33 +449,6 @@ public class Yurl {
 		// Key bindings
 		// -----------------------------------------------------------------------------
 
-		@Deprecated
-		@GET
-		@Path("keysUpdate")
-		@Produces("application/json")
-		// Ideally we should wrap this method inside a transaction but over REST
-		// I don't know how to do that.
-		// TODO: we will have to start supporting disassociation of key bindings
-		// with child categories
-		public Response keysUpdate(@QueryParam("parentId") Integer iParentId,
-				@QueryParam("newKeyBindings") String iNewKeyBindings,
-				@QueryParam("oldKeyBindings") String iOldKeyBindings)
-				throws JSONException, IOException {
-			System.out.println("keysUpdate() - begin");
-			// Remove duplicates by putting the bindings in a map
-			for (Map.Entry<String, String> pair : FluentIterable
-					.from(difference(iNewKeyBindings, iOldKeyBindings))
-					.filter(Predicates.not(IS_COMMENTED))
-					.transform(LINE_TO_BINDING_ENTRY).toSet()) {
-				deleteBinding(iParentId, pair.getKey(), pair.getValue());
-				// TODO: if it fails, recover and create the remaining ones?
-				createNewKeyBinding(pair.getValue(), pair.getKey(), iParentId);
-			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(getKeys(iParentId).toString())
-					.type("application/json").build();
-		}
-
 		private static void deleteBinding(Integer iParentId, String key, String name) {
 			try {
 				execute("START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
@@ -604,49 +577,7 @@ public class Yurl {
 			return shouldCreateNewCategoryNode;
 		}
 
-		@Deprecated
-		@GET
-		@Path("keys")
-		@Produces("application/json")
-		public Response keys(@QueryParam("parentId") Integer iParentId)
-				throws JSONException, IOException {
-			JSONArray ret = getKeys(iParentId);
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
-		}
-
-		@Deprecated
-		// TODO: Rewrite this as a map-fold?
-		public static JSONArray getKeys(Integer iParentId) throws IOException,
-				JSONException {
-//			System.out.println("getKeys() - parent ID: " + iParentId);
-			// Unfortunately, we cannot insist on counting only the URL nodes -
-			// it will prevent category nodes from being returned. See if
-			// there's a way to do this in Cypher. If there isn't, this is not a
-			// huge compromise.
-			// TODO: find a way to count the nodes
-			JSONArray theData = (JSONArray) execute(
-					"START parent=node({parentId}) " +
-					"MATCH parent-[c:CONTAINS*1..2]->n " +
-					"WHERE has(n.name)  and n.type = 'categoryNode' and id(parent) = {parentId} " +
-					"RETURN distinct ID(n),n.name,n.key,0 as c order by c desc",
-					ImmutableMap.<String, Object> builder()
-							.put("parentId", iParentId).build(), "getKeys()").get("data");
-			JSONArray oKeys = new JSONArray();
-			for (int i = 0; i < theData.length(); i++) {
-				JSONArray aBindingArray = theData.getJSONArray(i);
-				JSONObject aBindingObject = new JSONObject();
-				aBindingObject.put("id", (String) aBindingArray.get(0));
-				aBindingObject.put("name", (String) aBindingArray.get(1));
-				// TODO: this could be null
-				aBindingObject.put("key", (String) aBindingArray.get(2));
-				aBindingObject.put("count",
-						((Integer) aBindingArray.get(3)).toString());
-				oKeys.put(aBindingObject);
-			}
-//			System.out.println("getKeys() - end. length: " + oKeys.length());
-			return oKeys;
-		}
+		
 
 		// --------------------------------------------------------------------------------------
 		// Write operations
