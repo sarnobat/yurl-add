@@ -84,7 +84,11 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
 /**
+ * Deprecation doesn't mean the method can be removed. Only when index.html stops referring to it can it be removed.
+ * 
  * Neo4j dependencies removed.
+ * 
+ * Only writing to the persistent store (and the associated async tasks) should remain in this thread.
  */
 // TODO: Use javax.json.* for immutability
 public class Yurl {
@@ -981,69 +985,6 @@ public class Yurl {
 		}
 
 	
-		// moveup, move up
-		@Deprecated
-		@GET
-		@Path("surpassOrdinal")
-		@Produces("application/json")
-		public Response surpassOrdinal(
-				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
-				@QueryParam("nodeIdToSurpass") Integer nodeIdToSurpass)
-				throws IOException, JSONException {
-			return Response
-					.ok()
-					.header("Access-Control-Allow-Origin", "*")
-					.entity(execute(
-							"START n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) "
-									+ "SET n.ordinal = n2.ordinal + 100 "
-									+ "RETURN n.ordinal, n2.ordinal",
-							ImmutableMap.<String, Object> of("nodeIdToChange",
-									nodeIdToChange, "nodeIdToSurpass",
-									nodeIdToSurpass), "surpassOrdinal()")).type("application/json")
-					.build();
-		}
-
-		@Deprecated
-		@GET
-		@Path("undercutOrdinal")
-		@Produces("application/json")
-		public Response undercutOrdinal(
-				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
-				@QueryParam("nodeIdToUndercut") Integer nodeIdToUndercut)
-				throws IOException, JSONException {
-			return Response
-					.ok()
-					.header("Access-Control-Allow-Origin", "*")
-					.entity(execute(
-							"START n=node({nodeIdToChange}), n2=node({nodeIdToUndercut}) "
-									+ "SET n.ordinal=n2.ordinal - 100 "
-									+ "RETURN n.ordinal,n2.ordinal",
-							ImmutableMap.<String, Object> of("nodeIdToChange",
-									nodeIdToChange, "nodeIdToUndercut",
-									nodeIdToUndercut), "undercutOrdinal()").toString())
-					.type("application/json").build();
-		}
-
-		@Deprecated // Move to separate microservice
-		@GET
-		@Path("swapOrdinals")
-		@Produces("application/json")
-		public Response swapOrdinals(@QueryParam("firstId") Integer iFirstId,
-				@QueryParam("secondId") Integer iSecondId) throws IOException,
-				JSONException {
-			// TODO: implement this without neo4j
-			return Response
-					.ok()
-					.header("Access-Control-Allow-Origin", "*")
-					.entity(execute(
-							"START n=node({id1}), n2=node({id2}) "
-									+ "SET n.temp=n2.ordinal, n2.ordinal=n.ordinal, n.ordinal=n.temp "
-									+ "RETURN n.ordinal, n2.ordinal",
-							ImmutableMap.<String, Object> of("id1", iFirstId,
-									"id2", iSecondId), "swapOrdinals()").toString())
-					.type("application/json").build();
-		}
-
 		/** No existing relationships get deleted */
 		@GET
 		@Path("relateCategoriesToItem")
