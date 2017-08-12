@@ -85,8 +85,6 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 /**
  * Neo4j dependencies removed.
- * 
- * Ideally only retain the stash() functionality
  */
 // TODO: Use javax.json.* for immutability
 public class Yurl {
@@ -130,6 +128,48 @@ public class Yurl {
 			// or not until the server terminates unexceptionally (which never happens).
 		}
 		
+		@GET
+		@Path("uncategorized")
+		@Produces("application/json")
+		@Deprecated // We aren't using this anymore, we moved it to server_list.groovy.
+					// this should undo some of the bloated nature of this file.
+		public Response getUrls(@QueryParam("rootId") Integer iRootId,
+								@QueryParam("enableCache") @DefaultValue("true") Boolean iMongoDbCacheLookupEnabled)
+				throws JSONException, IOException {
+			checkNotNull(iRootId);
+			JSONObject categoriesTreeJson;
+			if (categoriesTreeCache == null) {
+				System.out.println("getUrls() - preloaded categories tree not ready");
+				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+			} else {
+				categoriesTreeJson = categoriesTreeCache;
+				// This is done in a separate thread
+				refreshCategoriesTreeCacheInSeparateThread();
+			}
+			try {
+				JSONObject oUrlsUnderCategory;
+				// We're not getting up to date pages when things change. But we need to
+				// start using this again if we dream of scaling this app.
+				// If there were multiple clients here, you'd need to block the 2nd onwards
+				System.out.println("YurlWorldResource.getUrls() - not using cache");
+				JSONObject retVal1;
+				retVal1 = new JSONObject();
+				retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+				retVal1.put("categoriesRecursive", categoriesTreeJson);
+				oUrlsUnderCategory = retVal1;
+				
+				return Response.ok().header("Access-Control-Allow-Origin", "*")
+						.entity(oUrlsUnderCategory.toString())
+						.type("application/json").build();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				return Response.serverError().header("Access-Control-Allow-Origin", "*")
+						.entity(e.getStackTrace())
+						.type("application/text").build();
+			}
+		}
+
 		@GET
 		@Path("downloadVideo")
 		@Produces("application/json")
@@ -250,6 +290,155 @@ public class Yurl {
 			unsuccessfulLines.append(second);
 			unsuccessfulLines.append("\n");
 			unsuccessfulLines.append("\n");
+		}
+
+		// ------------------------------------------------------------------------------------
+		// Page operations
+		// ------------------------------------------------------------------------------------
+
+		@GET
+		@Path("count_non_recursive")
+		@Produces("application/json")
+		// It's better to do this in a separate Ajax request because it's fast and we can get an idea if database queries are working.
+		public Response countNonRecursive(@QueryParam("rootId") Integer iRootId)
+				throws Exception {
+			checkNotNull(iRootId);
+			try {
+				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
+				theParams.put("rootId", iRootId);
+				JSONObject theQueryResultJson = execute(
+						"start n=node({rootId}) optional match n-[CONTAINS]->u where has(u.title) return n.name, count(u) as cnt",
+						theParams.build());
+				JSONArray outerArray = (JSONArray) theQueryResultJson
+						.get("data");
+				JSONArray innerArray = (JSONArray) outerArray.get(0);
+				String name = (String) innerArray.get(0);
+				Integer count = (Integer) innerArray.get(1);
+				JSONObject result = new JSONObject();
+				result.put("count", count);
+				result.put("name", name);
+				return Response.ok().header("Access-Control-Allow-Origin", "*")
+						.entity(result.toString()).type("application/json")
+						.build();
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw e;
+			}
+		}
+
+		////
+		//// The main part
+		////
+		// TODO: See if you can turn this into a map-reduce
+		@SuppressWarnings("unused")
+		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
+//			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
+			if (categoriesTreeCache == null) {
+				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+			}
+			// TODO: the source is null clause should be obsoleted
+			JSONObject theQueryResultJson = execute(
+					"START source=node({rootId}) "
+							+ "MATCH p = source-[r:CONTAINS*1..2]->u "
+							+ "WHERE (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
+							+ "RETURN distinct ID(u),u.title,u.url, extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal, u.biggest_image, u.user_image "
+// TODO : do not hardcode the limit to 500. Category 38044 doesn't display more than 50 books since there are so many child items.
+							+ "ORDER BY u.ordinal DESC LIMIT 500", ImmutableMap
+							.<String, Object> builder().put("rootId", iRootId)
+							.build(), "getItemsAtLevelAndChildLevels()");
+			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
+			JSONArray theUncategorizedNodesJson = new JSONArray();
+			for (int i = 0; i < theDataJson.length(); i++) {
+				JSONObject anUncategorizedNodeJsonObject = new JSONObject();
+				_1: {
+					JSONArray anItem = theDataJson.getJSONArray(i);
+					_11: {
+						String anId = (String) anItem.get(0);
+						anUncategorizedNodeJsonObject.put("id", anId);
+					}
+					_12: {
+						String aTitle = (String) anItem.get(1);
+						anUncategorizedNodeJsonObject.put("title", aTitle);
+					}
+					_13: {
+						String aUrl = (String) anItem.get(2);
+						anUncategorizedNodeJsonObject.put("url", aUrl);
+					}
+					_14: {
+						try {
+							JSONArray path = (JSONArray) anItem.get(3);
+							if (path.length() == 3) {
+								anUncategorizedNodeJsonObject.put("parentId",
+										path.get(1));
+							} else if (path.length() == 2) {
+								anUncategorizedNodeJsonObject.put("parentId",
+										iRootId);
+							}
+							else if (path.length() == 1) {
+								// This should never happen
+								anUncategorizedNodeJsonObject.put("parentId",
+										path.get(0));
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					_15: {
+
+						Object val = anItem.get(4);
+						if (isNotNull(val)) {
+							String aValue = (String) val;
+							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
+						}
+					}
+					_16: {
+						Object val = anItem.get(6);
+						if ("null".equals(val)) {
+							System.out.println("Is null value");
+						} else if (val == null) {
+							System.out.println("Is null string");
+						} else if (isNotNull(val)) {
+							Long aValue = (Long) val;
+							anUncategorizedNodeJsonObject.put("created", aValue);
+						}
+					}
+					_17: {
+						Object val = anItem.get(8);
+						if (isNotNull(val)) {
+							String aValue = (String) val;
+							if ("null".equals(aValue)) {
+								System.out.println("YurlWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
+							}
+							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
+						}
+					}
+					_18: {
+						Object val = anItem.get(9);
+						if (isNotNull(val)) {
+							String aValue = (String) val;
+							if ("null".equals(aValue)) {
+							}
+							anUncategorizedNodeJsonObject.put("user_image", aValue);
+						}
+					}
+				}
+				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
+			}
+			
+			JSONObject ret = new JSONObject();
+			transform : {
+				for (int i = 0; i < theUncategorizedNodesJson.length(); i++) {
+					JSONObject jsonObject = (JSONObject) theUncategorizedNodesJson
+							.get(i);
+					String parentId = (String) jsonObject.get("parentId");
+					if (!ret.has(parentId)) {
+						ret.put(parentId, new JSONArray());
+					}
+					JSONArray target = (JSONArray) ret.get(parentId);
+					target.put(jsonObject);
+				}
+			}
+			return ret;
 		}
 
 		private static boolean isNotNull(Object val) {
@@ -549,7 +738,6 @@ public class Yurl {
             }
         }
 
-        @Deprecated
 		private static void removeCategoryCache(Integer iCategoryId) {
 			java.nio.file.Path path1 = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/urls/" + iCategoryId + ".json");
 			path1.toFile().delete();
@@ -1230,7 +1418,6 @@ public class Yurl {
 		@GET
 		@Path("categoriesRecursive")
 		@Produces("application/json")
-		@Deprecated
 		public Response categoriesRecursive(
 				@QueryParam("parentId") Integer iParentId)
 				throws JSONException, IOException {
@@ -1241,14 +1428,213 @@ public class Yurl {
 				categoriesTreeJson = new JSONObject(FileUtils.readFileToString(path.toFile(), "UTF-8"));
 			} else {
 				if (categoriesTreeCache == null) {
+					categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
 				} else {
 					categoriesTreeJson = categoriesTreeCache;
+					refreshCategoriesTreeCacheInSeparateThread();
 				}
-				//FileUtils.writeStringToFile(path.toFile(), categoriesTreeJson.toString(2), "UTF-8");
+				FileUtils.writeStringToFile(path.toFile(), categoriesTreeJson.toString(2), "UTF-8");
 			}
 			ret.put("categoriesTree", categoriesTreeJson);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(ret.toString()).type("application/json").build();
+		}
+
+		private static void refreshCategoriesTreeCacheInSeparateThread() {
+			new Thread(){
+				@Override
+				public void run() {
+					try {
+						//categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+					} catch (JSONException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}.start();
+		}
+		
+		private static class ReadCategoryTree {
+			static JSONObject getCategoriesTree(Integer rootId)
+					throws JSONException, IOException {
+				return new AddSizes(
+						// This is the expensive query, not the other one
+						getCategorySizes(YurlResource.execute(
+								"START n=node(*) MATCH n-->u WHERE has(n.name) "
+										+ "RETURN id(n),count(u);",
+								ImmutableMap.<String, Object>of(),
+								"getCategoriesTree() - Getting sizes [The expensive query]").getJSONArray(
+								"data")))
+						.apply(
+						// Path to JSON conversion done in Cypher
+						createCategoryTreeFromCypherResultPaths(
+								// TODO: I don't think we need each path do we? We just need each parent-child relationship.
+								YurlResource.execute("START n=node({parentId}) "
+										+ "MATCH path=n-[r:CONTAINS*]->c "
+										+ "WHERE has(c.name) "
+										+ "RETURN extract(p in nodes(path)| "
+										+ "'{ " + "id : ' + id(p) + ', "
+										+ "name : \"'+ p.name +'\" , "
+										+ "key : \"' + coalesce(p.key, '') + '\"" + " }'" + ")",
+										ImmutableMap.<String, Object> of(
+												"parentId", rootId),
+												false,
+										"getCategoriesTree() - Getting all paths"),
+								rootId));
+			}
+			
+			private static Map<Integer, Integer> getCategorySizes(JSONArray counts) {
+				Map<Integer, Integer> sizesMap = new HashMap<Integer, Integer>();
+				for (int i = 0; i < counts.length(); i++) {
+					JSONArray row = counts.getJSONArray(i);
+					sizesMap.put(row.getInt(0), row.getInt(1));
+				}
+				return ImmutableMap.copyOf(sizesMap);
+			}
+			
+
+			private static JSONObject addSizesToCypherJsonResultObjects(JSONObject categoriesTree,
+					Map<Integer, Integer> categorySizes) {
+				Integer id = categoriesTree.getInt("id");
+				categoriesTree.put("size", categorySizes.get(id));
+				if (categoriesTree.has("children")) {
+					JSONArray children = categoriesTree.getJSONArray("children");
+					for (int i = 0; i < children.length(); i++) {
+						addSizesToCypherJsonResultObjects(children.getJSONObject(i), categorySizes);
+					}
+				}
+				return categoriesTree;
+			}
+			
+			private static class AddSizes implements
+					Function<JSONObject, JSONObject> {
+				private final Map<Integer, Integer> categorySizes;
+
+				AddSizes(Map<Integer, Integer> categorySizes) {
+					this.categorySizes = categorySizes;
+				}
+
+				@Override
+				public JSONObject apply(JSONObject input) {
+					return addSizesToCypherJsonResultObjects(
+							input, categorySizes);
+				}
+			}
+			
+			private static JSONObject createCategoryTreeFromCypherResultPaths(
+					JSONObject theQueryJsonResult, Integer rootId) {
+				JSONArray cypherRawResults = theQueryJsonResult
+						.getJSONArray("data");
+				checkState(cypherRawResults.length() > 0);
+				Multimap<Integer, Integer> parentToChildren = buildParentToChildMultimap2(cypherRawResults);
+				Map<Integer, JSONObject> categoryNodesWithoutChildren = createId(cypherRawResults);
+				JSONObject root = categoryNodesWithoutChildren.get(rootId);
+				root.put(
+						"children",
+						toJsonArray(buildChildren(parentToChildren.get(rootId),
+								categoryNodesWithoutChildren, parentToChildren)));
+				return root;
+			}
+
+			/**
+			 * @return - a pair for each category node
+			 */
+			private static Map<Integer, JSONObject> createId(JSONArray cypherRawResults) {
+				ImmutableMap.Builder<Integer, JSONObject> idToJsonBuilder = ImmutableMap
+						.<Integer, JSONObject> builder();
+				Set<Integer> seen = new HashSet<Integer>();
+				for (int i = 0; i < cypherRawResults.length(); i++) {
+					JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
+					for (int j = 0; j < treePath.length(); j++) {
+						if (treePath.get(j).getClass().equals(YurlResource.JSON_OBJECT_NULL)) {
+							continue;
+						}
+						JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
+						int categoryId = pathHopNode.getInt("id");
+						if (!seen.contains(categoryId)){
+							seen.add(categoryId);
+							idToJsonBuilder.put(categoryId,
+									pathHopNode);
+						}
+					}
+				}
+				return idToJsonBuilder.build();
+			}
+			
+			private static JSONArray removeNulls(JSONArray iJsonArray) {
+				for(int i = 0; i < iJsonArray.length(); i++) {
+					if (YurlResource.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
+						iJsonArray.remove(i);
+						--i;
+					}
+				}
+				return iJsonArray;
+			}
+
+			/**
+			 * @return Integer to set of Integers
+			 */
+			private static Multimap<Integer, Integer> buildParentToChildMultimap2(
+					JSONArray cypherRawResults) {
+				Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
+				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
+					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum)
+							.getJSONArray(0));
+					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
+						if (categoryPath.get(hopNum).getClass()
+								.equals(YurlResource.JSON_OBJECT_NULL)) {
+							continue;
+						}
+						if (categoryPath.get(hopNum + 1).getClass()
+								.equals(YurlResource.JSON_OBJECT_NULL)) {
+							continue;
+						}
+						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
+							continue;
+						}
+						int childId = new JSONObject(categoryPath.getString(hopNum + 1))
+								.getInt("id");
+						int parentId = checkNotNull(new JSONObject(categoryPath.getString(hopNum))
+								.getInt("id"));
+						Object childrenObj = oParentToChildren.get(parentId);
+						if (childrenObj != null) {
+							Set<?> children = (Set<?>) childrenObj;
+							if (!children.contains(childId)) {
+								oParentToChildren.put(parentId, childId);
+							}
+						} else {
+							oParentToChildren.put(parentId, childId);
+						}
+					}
+				}
+				return oParentToChildren;
+			}
+
+			private static JSONArray toJsonArray(Collection<JSONObject> children) {
+				JSONArray arr = new JSONArray();
+				for (JSONObject child : children) {
+					arr.put(child);
+				}
+				return arr;
+			}
+
+			private static Set<JSONObject> buildChildren(
+					Collection<Integer> childIds, Map<Integer, JSONObject> nodes,
+					Multimap<Integer, Integer> parentToChildren) {
+				Builder<JSONObject> set = ImmutableSet.builder();
+				for (int childId : childIds) {
+					JSONObject childJson = nodes.get(childId);
+					Collection<Integer> grandchildIds = parentToChildren
+							.get(childId);
+					Collection<JSONObject> grandchildNodes = buildChildren(
+							grandchildIds, nodes, parentToChildren);
+					JSONArray grandchildrenArray = toJsonArray(grandchildNodes);
+					childJson.put("children", grandchildrenArray);
+					set.add(childJson);
+				}
+				return set.build();
+			}			
 		}
 
 		private static class BiggestImage {
@@ -1468,6 +1854,7 @@ public class Yurl {
 		  }
 		}
     
+		YurlResource.refreshCategoriesTreeCacheInSeparateThread();
 		// Turn off that stupid Jersey logger.
 		// This works in Java but not in Groovy.
 		//java.util.Logger.getLogger("org.glassfish.jersey").setLevel(java.util.Level.SEVERE);
