@@ -254,36 +254,6 @@ public class Yurl {
 		// Page operations
 		// ------------------------------------------------------------------------------------
 
-		@GET
-		@Path("count_non_recursive")
-		@Produces("application/json")
-		// It's better to do this in a separate Ajax request because it's fast and we can get an idea if database queries are working.
-		public Response countNonRecursive(@QueryParam("rootId") Integer iRootId)
-				throws Exception {
-			checkNotNull(iRootId);
-			try {
-				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-				theParams.put("rootId", iRootId);
-				JSONObject theQueryResultJson = execute(
-						"start n=node({rootId}) optional match n-[CONTAINS]->u where has(u.title) return n.name, count(u) as cnt",
-						theParams.build());
-				JSONArray outerArray = (JSONArray) theQueryResultJson
-						.get("data");
-				JSONArray innerArray = (JSONArray) outerArray.get(0);
-				String name = (String) innerArray.get(0);
-				Integer count = (Integer) innerArray.get(1);
-				JSONObject result = new JSONObject();
-				result.put("count", count);
-				result.put("name", name);
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(result.toString()).type("application/json")
-						.build();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw e;
-			}
-		}
-
 		////
 		//// The main part
 		////
@@ -460,33 +430,6 @@ public class Yurl {
 					ImmutableSet.copyOf(iOldKeyBindings.trim().split("\n")));
 			System.out.println("Difference: " + theNewKeyBindingLines);
 			return theNewKeyBindingLines;
-		}
-
-		private static void createNewKeyBinding(String iCategoryName, String iKeyCode,
-				Integer iParentId) throws IOException, JSONException {
-			System.out.println("createNewKeyBinding() - begin() : " + String.format("iCategoryName %s\tiKeyCode %s\tiParentId %d", iCategoryName, iKeyCode, iParentId));
-			// TODO: Also create a trash category for each new category key node
-			JSONArray theCategoryNodes = (JSONArray) execute(
-					"START parent=node({parentId})" +
-					" MATCH parent -[r:CONTAINS]-> existingCategory" +
-					" WHERE has(existingCategory.type)" +
-					" and existingCategory.type = 'categoryNode'" +
-					" and existingCategory.name = {aCategoryName}" +
-					" SET existingCategory.key = {aKeyCode}" +
-					" RETURN distinct id(existingCategory)",
-					ImmutableMap.<String, Object> builder()
-							.put("parentId", iParentId)
-							// TODO: change this back
-							.put("aCategoryName", iCategoryName)
-							.put("aKeyCode", iKeyCode).build(), "createNewKeyBinding()").get("data");
-			try {
-				createNewRelation(iParentId,
-						Integer.parseInt(getCategoryNodeIdString(iCategoryName,
-								iKeyCode, theCategoryNodes)));
-				System.out.println("createNewKeyBinding() - end()");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 
 		/** Get or create the category node that is to be associated with the key code */
@@ -1255,6 +1198,7 @@ public class Yurl {
 			return execute(iCypherQuery, iParams, true, iCommentPrefix);
 		}
 
+		// TODO: Only delete this once we're no longer using the 2015 backup of the neo4j DB. It is still providing some functinoality.
 		@Deprecated
 		// TODO: make this map immutable
 		static JSONObject execute(String iCypherQuery,
