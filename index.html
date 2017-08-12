@@ -170,9 +170,10 @@ function renderIfReady() {
 			//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
 			//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
 			var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
-			cardsHtml = urlsRootOnly
+			cardsHtml = urlsRootOnly				
 				.map(function(i){ if (i.ordinal < 9999999999) { i.ordinal = i.ordinal * 1000; }; return i;})
 				.sort(function (u1, u2) {return u2.ordinal - u1.ordinal ;})
+				.slice(0, limit)
 				.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
 		}
 	}

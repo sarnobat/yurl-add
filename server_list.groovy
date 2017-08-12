@@ -239,37 +239,42 @@ public class YurlList {
 				Map<String, String> userImages = getUserImages(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt"));
 
 				for (String line : filterByCategory(filterToBeRemovedLines(lines, remove), categoryId)) {
-					JSONObject urlObj = new JSONObject();
-					String[] elements = line.split("::");
-					if (elements.length < 3) {
+					try {
+						JSONObject urlObj = new JSONObject();
+						String[] elements = line.split("::");
+						if (elements.length < 3) {
+							continue;
+						}
+						//System.err.println("YurlList.YurlResource.getUrlsInCategory(): " + line);
+						String categoryIdElement = elements[0];
+						String url = elements[1];
+						String timestamp = elements[2];
+					
+						JSONObject urlObj1 = new JSONObject();
+						urlObj1.put("id", "STOP_RELYING_ON_THIS");// TODO: moving a url will need reimplementing on the client and server
+						urlObj1.put("url", url);
+						urlObj1.put("created", Long.parseLong(timestamp));
+						if (orderMap.containsKey(url)) {
+							urlObj1.put("ordinal", orderMap.get(url));
+						} else {
+							urlObj1.put("ordinal", Long.parseLong(timestamp));
+						}
+						if (downloadedVideos.contains(url)) {
+							urlObj1.put("downloaded_video", true);
+						} else {
+							urlObj1.put("downloaded_video", false);
+						}
+						urlObj1.put("parentId", categoryId);
+						urlObj1.put("title", "<fill this in>");
+						if (userImages.keySet().contains(url)) {
+							urlObj1.put("user_image", userImages.get(url));
+						}
+					
+						urlsInCategory.put(urlObj1);
+					} catch (NumberFormatException e) {
+						e.printStackTrace();
 						continue;
 					}
-					//System.err.println("YurlList.YurlResource.getUrlsInCategory(): " + line);
-					String categoryIdElement = elements[0];
-					String url = elements[1];
-					String timestamp = elements[2];
-					
-					JSONObject urlObj1 = new JSONObject();
-					urlObj1.put("id", "STOP_RELYING_ON_THIS");// TODO: moving a url will need reimplementing on the client and server
-					urlObj1.put("url", url);
-					urlObj1.put("created", Long.parseLong(timestamp));
-					if (orderMap.containsKey(url)) {
-						urlObj1.put("ordinal", orderMap.get(url));
-					} else {
-						urlObj1.put("ordinal", Long.parseLong(timestamp));
-					}
-					if (downloadedVideos.contains(url)) {
-						urlObj1.put("downloaded_video", true);
-					} else {
-						urlObj1.put("downloaded_video", false);
-					}
-					urlObj1.put("parentId", categoryId);
-					urlObj1.put("title", "<fill this in>");
-					if (userImages.keySet().contains(url)) {
-						urlObj1.put("user_image", userImages.get(url));
-					}
-					
-					urlsInCategory.put(urlObj1);
 				}
 				
 				FileUtils.write(urlsInCategoryJsonFile.toFile(), urlsInCategory.toString(2), "UTF-8");
