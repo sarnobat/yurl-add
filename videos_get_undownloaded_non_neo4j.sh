@@ -1,7 +1,2 @@
 #!/bin/bash
-#
-# Usage:
-# arg 1 : the category ID
-#
-
-cat <(cat ~/sarnobat.git/db/yurl_flatfile_db/yurl_master.txt | grep -f ~/sarnobat.git/db/yurl_flatfile_db/categories_with_videos.txt) | groovy ~/github/yurl/newer_than.groovy 1502776328 | grep "^$1" | perl -pe 's{.*::(.*)::.*}{$1}g'
+diff --unchanged-line-format= --old-line-format= --new-line-format='%L' <(bash videos_in_category_non_neo4j.sh "$1" | sort) <(cat ~/sarnobat.git/db/yurl_flatfile_db/videos_download_succeeded.txt | perl -pe 's{::.*}{}g' | sort)
