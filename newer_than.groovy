@@ -21,15 +21,17 @@ public class NewerThan {
 			if (l < 9999999999L) {
 				l = l * 1000;
 			}
+long difference = l - threshold;
+//                                System.out.println("NewerThan.main() --------------------------");
 			if (l > threshold) {
 				System.out.println(line);
 				System.err.println("NewerThan.main() new: " + new Date(l));
 			} else {
-				System.out.println("NewerThan.main() --------------------------");
-				System.out.println("NewerThan.main() l         = " + l);
-				System.out.println("NewerThan.main() threshold = " + threshold);
-				System.err.println("NewerThan.main() too old: " + new Date(l));
+//				System.out.println("NewerThan.main() l         = " + l);
+//				System.out.println("NewerThan.main() threshold = " + threshold);
+//				System.err.println("NewerThan.main() too old: " + new Date(l));
 			}
+//System.out.println("NewerThan.main() difference = " + difference);
 			} catch (Exception e) {
 				System.err.println("NewerThan.main() " + e + ": " + line);
 				
