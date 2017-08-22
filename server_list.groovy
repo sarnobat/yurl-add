@@ -94,6 +94,7 @@ public class YurlList {
 
 	private static final String YURL_ORDINALS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_ordinals.txt";
 	private static final String DOWNLOADED_VIDEOS = System.getProperty("user.home") + "/sarnobat.git/db/auto/yurl_queue_httpcat_videos_downloaded.json";
+	private static final String DOWNLOADED_VIDEOS_2017 = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/videos_download_succeeded.txt";
     private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 
@@ -149,6 +150,7 @@ public class YurlList {
 					//retVal1.put("urlsNeo4j", getItemsAtLevelAndChildLevelsNeo4j(iRootId));
 					
 					Collection<String> downloadedVideos = new HashSet(getDownloadedVideos(DOWNLOADED_VIDEOS));
+					downloadedVideos.addAll(getDownloadedVideos2017(DOWNLOADED_VIDEOS_2017));
 					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId, downloadedVideos));
 					retVal1.put("categoriesRecursive", categoriesTreeJson);
 					if (MONGODB_ENABLED) {
@@ -175,9 +177,19 @@ public class YurlList {
 		// Page operations
 		// ------------------------------------------------------------------------------------
 
-		
+		@Deprecated // TODO: this file is not in the right format 
 		private Collection<String> getDownloadedVideos(String downloadedVideos) {
 			return FileUtils.readLines(Paths.get(downloadedVideos).toFile(), "UTF-8");
+		}
+		
+		private Collection<String> getDownloadedVideos2017(String downloadedVideos) {
+			List<String> readLines = FileUtils.readLines(Paths.get(downloadedVideos).toFile(), "UTF-8");
+			Set<String> ret = new HashSet<String>();
+			for (String line : readLines) {
+				String[] elements = line.split("::");
+				ret.add(elements[0]);
+			}
+			return ret;
 		}
 
 		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId, Collection<String> downloadedVideos) throws JSONException, IOException {
