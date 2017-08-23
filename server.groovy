@@ -496,6 +496,7 @@ public class Yurl {
 				IOException {
 			// This will convert
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
+			System.out.println("stash() theHttpUrl = " + theHttpUrl);
 			try {
 				// TODO: append synchronously to new yurl master queue 
 	            appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
