@@ -194,7 +194,7 @@ public class YurlList {
 
 		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId, Collection<String> downloadedVideos) throws JSONException, IOException {
 			JSONObject urls = new JSONObject();
-			
+		System.out.println("getItemsAtLevelAndChildLevels() begin");	
 			Collection<String> categoriesToGetUrlsFrom = ImmutableList
 					.<String> builder().add(iRootId.toString())
 					.addAll(getChildCategories(iRootId.toString())).build();
@@ -374,7 +374,7 @@ public class YurlList {
 		}
 
 		private static Collection<String> getChildCategories(String iRootId) {
-			
+		System.out.println("getChildCategories() - begin");	
 			File file = Paths.get("/home/sarnobat/github/yurl/tmp/categories/topology/" + iRootId + ".txt").toFile();
 			if (!file.exists()) {
 				java.nio.file.Path p = Paths.get("/home/sarnobat/github/yurl/yurl_category_topology.txt.2017-07-29.columns_reordered");
