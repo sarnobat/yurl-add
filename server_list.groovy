@@ -98,6 +98,9 @@ public class YurlList {
     private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 
+	private static final String CATEGORY_RELATIONSHIPS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_topology.txt";
+	private static final String CATEGORY_NAMES = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_names.txt";
+	
 	@Path("yurl")
 	// TODO: Rename to YurlResource
 	public static class YurlResource { // Must be public
@@ -152,6 +155,7 @@ public class YurlList {
 					Collection<String> downloadedVideos = new HashSet(getDownloadedVideos(DOWNLOADED_VIDEOS));
 					downloadedVideos.addAll(getDownloadedVideos2017(DOWNLOADED_VIDEOS_2017));
 					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId, downloadedVideos));
+					// TODO: Do we need this? We have server_categoriesRecursive.groovy
 					retVal1.put("categoriesRecursive", categoriesTreeJson);
 					if (MONGODB_ENABLED) {
 						MongoDbCache.put(iRootId.toString(), retVal1.toString());
@@ -417,6 +421,7 @@ public class YurlList {
 		////
 		// TODO: See if you can turn this into a map-reduce
 		@SuppressWarnings("unused")
+		@Deprecated
 		private static JSONObject getItemsAtLevelAndChildLevelsNeo4j(Integer iRootId) throws JSONException, IOException {
 //			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
@@ -590,6 +595,7 @@ public class YurlList {
 		// Read operations
 		// ----------------------------------------------------------------------------
 		
+		@Deprecated
 		private static void refreshCategoriesTreeCacheInSeparateThread() {
 			new Thread(){
 				@Override
@@ -605,6 +611,33 @@ public class YurlList {
 			}.start();
 		}
 		
+
+		private static class ReadCategoryTreeNonNeo4j {
+			static JSONObject getCategoriesTreeNeo4j(Integer rootId) {
+
+				java.nio.file.Path namesFile = Paths.get(CATEGORY_NAMES);
+				Map<Integer,String> names = new HashMap<Integer, String>();
+				for (String line : FileUtils.readLines(namesFile.toFile(), "UTF-8")) {
+					String[] elements = line.split("::");
+					Integer i = Integer.parseInt(elements[0]);
+					String name = elements[1];
+					names.put(i, name);
+				}
+
+				java.nio.file.Path relationships = Paths.get(CATEGORY_RELATIONSHIPS);
+				Map<Integer, Integer> parents = new HashMap<Integer, Integer>();
+				for (String line : FileUtils.readLines(relationships.toFile(), "UTF-8")) {
+					String[] elements = line.split("::");
+					Integer child = Integer.parseInt( elements[0]);
+					Integer parent = Integer.parseInt(elements[1]);
+					parents.put(child, parent);
+				}
+				
+				
+			}
+		}
+
+		@Deprecated
 		private static class ReadCategoryTree {
 			@Deprecated
 			static JSONObject getCategoriesTreeNeo4j(Integer rootId)
