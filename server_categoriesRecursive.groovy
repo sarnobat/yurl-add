@@ -47,7 +47,7 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
-public class YurlCategoriesRecursiveNeo4j {
+public class YurlCategoriesRecursive {
 
 	// Gets stored here: http://192.168.1.2:28017/cache/items/
 	public static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
