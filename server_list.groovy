@@ -347,8 +347,12 @@ public class YurlList {
 					Map<Integer, Integer> parents = new HashMap<Integer, Integer>();  
 					for (String line : readFile(rel)) {
 						String[] elements = line.split("::");
-						parents.put(Integer.parseInt(elements[0]),
-								Integer.parseInt(elements[1]));
+						if (37658 == Integer.parseInt(elements[1])) {
+							System.out
+									.println("run() " + Integer.parseInt(elements[0]));
+						}
+						parents.put(Integer.parseInt(elements[1]),
+								Integer.parseInt(elements[0]));
 					}
 					java.nio.file.Path nam = Paths.get(CATEGORY_NAMES);
 					Map<Integer, String> names = new HashMap<Integer, String>();  
@@ -358,23 +362,35 @@ public class YurlList {
 								elements[1]);
 					}
 					
-					Multimap<Integer, Integer> children = createChildrenMultimap(parents);
-					
+					Multimap<Integer, Integer> children = createChildrenMultimap(parents, names.keySet());
 					JSONObject categoryHierarchy = createCategoryNode(45, names, parents, children);
 					try {
-						FileUtils.write(Paths.get(CATEGORY_HIERARCHY_JSON).toFile(), categoryHierarchy.toString(2), "UTF-8");
-					} catch (JSONException | IOException e) {
+						FileUtils.write(Paths.get(YurlList.CATEGORY_HIERARCHY_JSON).toFile(), categoryHierarchy.toString(2), "UTF-8");
+					} catch (Exception e) {
 						e.printStackTrace();
+						throw new RuntimeException(e);
 					}
 				}
 
 				private Multimap<Integer, Integer> createChildrenMultimap(
-						Map<Integer, Integer> parents) {
+						Map<Integer, Integer> parents, Set<Integer> childIds) {
 
 					Multimap<Integer, Integer> children = HashMultimap.create();
-					for (Integer child : parents.keySet()) {
-						children.put(parents.get(child), child);
+					for (Integer child : childIds) {
+						if (!parents.keySet().contains(child)) {
+							System.out
+									.println(".createChildrenMultimap() ERROR : no parent for " + child);
+							continue;
+						}
+						Integer parent = parents.get(child);
+						children.put(parent, child);
+						if (parent == 37658) {
+							System.out.println("createChildrenMultimap() " + parent + " :: " + child);
+						}
+//						System.out
+//								.println(".createChildrenMultimap() " + parents.get(child) + " :: " + children.get(parents.get(child)));
 					}
+//				System.out.println("createChildrenMultimap() children = " + children);
 					return children;
 				}
 
@@ -387,6 +403,11 @@ public class YurlList {
 						JSONObject child = createCategoryNode(childCategoryId, names, parents, children);
 						childCategoryNodes.put(child);
 					}
+//					if (childCategoryNodes.length() < 1) {
+//						System.out
+//								.println("YurlList.YurlResource.refreshCategoriesTreeCacheInSeparateThreadNoNeo4j().new Thread() {...}.createCategoryNode() error");
+//						throw new RuntimeException("childCategoryNodes = " + childCategoryNodes.length());
+//					}
 					node.put("children", childCategoryNodes);
 					return node;
 				}
@@ -401,10 +422,9 @@ public class YurlList {
 				}
 			};
 		}
+		private static final String CATEGORY_RELATIONSHIPS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_topology.txt";
+		private static final String CATEGORY_NAMES = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_names.txt";
 	}
-
-	private static final String CATEGORY_RELATIONSHIPS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_topology.txt";
-	private static final String CATEGORY_NAMES = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_names.txt";
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 
