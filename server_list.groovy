@@ -1,81 +1,41 @@
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
-import javax.imageio.ImageIO;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 
-import com.github.axet.vget.VGet;
-import com.github.axet.vget.info.VideoInfo.VideoQuality;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.base.Strings;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -87,7 +47,6 @@ public class YurlList {
 
 	// Gets stored here: http://192.168.1.2:28017/cache/items/
 	@Deprecated
-	private static final boolean MONGODB_ENABLED = YurlResource.MongoDbCache.ENABLED;
 	public static final Integer ROOT_ID = 45;
 	@Deprecated
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
@@ -98,6 +57,8 @@ public class YurlList {
     private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 
+	// TODO: Regenerate the cache file using these sources of truth.
+	private static final String CATEGORY_HIERARCHY_JSON = System.getProperty("user.home") +"/github/yurl/cache/categories/all.json";
 	private static final String CATEGORY_RELATIONSHIPS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_topology.txt";
 	private static final String CATEGORY_NAMES = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_names.txt";
 	
@@ -110,9 +71,6 @@ public class YurlList {
 			// We can't put this in the constructor because multiple instances will get created
 			// YurlWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		}
-
-		@Deprecated // This is stored in a file now
-		private static JSONObject categoriesTreeCache;
 
 		// This only gets invoked when it receives the first request
 		// Multiple instances get created
@@ -130,31 +88,17 @@ public class YurlList {
 				throws JSONException, IOException {
 			checkNotNull(iRootId);
 			JSONObject categoriesTreeJson;
-			String filePath = "/home/sarnobat/github/yurl/cache/categories/all.json";
 			
-			if (Paths.get(filePath).toFile().exists()) {
+			if (Paths.get(CATEGORY_HIERARCHY_JSON).toFile().exists()) {
 				System.out.println("getUrls() - preloaded categories tree not ready");
-				try {
-				categoriesTreeJson = readFromCache(filePath);
-				} catch (Exception e) {
-					System.out.println("YurlList.YurlResource.getUrls() ERROR: " + e.getMessage());
-					e.printStackTrace();
-				categoriesTreeJson = ReadCategoryTree.getCategoriesTreeNeo4j(YurlList.ROOT_ID);
-				}
+				categoriesTreeJson = readFromCache(CATEGORY_HIERARCHY_JSON);
 			} else {
-				refreshCategoriesTreeCacheInSeparateThreadNoNeo4j();
-				categoriesTreeJson = categoriesTreeCache;
-				// This is done in a separate thread
-				refreshCategoriesTreeCacheInSeparateThread();
+				throw new RuntimeException("does not exist: " + CATEGORY_HIERARCHY_JSON);
 			}
 			try {
 				JSONObject oUrlsUnderCategory;
 				// We're not getting up to date pages when things change. But we need to
 				// start using this again if we dream of scaling this app.
-				if (MONGODB_ENABLED && MongoDbCache.exists(iRootId.toString())) {
-					System.out.println("YurlWorldResource.getUrls() - using cache");
-					oUrlsUnderCategory = new JSONObject(MongoDbCache.get(iRootId.toString()));
-				} else {
 					// If there were multiple clients here, you'd need to block the 2nd onwards
 					System.out.println("YurlWorldResource.getUrls() - not using cache");
 					JSONObject retVal1;
@@ -169,11 +113,7 @@ public class YurlList {
 					// server_categoriesRecursive.groovy would do it but at the
 					// moment that only uses neo4j.
 					retVal1.put("categoriesRecursive", categoriesTreeJson);
-					if (MONGODB_ENABLED) {
-						MongoDbCache.put(iRootId.toString(), retVal1.toString());
-					}
 					oUrlsUnderCategory = retVal1;
-				}
 				
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(oUrlsUnderCategory.toString())
@@ -193,7 +133,7 @@ public class YurlList {
 		// Page operations
 		// ------------------------------------------------------------------------------------
 
-		private JSONObject readFromCache(String filePath) {
+		private JSONObject readFromCache(String filePath) throws IOException {
 			System.out.println("YurlList.YurlResource.readFromCache() " + filePath);
 			File f = Paths.get(filePath).toFile();
 			String s = FileUtils.readFileToString(f, "UTF-8");
@@ -202,11 +142,11 @@ public class YurlList {
 		}
 
 		@Deprecated // TODO: this file is not in the right format 
-		private Collection<String> getDownloadedVideos(String downloadedVideos) {
+		private Collection<String> getDownloadedVideos(String downloadedVideos) throws IOException {
 			return FileUtils.readLines(Paths.get(downloadedVideos).toFile(), "UTF-8");
 		}
 		
-		private Collection<String> getDownloadedVideos2017(String downloadedVideos) {
+		private Collection<String> getDownloadedVideos2017(String downloadedVideos) throws IOException {
 			List<String> readLines = FileUtils.readLines(Paths.get(downloadedVideos).toFile(), "UTF-8");
 			Set<String> ret = new HashSet<String>();
 			for (String line : readLines) {
@@ -238,7 +178,7 @@ public class YurlList {
 		}
 
 		private static Map<String, String> buildOrderMap(String yurlOrdinals,
-				Integer iRootId) {
+				Integer iRootId) throws IOException {
 
 			List<String> lines = FileUtils.readLines(Paths.get(yurlOrdinals).toFile(), "UTF-8");
 			Map<String, String> ret = new HashMap<String, String>();
@@ -250,7 +190,7 @@ public class YurlList {
 			return ImmutableMap.copyOf(ret);
 		}
 
-		private static JSONArray getUrlsInCategory(String categoryId, Map<String, String> orderMap, Collection<String> downloadedVideos) {
+		private static JSONArray getUrlsInCategory(String categoryId, Map<String, String> orderMap, Collection<String> downloadedVideos) throws IOException {
 			// Create the file if it doesn't exist
 			java.nio.file.Path urlsInCategoryJsonFile = Paths.get(System
 					.getProperty("user.home") + "/github/yurl/tmp/urls/" + categoryId + ".json");
@@ -276,7 +216,6 @@ public class YurlList {
 
 				for (String line : filterByCategory(filterToBeRemovedLines(lines, remove), categoryId)) {
 					try {
-						JSONObject urlObj = new JSONObject();
 						String[] elements = line.split("::");
 						if (elements.length < 3) {
 							continue;
@@ -374,7 +313,7 @@ public class YurlList {
 			return e[0] + "::" + e[1];
 		}
 
-		private static Map<String, String> getUserImages(java.nio.file.Path path) {
+		private static Map<String, String> getUserImages(java.nio.file.Path path) throws IOException {
 
 			List<String> lines = FileUtils.readLines(path.toFile(), "UTF-8");
 			Map<String, String> ret = new HashMap<String, String>();
@@ -397,7 +336,7 @@ public class YurlList {
 			}).toList();
 		}
 
-		private static Collection<String> getChildCategories(String iRootId) {
+		private static Collection<String> getChildCategories(String iRootId) throws IOException {
 		System.out.println("getChildCategories() - begin");	
 			File file = Paths.get("/home/sarnobat/github/yurl/tmp/categories/topology/" + iRootId + ".txt").toFile();
 			if (!file.exists()) {
@@ -436,135 +375,9 @@ public class YurlList {
 				}}).toList();
 		}
 
-		////
-		//// The main part
-		////
-		// TODO: See if you can turn this into a map-reduce
-		@SuppressWarnings("unused")
-		@Deprecated
-		private static JSONObject getItemsAtLevelAndChildLevelsNeo4j(Integer iRootId) throws JSONException, IOException {
-//			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
-			if (categoriesTreeCache == null) {
-				categoriesTreeCache = ReadCategoryTree.getCategoriesTreeNeo4j(YurlList.ROOT_ID);
-			}
-			// TODO: the source is null clause should be obsoleted
-			JSONObject theQueryResultJson = execute(
-					"START source=node({rootId}) "
-							+ "MATCH p = source-[r:CONTAINS*1..2]->u "
-							+ "WHERE (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
-							+ "RETURN distinct ID(u),u.title,u.url, extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal, u.biggest_image, u.user_image "
-// TODO : do not hardcode the limit to 500. Category 38044 doesn't display more than 50 books since there are so many child items.
-							+ "ORDER BY u.ordinal DESC LIMIT 500", ImmutableMap
-							.<String, Object> builder().put("rootId", iRootId)
-							.build(), "getItemsAtLevelAndChildLevels()");
-			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
-			JSONArray theUncategorizedNodesJson = new JSONArray();
-			for (int i = 0; i < theDataJson.length(); i++) {
-				JSONObject anUncategorizedNodeJsonObject = new JSONObject();
-				_1: {
-					JSONArray anItem = theDataJson.getJSONArray(i);
-					_11: {
-						String anId = (String) anItem.get(0);
-						anUncategorizedNodeJsonObject.put("id", anId);
-					}
-					_12: {
-						String aTitle = (String) anItem.get(1);
-						anUncategorizedNodeJsonObject.put("title", aTitle);
-					}
-					_13: {
-						String aUrl = (String) anItem.get(2);
-						anUncategorizedNodeJsonObject.put("url", aUrl);
-					}
-					_14: {
-						try {
-							JSONArray path = (JSONArray) anItem.get(3);
-							if (path.length() == 3) {
-								anUncategorizedNodeJsonObject.put("parentId",
-										path.get(1));
-							} else if (path.length() == 2) {
-								anUncategorizedNodeJsonObject.put("parentId",
-										iRootId);
-							}
-							else if (path.length() == 1) {
-								// This should never happen
-								anUncategorizedNodeJsonObject.put("parentId",
-										path.get(0));
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-					_15: {
-
-						Object val = anItem.get(4);
-						if (isNotNull(val)) {
-							String aValue = (String) val;
-							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
-						}
-					}
-					_16: {
-						Object val = anItem.get(6);
-						if ("null".equals(val)) {
-							System.out.println("Is null value");
-						} else if (val == null) {
-							System.out.println("Is null string");
-						} else if (isNotNull(val)) {
-							Long aValue = (Long) val;
-							anUncategorizedNodeJsonObject.put("created", aValue);
-						}
-					}
-					_17: {
-						Object val = anItem.get(8);
-						if (isNotNull(val)) {
-							String aValue = (String) val;
-							if ("null".equals(aValue)) {
-								System.out.println("YurlWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
-							}
-							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
-						}
-					}
-					_18: {
-						Object val = anItem.get(9);
-						if (isNotNull(val)) {
-							String aValue = (String) val;
-							if ("null".equals(aValue)) {
-							}
-							anUncategorizedNodeJsonObject.put("user_image", aValue);
-						}
-					}
-				}
-				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
-			}
-			
-			JSONObject ret = new JSONObject();
-			transform : {
-				for (int i = 0; i < theUncategorizedNodesJson.length(); i++) {
-					JSONObject jsonObject = (JSONObject) theUncategorizedNodesJson
-							.get(i);
-					String parentId = (String) jsonObject.get("parentId");
-					if (!ret.has(parentId)) {
-						ret.put(parentId, new JSONArray());
-					}
-					JSONArray target = (JSONArray) ret.get(parentId);
-					target.put(jsonObject);
-				}
-			}
-			return ret;
-		}
-
-		private static boolean isNotNull(Object val) {
-			return val != null && !("null".equals(val)) && !(val.getClass().equals(YurlResource.JSON_OBJECT_NULL));
-		}
-
 		// --------------------------------------------------------------------------------------
 		// Write operations
 		// --------------------------------------------------------------------------------------
-
-		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
-
-		static JSONObject execute(String iCypherQuery, Map<String, Object> iParams, String... iCommentPrefix) {
-			execute(iCypherQuery, iParams, true, iCommentPrefix);
-		}
 
 		// TODO: make this map immutable
 		@Deprecated
@@ -619,323 +432,20 @@ public class YurlList {
 		 * file will get written to
 		 */
 		// TODO: implement this
-		private static void refreshCategoriesTreeCacheInSeparateThreadNoNeo4j() {
-			new Thread(){
+		private static Thread refreshCategoriesTreeCacheInSeparateThreadNoNeo4j() {
+			return new Thread(){
 				@Override
 				public void run() {
 					System.out
 							.println("YurlList.YurlResource.refreshCategoriesTreeCacheInSeparateThreadNoNeo4j() UNIMPLEMENTED");
 				}
-			}.start();
-		}
-		
-		@Deprecated
-		private static void refreshCategoriesTreeCacheInSeparateThread() {
-			new Thread(){
-				@Override
-				public void run() {
-					try {
-						categoriesTreeCache = ReadCategoryTree.getCategoriesTreeNeo4j(YurlList.ROOT_ID);
-					} catch (JSONException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}.start();
-		}
-		
-
-		// Currently not being used
-		private static JSONObject getCategoriesTree(Integer rootId) {
-
-			java.nio.file.Path namesFile = Paths.get(CATEGORY_NAMES);
-			Map<Integer,String> names = new HashMap<Integer, String>();
-			for (String line : FileUtils.readLines(namesFile.toFile(), "UTF-8")) {
-				String[] elements = line.split("::");
-				Integer i = Integer.parseInt(elements[0]);
-				String name = elements[1];
-				names.put(i, name);
-			}
-
-			java.nio.file.Path relationships = Paths.get(CATEGORY_RELATIONSHIPS);
-			Map<Integer, Integer> parents = new HashMap<Integer, Integer>();
-			for (String line : FileUtils.readLines(relationships.toFile(), "UTF-8")) {
-				String[] elements = line.split("::");
-				Integer child = Integer.parseInt( elements[0]);
-				Integer parent = Integer.parseInt(elements[1]);
-				parents.put(child, parent);
-			}
-			
-			
-		}
-
-		@Deprecated
-		private static class ReadCategoryTree {
-			@Deprecated
-			static JSONObject getCategoriesTreeNeo4j(Integer rootId)
-					throws JSONException, IOException {
-				return new AddSizes(
-						// This is the expensive query, not the other one
-						getCategorySizes(YurlResource.execute(
-								"START n=node(*) MATCH n-->u WHERE has(n.name) "
-										+ "RETURN id(n),count(u);",
-								ImmutableMap.<String, Object>of(),
-								"getCategoriesTree() - Getting sizes [The expensive query]").getJSONArray(
-								"data")))
-						.apply(
-						// Path to JSON conversion done in Cypher
-						createCategoryTreeFromCypherResultPaths(
-								// TODO: I don't think we need each path do we? We just need each parent-child relationship.
-								YurlResource.execute("START n=node({parentId}) "
-										+ "MATCH path=n-[r:CONTAINS*]->c "
-										+ "WHERE has(c.name) "
-										+ "RETURN extract(p in nodes(path)| "
-										+ "'{ " + "id : ' + id(p) + ', "
-										+ "name : \"'+ p.name +'\" , "
-										+ "key : \"' + coalesce(p.key, '') + '\"" + " }'" + ")",
-										ImmutableMap.<String, Object> of(
-												"parentId", rootId),
-												false,
-										"getCategoriesTree() - Getting all paths"),
-								rootId));
-			}
-			
-			private static Map<Integer, Integer> getCategorySizes(JSONArray counts) {
-				Map<Integer, Integer> sizesMap = new HashMap<Integer, Integer>();
-				for (int i = 0; i < counts.length(); i++) {
-					JSONArray row = counts.getJSONArray(i);
-					sizesMap.put(row.getInt(0), row.getInt(1));
-				}
-				return ImmutableMap.copyOf(sizesMap);
-			}
-			
-
-			private static JSONObject addSizesToCypherJsonResultObjects(JSONObject categoriesTree,
-					Map<Integer, Integer> categorySizes) {
-				Integer id = categoriesTree.getInt("id");
-				categoriesTree.put("size", categorySizes.get(id));
-				if (categoriesTree.has("children")) {
-					JSONArray children = categoriesTree.getJSONArray("children");
-					for (int i = 0; i < children.length(); i++) {
-						addSizesToCypherJsonResultObjects(children.getJSONObject(i), categorySizes);
-					}
-				}
-				return categoriesTree;
-			}
-			
-			private static class AddSizes implements
-					Function<JSONObject, JSONObject> {
-				private final Map<Integer, Integer> categorySizes;
-
-				AddSizes(Map<Integer, Integer> categorySizes) {
-					this.categorySizes = categorySizes;
-				}
-
-				@Override
-				public JSONObject apply(JSONObject input) {
-					return addSizesToCypherJsonResultObjects(
-							input, categorySizes);
-				}
-			}
-			
-			private static JSONObject createCategoryTreeFromCypherResultPaths(
-					JSONObject theQueryJsonResult, Integer rootId) {
-				JSONArray cypherRawResults = theQueryJsonResult
-						.getJSONArray("data");
-				checkState(cypherRawResults.length() > 0);
-				Multimap<Integer, Integer> parentToChildren = buildParentToChildMultimap2(cypherRawResults);
-				Map<Integer, JSONObject> categoryNodesWithoutChildren = createId(cypherRawResults);
-				JSONObject root = categoryNodesWithoutChildren.get(rootId);
-				root.put(
-						"children",
-						toJsonArray(buildChildren(parentToChildren.get(rootId),
-								categoryNodesWithoutChildren, parentToChildren)));
-				return root;
-			}
-
-			/**
-			 * @return - a pair for each category node
-			 */
-			private static Map<Integer, JSONObject> createId(JSONArray cypherRawResults) {
-				ImmutableMap.Builder<Integer, JSONObject> idToJsonBuilder = ImmutableMap
-						.<Integer, JSONObject> builder();
-				Set<Integer> seen = new HashSet<Integer>();
-				for (int i = 0; i < cypherRawResults.length(); i++) {
-					JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
-					for (int j = 0; j < treePath.length(); j++) {
-						if (treePath.get(j).getClass().equals(YurlResource.JSON_OBJECT_NULL)) {
-							continue;
-						}
-						JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
-						int categoryId = pathHopNode.getInt("id");
-						if (!seen.contains(categoryId)){
-							seen.add(categoryId);
-							idToJsonBuilder.put(categoryId,
-									pathHopNode);
-						}
-					}
-				}
-				return idToJsonBuilder.build();
-			}
-			
-			private static JSONArray removeNulls(JSONArray iJsonArray) {
-				for(int i = 0; i < iJsonArray.length(); i++) {
-					if (YurlResource.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
-						iJsonArray.remove(i);
-						--i;
-					}
-				}
-				return iJsonArray;
-			}
-
-			/**
-			 * @return Integer to set of Integers
-			 */
-			private static Multimap<Integer, Integer> buildParentToChildMultimap2(
-					JSONArray cypherRawResults) {
-				Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
-				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
-					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum)
-							.getJSONArray(0));
-					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-						if (categoryPath.get(hopNum).getClass()
-								.equals(YurlResource.JSON_OBJECT_NULL)) {
-							continue;
-						}
-						if (categoryPath.get(hopNum + 1).getClass()
-								.equals(YurlResource.JSON_OBJECT_NULL)) {
-							continue;
-						}
-						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
-							continue;
-						}
-						int childId = new JSONObject(categoryPath.getString(hopNum + 1))
-								.getInt("id");
-						int parentId = checkNotNull(new JSONObject(categoryPath.getString(hopNum))
-								.getInt("id"));
-						Object childrenObj = oParentToChildren.get(parentId);
-						if (childrenObj != null) {
-							Set<?> children = (Set<?>) childrenObj;
-							if (!children.contains(childId)) {
-								oParentToChildren.put(parentId, childId);
-							}
-						} else {
-							oParentToChildren.put(parentId, childId);
-						}
-					}
-				}
-				return oParentToChildren;
-			}
-
-			private static JSONArray toJsonArray(Collection<JSONObject> children) {
-				JSONArray arr = new JSONArray();
-				for (JSONObject child : children) {
-					arr.put(child);
-				}
-				return arr;
-			}
-
-			private static Set<JSONObject> buildChildren(
-					Collection<Integer> childIds, Map<Integer, JSONObject> nodes,
-					Multimap<Integer, Integer> parentToChildren) {
-				Builder<JSONObject> set = ImmutableSet.builder();
-				for (int childId : childIds) {
-					JSONObject childJson = nodes.get(childId);
-					Collection<Integer> grandchildIds = parentToChildren
-							.get(childId);
-					Collection<JSONObject> grandchildNodes = buildChildren(
-							grandchildIds, nodes, parentToChildren);
-					JSONArray grandchildrenArray = toJsonArray(grandchildNodes);
-					childJson.put("children", grandchildrenArray);
-					set.add(childJson);
-				}
-				return set.build();
-			}			
-		}
-
-		// I hope this is the same as JSONObject.Null (not capitals)
-		@Deprecated // Does not compile in Eclipse, but does compile in groovy
-		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
-
-		@Deprecated
-		private static class MongoDbCache {
-
-
-			public static final boolean ENABLED = false;
-			private static final String HOST = "192.168.1.2";
-			private static final int PORT = 27017;
-
-			private static final String VALUE = "value";
-			private static final String ID = "_id";
-
-			private static final String COLLECTION = "items";
-			private static final String CACHE = "cache";
-
-			private static boolean delete(String key) {
-				MongoClient mongo;
-				try {
-					mongo = new MongoClient(HOST, PORT);
-				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
-				}
-				DB db = mongo.getDB(CACHE);
-				DBCollection table = db.getCollection(COLLECTION);
-				BasicDBObject searchQuery = new BasicDBObject(ID, key);
-				return table.remove(searchQuery).getN() > 0;
-			}
-
-			static boolean invalidate(String key) {
-				delete(key);
-			}
-
-			static boolean exists(String key) {
-				MongoClient mongo;
-				try {
-					mongo = new MongoClient(HOST, PORT);
-				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
-				}
-				DB db = mongo.getDB(CACHE);
-				DBCollection table = db.getCollection(COLLECTION);
-				BasicDBObject searchQuery = new BasicDBObject(ID, key);
-				return table.find(searchQuery).size() > 0;
-			}
-
-			static void put(String key, String value) {
-				MongoClient mongo;
-				try {
-					mongo = new MongoClient(HOST, PORT);
-				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
-				}
-				DB db = mongo.getDB(CACHE);
-				DBCollection collection = db.getCollection(COLLECTION);
-				BasicDBObject document = new BasicDBObject(ID, key);
-				document.put(VALUE, value);
-				collection.insert(document);
-			}
-
-			static String get(String key) {
-				MongoClient mongo;
-				try {
-					mongo = new MongoClient(HOST, PORT);
-				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
-				}
-				DB db = mongo.getDB(CACHE);
-				DBCollection collection = db.getCollection(COLLECTION);
-				BasicDBObject searchQuery = new BasicDBObject(ID, key);
-				DBCursor cursor = collection.find(searchQuery);
-				DBObject next = cursor.next();
-				return (String) next.get(VALUE);
-			}
+			};
 		}
 	}
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 
-		YurlResource.refreshCategoriesTreeCacheInSeparateThread();
+		YurlResource.refreshCategoriesTreeCacheInSeparateThreadNoNeo4j().start();
 		// Turn off that stupid Jersey logger.
 		// This works in Java but not in Groovy.
 		//java.util.Logger.getLogger("org.glassfish.jersey").setLevel(java.util.Level.SEVERE);
