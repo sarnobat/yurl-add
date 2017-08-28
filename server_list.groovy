@@ -31,8 +31,10 @@ import org.json.JSONObject;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 
 public class YurlList {
 
@@ -44,8 +46,6 @@ public class YurlList {
 
 	// TODO: Regenerate the cache file using these sources of truth.
 	private static final String CATEGORY_HIERARCHY_JSON = System.getProperty("user.home") +"/github/yurl/cache/categories/all.json";
-	private static final String CATEGORY_RELATIONSHIPS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_topology.txt";
-	private static final String CATEGORY_NAMES = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_names.txt";
 	
 	// This only gets invoked when it receives the first request
 	// Multiple instances get created
@@ -343,13 +343,68 @@ public class YurlList {
 			return new Thread(){
 				@Override
 				public void run() {
-					// TODO: implement this
-					System.out
-							.println("YurlList.YurlResource.refreshCategoriesTreeCacheInSeparateThreadNoNeo4j() UNIMPLEMENTED");
+					java.nio.file.Path rel = Paths.get(CATEGORY_RELATIONSHIPS);
+					Map<Integer, Integer> parents = new HashMap<Integer, Integer>();  
+					for (String line : readFile(rel)) {
+						String[] elements = line.split("::");
+						parents.put(Integer.parseInt(elements[0]),
+								Integer.parseInt(elements[1]));
+					}
+					java.nio.file.Path nam = Paths.get(CATEGORY_NAMES);
+					Map<Integer, String> names = new HashMap<Integer, String>();  
+					for (String line : readFile(nam)) {
+						String[] elements = line.split("::");
+						names.put(Integer.parseInt(elements[0]),
+								elements[1]);
+					}
+					
+					Multimap<Integer, Integer> children = createChildrenMultimap(parents);
+					
+					JSONObject categoryHierarchy = createCategoryNode(45, names, parents, children);
+					try {
+						FileUtils.write(Paths.get(CATEGORY_HIERARCHY_JSON).toFile(), categoryHierarchy.toString(2), "UTF-8");
+					} catch (JSONException | IOException e) {
+						e.printStackTrace();
+					}
+				}
+
+				private Multimap<Integer, Integer> createChildrenMultimap(
+						Map<Integer, Integer> parents) {
+
+					Multimap<Integer, Integer> children = HashMultimap.create();
+					for (Integer child : parents.keySet()) {
+						children.put(parents.get(child), child);
+					}
+					return children;
+				}
+
+				private JSONObject createCategoryNode(int categoryId, Map<Integer, String> names, Map<Integer, Integer> parents, Multimap<Integer, Integer> children) {
+					JSONObject node = new JSONObject();
+					node.put("name", names.get(categoryId));
+					node.put("id", categoryId);
+					JSONArray childCategoryNodes = new JSONArray();
+					for (Integer childCategoryId : children.get(categoryId)) {
+						JSONObject child = createCategoryNode(childCategoryId, names, parents, children);
+						childCategoryNodes.put(child);
+					}
+					node.put("children", childCategoryNodes);
+					return node;
+				}
+
+				private List<String> readFile(java.nio.file.Path rel) {
+					try {
+						return FileUtils.readLines(rel.toFile(), "UTF-8");
+					} catch (IOException e) {
+						e.printStackTrace();
+						throw new RuntimeException(e);
+					}
 				}
 			};
 		}
 	}
+
+	private static final String CATEGORY_RELATIONSHIPS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_topology.txt";
+	private static final String CATEGORY_NAMES = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_names.txt";
 
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 
