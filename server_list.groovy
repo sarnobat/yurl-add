@@ -111,6 +111,7 @@ public class YurlList {
 			// YurlWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		}
 
+		@Deprecated // This is stored in a file now
 		private static JSONObject categoriesTreeCache;
 
 		// This only gets invoked when it receives the first request
@@ -129,10 +130,19 @@ public class YurlList {
 				throws JSONException, IOException {
 			checkNotNull(iRootId);
 			JSONObject categoriesTreeJson;
-			if (categoriesTreeCache == null) {
+			String filePath = "/home/sarnobat/github/yurl/cache/categories/all.json";
+			
+			if (Paths.get(filePath).toFile().exists()) {
 				System.out.println("getUrls() - preloaded categories tree not ready");
+				try {
+				categoriesTreeJson = readFromCache(filePath);
+				} catch (Exception e) {
+					System.out.println("YurlList.YurlResource.getUrls() ERROR: " + e.getMessage());
+					e.printStackTrace();
 				categoriesTreeJson = ReadCategoryTree.getCategoriesTreeNeo4j(YurlList.ROOT_ID);
+				}
 			} else {
+				refreshCategoriesTreeCacheInSeparateThreadNoNeo4j();
 				categoriesTreeJson = categoriesTreeCache;
 				// This is done in a separate thread
 				refreshCategoriesTreeCacheInSeparateThread();
@@ -155,7 +165,9 @@ public class YurlList {
 					Collection<String> downloadedVideos = new HashSet(getDownloadedVideos(DOWNLOADED_VIDEOS));
 					downloadedVideos.addAll(getDownloadedVideos2017(DOWNLOADED_VIDEOS_2017));
 					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId, downloadedVideos));
-					// TODO: Do we need this? We have server_categoriesRecursive.groovy
+					// We do need this. Ideally
+					// server_categoriesRecursive.groovy would do it but at the
+					// moment that only uses neo4j.
 					retVal1.put("categoriesRecursive", categoriesTreeJson);
 					if (MONGODB_ENABLED) {
 						MongoDbCache.put(iRootId.toString(), retVal1.toString());
@@ -180,6 +192,14 @@ public class YurlList {
 		// ------------------------------------------------------------------------------------
 		// Page operations
 		// ------------------------------------------------------------------------------------
+
+		private JSONObject readFromCache(String filePath) {
+			System.out.println("YurlList.YurlResource.readFromCache() " + filePath);
+			File f = Paths.get(filePath).toFile();
+			String s = FileUtils.readFileToString(f, "UTF-8");
+			System.out.println("YurlList.YurlResource.readFromCache() success");
+			return new JSONObject(s);
+		}
 
 		@Deprecated // TODO: this file is not in the right format 
 		private Collection<String> getDownloadedVideos(String downloadedVideos) {
@@ -594,6 +614,18 @@ public class YurlList {
 		// ----------------------------------------------------------------------------
 		// Read operations
 		// ----------------------------------------------------------------------------
+
+		/**
+		 * file will get written to
+		 */
+		// TODO: implement this
+		private static void refreshCategoriesTreeCacheInSeparateThreadNoNeo4j() {
+			new Thread(){
+				@Override
+				public void run() {
+				}
+			}.start();
+		}
 		
 		@Deprecated
 		private static void refreshCategoriesTreeCacheInSeparateThread() {
@@ -612,29 +644,28 @@ public class YurlList {
 		}
 		
 
-		private static class ReadCategoryTreeNonNeo4j {
-			static JSONObject getCategoriesTreeNeo4j(Integer rootId) {
+		// Currently not being used
+		private static JSONObject getCategoriesTree(Integer rootId) {
 
-				java.nio.file.Path namesFile = Paths.get(CATEGORY_NAMES);
-				Map<Integer,String> names = new HashMap<Integer, String>();
-				for (String line : FileUtils.readLines(namesFile.toFile(), "UTF-8")) {
-					String[] elements = line.split("::");
-					Integer i = Integer.parseInt(elements[0]);
-					String name = elements[1];
-					names.put(i, name);
-				}
-
-				java.nio.file.Path relationships = Paths.get(CATEGORY_RELATIONSHIPS);
-				Map<Integer, Integer> parents = new HashMap<Integer, Integer>();
-				for (String line : FileUtils.readLines(relationships.toFile(), "UTF-8")) {
-					String[] elements = line.split("::");
-					Integer child = Integer.parseInt( elements[0]);
-					Integer parent = Integer.parseInt(elements[1]);
-					parents.put(child, parent);
-				}
-				
-				
+			java.nio.file.Path namesFile = Paths.get(CATEGORY_NAMES);
+			Map<Integer,String> names = new HashMap<Integer, String>();
+			for (String line : FileUtils.readLines(namesFile.toFile(), "UTF-8")) {
+				String[] elements = line.split("::");
+				Integer i = Integer.parseInt(elements[0]);
+				String name = elements[1];
+				names.put(i, name);
 			}
+
+			java.nio.file.Path relationships = Paths.get(CATEGORY_RELATIONSHIPS);
+			Map<Integer, Integer> parents = new HashMap<Integer, Integer>();
+			for (String line : FileUtils.readLines(relationships.toFile(), "UTF-8")) {
+				String[] elements = line.split("::");
+				Integer child = Integer.parseInt( elements[0]);
+				Integer parent = Integer.parseInt(elements[1]);
+				parents.put(child, parent);
+			}
+			
+			
 		}
 
 		@Deprecated
