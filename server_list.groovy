@@ -19,11 +19,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
@@ -31,25 +29,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.json.JSONConfiguration;
 
-// TODO: Use javax.json.* for immutability
 public class YurlList {
-
-	// Gets stored here: http://192.168.1.2:28017/cache/items/
-	@Deprecated
-	public static final Integer ROOT_ID = 45;
-	@Deprecated
-	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 
 	private static final String YURL_ORDINALS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_ordinals.txt";
 	private static final String DOWNLOADED_VIDEOS = System.getProperty("user.home") + "/sarnobat.git/db/auto/yurl_queue_httpcat_videos_downloaded.json";
@@ -62,23 +47,11 @@ public class YurlList {
 	private static final String CATEGORY_RELATIONSHIPS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_topology.txt";
 	private static final String CATEGORY_NAMES = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_category_names.txt";
 	
+	// This only gets invoked when it receives the first request
+	// Multiple instances get created
 	@Path("yurl")
-	// TODO: Rename to YurlResource
 	public static class YurlResource { // Must be public
 
-
-		static {
-			// We can't put this in the constructor because multiple instances will get created
-			// YurlWorldResource.downloadUndownloadedVideosInSeparateThread() ;
-		}
-
-		// This only gets invoked when it receives the first request
-		// Multiple instances get created
-		YurlResource() {
-			// We can't put the auto downloader in main()
-			// then either it will be called every time the cron job is executed,
-			// or not until the server terminates unexceptionally (which never happens).
-		}
 		
 		@GET
 		@Path("uncategorized")
@@ -99,22 +72,20 @@ public class YurlList {
 				JSONObject oUrlsUnderCategory;
 				// We're not getting up to date pages when things change. But we need to
 				// start using this again if we dream of scaling this app.
-					// If there were multiple clients here, you'd need to block the 2nd onwards
-					System.out.println("YurlWorldResource.getUrls() - not using cache");
-					JSONObject retVal1;
-					retVal1 = new JSONObject();
-					// TODO: Remove this
-					//retVal1.put("urlsNeo4j", getItemsAtLevelAndChildLevelsNeo4j(iRootId));
-					
-					Collection<String> downloadedVideos = new HashSet(getDownloadedVideos(DOWNLOADED_VIDEOS));
-					downloadedVideos.addAll(getDownloadedVideos2017(DOWNLOADED_VIDEOS_2017));
-					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId, downloadedVideos));
-					// We do need this. Ideally
-					// server_categoriesRecursive.groovy would do it but at the
-					// moment that only uses neo4j.
-					retVal1.put("categoriesRecursive", categoriesTreeJson);
-					oUrlsUnderCategory = retVal1;
+
+				// If there were multiple clients here, you'd need to block the 2nd onwards
+				System.out.println("YurlWorldResource.getUrls() - not using cache");
+				JSONObject retVal1;
+				retVal1 = new JSONObject();
 				
+				Collection<String> downloadedVideos = new HashSet(getDownloadedVideos(DOWNLOADED_VIDEOS));
+				downloadedVideos.addAll(getDownloadedVideos2017(DOWNLOADED_VIDEOS_2017));
+				retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId, downloadedVideos));
+				// We do need this. Ideally server_categoriesRecursive.groovy
+				// would do it but at the moment that only uses neo4j.
+				retVal1.put("categoriesRecursive", categoriesTreeJson);
+				oUrlsUnderCategory = retVal1;
+			
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(oUrlsUnderCategory.toString())
 						.type("application/json").build();
@@ -126,12 +97,6 @@ public class YurlList {
 						.type("application/text").build();
 			}
 		}
-
-		
-
-		// ------------------------------------------------------------------------------------
-		// Page operations
-		// ------------------------------------------------------------------------------------
 
 		private JSONObject readFromCache(String filePath) throws IOException {
 			System.out.println("YurlList.YurlResource.readFromCache() " + filePath);
@@ -220,7 +185,7 @@ public class YurlList {
 						if (elements.length < 3) {
 							continue;
 						}
-						//System.err.println("YurlList.YurlResource.getUrlsInCategory(): " + line);
+						@SuppressWarnings("unused")
 						String categoryIdElement = elements[0];
 						String url = elements[1];
 						String timestamp = elements[2];
@@ -345,13 +310,9 @@ public class YurlList {
 				StringBuffer sb = new StringBuffer();
 				for (String line : FileUtils.readLines(p.toFile(), "UTF-8")) {
 					String[] elements = line.split("::");
-//					System.out
-//							.println("YurlList.YurlResource.getChildCategories() 1 " + line);
 					if (elements.length < 2) {
 						continue;
 					}
-//					System.out
-//					.println("YurlList.YurlResource.getChildCategories() 2 " + line);
 					String categoryId = elements[0];
 					String childCategoryId = elements[1];
 					if (categoryId.equals(iRootId)) {
@@ -375,67 +336,14 @@ public class YurlList {
 				}}).toList();
 		}
 
-		// --------------------------------------------------------------------------------------
-		// Write operations
-		// --------------------------------------------------------------------------------------
-
-		// TODO: make this map immutable
-		@Deprecated
-		static JSONObject execute(String iCypherQuery,
-				Map<String, Object> iParams, boolean doLogging, String... iCommentPrefix) {
-			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
-			if (doLogging) {
-				System.out.println(commentPrefix + " - \t" + iCypherQuery);
-				System.out.println(commentPrefix + "- \tparams - " + iParams);
-			}
-			ClientConfig clientConfig = new DefaultClientConfig();
-			clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
-					Boolean.TRUE);
-	
-			// POST {} to the node entry point URI
-			ClientResponse theResponse = Client.create(clientConfig).resource(
-					CYPHER_URI)
-					.accept(MediaType.APPLICATION_JSON)
-					.type(MediaType.APPLICATION_JSON).entity("{ }")
-					.post(ClientResponse.class, ImmutableMap
-							.<String, Object> of("query", iCypherQuery, "params",
-									Preconditions.checkNotNull(iParams)));
-			if (theResponse.getStatus() != 200) {
-				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: " + iParams);
-				try {
-					throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream(), "UTF-8"));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			String theNeo4jResponse ;
-			try {
-				// Do not inline this. We need to close the stream after
-				// copying
-				theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream(), "UTF-8");
-				theResponse.getEntityInputStream().close();
-				theResponse.close();
-				if (doLogging) {
-					System.out.println(commentPrefix + "end");
-				}
-				return new JSONObject(theNeo4jResponse);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		// ----------------------------------------------------------------------------
-		// Read operations
-		// ----------------------------------------------------------------------------
-
 		/**
 		 * file will get written to
 		 */
-		// TODO: implement this
 		private static Thread refreshCategoriesTreeCacheInSeparateThreadNoNeo4j() {
 			return new Thread(){
 				@Override
 				public void run() {
+					// TODO: implement this
 					System.out
 							.println("YurlList.YurlResource.refreshCategoriesTreeCacheInSeparateThreadNoNeo4j() UNIMPLEMENTED");
 				}
