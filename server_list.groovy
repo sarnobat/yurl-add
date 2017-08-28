@@ -623,6 +623,8 @@ public class YurlList {
 			new Thread(){
 				@Override
 				public void run() {
+					System.out
+							.println("YurlList.YurlResource.refreshCategoriesTreeCacheInSeparateThreadNoNeo4j() UNIMPLEMENTED");
 				}
 			}.start();
 		}
