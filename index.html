@@ -19,7 +19,6 @@
 
 var host = "http://netgear.rohidekar.com";
 var urlBase = "http://netgear.rohidekar.com:44447/yurl";
-var urlBaseList = "http://netgear.rohidekar.com:44443/yurl";
 var rootId;
 var parentOfRootId;
 var orderedDescending = true;
@@ -40,7 +39,7 @@ function initialize() {
 	////
     
 	getUrls : {
-		$.getJSON(urlBaseList + "/uncategorized?rootId=" +rootId, function(result) {
+		$.getJSON(host + ":44443/yurl/uncategorized?rootId=" +rootId, function(result) {
 			uncategorizedResponse = result;
 			renderIfReady();
 		});
@@ -170,7 +169,11 @@ function renderIfReady() {
 			//urlsRootOnly.splice(headLength, urlsRootOnly.length - 1 - headLength);
 			//console.debug("remaining elements: " + truncated.length + " of " + urlsRootOnly.length);
 			var childCategories = findCategoryChildren(uncategorizedResponse.categoriesRecursive, rootId);
-			cardsHtml = urlsRootOnly.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
+			cardsHtml = urlsRootOnly				
+				.map(function(i){ if (i.ordinal < 9999999999) { i.ordinal = i.ordinal * 1000; }; return i;})
+				.sort(function (u1, u2) {return u2.ordinal - u1.ordinal ;})
+				.slice(0, limit)
+				.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
 		}
 	}
 	var urlThumbnailsHtml = "";
@@ -214,7 +217,7 @@ function initializeBeforeAjax() {
 	}
 	
 	setCountAndTitle: {
-		$.getJSON(urlBase + "/count_non_recursive?rootId=" +rootId,function(result){
+		$.getJSON(host + ":44438/yurl/count_non_recursive?rootId=" +rootId,function(result){
 			$("#count").text(result.count);
 			$("#category").text(result.name);
 			document.title = result.name.charAt(0).toUpperCase() + result.name.slice(1) + " (yurl)";
@@ -334,6 +337,43 @@ function createImageCell(field) {
 	return img;
 }
 
+function relateNew(newParentId, currentRootId, button) {
+	if (newParentId == null) {
+		alert("newParentId = " + newParentId);
+		return;
+	}
+
+	var liElem = button.parentElement.parentElement.parentElement.parentElement.parentElement;
+	var url 		= $(liElem).attr("url");
+	var created 	= $(liElem).attr("created");
+	var categoryId 	= $(liElem).attr("categoryId");
+	
+	var url = urlBase + "/relate?parentId=" +newParentId+"&url=" +  encodeURIComponent(url) + "&currentParentId=" + categoryId + "&created=" + created;	
+	var parentId = newParentId;
+	
+	removeTopNew(newParentId, liElem);
+	//
+	// The main part
+	//
+	$.getJSON(url, function(result){})
+		.success(function() { 
+
+			$("#list_"+parentId).effect("highlight", null, 4000, function() {});
+			
+			// Change the destination category count
+			var count = parseInt($("#count_"+parentId).text()) + 1;
+			$("#count_"+parentId).text(count);
+			$("#count_"+parentId).css("font-weight","Bold");
+			
+			// Decrement the number of items in this category that is displayed
+			var newCount = parseInt($("#count").text());
+			newCount -= 1;
+			$("#count").text(newCount);
+		})
+		.error(function() { alert("error occurred "); })
+		.complete(function() { });
+}
+
 function relate(parentId, childId, currentRootId) {
 	removeTop(parentId, childId);
 	var url = urlBase + "/relate?parentId=" +parentId+"&childId=" +  childId + "&currentParentId=" + currentRootId;	
@@ -381,6 +421,20 @@ function removeTopNoDest(childId) {
 }
 
 // This part just performs frontend changes, nothing backend
+function removeTopNew(parentId, itemElem) {
+	var target;
+	if (parentId == parentOfRootId) {
+		target = "#up";
+	} else {
+		target = "#list_"+parentId;
+	}
+	var options = { to: target, className: "ui-effects-transfer" };
+	$($(itemElem)).effect('transfer', options, 50, function() { // !!!!!!!! TODO : Wrong. remove the one specified by child ID
+		$($(itemElem)).effect( "blind",null, 5, function() { $(this).remove(); });
+	});	
+}
+
+// This part just performs frontend changes, nothing backend
 function removeTop(parentId, childId) {
 	var target;
 	if (parentId == parentOfRootId) {
@@ -410,14 +464,20 @@ function writeCategoryTree(root, level) {
 	}
 }
 
-function moveToTop(source) {
+function moveToTop(source, button) {
 	var idToMove = source;
 	var firstId = $("#url_cards").children().first().attr("id");
+
+	var liElement = button.parentElement.parentElement.parentElement.parentElement.parentElement;
+
+	var url = liElement.getAttribute('url');
+	var categoryId = liElement.getAttribute('categoryId');
+	var created = liElement.getAttribute('created');
 	if (orderedDescending) {
-		var elem = $("#" + idToMove).remove();
+		var elem = $(liElement).remove();
 		$("#url_cards").prepend(elem);
 		// 1 more than latest timestamp
-		$.getJSON(host + ":44439/yurl/surpassOrdinal?nodeIdToChange=" + idToMove + "&nodeIdToSurpass=" + firstId,
+		$.getJSON(host + ":44439/yurl/surpassOrdinal?url=" + encodeURIComponent(url) + "&categoryId=" + categoryId + "&created=" + created,
 			function(result){
 			})
 			.success(function(data) {  
@@ -454,29 +514,34 @@ function moveToBottom(source) {
 }
 
 function moveUp(source) {
-	var first = $("#" + source).prev().attr('id');
-	var second = source;
-	swap(first, second);
+// 	var first = $("#" + source).prev().attr('id');
+// 	var second = source;
+// 	swap(first, second);
+	alert("Needs reimplementing 1");
 }
 
 function moveDown(source) {
-	var first = source;
-	var second = $("#" + source).next().attr('id');
-	swap(first, second);
+// 	var first = source;
+// 	var second = $("#" + source).next().attr('id');
+// 	swap(first, second);
+
+	alert("Needs reimplementing 2");
 }
 
 function swap(firstId, secondId) {
-	$.getJSON(host + ":44439/yurl/swapOrdinals?firstId=" + firstId + "&secondId=" + secondId, 
-		function(result){
-		})
-		.success(function(data) {  
-			$("#" + secondId).after($("#" + firstId));
-		})
-		.error(function() { 
-			alert("error occurred "); 
-		})
-		.complete(function() { 
-		});
+// 	$.getJSON(host + ":44439/yurl/swapOrdinals?firstId=" + firstId + "&secondId=" + secondId, 
+// 		function(result){
+// 		})
+// 		.success(function(data) {  
+// 			$("#" + secondId).after($("#" + firstId));
+// 		})
+// 		.error(function() { 
+// 			alert("error occurred "); 
+// 		})
+// 		.complete(function() { 
+// 		});
+
+	alert("Needs reimplementing 3");
 
 }
 
@@ -607,7 +672,8 @@ function getCategoryTableHtml(categoryId, categoryName, urlsInCategory) {
 		return html;
 }
 
-function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory, limit) {
+function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory1, limit) {
+		var urlsInCategory = urlsInCategory1.map(function(i){ if (i.ordinal < 9999999999) { i.ordinal = i.ordinal * 1000; }; return i;}).sort(function (u1, u2) {return u2.ordinal - u1.ordinal ;});
 		var urlThumbnailsHtml = "<h3><a href='/yurl/?rootId="+categoryId+"'>" + categoryName + " (" + categoryId + ")</a></h3>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
 			if (j > limit) {
@@ -758,7 +824,10 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		}
 	
 		{
-			listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96');
+			listItem = $("<li>").attr('id',field.id).attr("class",'buttonize').attr('style','background-color:#FDFD96')
+				.attr('url',field.url)
+				.attr('created',field.created)
+				.attr('categoryId',rootId);
 			listItem.append(table);
 			//$("#url_cards").append(listItem);
 		}
@@ -771,7 +840,12 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 			var site = urlElements[0];
 			two.append("<img src='" + site + "/favicon.ico' width=18 onerror=\"this.style.display='none'\" > ");
 		}
-		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+(new Date(field.created))+"<br>"+"</sub>");
+		var date;
+		if (field.created < 9999999999) {
+			field.created = field.created * 1000;
+		} 
+		var dddd = (new Date(field.created)).toString();
+		two.append("<font style=\"color: #002366 ; font-weight : normal; font-size: medium\">"+ field.title + "</font><br><sub><font style=\"color: #436B95\"><a href='" +field.url+"'>"+field.url+"</a></font><br>"+field.created+" - "+dddd+"<br>"+"</sub>");
 	}
 	
 	var imageCell = createImageCell(field, biggestImages, null, resultRowNumber);
@@ -786,13 +860,13 @@ function fillCardItem(resultRowNumber, field, result, limit, biggestImages, cate
 		buttonCell.append("<br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<input type=button class='genericButton' value=Tag onClick='tagUrlWithSelections("+field.id+")'><br>");			
-		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relate("+parentOfRootId+","+field.id+","+rootId+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Wrong Category' onClick='relateNew("+parentOfRootId+","+rootId+",this)'><br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<input type=button class='genericButton' value='Change Image' onClick='changeImage("+field.id+",this,\"" +field.url+ "\")'><br>");
-                buttonCell.append("<input type=button class='genericButton' value='Remove Custom Image' onClick='removeImage("+field.id+",this,\"" +field.url +"\"," + rootId + ")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Remove Custom Image' onClick='removeImage("+field.id+",this,\"" +field.url +"\"," + rootId + ")'><br>");
 		buttonCell.append("<br>");
 		buttonCell.append("<br>");
-		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+")'><br>");
+		buttonCell.append("<input type=button class='genericButton' value='Top' onclick='moveToTop("+field.id+", this)'><br>");
 		buttonCell.append("<input type=button class='genericButton' value='Move Up' onclick='moveUp("+field.id+")'><br>");
 		buttonCell.append("<input type=button class='genericButton' value='Move Down' onclick='moveDown("+field.id+")'><br>");
 		buttonCell.append("<input type=button class='genericButton' value='Bottom' onclick='moveToBottom("+field.id+")'><br>");
@@ -859,7 +933,7 @@ function changeImage(id, button, url) {
 	// TODO : prepopulate with the computed thumbnail
 	var newImageUrl = prompt("Enter a new image URL:", prepopulatedImage(url));
 	if (newImageUrl.length > 0) {
-		$.getJSON(urlBase + '/updateImage?url=' + encodeURIComponent(newImageUrl) + "&id=" + id, 
+		$.getJSON(urlBase + '/updateImage?linkUrl='+encodeURIComponent(url)+'&url=' + encodeURIComponent(newImageUrl) + "&categoryId=" + rootId, 
 			function(result){
 				console.debug(result);
 			})
@@ -924,7 +998,7 @@ function CATEGORY_TO_BUTTON(itemId, currentCategoryId, categoryNode) {
 	return function(categoryNode) {
 		return "<input type=button class='genericButton' "
 			+ " value='"+categoryNode.name+" ("+ categoryNode.key+")'"
-			+ " onclick='relate("+categoryNode.id+","+itemId+","+currentCategoryId+")'>"
+			+ " onclick='relateNew("+categoryNode.id+","+currentCategoryId+", this)'>"
 			+ "";
 	};
 }
@@ -992,20 +1066,21 @@ function configureKeyBindings() {
 		});
 	}
 	$(window).keypress(function(event) {
-		var key = String.fromCharCode(event.which);
-		if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
-			var idOfTop = $("#url_cards").children()[0].id;
-			moveToBottom(idOfTop);
-		}
-		if (String.fromCharCode(event.which) == '<') {
-			var parentId = parentOfRootId;
-			var childId = $("#url_cards").children()[0].id;
-			var currentRootId = rootId;
-			relate(parentId, childId, currentRootId);
-		}
-		if (String.fromCharCode(event.which) == '>') {
-			console.debug("remove from list (deal with it later)");
-		}
+		alert("Needs reimplementing: key bindings");
+// 		var key = String.fromCharCode(event.which);
+// 		if (('_' == key)||('-'==key) ||('j'==key)|| ('n' == key) ) {
+// 			var idOfTop = $("#url_cards").children()[0].id;
+// 			moveToBottom(idOfTop);
+// 		}
+// 		if (String.fromCharCode(event.which) == '<') {
+// 			var parentId = parentOfRootId;
+// 			var childId = $("#url_cards").children()[0].id;
+// 			var currentRootId = rootId;
+// 			relate(parentId, childId, currentRootId);
+// 		}
+// 		if (String.fromCharCode(event.which) == '>') {
+// 			console.debug("remove from list (deal with it later)");
+// 		}
 	});
 }
 //----------------------------------------------------------------------------------------
@@ -1508,14 +1583,14 @@ reading list (pdf))
 
 <br>
 TODO:<br>
-* Get off Neo4j completely. Upgrading Ubuntu or JDK causes issues, and it's easy to corrupt the database.<br>
 ** create a manual videos page based on yurl video category (read-only)<br>
 ** yurl_httpcat.txt - create a file yurl_httpcat_category_paths.txt<br>
 *** yurl_categories.txt - ID, category_path<br>
 *** yurl_exhaustive.txt - combine yurl_httpcat.txt and ~/github/yurl/export_all.txt<br>
-** /Yurl_plaintext/<br>
 ** Later - /Yurl_json/<br>
-* Don't print such ugly timestamps<br>
+<strike>* Get off Neo4j completely. Upgrading Ubuntu or JDK causes issues, and it's easy to corrupt the database.</strike><br>
+<strike>** /Yurl_plaintext/</strike><br>
+<strike>* Don't print such ugly timestamps</strike><br>
 <br>
 						<div id="tabs">
 							  <ul>

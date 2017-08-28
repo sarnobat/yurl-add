@@ -54,6 +54,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.jvnet.hk2.annotations.Optional;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
@@ -83,7 +84,11 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
 /**
+ * Deprecation doesn't mean the method can be removed. Only when index.html stops referring to it can it be removed.
+ * 
  * Neo4j dependencies removed.
+ * 
+ * Only writing to the persistent store (and the associated async tasks) should remain in this thread.
  */
 // TODO: Use javax.json.* for immutability
 public class Yurl {
@@ -94,9 +99,14 @@ public class Yurl {
 	@Deprecated
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
+	@Deprecated
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
-        private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";// Started using this in Aug 2017. Older data is not yet in this file.
+	private static final String TITLE_FILE_TXT = "yurl_titles_2017.txt";
+    private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";
+    private static final String QUEUE_FILE_TXT_2017 = "yurl_queue_2017.txt";// Started using this in Aug 2017. Older data is not in this file.
+    private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
+	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/3TB/new/move_to_unsorted/images/";
 // usually full and we get zero size files: "/media/sarnobat/Unsorted/images/";
 	private static final String TARGET_DIR_PATH_IMAGES_OTHER = "/media/sarnobat/3TB/new/move_to_unsorted/images/other";
@@ -122,48 +132,6 @@ public class Yurl {
 			// or not until the server terminates unexceptionally (which never happens).
 		}
 		
-		@GET
-		@Path("uncategorized")
-		@Produces("application/json")
-		@Deprecated // We aren't using this anymore, we moved it to server_list.groovy.
-					// this should undo some of the bloated nature of this file.
-		public Response getUrls(@QueryParam("rootId") Integer iRootId,
-								@QueryParam("enableCache") @DefaultValue("true") Boolean iMongoDbCacheLookupEnabled)
-				throws JSONException, IOException {
-			checkNotNull(iRootId);
-			JSONObject categoriesTreeJson;
-			if (categoriesTreeCache == null) {
-				System.out.println("getUrls() - preloaded categories tree not ready");
-				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
-			} else {
-				categoriesTreeJson = categoriesTreeCache;
-				// This is done in a separate thread
-				refreshCategoriesTreeCacheInSeparateThread();
-			}
-			try {
-				JSONObject oUrlsUnderCategory;
-				// We're not getting up to date pages when things change. But we need to
-				// start using this again if we dream of scaling this app.
-				// If there were multiple clients here, you'd need to block the 2nd onwards
-				System.out.println("YurlWorldResource.getUrls() - not using cache");
-				JSONObject retVal1;
-				retVal1 = new JSONObject();
-				retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
-				retVal1.put("categoriesRecursive", categoriesTreeJson);
-				oUrlsUnderCategory = retVal1;
-				
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(oUrlsUnderCategory.toString())
-						.type("application/json").build();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				return Response.serverError().header("Access-Control-Allow-Origin", "*")
-						.entity(e.getStackTrace())
-						.type("application/text").build();
-			}
-		}
-
 		@GET
 		@Path("downloadVideo")
 		@Produces("application/json")
@@ -290,36 +258,6 @@ public class Yurl {
 		// Page operations
 		// ------------------------------------------------------------------------------------
 
-		@GET
-		@Path("count_non_recursive")
-		@Produces("application/json")
-		// It's better to do this in a separate Ajax request because it's fast and we can get an idea if database queries are working.
-		public Response countNonRecursive(@QueryParam("rootId") Integer iRootId)
-				throws Exception {
-			checkNotNull(iRootId);
-			try {
-				ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-				theParams.put("rootId", iRootId);
-				JSONObject theQueryResultJson = execute(
-						"start n=node({rootId}) optional match n-[CONTAINS]->u where has(u.title) return n.name, count(u) as cnt",
-						theParams.build());
-				JSONArray outerArray = (JSONArray) theQueryResultJson
-						.get("data");
-				JSONArray innerArray = (JSONArray) outerArray.get(0);
-				String name = (String) innerArray.get(0);
-				Integer count = (Integer) innerArray.get(1);
-				JSONObject result = new JSONObject();
-				result.put("count", count);
-				result.put("name", name);
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(result.toString()).type("application/json")
-						.build();
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw e;
-			}
-		}
-
 		////
 		//// The main part
 		////
@@ -443,33 +381,6 @@ public class Yurl {
 		// Key bindings
 		// -----------------------------------------------------------------------------
 
-		@Deprecated
-		@GET
-		@Path("keysUpdate")
-		@Produces("application/json")
-		// Ideally we should wrap this method inside a transaction but over REST
-		// I don't know how to do that.
-		// TODO: we will have to start supporting disassociation of key bindings
-		// with child categories
-		public Response keysUpdate(@QueryParam("parentId") Integer iParentId,
-				@QueryParam("newKeyBindings") String iNewKeyBindings,
-				@QueryParam("oldKeyBindings") String iOldKeyBindings)
-				throws JSONException, IOException {
-			System.out.println("keysUpdate() - begin");
-			// Remove duplicates by putting the bindings in a map
-			for (Map.Entry<String, String> pair : FluentIterable
-					.from(difference(iNewKeyBindings, iOldKeyBindings))
-					.filter(Predicates.not(IS_COMMENTED))
-					.transform(LINE_TO_BINDING_ENTRY).toSet()) {
-				deleteBinding(iParentId, pair.getKey(), pair.getValue());
-				// TODO: if it fails, recover and create the remaining ones?
-				createNewKeyBinding(pair.getValue(), pair.getKey(), iParentId);
-			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(getKeys(iParentId).toString())
-					.type("application/json").build();
-		}
-
 		private static void deleteBinding(Integer iParentId, String key, String name) {
 			try {
 				execute("START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
@@ -525,33 +436,6 @@ public class Yurl {
 			return theNewKeyBindingLines;
 		}
 
-		private static void createNewKeyBinding(String iCategoryName, String iKeyCode,
-				Integer iParentId) throws IOException, JSONException {
-			System.out.println("createNewKeyBinding() - begin() : " + String.format("iCategoryName %s\tiKeyCode %s\tiParentId %d", iCategoryName, iKeyCode, iParentId));
-			// TODO: Also create a trash category for each new category key node
-			JSONArray theCategoryNodes = (JSONArray) execute(
-					"START parent=node({parentId})" +
-					" MATCH parent -[r:CONTAINS]-> existingCategory" +
-					" WHERE has(existingCategory.type)" +
-					" and existingCategory.type = 'categoryNode'" +
-					" and existingCategory.name = {aCategoryName}" +
-					" SET existingCategory.key = {aKeyCode}" +
-					" RETURN distinct id(existingCategory)",
-					ImmutableMap.<String, Object> builder()
-							.put("parentId", iParentId)
-							// TODO: change this back
-							.put("aCategoryName", iCategoryName)
-							.put("aKeyCode", iKeyCode).build(), "createNewKeyBinding()").get("data");
-			try {
-				createNewRelation(iParentId,
-						Integer.parseInt(getCategoryNodeIdString(iCategoryName,
-								iKeyCode, theCategoryNodes)));
-				System.out.println("createNewKeyBinding() - end()");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
 		/** Get or create the category node that is to be associated with the key code */
 		private static String getCategoryNodeIdString(String iCategoryName,
 				String iKeyCode, JSONArray theCategoryNodes) throws IOException {
@@ -598,49 +482,7 @@ public class Yurl {
 			return shouldCreateNewCategoryNode;
 		}
 
-		@Deprecated
-		@GET
-		@Path("keys")
-		@Produces("application/json")
-		public Response keys(@QueryParam("parentId") Integer iParentId)
-				throws JSONException, IOException {
-			JSONArray ret = getKeys(iParentId);
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
-		}
-
-		@Deprecated
-		// TODO: Rewrite this as a map-fold?
-		public static JSONArray getKeys(Integer iParentId) throws IOException,
-				JSONException {
-//			System.out.println("getKeys() - parent ID: " + iParentId);
-			// Unfortunately, we cannot insist on counting only the URL nodes -
-			// it will prevent category nodes from being returned. See if
-			// there's a way to do this in Cypher. If there isn't, this is not a
-			// huge compromise.
-			// TODO: find a way to count the nodes
-			JSONArray theData = (JSONArray) execute(
-					"START parent=node({parentId}) " +
-					"MATCH parent-[c:CONTAINS*1..2]->n " +
-					"WHERE has(n.name)  and n.type = 'categoryNode' and id(parent) = {parentId} " +
-					"RETURN distinct ID(n),n.name,n.key,0 as c order by c desc",
-					ImmutableMap.<String, Object> builder()
-							.put("parentId", iParentId).build(), "getKeys()").get("data");
-			JSONArray oKeys = new JSONArray();
-			for (int i = 0; i < theData.length(); i++) {
-				JSONArray aBindingArray = theData.getJSONArray(i);
-				JSONObject aBindingObject = new JSONObject();
-				aBindingObject.put("id", (String) aBindingArray.get(0));
-				aBindingObject.put("name", (String) aBindingArray.get(1));
-				// TODO: this could be null
-				aBindingObject.put("key", (String) aBindingArray.get(2));
-				aBindingObject.put("count",
-						((Integer) aBindingArray.get(3)).toString());
-				oKeys.put(aBindingObject);
-			}
-//			System.out.println("getKeys() - end. length: " + oKeys.length());
-			return oKeys;
-		}
+		
 
 		// --------------------------------------------------------------------------------------
 		// Write operations
@@ -654,10 +496,10 @@ public class Yurl {
 				IOException {
 			// This will convert
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
-			String theTitle = getTitle(new URL(theHttpUrl));
+			System.out.println("stash() theHttpUrl = " + theHttpUrl);
 			try {
 				// TODO: append synchronously to new yurl master queue 
-	                        appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
+	            appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
 
 				launchAsynchronousTasksHttpcat(theHttpUrl, iCategoryId);
 				// TODO: check that it returned successfully (redundant?)
@@ -672,50 +514,126 @@ public class Yurl {
 		}
 
 
-                private static void launchAsynchronousTasksHttpcat(String iUrl, Integer iCategoryId) {
+        private static void launchAsynchronousTasksHttpcat(final String iUrl, Integer iCategoryId) {
+		
+			appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_DIR, Yurl.QUEUE_FILE_TXT_2017);
+			
+			// Delete the url cache file for this category. It will get
+			// regenrated next time we load that category page.
+        	removeCategoryCache(iCategoryId);
+        	
+        	// Get the title
+			
+			_10: {
 
-                        // This is not (yet) the master file. The master file is written to synchronously.
-                        appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
-                        String targetDirPathImages;
-                        if (iCategoryId.longValue() == 29172) {
-                                targetDirPathImages = TARGET_DIR_PATH_IMAGES_OTHER;
-                        } else {
-                                targetDirPathImages = TARGET_DIR_PATH_IMAGES;
-                        }
-                        DownloadImage.downloadImageInSeparateThreadHttpcat(iUrl, targetDirPathImages, CYPHER_URI);
-                        DownloadVideo.downloadVideoInSeparateThreadHttpcat(iUrl, TARGET_DIR_PATH, CYPHER_URI);
-                        if (!iUrl.contains("amazon")) {
-                                // We end up with garbage images if we try to screen-scrape Amazon.
-                                // The static rules result in better images.
-                        		// TODO: Store this successful image download outside Neo4j.
-                                //BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
-                        }
-                }
+				final String theTitle = getTitle(new URL(iUrl));
+				if (theTitle != null && theTitle.length() > 0) {
+					Runnable r = new Runnable() {
+						// @Override
+						public void run() {
+							String titleFileStr = Yurl.QUEUE_FILE + "/" + Yurl.TITLE_FILE_TXT;
+							File file = Paths.get(titleFileStr).toFile();
+							File file2 = Paths.get(Yurl.QUEUE_FILE).toFile();
+							if (!file2.exists()) {
+								throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+							}
+							String command = "echo '" + iUrl + "::" + theTitle + "' | tee -a '" + titleFileStr + "'";
+							System.out.println("appendToTextFile() - " + command);
+							Process p = new ProcessBuilder()
+									.directory(file2)
+									.command("echo","hello world")
+									.command("/bin/sh", "-c", command)
+									.inheritIO().start();
+							p.waitFor();
+							if (p.exitValue() == 0) {
+								System.out.println("appendToTextFile() - successfully appended "
+										+ iUrl);
+							} else {
+								System.out.println("appendToTextFile() - error appending " + iUrl);
+							}
+						}
+					};
+					new Thread(r).start();
+				}
+			}
+        	
+            // This is not (yet) the master file. The master file is written to synchronously.
+            appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
+            String targetDirPathImages;
+            if (iCategoryId.longValue() == 29172) {
+                    targetDirPathImages = TARGET_DIR_PATH_IMAGES_OTHER;
+            } else {
+                    targetDirPathImages = TARGET_DIR_PATH_IMAGES;
+            }
+            DownloadImage.downloadImageInSeparateThreadHttpcat(iUrl, targetDirPathImages, CYPHER_URI);
+            DownloadVideo.downloadVideoInSeparateThreadHttpcat(iUrl, TARGET_DIR_PATH, CYPHER_URI);
+            if (!iUrl.contains("amazon")) {
+                    // We end up with garbage images if we try to screen-scrape Amazon.
+                    // The static rules result in better images.
+            		// TODO: Store this successful image download outside Neo4j.
+                    //BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
+            }
+        }
 
+		private static void removeCategoryCache(Integer iCategoryId) {
+			java.nio.file.Path path1 = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/urls/" + iCategoryId + ".json");
+			path1.toFile().delete();
+        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path1);
+        	
+        	java.nio.file.Path path = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/categories/topology/" + iCategoryId + ".txt");
+			path.toFile().delete();
+        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path);
+		}
 
-                private static void appendToTextFileSync(final String iUrl, final String id, final String dir, String file2) throws IOException,
-                                InterruptedException {
-                                        String queueFile = dir + "/" + file2;
-                                        File file = Paths.get(dir).toFile();
-                                        if (!file.exists()) {
-                                                throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
-                                        }
-                                        String command =  "echo '" + id + "::" + iUrl + "::'`date +%s` | tee -a '" + queueFile + "'";
-                                        System.out.println("appendToTextFileSync() - " + command);
-                                        Process p = new ProcessBuilder()
-                                                        .directory(file)
-                                                        .command("echo","hello world")
-                                                        .command("/bin/sh", "-c", command)
-                                                                        //"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
-                                                                                        .inheritIO().start();
-                                        p.waitFor();
-                                        if (p.exitValue() == 0) {
-                                                System.out.println("appendToTextFileSync() - successfully appended "
-                                                                + iUrl);
-                                        } else {
-                                                System.out.println("appendToTextFileSync() - error appending " + iUrl);
-                                        }
-                }
+		private static void appendToTextFileSync(final String iUrl,
+				final String id, final String dir, String file2, long created)
+				throws IOException, InterruptedException {
+
+			String queueFile = dir + "/" + file2;
+			File file = Paths.get(dir).toFile();
+			if (!file.exists()) {
+			    throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+			}
+			String command =  "echo '" + id + "::" + iUrl + "::"+created+"' | tee -a '" + queueFile + "'";
+			System.out.println("appendToTextFileSync() - " + command);
+			Process p = new ProcessBuilder()
+			            .directory(file)
+			            .command("echo","hello world")
+			            .command("/bin/sh", "-c", command)
+			                            //"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
+			                                            .inheritIO().start();
+			p.waitFor();
+			if (p.exitValue() == 0) {
+			    System.out.println("appendToTextFileSync() - successfully appended "
+			                    + iUrl);
+			} else {
+			    System.out.println("appendToTextFileSync() - error appending " + iUrl);
+			}
+		}
+		
+        private static void appendToTextFileSync(final String iUrl, final String id, final String dir, String file2) throws IOException,
+                        InterruptedException {
+            String queueFile = dir + "/" + file2;
+            File file = Paths.get(dir).toFile();
+            if (!file.exists()) {
+                    throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
+            }
+            String command =  "echo '" + id + "::" + iUrl + "::'`date +%s` | tee -a '" + queueFile + "'";
+            System.out.println("appendToTextFileSync() - " + command);
+            Process p = new ProcessBuilder()
+                            .directory(file)
+                            .command("echo","hello world")
+                            .command("/bin/sh", "-c", command)
+                                            //"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
+                                                            .inheritIO().start();
+            p.waitFor();
+            if (p.exitValue() == 0) {
+                    System.out.println("appendToTextFileSync() - successfully appended "
+                                    + iUrl);
+            } else {
+                    System.out.println("appendToTextFileSync() - error appending " + iUrl);
+            }
+        }
 
 		private static void appendToTextFile(final String iUrl, final String id, final String dir) throws IOException,
 				InterruptedException {
@@ -812,7 +730,7 @@ public class Yurl {
 			}
 		}
 
-		private String getTitle(final URL iUrl) {
+		private static String getTitle(final URL iUrl) {
 			String title = "";
 			try {
 				title = Executors
@@ -1006,29 +924,40 @@ public class Yurl {
 		@Produces("application/json")
 		public Response changeImage(
 				@QueryParam("url") String imageUrl,
-				@QueryParam("id") Integer nodeIdToChange,
-				@QueryParam("parentId") Integer parentId)
+				@QueryParam("linkUrl") String iUrl,
+				@QueryParam("categoryId") String iCategoryId)
 				throws IOException, JSONException {
+			System.err.println("Yurl.YurlResource.changeImage() begin");
+			
+			FileUtils.write(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt").toFile(), iUrl + "::" + imageUrl + "\n", "UTF-8", true);
+			System.err.println("Yurl.YurlResource.changeImage() - " + iUrl + " :: " + imageUrl);
 
-			if (parentId == null) {
-				System.err.println("YurlWorldResource.changeImage() - Warning: cache not updated, because parentId was not passed");
-			} else {
-			}
-
+			removeCategoryCacheAsync(iCategoryId);
+			// TODO: remove the Neo4j part
+//			JSONObject execute = execute(
+//					"START n=node({nodeIdToChange}) "
+//							+ "SET n.user_image =  {imageUrl}"
+//							+ "RETURN n",
+//					ImmutableMap.<String, Object> of("nodeIdToChange",
+//							nodeIdToChange, "imageUrl",
+//							imageUrl), "changeImage()");
 			return Response
 					.ok()
 					.header("Access-Control-Allow-Origin", "*")
-					.entity(execute(
-							"START n=node({nodeIdToChange}) "
-									+ "SET n.user_image =  {imageUrl}"
-									+ "RETURN n",
-							ImmutableMap.<String, Object> of("nodeIdToChange",
-									nodeIdToChange, "imageUrl",
-									imageUrl), "changeImage()")).type("application/json")
+					.entity(new JSONObject()).type("application/json")
 					.build();
 		}
 
+		private void removeCategoryCacheAsync(final String iCategoryId) {
+			new Thread() {
+				@Override
+				public void run() {
+					removeCategoryCache(Integer.parseInt(iCategoryId));
+				}
+			}.start();
+		}
 
+		// I don't think this is of any use anymore
 		@GET
 		@Path("removeImage")
 		@Produces("application/json")
@@ -1057,68 +986,6 @@ public class Yurl {
 		}
 
 	
-		// moveup, move up
-		@Deprecated
-		@GET
-		@Path("surpassOrdinal")
-		@Produces("application/json")
-		public Response surpassOrdinal(
-				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
-				@QueryParam("nodeIdToSurpass") Integer nodeIdToSurpass)
-				throws IOException, JSONException {
-			return Response
-					.ok()
-					.header("Access-Control-Allow-Origin", "*")
-					.entity(execute(
-							"START n=node({nodeIdToChange}),n2=node({nodeIdToSurpass}) "
-									+ "SET n.ordinal = n2.ordinal + 100 "
-									+ "RETURN n.ordinal, n2.ordinal",
-							ImmutableMap.<String, Object> of("nodeIdToChange",
-									nodeIdToChange, "nodeIdToSurpass",
-									nodeIdToSurpass), "surpassOrdinal()")).type("application/json")
-					.build();
-		}
-
-		@Deprecated
-		@GET
-		@Path("undercutOrdinal")
-		@Produces("application/json")
-		public Response undercutOrdinal(
-				@QueryParam("nodeIdToChange") Integer nodeIdToChange,
-				@QueryParam("nodeIdToUndercut") Integer nodeIdToUndercut)
-				throws IOException, JSONException {
-			return Response
-					.ok()
-					.header("Access-Control-Allow-Origin", "*")
-					.entity(execute(
-							"START n=node({nodeIdToChange}), n2=node({nodeIdToUndercut}) "
-									+ "SET n.ordinal=n2.ordinal - 100 "
-									+ "RETURN n.ordinal,n2.ordinal",
-							ImmutableMap.<String, Object> of("nodeIdToChange",
-									nodeIdToChange, "nodeIdToUndercut",
-									nodeIdToUndercut), "undercutOrdinal()").toString())
-					.type("application/json").build();
-		}
-
-		@Deprecated
-		@GET
-		@Path("swapOrdinals")
-		@Produces("application/json")
-		public Response swapOrdinals(@QueryParam("firstId") Integer iFirstId,
-				@QueryParam("secondId") Integer iSecondId) throws IOException,
-				JSONException {
-			return Response
-					.ok()
-					.header("Access-Control-Allow-Origin", "*")
-					.entity(execute(
-							"START n=node({id1}), n2=node({id2}) "
-									+ "SET n.temp=n2.ordinal, n2.ordinal=n.ordinal, n.ordinal=n.temp "
-									+ "RETURN n.ordinal, n2.ordinal",
-							ImmutableMap.<String, Object> of("id1", iFirstId,
-									"id2", iSecondId), "swapOrdinals()").toString())
-					.type("application/json").build();
-		}
-
 		/** No existing relationships get deleted */
 		@GET
 		@Path("relateCategoriesToItem")
@@ -1184,6 +1051,7 @@ public class Yurl {
 			return theNewCategoryNodeIdString;
 		}
 
+		@Deprecated // Uses Neo4j
 		private JSONObject relateToExistingCategory(Integer iItemId, Integer iCurrentParentId,
 				Integer theNewCategoryNodeIdString) throws IOException {
 			// delete any existing contains relationship with the
@@ -1203,16 +1071,39 @@ public class Yurl {
 		@GET
 		@Path("relate")
 		@Produces("application/json")
-		public Response move(@QueryParam("parentId") Integer iNewParentId,
-				@QueryParam("childId") Integer iChildId,
-				@QueryParam("currentParentId") Integer iCurrentParentId)
+		public Response move(@QueryParam("parentId") final Integer iNewParentId,
+				@QueryParam("url") String iUrl,
+				@QueryParam("currentParentId") final Integer iCurrentParentId,
+				@QueryParam("created") Long created)
 				throws JSONException, IOException {
-			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
-					iNewParentId);
+			
+			System.out.println("Yurl.YurlResource.move() begin");
+			
+			appendToTextFileSync(iUrl, iNewParentId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER, created);
+			
+			System.out.println("Yurl.YurlResource.move() 2");
+			appendToTextFileSync(iUrl, "-" + iCurrentParentId.toString(), QUEUE_DIR, Yurl.QUEUE_FILE_TXT_DELETE, created);
+			System.out.println("Yurl.YurlResource.move() 4");
+			
+			new Thread() {
+				@Override
+				public void run() {
+					removeCategoryCache(iNewParentId);
+				}
+			}.start();
+			new Thread() {
+				@Override
+				public void run() {
+					removeCategoryCache(iCurrentParentId);
+				}
+			}.start();
+			
+//			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
+//					iNewParentId);
 //			MongoDbCache.invalidate(iNewParentId.toString());
 //			MongoDbCache.invalidate(iCurrentParentId.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(moveHelper.toString())
+					.entity(new JSONObject())
 					.type("application/json").build();
 		}
 
@@ -1249,6 +1140,7 @@ public class Yurl {
 			return execute(iCypherQuery, iParams, true, iCommentPrefix);
 		}
 
+		// TODO: Only delete this once we're no longer using the 2015 backup of the neo4j DB. It is still providing some functinoality.
 		@Deprecated
 		// TODO: make this map immutable
 		static JSONObject execute(String iCypherQuery,

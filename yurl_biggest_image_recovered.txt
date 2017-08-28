@@ -1,0 +1,11 @@
+Welcome to the Neo4j Shell! Enter 'help' for a list of commands
+NOTE: Remote Neo4j graph database service 'shell' at port 1337
+
+neo4j-sh (?)$ start n=node(*) where has(n.biggest_image) return n.url + '::' +  n.biggest_image order by n.biggest_image;
++---------------------------------+
+| n.url + '::' +  n.biggest_image |
++---------------------------------+
++---------------------------------+
+0 row
+5004 ms
+neo4j-sh (?)$ 

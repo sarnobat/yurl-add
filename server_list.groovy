@@ -16,6 +16,7 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -85,10 +86,18 @@ import com.sun.jersey.api.json.JSONConfiguration;
 public class YurlList {
 
 	// Gets stored here: http://192.168.1.2:28017/cache/items/
+	@Deprecated
 	private static final boolean MONGODB_ENABLED = YurlResource.MongoDbCache.ENABLED;
 	public static final Integer ROOT_ID = 45;
+	@Deprecated
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
-	
+
+	private static final String YURL_ORDINALS = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_ordinals.txt";
+	private static final String DOWNLOADED_VIDEOS = System.getProperty("user.home") + "/sarnobat.git/db/auto/yurl_queue_httpcat_videos_downloaded.json";
+	private static final String DOWNLOADED_VIDEOS_2017 = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/videos_download_succeeded.txt";
+    private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
+	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
+
 	@Path("yurl")
 	// TODO: Rename to YurlResource
 	public static class YurlResource { // Must be public
@@ -119,7 +128,7 @@ public class YurlList {
 			JSONObject categoriesTreeJson;
 			if (categoriesTreeCache == null) {
 				System.out.println("getUrls() - preloaded categories tree not ready");
-				categoriesTreeJson = ReadCategoryTree.getCategoriesTree(YurlList.ROOT_ID);
+				categoriesTreeJson = ReadCategoryTree.getCategoriesTreeNeo4j(YurlList.ROOT_ID);
 			} else {
 				categoriesTreeJson = categoriesTreeCache;
 				// This is done in a separate thread
@@ -137,7 +146,12 @@ public class YurlList {
 					System.out.println("YurlWorldResource.getUrls() - not using cache");
 					JSONObject retVal1;
 					retVal1 = new JSONObject();
-					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId));
+					// TODO: Remove this
+					//retVal1.put("urlsNeo4j", getItemsAtLevelAndChildLevelsNeo4j(iRootId));
+					
+					Collection<String> downloadedVideos = new HashSet(getDownloadedVideos(DOWNLOADED_VIDEOS));
+					downloadedVideos.addAll(getDownloadedVideos2017(DOWNLOADED_VIDEOS_2017));
+					retVal1.put("urls", getItemsAtLevelAndChildLevels(iRootId, downloadedVideos));
 					retVal1.put("categoriesRecursive", categoriesTreeJson);
 					if (MONGODB_ENABLED) {
 						MongoDbCache.put(iRootId.toString(), retVal1.toString());
@@ -163,15 +177,250 @@ public class YurlList {
 		// Page operations
 		// ------------------------------------------------------------------------------------
 
+		@Deprecated // TODO: this file is not in the right format 
+		private Collection<String> getDownloadedVideos(String downloadedVideos) {
+			return FileUtils.readLines(Paths.get(downloadedVideos).toFile(), "UTF-8");
+		}
+		
+		private Collection<String> getDownloadedVideos2017(String downloadedVideos) {
+			List<String> readLines = FileUtils.readLines(Paths.get(downloadedVideos).toFile(), "UTF-8");
+			Set<String> ret = new HashSet<String>();
+			for (String line : readLines) {
+				String[] elements = line.split("::");
+				ret.add(elements[0]);
+			}
+			return ret;
+		}
+
+		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId, Collection<String> downloadedVideos) throws JSONException, IOException {
+			JSONObject urls = new JSONObject();
+		System.out.println("getItemsAtLevelAndChildLevels() begin");	
+			Collection<String> categoriesToGetUrlsFrom = ImmutableList
+					.<String> builder().add(iRootId.toString())
+					.addAll(getChildCategories(iRootId.toString())).build();
+			
+			Map<String, String> orderMap = buildOrderMap(YURL_ORDINALS,iRootId);
+
+			for (String categoryId : categoriesToGetUrlsFrom) {
+				System.out
+						.println("YurlList.YurlResource.getItemsAtLevelAndChildLevels() " + categoryId);
+				if (categoryId.length() > 10) {
+					throw new RuntimeException("Not a category ID: " + categoryId);
+				}
+				JSONArray urlsInCategory = getUrlsInCategory(categoryId, orderMap, downloadedVideos);
+				urls.put(categoryId, urlsInCategory);
+			}
+			return urls;
+		}
+
+		private static Map<String, String> buildOrderMap(String yurlOrdinals,
+				Integer iRootId) {
+
+			List<String> lines = FileUtils.readLines(Paths.get(yurlOrdinals).toFile(), "UTF-8");
+			Map<String, String> ret = new HashMap<String, String>();
+			for (String line : filter(lines, iRootId.toString())) {
+				String[] elements = line.split("::");
+				ret.put(elements[1], elements[2]);
+			}
+			
+			return ImmutableMap.copyOf(ret);
+		}
+
+		private static JSONArray getUrlsInCategory(String categoryId, Map<String, String> orderMap, Collection<String> downloadedVideos) {
+			// Create the file if it doesn't exist
+			java.nio.file.Path urlsInCategoryJsonFile = Paths.get(System
+					.getProperty("user.home") + "/github/yurl/tmp/urls/" + categoryId + ".json");
+
+			if (!urlsInCategoryJsonFile.toFile().exists()) {
+				
+				JSONArray urlsInCategory = new JSONArray();
+
+				List<String> lines1 = FileUtils.readLines(
+						Paths.get(QUEUE_DIR + "/" + QUEUE_FILE_TXT_DELETE)
+								.toFile(), "UTF-8");
+				
+				List<String> remove = getRemoveLines(lines1);
+				
+				List<String> lines = FileUtils.readLines(
+						Paths.get(
+								System.getProperty("user.home")
+										+ "/sarnobat.git/yurl_master.txt")
+								.toFile(), "UTF-8");
+				
+				
+				Map<String, String> userImages = getUserImages(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt"));
+
+				for (String line : filterByCategory(filterToBeRemovedLines(lines, remove), categoryId)) {
+					try {
+						JSONObject urlObj = new JSONObject();
+						String[] elements = line.split("::");
+						if (elements.length < 3) {
+							continue;
+						}
+						//System.err.println("YurlList.YurlResource.getUrlsInCategory(): " + line);
+						String categoryIdElement = elements[0];
+						String url = elements[1];
+						String timestamp = elements[2];
+					
+						JSONObject urlObj1 = new JSONObject();
+						urlObj1.put("id", "STOP_RELYING_ON_THIS");// TODO: moving a url will need reimplementing on the client and server
+						urlObj1.put("url", url);
+						urlObj1.put("created", Long.parseLong(timestamp));
+						if (orderMap.containsKey(url)) {
+							urlObj1.put("ordinal", orderMap.get(url));
+						} else {
+							urlObj1.put("ordinal", Long.parseLong(timestamp));
+						}
+						if (downloadedVideos.contains(url)) {
+							urlObj1.put("downloaded_video", true);
+						} else {
+							urlObj1.put("downloaded_video", false);
+						}
+						urlObj1.put("parentId", categoryId);
+						urlObj1.put("title", "<fill this in>");
+						if (userImages.keySet().contains(url)) {
+							urlObj1.put("user_image", userImages.get(url));
+						}
+					
+						urlsInCategory.put(urlObj1);
+					} catch (NumberFormatException e) {
+						e.printStackTrace();
+						continue;
+					}
+				}
+				
+				FileUtils.write(urlsInCategoryJsonFile.toFile(), urlsInCategory.toString(2), "UTF-8");
+			}
+			return new JSONArray(FileUtils.readFileToString(
+					urlsInCategoryJsonFile.toFile(), "UTF-8"));
+		}
+
+		private static List<String> getRemoveLines(List<String> lines) {
+			System.out.println("YurlList.YurlResource.getRemoveLines()");
+			List<String> ret = new LinkedList<String>();
+			for (String line : lines) {
+				if (line.startsWith("-")) {
+					ret.add(line);
+				}
+			}
+			return ImmutableList.copyOf(ret);
+		}
+
+		private static List<String> filterToBeRemovedLines(List<String> lines,
+				List<String> remove1) { // TODO: this should be a HashSet
+			List<String> remove = removeField(remove1, 3);
+			System.out
+					.println("YurlList.YurlResource.filterToBeRemovedLines() remove = " + remove);
+			List<String> ret = new LinkedList<String>();
+			for (String line : lines) {
+				String lineWithout3rdField = removeField(line, 2);
+				if (remove.contains("-" + lineWithout3rdField)) {
+					System.out.println("YurlList.YurlResource.filterToBeRemovedLines() was removed: " + line);
+				} else {
+					if (line.startsWith("221013::https://www.amazon.com/ACCO-Binder-Cli")) {
+						System.out
+								.println("YurlList.YurlResource.filterToBeRemovedLines() ERROR 1: " + line);
+						System.out
+								.println("YurlList.YurlResource.filterToBeRemovedLines() ERROR 2: " + remove.get(0));
+					}
+					ret.add(line);
+				}
+			}
+			return ImmutableList.copyOf(ret);
+		}
+
+		private static List<String> removeField(List<String> remove1,
+				final int i) {
+			return FluentIterable.from(remove1)
+					.transform(new Function<String, String>() {
+						@Override
+						@Nullable
+						public String apply(@Nullable String input) {
+							return removeField(input, i);
+						}
+					}).toList();
+		}
+
+		private static String removeField(String line, int i) {
+			String[] e = line.split("::");
+			if (e.length < 3) {
+				System.err.println("YurlList.YurlResource.removeField() bad line: " + line);
+				return line;
+			}
+			return e[0] + "::" + e[1];
+		}
+
+		private static Map<String, String> getUserImages(java.nio.file.Path path) {
+
+			List<String> lines = FileUtils.readLines(path.toFile(), "UTF-8");
+			Map<String, String> ret = new HashMap<String, String>();
+			for (String line : lines) {
+				String[] elements = line.split("::");
+				String url = elements[0];
+				String imageUrl = elements[1];
+				ret.put(url, imageUrl);
+			}
+			return ImmutableMap.copyOf(ret);
+		}
+
+		private static List<String> filterByCategory(List<String> lines,
+				final String categoryId) {
+			return FluentIterable.from(lines).filter(new Predicate<String>() {
+				@Override
+				public boolean apply(@Nullable String input) {
+					return input.startsWith(categoryId);
+				}
+			}).toList();
+		}
+
+		private static Collection<String> getChildCategories(String iRootId) {
+		System.out.println("getChildCategories() - begin");	
+			File file = Paths.get("/home/sarnobat/github/yurl/tmp/categories/topology/" + iRootId + ".txt").toFile();
+			if (!file.exists()) {
+				java.nio.file.Path p = Paths.get("/home/sarnobat/github/yurl/yurl_category_topology.txt.2017-07-29.columns_reordered");
+				List<String> childCategories = new LinkedList<String>();
+				StringBuffer sb = new StringBuffer();
+				for (String line : FileUtils.readLines(p.toFile(), "UTF-8")) {
+					String[] elements = line.split("::");
+//					System.out
+//							.println("YurlList.YurlResource.getChildCategories() 1 " + line);
+					if (elements.length < 2) {
+						continue;
+					}
+//					System.out
+//					.println("YurlList.YurlResource.getChildCategories() 2 " + line);
+					String categoryId = elements[0];
+					String childCategoryId = elements[1];
+					if (categoryId.equals(iRootId)) {
+						childCategories.add(childCategoryId);
+						sb.append(childCategoryId);
+						sb.append("\n");
+					}
+				}
+				FileUtils.writeLines(file, "UTF-8", childCategories);
+			}
+			System.out.println("YurlList.YurlResource.getChildCategories() file = " + file.getPath());
+			List<String> categoryLines = FileUtils.readLines(file, "UTF-8");
+			return ImmutableList.copyOf(categoryLines);
+		}
+
+		private static List<String> filter(List<String> categoryLines, final String iRootId) {
+			return FluentIterable.from(categoryLines).filter(new Predicate<String>(){
+				@Override
+				public boolean apply(@Nullable String input) {
+					return input.startsWith(iRootId);
+				}}).toList();
+		}
+
 		////
 		//// The main part
 		////
 		// TODO: See if you can turn this into a map-reduce
 		@SuppressWarnings("unused")
-		private static JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
+		private static JSONObject getItemsAtLevelAndChildLevelsNeo4j(Integer iRootId) throws JSONException, IOException {
 //			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
-				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(YurlList.ROOT_ID);
+				categoriesTreeCache = ReadCategoryTree.getCategoriesTreeNeo4j(YurlList.ROOT_ID);
 			}
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
@@ -293,6 +542,7 @@ public class YurlList {
 		}
 
 		// TODO: make this map immutable
+		@Deprecated
 		static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams, boolean doLogging, String... iCommentPrefix) {
 			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
@@ -345,7 +595,7 @@ public class YurlList {
 				@Override
 				public void run() {
 					try {
-						categoriesTreeCache = ReadCategoryTree.getCategoriesTree(YurlList.ROOT_ID);
+						categoriesTreeCache = ReadCategoryTree.getCategoriesTreeNeo4j(YurlList.ROOT_ID);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					} catch (IOException e) {
@@ -356,7 +606,8 @@ public class YurlList {
 		}
 		
 		private static class ReadCategoryTree {
-			static JSONObject getCategoriesTree(Integer rootId)
+			@Deprecated
+			static JSONObject getCategoriesTreeNeo4j(Integer rootId)
 					throws JSONException, IOException {
 				return new AddSizes(
 						// This is the expensive query, not the other one
@@ -541,6 +792,7 @@ public class YurlList {
 		@Deprecated // Does not compile in Eclipse, but does compile in groovy
 		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
 
+		@Deprecated
 		private static class MongoDbCache {
 
 
