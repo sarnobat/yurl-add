@@ -1,0 +1,83 @@
+[
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639148",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380157627711,
+    "ordinal": 1380157627711,
+    "url": "http://www.amazon.com/Refactoring-Databases-Evolutionary-paperback-Addison-Wesley/dp/0321774515/ref=sr_1_1?s=books&ie=UTF8&qid=1380157454&sr=1-1&keywords=refactoring+databases"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639148",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380157628233,
+    "ordinal": 1380157628233,
+    "url": "http://www.amazon.com/Refactoring-Patterns-Joshua-Kerievsky/dp/0321213351/ref=sr_1_1?s=books&ie=UTF8&qid=1380157465&sr=1-1&keywords=refactoring+to+patterns"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639148",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380172971376,
+    "ordinal": 1380172971376,
+    "url": "http://www.amazon.com/Domain-Specific-Languages-Addison-Wesley-Signature-Series/dp/0321712943/ref=sr_1_1?ie=UTF8&qid=1380172637&sr=8-1&keywords=domain specific languages"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639148",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380173164598,
+    "ordinal": 1380173164598,
+    "url": "http://www.amazon.com/Beyond-Software-Architecture-Sustaining-Solutions/dp/0201775948/ref=sr_1_1?ie=UTF8&qid=1380173114&sr=8-1&keywords=beyond software architecture"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639148",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380173167580,
+    "ordinal": 1380173167580,
+    "url": "http://www.amazon.com/Patterns-Enterprise-Application-Architecture-Martin/dp/0321127420/ref=sr_1_7?ie=UTF8&qid=1380173123&sr=8-7&keywords=enterprise architecture"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639148",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380173348982,
+    "ordinal": 1380173348982,
+    "url": "http://www.amazon.com/Enterprise-Integration-Patterns-Designing-Deploying/dp/0321200683/ref=sr_1_1?ie=UTF8&qid=1380173260&sr=8-1&keywords=enterprise integration patterns"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639148",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1407021040910,
+    "ordinal": 1407021040910,
+    "url": "http://www.amazon.com/Refactoring-Patterns-Joshua-Kerievsky/dp/0321213351/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=1CZT5M13VEWRE&amp;coliid=I25O2L9C7N6FIN"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639148",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1453097418514,
+    "ordinal": 1453097418514,
+    "url": "http://www.amazon.com/xUnit-Test-Patterns-Refactoring-Code/dp/0131495054"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639148",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1453097428073,
+    "ordinal": 1453097428073,
+    "url": "http://www.amazon.com/Continuous-Integration-Improving-Software-Reducing/dp/0321336380"
+  }
+]

@@ -1,16 +1,9 @@
-612197  commercial
-611800  null
-611719  humor
-611719  humor
-611718  trash
 608485  Partially watched
 386602  searches
 377492  Television web channels
 37567  watch these
-612875  No longer interested
 524629  Partially watched
 37652  watched
-641643  trash
 506262  incomplete
 37651  trash
 239431  career
@@ -47,7 +40,6 @@
 313899  companies
 313898  people
 37817  wrestling
-626193  funny
 129025  matches
 129024  vignettes
 129023  PPV
@@ -58,7 +50,6 @@
 129017  divas
 37818  volumes
 37761  soccer
-617618  English
 95564  youth
 95562  music
 95560  International
@@ -71,9 +62,7 @@
 37812  players
 37813  rivalries
 83607  Atletico Madrid
-622007  1920s
 322647  documentary
-621179  1940s
 395874  material
 322711  1960s
 322710  1950s
@@ -116,17 +105,16 @@
 83222  1994 USA
 83219  1990 Italy
 95530  Liverpool
-405346  98-99
-405347  99-00
-405348  1990s
-405377  2000s
-405411  2010s
-405412  1980s
 533852  season reviews
+405412  1980s
+405411  2010s
+405377  2000s
+405348  1990s
+405347  99-00
+405346  98-99
 37700  favorites
 37740  trash
 37659  documentaries
-643801  unsolved_mysteries
 37833  technology
 37832  self
 37831  business

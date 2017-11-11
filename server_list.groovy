@@ -283,10 +283,15 @@ public class YurlList {
 			List<String> lines = FileUtils.readLines(path.toFile(), "UTF-8");
 			Map<String, String> ret = new HashMap<String, String>();
 			for (String line : lines) {
+				try {
 				String[] elements = line.split("::");
 				String url = elements[0];
 				String imageUrl = elements[1];
 				ret.put(url, imageUrl);
+				} catch (Exception e) {
+					e.printStackTrace();
+					System.err.println("[ERROR] " + e.getMessage());
+				}
 			}
 			return ImmutableMap.copyOf(ret);
 		}

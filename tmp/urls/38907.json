@@ -273,7 +273,7 @@
     "id": "STOP_RELYING_ON_THIS",
     "parentId": "38907",
     "title": "<fill this in>",
-    "downloaded_video": false,
+    "downloaded_video": true,
     "created": 1452541227380,
     "ordinal": 1452541227380,
     "url": "https://www.youtube.com/watch?v=RLoevStADm8"
@@ -565,5 +565,14 @@
     "created": 1502998508,
     "ordinal": 1502998508,
     "url": "https%3A%2F%2Fwww.nateliason.com%2Fimagined-scarcity%2F"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "38907",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1505799497,
+    "ordinal": 1505799497,
+    "url": "http%3A%2F%2Ffortune.com%2F2015%2F08%2F20%2Fdonald-trump-index-funds%2F"
   }
 ]

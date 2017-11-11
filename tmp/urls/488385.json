@@ -1,0 +1,74 @@
+[
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "488385",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380173336288,
+    "ordinal": 1380173336288,
+    "url": "http://www.amazon.com/Effective-Java-Programming-Language-Series/dp/0201310058/ref=sr_1_2?ie=UTF8&qid=1380173289&sr=8-2&keywords=effective java"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "488385",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1407021045358,
+    "ordinal": 1407021045358,
+    "url": "http://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=1CZT5M13VEWRE&amp;coliid=INWKW2G8GKSTE"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "488385",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1418682590669,
+    "ordinal": 1418682590669,
+    "url": "http://www.amazon.com/dp/0471197130/ref=pe_175190_21431760_3p_M3T1_ST1_dp_1"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "488385",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1418684100903,
+    "ordinal": 1418684100903,
+    "url": "http://www.amazon.com/dp/0321127420/ref=pe_175190_21431760_M3C_SC_3p_dp_1"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "488385",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1418692102737,
+    "ordinal": 1418692102737,
+    "url": "http://www.amazon.com/Pro-Jakarta-Commons-Harshad-Oak/dp/1590592832/ref=sr_1_1?ie=UTF8&qid=1418691616&sr=8-1&keywords=pro jakarta commons"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "488385",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1418694032673,
+    "ordinal": 1418694032673,
+    "url": "http://www.amazon.com/gp/product/0735622183/ref=oh_aui_detailpage_o04_s00?ie=UTF8&psc=1"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "488385",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1418694036448,
+    "ordinal": 1418694036448,
+    "url": "http://www.amazon.com/gp/product/0735619174/ref=oh_aui_detailpage_o07_s00?ie=UTF8&psc=1"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "488385",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1480484172316,
+    "ordinal": 1480484172316,
+    "url": "https://www.amazon.com/Writing-Apache-Modules-Perl-mod_perl/dp/156592567X/ref=sr_1_2?s=books&ie=UTF8&qid=1480483538&sr=1-2&keywords=apache modules"
+  }
+]

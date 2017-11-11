@@ -1,0 +1,83 @@
+[
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639154",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380157627055,
+    "ordinal": 1380157627055,
+    "url": "http://www.amazon.com/Refactoring-Improving-Addison-Wesley-Technology-ebook/dp/B007WTFWJ6/ref=dp_kinw_strp_1"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639154",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380157628794,
+    "ordinal": 1380157628794,
+    "url": "http://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882/ref=sr_1_1?s=books&ie=UTF8&qid=1380157470&sr=1-1&keywords=clean+code"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639154",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380172968114,
+    "ordinal": 1380172968114,
+    "url": "http://www.amazon.com/The-Art-Scalability-Architecture-Organizations/dp/0137030428/ref=sr_1_1?ie=UTF8&qid=1380172625&sr=8-1&keywords=art of scalability"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639154",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380173171345,
+    "ordinal": 1380173171345,
+    "url": "http://www.amazon.com/AntiPatterns-Refactoring-Software-Architectures-Projects/dp/0471197130/ref=sr_1_1?ie=UTF8&qid=1380173144&sr=8-1&keywords=anti patterns"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639154",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1380173351795,
+    "ordinal": 1380173351795,
+    "url": "http://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612/ref=sr_1_1?ie=UTF8&qid=1380173251&sr=8-1&keywords=gang of four"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639154",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1396476890868,
+    "ordinal": 1396476890868,
+    "url": "http://www.amazon.com/Programming-Addison-Wesley-Professional-Computng-Series/dp/0131429019"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639154",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1407021011057,
+    "ordinal": 1407021011057,
+    "url": "http://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=1CZT5M13VEWRE&amp;coliid=I20SDPZMMGF199"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639154",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1407021038717,
+    "ordinal": 1407021038717,
+    "url": "http://www.amazon.com/Refactoring-Improving-Design-Existing-Code/dp/0201485672/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=1CZT5M13VEWRE&amp;coliid=INXSP31HPBS33"
+  },
+  {
+    "id": "STOP_RELYING_ON_THIS",
+    "parentId": "639154",
+    "title": "<fill this in>",
+    "downloaded_video": false,
+    "created": 1453099252603,
+    "ordinal": 1453099252603,
+    "url": "http://www.amazon.com/Effective-JavaScript-Specific-Software-Development/dp/0321812182"
+  }
+]

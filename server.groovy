@@ -546,7 +546,7 @@ public class Yurl {
 									.inheritIO().start();
 							p.waitFor();
 							if (p.exitValue() == 0) {
-								System.out.println("appendToTextFile() - successfully appended "
+								System.out.println("appendToTextFile() - successfully appended 2 "
 										+ iUrl);
 							} else {
 								System.out.println("appendToTextFile() - error appending " + iUrl);
@@ -578,11 +578,11 @@ public class Yurl {
 		private static void removeCategoryCache(Integer iCategoryId) {
 			java.nio.file.Path path1 = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/urls/" + iCategoryId + ".json");
 			path1.toFile().delete();
-        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path1);
+        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file 1: " + path1);
         	
         	java.nio.file.Path path = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/categories/topology/" + iCategoryId + ".txt");
 			path.toFile().delete();
-        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file: " + path);
+        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file 2: " + path);
 		}
 
 		private static void appendToTextFileSync(final String iUrl,
@@ -604,7 +604,7 @@ public class Yurl {
 			                                            .inheritIO().start();
 			p.waitFor();
 			if (p.exitValue() == 0) {
-			    System.out.println("appendToTextFileSync() - successfully appended "
+			    System.out.println("appendToTextFileSync() - successfully appended 3 "
 			                    + iUrl);
 			} else {
 			    System.out.println("appendToTextFileSync() - error appending " + iUrl);
@@ -628,7 +628,7 @@ public class Yurl {
                                                             .inheritIO().start();
             p.waitFor();
             if (p.exitValue() == 0) {
-                    System.out.println("appendToTextFileSync() - successfully appended "
+                    System.out.println("appendToTextFileSync() - successfully appended 4 "
                                     + iUrl);
             } else {
                     System.out.println("appendToTextFileSync() - error appending " + iUrl);
@@ -655,7 +655,7 @@ public class Yurl {
 											.inheritIO().start();
 					p.waitFor();
 					if (p.exitValue() == 0) {
-						System.out.println("appendToTextFile() - successfully appended "
+						System.out.println("appendToTextFile() - successfully appended 5 "
 								+ iUrl);
 					} else {
 						System.out.println("appendToTextFile() - error appending " + iUrl);

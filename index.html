@@ -174,6 +174,12 @@ function renderIfReady() {
 				.sort(function (u1, u2) {return u2.ordinal - u1.ordinal ;})
 				.slice(0, limit)
 				.map(ITEM_TO_HTML(childCategories, rootId, parentOfRootId)).join("\n");
+				
+			var imageUrlsTxt = urlsRootOnly				
+				.map(function(i){ if (i.ordinal < 9999999999) { i.ordinal = i.ordinal * 1000; }; return i;})
+				.sort(function (u1, u2) {return u2.ordinal - u1.ordinal ;})
+				.map(ITEM_TO_IMAGE_URL);
+			$("#imageUrls").append(imageUrlsTxt);
 		}
 	}
 	var urlThumbnailsHtml = "";
@@ -335,6 +341,59 @@ function createImageCell(field) {
 		content:  field.title + "<br><font style=\"font-size : xx-small \">"+field.url+"</font>",
 	});	*/
 	return img;
+}
+
+
+function ITEM_TO_IMAGE_URL(item2) {
+	var field = item2;
+	var imageCell = "";
+	var hasScreenshot = false;
+	{
+		if (field.url.match(".jpg\??") || 
+			field.url.match(/.*jpg/i) ||
+			field.url.match(".gif$") || 
+			field.url.match(".png\??") || 
+			field.url.match("images.q=tbn:")) {
+			imageCell += field.url;
+			hasScreenshot = true;
+		}
+		if (field.user_image != null) {
+				imageCell += field.user_image;
+				hasScreenshot = true;		
+		} else if (field.url.match("youtube.com")) {
+			if (field.url.match("youtube.com/watch")) {
+				var youtubeId = field.url.replace(/^https?:..www.youtube.com.watch.*v=([^&]+).*/g,'$1');
+				imageCell += "http://img.youtube.com/vi/"+youtubeId+"/0.jpg";
+				hasScreenshot = true;
+			}
+		
+		} else if (field.url.match("dailymotion.com/video")) {
+				var youtubeId = field.url.replace(/^http.*video.([^?]+)(.*)/g,'$1');
+				imageCell += "http://dailymotion.com/thumbnail/video/"+youtubeId ;
+				hasScreenshot = true;
+		
+		} else if (field.url.match(".amazon.co[^/]+\/[^s]")) {
+			var asin = field.url.replace(/.+((dp)|(product))\/([^\/?]+)[\/?].*/,'$4');
+			asin = asin.replace(/.*dp./,'');
+			asin = asin.replace(/.*gp.aw.d./, '');
+			asin = asin.replace(/.ref_?=.*/, '');
+			asin = asin.replace(/.*offer-listing./, '');
+			var productImageUrl = 'http://images.amazon.com/images/P/'+asin+'.01.LZZZZZZZ.jpg';
+			imageCell += productImageUrl;
+			hasScreenshot = true;
+		}
+	}
+
+	if (!hasScreenshot) {
+		imageCell += "http://free.pagepeeker.com/v2/thumbs.php?size=x&url="+encodeURIComponent(field.url);
+		// Check if the biggest image server is up
+		if (biggestImages != null) {
+			if (biggestImages[field.url] != null) {
+				imageCell += biggestImages[field.url];
+			}
+		}
+	}
+	return imageCell + "\n";
 }
 
 function relateNew(newParentId, currentRootId, button) {
@@ -1584,13 +1643,17 @@ reading list (pdf))
 <br>
 TODO:<br>
 ** create a manual videos page based on yurl video category (read-only)<br>
-** yurl_httpcat.txt - create a file yurl_httpcat_category_paths.txt<br>
+** Don't print such ugly timestamps<br>
+<!--** yurl_httpcat.txt - create a file yurl_httpcat_category_paths.txt<br>
 *** yurl_categories.txt - ID, category_path<br>
 *** yurl_exhaustive.txt - combine yurl_httpcat.txt and ~/github/yurl/export_all.txt<br>
 ** Later - /Yurl_json/<br>
+-->
+<!--
 <strike>* Get off Neo4j completely. Upgrading Ubuntu or JDK causes issues, and it's easy to corrupt the database.</strike><br>
 <strike>** /Yurl_plaintext/</strike><br>
 <strike>* Don't print such ugly timestamps</strike><br>
+-->
 <br>
 						<div id="tabs">
 							  <ul>
@@ -1603,6 +1666,7 @@ TODO:<br>
 								<li><a href="#tabs-7">Catalog</a></li>
 								<li><a href="#tabs-8">Products</a></li>
 								<li><a href="#tabs-9">HTML</a></li>
+								<li><a href="#tabs-10">Image URLs</a></li>
 							  </ul>
 							  <div id="tabs-1">
 									To identify and open what you're looking for most (e.g. videos)<br>
@@ -1654,6 +1718,12 @@ TODO:<br>
 							  <a href="" onclick="openHtmlTextInNewTab()">Open in new tab</a><br>
 							  <br>
 							  <textarea id="htmlText" rows=20 columns=100 style="white-space: nowrap; overflow: none;"></textarea>
+							</div>
+							<div id="tabs-10">
+							 Use cases:<br>
+							 * Heap<br>
+							  <br>
+							  <textarea id="imageUrls" rows=20 columns=100 style="white-space: nowrap; overflow: none;"></textarea>
 							</div>
 						</div>
 <!--						<button type=button onclick='$("#d3").toggle()'>Show visualization</button>
