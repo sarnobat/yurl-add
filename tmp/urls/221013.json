@@ -286,15 +286,6 @@
   },
   {
     "downloaded_video": false,
-    "created": 1447378097583,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "http://www.amazon.com/The-Science-Branding-Giep-Franzen/dp/0765617919",
-    "parentId": "221013",
-    "ordinal": 1447378097583
-  },
-  {
-    "downloaded_video": false,
     "created": 1452051067681,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -337,16 +328,6 @@
     "url": "http://www.amazon.com/Wikipedia-Revolution-Nobodies-Greatest-Encyclopedia/dp/B002V0FH4G/ref=tmm_aud_swatch_0?_encoding=UTF8&qid=1445228491&sr=1-6",
     "parentId": "221013",
     "ordinal": 1457044717190
-  },
-  {
-    "downloaded_video": false,
-    "user_image": "https://images-na.ssl-images-amazon.com/images/I/81u7YLBo4FL._SL1500_.jpg",
-    "created": 1457222303940,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "http://www.amazon.com/Thera-Band-Comfort-Ankle-Wrist-Weight/dp/B0029U0CUW",
-    "parentId": "221013",
-    "ordinal": 1457222303940
   },
   {
     "downloaded_video": false,
@@ -451,16 +432,6 @@
     "url": "https://www.amazon.com/Photography-Portrait-Continuous-LimoStudio-LMS103/dp/B005FHZ2SI/ref=sr_1_4?ie=UTF8&qid=1471490410&sr=8-4&keywords=photo+umbrella",
     "parentId": "221013",
     "ordinal": 1471490582165
-  },
-  {
-    "downloaded_video": false,
-    "user_image": "https://images-na.ssl-images-amazon.com/images/I/51kJgTeh7IL.jpg",
-    "created": 1471490852262,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/LimoStudio-Photography-Studio-Lighting-AGG349/dp/B005CX9S8A/ref=sr_1_2?ie=UTF8&qid=1471490513&sr=8-2&keywords=photo+white+light+box",
-    "parentId": "221013",
-    "ordinal": 1471490852262
   },
   {
     "downloaded_video": false,
@@ -732,15 +703,6 @@
   },
   {
     "downloaded_video": false,
-    "created": 1484472473892,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Spanish-Vocabulary-Quick-Study-BarCharts/dp/1423221664/ref=sr_1_1?ie=UTF8&qid=1484431214&sr=8-1&keywords=spanish+vocabulary+cards",
-    "parentId": "221013",
-    "ordinal": 1484472473892
-  },
-  {
-    "downloaded_video": false,
     "created": 1484505855612,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -794,15 +756,6 @@
     "url": "https://www.amazon.com/Essentials-Preventing-Overcoming-Difficulties-Psychological/dp/1118845242/ref=sr_1_1?ie=UTF8&qid=1484086483&sr=8-1&keywords=reading+difficulty",
     "parentId": "221013",
     "ordinal": 1485205328979
-  },
-  {
-    "downloaded_video": false,
-    "created": 1485317160569,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Seville-Classics-5-Tier-UltraZinc-Shelving/dp/B00B7E8Y9M/ref=pd_lpo_196_tr_t_2?_encoding=UTF8&psc=1&refRID=PAHX6QSG7HAQ819VFR7P",
-    "parentId": "221013",
-    "ordinal": 1485317160569
   },
   {
     "downloaded_video": false,
@@ -957,7 +910,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Segway-miniPRO-Balancing-Personal-Transporter/dp/B019Z6HS86/ref=sr_1_2?s=outdoor-recreation&ie=UTF8&qid=1490332115&sr=1-2&keywords=segway",
     "parentId": "221013",
-    "ordinal": 1490332196645
+    "ordinal": "1512961249190"
   },
   {
     "downloaded_video": false,
@@ -1377,7 +1330,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Kanban-Action-Marcus-Hammarberg/dp/1617291056/ref=sr_1_8?ie=UTF8&qid=1503623180&sr=8-8&keywords=kanban",
     "parentId": "221013",
-    "ordinal": "1507674318157"
+    "ordinal": "1512961131245"
   },
   {
     "downloaded_video": false,
@@ -1469,25 +1422,6 @@
     "url": "https://www.amazon.com/Java-Modularity-Developing-Maintainable-Applications/dp/1491954167/ref=pd_sbs_14_2?_encoding=UTF8&pd_rd_i=1491954167&pd_rd_r=JDYFNK6BA3AZTMZEGR6X&pd_rd_w=IzAV4&pd_rd_wg=DBkAq&psc=1&refRID=JDYFNK6BA3AZTMZEGR6X",
     "parentId": "221013",
     "ordinal": 1504908146
-  },
-  {
-    "downloaded_video": false,
-    "user_image": "https://images-na.ssl-images-amazon.com/images/I/81PifOS0NuL._SX522_.jpg",
-    "created": 1505065677,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/adidas-Mens-Soccer-Tiro-Pants/dp/B01N06LNTN/ref=pd_sbs_193_1?_encoding=UTF8&refRID=A2KRATSZ5BNSBP98JQB2&th=1&psc=1",
-    "parentId": "221013",
-    "ordinal": 1505065677
-  },
-  {
-    "downloaded_video": false,
-    "created": 1505065867,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Mens-Nike-Running-Black-Medium/dp/B00MQI1LPM/ref=sr_1_3?s=team-sports&ie=UTF8&qid=1505065794&sr=1-3&keywords=black%2Btrack%2Bpants%2Bnike&th=1&psc=1",
-    "parentId": "221013",
-    "ordinal": "1507674336035"
   },
   {
     "downloaded_video": false,
@@ -1592,16 +1526,6 @@
   },
   {
     "downloaded_video": false,
-    "user_image": "https://images-na.ssl-images-amazon.com/images/I/71L8RKp34KL._SX522_.jpg",
-    "created": 1509654302,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Etekcity-Extension-Outlet-16AWG-13A-Listed/dp/B00CEJW0WQ/ref=sr_1_12?ie=UTF8&qid=1509310980&sr=8-12&keywords=long+power+strip",
-    "parentId": "221013",
-    "ordinal": 1509654302
-  },
-  {
-    "downloaded_video": false,
     "created": 1509654304,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1636,7 +1560,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Hefty-Compartment-Plates-175-Count/dp/B001UC9EE0/ref=sr_1_9?ie=UTF8&qid=1510682655&sr=8-9&keywords=foam+plates+compartment",
     "parentId": "221013",
-    "ordinal": 1510702610
+    "ordinal": "1512961084931"
   },
   {
     "downloaded_video": true,
@@ -1740,15 +1664,6 @@
   },
   {
     "downloaded_video": true,
-    "created": 1512456427,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/gp/product/B00MULRY2Y/ref=ox_sc_act_title_1?smid=A1YOGV6ONAJHV3&psc=1",
-    "parentId": "221013",
-    "ordinal": 1512456427
-  },
-  {
-    "downloaded_video": true,
     "created": 1512519172,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1758,29 +1673,110 @@
   },
   {
     "downloaded_video": true,
-    "created": 1512523455,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Adjustable-Phone-Stand-Lamicall-iPhone/dp/B01M4NOUMB/ref=dp_ob_title_wld",
-    "parentId": "221013",
-    "ordinal": 1512523455
-  },
-  {
-    "downloaded_video": true,
-    "created": 1512523484,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Adjustable-Phone-Stand-Lamicall-iPhone/dp/B01M7U6F8T/ref=dp_ob_title_wld",
-    "parentId": "221013",
-    "ordinal": 1512523484
-  },
-  {
-    "downloaded_video": true,
     "created": 1512604268,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Proud-Man-Walking-Claudio-Ranieri-ebook/dp/B00E7GOMKW/ref=la_B0034PZMTM_1_1?s=books&ie=UTF8&qid=1512583651&sr=1-1",
     "parentId": "221013",
     "ordinal": 1512604268
+  },
+  {
+    "downloaded_video": false,
+    "created": 1512939606,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/AmazonBasics-53-005312-Portable-Photo-Studio/dp/B01GIL6EU4/ref=sr_1_5?ie=UTF8&qid=1512939496&sr=8-5&keywords=lighting+tent",
+    "parentId": "221013",
+    "ordinal": 1512939606
+  },
+  {
+    "downloaded_video": false,
+    "created": 1512940075,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Medi-Pak%C3%AF%C2%BF%C2%BD-Tape-Measure-Paper-Disposable/dp/B002C5CMN4/ref=cm_cr_arp_d_product_top?ie=UTF8",
+    "parentId": "221013",
+    "ordinal": 1512940075
+  },
+  {
+    "downloaded_video": false,
+    "created": 1512951718,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.containerstore.com/s/office/paper-file-storage/sorters-trays/small-premium-acrylic-paper-tray/123d?productId=11003656&theme=paper%20stacking%20tray&pos=1",
+    "parentId": "221013",
+    "ordinal": 1512951718
+  },
+  {
+    "downloaded_video": true,
+    "created": 1512951940,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/gp/product/B01HBW7TWQ/ref=ask_ql_qh_dp_hza",
+    "parentId": "221013",
+    "ordinal": 1512951940
+  },
+  {
+    "downloaded_video": true,
+    "created": 1512952031,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.containerstore.com/s/office/desktop-collections/clear-collection/pencil-cup/123d?productId=10001508&green=7325EC29-F6FF-50FC-0F4C-8AA10880D3DB",
+    "parentId": "221013",
+    "ordinal": 1512952031
+  },
+  {
+    "downloaded_video": true,
+    "created": 1512952202,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.containerstore.com/s/bath/bathroom-sets-accessories/acrylic-hinged-lid-boutique-tissue-box/12d?productId=10031023",
+    "parentId": "221013",
+    "ordinal": 1512952202
+  },
+  {
+    "downloaded_video": false,
+    "created": 1512952373,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.containerstore.com/s/office/paper-file-storage/sorters-trays/small-premium-acrylic-paper-tray/123d?productId=11003656&theme=paper%20stacking%20tray&pos=1",
+    "parentId": "221013",
+    "ordinal": 1512952373
+  },
+  {
+    "downloaded_video": false,
+    "created": 1512952451,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Neewer-Shooting-Diffusion-Backdrops-Photography/dp/B00GKGGICC/ref=sr_1_4?ie=UTF8&qid=1512939496&sr=8-4&keywords=lighting+tent",
+    "parentId": "221013",
+    "ordinal": 1512952451
+  },
+  {
+    "downloaded_video": true,
+    "created": 1512952605,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/LimoStudio-Adjustable-Background-Backdrop-AGG1112/dp/B00E6GRHBO/ref=pd_sim_421_1?_encoding=UTF8&pd_rd_i=B00E6GRHBO&pd_rd_r=FBB2NN9E0CN54EHF5JTP&pd_rd_w=I3gNc&pd_rd_wg=1MTaa&psc=1&refRID=FBB2NN9E0CN54EHF5JTP",
+    "parentId": "221013",
+    "ordinal": 1512952605
+  },
+  {
+    "downloaded_video": false,
+    "created": 1512952625,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Julius-Studio-Photography-Backdrop-Background/dp/B015YHXHWQ/ref=sr_1_1?ie=UTF8&qid=1512935766&sr=8-1&keywords=white+photo+background",
+    "parentId": "221013",
+    "ordinal": 1512952625
+  },
+  {
+    "downloaded_video": true,
+    "created": 1512953873,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Scotch-Finish-Writeable-Inches-810K6/dp/B00006IF67/ref=sr_1_2?ie=UTF8&qid=1512953508&sr=8-2&keywords=scotchtape",
+    "parentId": "221013",
+    "ordinal": 1512953873
   }
 ]

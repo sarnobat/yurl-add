@@ -596,5 +596,61 @@
     "url": "https://www.amazon.com/Best-Price-Mattress-Innovated-Spring/dp/B00HCZ0YGG/ref=redir_mobile_desktop?_encoding=UTF8&dpID=51bWSuRcxmL&dpPl=1&keywords=best%2Bbox&pi=AC_SX236_SY340_QL65&psc=1&qid=1512352107&ref=plSrch&ref_=mp_s_a_1_8&sr=8-8&th=1",
     "parentId": "230183",
     "ordinal": 1512447365
+  },
+  {
+    "downloaded_video": true,
+    "created": 1512930561,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/dp/B005W8NSYK/ref=twister_B0118RTQDA",
+    "parentId": "230183",
+    "ordinal": 1512930561
+  },
+  {
+    "downloaded_video": true,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/71ctPop%2B5JL._SY685_.jpg",
+    "created": 1512523484,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Adjustable-Phone-Stand-Lamicall-iPhone/dp/B01M7U6F8T/ref=dp_ob_title_wld",
+    "parentId": "230183",
+    "ordinal": 1512523484
+  },
+  {
+    "downloaded_video": false,
+    "created": 1505065867,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Mens-Nike-Running-Black-Medium/dp/B00MQI1LPM/ref=sr_1_3?s=team-sports&ie=UTF8&qid=1505065794&sr=1-3&keywords=black%2Btrack%2Bpants%2Bnike&th=1&psc=1",
+    "parentId": "230183",
+    "ordinal": "1507674336035"
+  },
+  {
+    "downloaded_video": false,
+    "created": 1484472473892,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Spanish-Vocabulary-Quick-Study-BarCharts/dp/1423221664/ref=sr_1_1?ie=UTF8&qid=1484431214&sr=8-1&keywords=spanish+vocabulary+cards",
+    "parentId": "230183",
+    "ordinal": 1484472473892
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/81u7YLBo4FL._SL1500_.jpg",
+    "created": 1457222303940,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Thera-Band-Comfort-Ankle-Wrist-Weight/dp/B0029U0CUW",
+    "parentId": "230183",
+    "ordinal": 1457222303940
+  },
+  {
+    "downloaded_video": false,
+    "created": 1447378097583,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-Science-Branding-Giep-Franzen/dp/0765617919",
+    "parentId": "230183",
+    "ordinal": 1447378097583
   }
 ]
