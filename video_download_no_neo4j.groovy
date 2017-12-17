@@ -1,6 +1,7 @@
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.Map;
+import java.io.*;
 import java.lang.Deprecated;
 import javax.ws.rs.core.MediaType;
 
@@ -30,9 +31,24 @@ public class VideoDownload {
 		String iTargetDirPath = args[0];
 		String iVideoUrl = args[1];
 
+		File iTargetDirPath2 ;
+		try {
+			iTargetDirPath2 = Paths.get(iTargetDirPath).toFile();
+			System.out.println("[DEBUG] Running in dir " + iTargetDirPath);
+		} catch (Exception e) {
+			System.out.println("[WARNING] Using " +System.getProperty("user.dir")+ " instead of passed dir due to: " + e.getMessage())
+			iTargetDirPath2 = Paths.get(System.getProperty("user.dir")).toFile();
+		}
+
+		if (iTargetDirPath2.exists()) {
+		} else {
+                        iTargetDirPath2 = Paths.get(System.getProperty("user.dir")).toFile();
+		}
+
+
 		try {
 			Process p = new ProcessBuilder()
-					.directory(Paths.get(iTargetDirPath).toFile())
+					.directory(iTargetDirPath2)
 					.command(
 							ImmutableList.of(YOUTUBE_DOWNLOAD,
 									iVideoUrl)).inheritIO().start();
