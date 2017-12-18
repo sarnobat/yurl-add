@@ -28,6 +28,10 @@ public class VideoDownload {
 //	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
 	
 	public static void main(String[] args) {
+		if (args.length == 1) {
+			System.err.println("[WARNING] No url to download.");
+			System.exit(-1);
+		}
 		String iTargetDirPath = args[0];
 		String iVideoUrl = args[1];
 
