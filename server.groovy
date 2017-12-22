@@ -54,7 +54,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.jvnet.hk2.annotations.Optional;
+//import org.jvnet.hk2.annotations.Optional;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
