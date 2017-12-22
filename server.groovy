@@ -55,11 +55,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.jvnet.hk2.annotations.Optional;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 
-import com.github.axet.vget.VGet;
-import com.github.axet.vget.info.VideoInfo.VideoQuality;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
@@ -76,7 +72,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.mongodb.BasicDBObject;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
@@ -890,24 +886,6 @@ public class Yurl {
 				}
 			}
 
-			private static void downloadVideo(final String iVideoUrl, String targetDirPath)
-					throws MalformedURLException {
-				System.out.println("UndownloadedVideosBatchJob.downloadVideo() - Begin: " + iVideoUrl);
-				File theTargetDir = new File(targetDirPath);
-				if (!theTargetDir.exists()) {
-					throw new RuntimeException(
-							"Target directory doesn't exist");
-				}
-				final VGet v = new VGet(new URL(iVideoUrl), theTargetDir);
-				v.getVideo().setVideoQuality(VideoQuality.p1080);
-				System.out.println("downloadVideo() - " + v.getVideo().getWeb().toString());
-				System.out.println("downloadVideo() - " + v.getVideo().getVideoQuality());
-				System.out.print("downloadVideo() - If this is the last thing you see, vget is hanging");
-				v.download();// If this hangs, make sure you are using
-				// vget 1.15. If you use 1.13 I know it
-				// hangs
-				System.out.println("\nUndownloadedVideosBatchJob.downloadVideo() - successfully downloaded video at " + iVideoUrl + " (" + v.getVideo().getTitle() + ")");
-			}
 		}
 
 		private static void writeSuccessToDb(final String iVideoUrl, final String id)
@@ -1100,8 +1078,6 @@ public class Yurl {
 			
 //			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
 //					iNewParentId);
-//			MongoDbCache.invalidate(iNewParentId.toString());
-//			MongoDbCache.invalidate(iCurrentParentId.toString());
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(new JSONObject())
 					.type("application/json").build();
@@ -1412,182 +1388,6 @@ public class Yurl {
 			}			
 		}
 
-		private static class BiggestImage {
-
-			private static String getBiggestImage(String url) throws MalformedURLException, IOException {
-				List<String> imagesDescendingSize = getImagesDescendingSize(url);
-				String biggestImage = imagesDescendingSize.get(0);
-				return biggestImage;
-			}
-
-			private static List<String> getImagesDescendingSize(String url) throws MalformedURLException,
-					IOException {
-				String base = getBaseUrl(url);
-				// Don't use the chrome binaries that you browse the web with.
-				System.setProperty("webdriver.chrome.driver", Yurl.CHROMEDRIVER_PATH
-						);
-
-				// HtmlUnitDriver and FirefoxDriver didn't work. Thankfully ChromeDriver does
-				WebDriver driver = new ChromeDriver();
-				List<String> ret = ImmutableList.of();
-				try {
-					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 1");
-					driver.get(url);
-					// TODO: shame there isn't an input stream, then we wouldn't have to
-					// store the whole page in memory
-					try {
-						// We need to let the dynamic content load.
-						Thread.sleep(5000L);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 2");
-					String source = driver.getPageSource();
-					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 3");
-					List<String> out = getAllTags(base + "/", source);
-					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 4");
-					Multimap<Integer, String> imageSizes = getImageSizes(out);
-					System.out.println("Yurl.YurlResource.BiggestImage.getImagesDescendingSize() 5");
-					ret = sortByKey(imageSizes);
-					if (ret.size() < 1) {
-						throw new RuntimeException("2 We're going to get a nullpointerexception later: " + url);
-					}
-				} finally {
-					driver.quit();
-				}
-				if (ret.size() < 1) {
-					throw new RuntimeException("1 We're going to get a nullpointerexception later: " + url);
-				}
-				return ret;
-			}
-
-			private static List<String> sortByKey(Multimap<Integer, String> imageSizes) {
-				ImmutableList.Builder<String> finalList = ImmutableList.builder();
-				
-				// Phase 1: Sort by size descending
-				ImmutableList<Integer> sortedList = FluentIterable.from(imageSizes.keySet())
-						.toSortedList(Ordering.natural().reverse());
-				
-				// Phase 2: Put JPGs first 
-				for (Integer size : sortedList) {
-					for (String url: imageSizes.get(size)) {
-						if (isJpgFile(url)) {
-							finalList.add(url);
-							System.out
-									.println("BiggestImage.sortByKey() - "
-											+ size + "\t" + url);
-						}
-					}
-				}
-				for (Integer size : sortedList) {
-					for (String url: imageSizes.get(size)) {
-						if (!isJpgFile(url)) {
-							finalList.add(url);
-							System.out
-									.println("BiggestImage.sortByKey() - "
-											+ size + "\t" + url);
-						}
-					}
-				}
-				return finalList.build();
-			}
-
-			private static boolean isJpgFile(String url) {
-				return url.matches("(?i).*\\.jpg") || url.matches("(?i).*\\.jpg\\?.*");
-			}
-
-			private static Multimap<Integer, String> getImageSizes(List<String> out) {
-				ImmutableMultimap.Builder<Integer, String> builder = ImmutableMultimap.builder();
-				for (String imgSrc : out) {
-					int size = getByteSize(imgSrc);
-					builder.put(size, imgSrc);
-				}
-				return builder.build();
-			}
-
-			private static int getByteSize(String absUrl) {
-				if (Strings.isNullOrEmpty(absUrl)) {
-					return 0;
-				}
-				URL url;
-				try {
-					url = new URL(absUrl);
-					int contentLength = url.openConnection().getContentLength();
-					return contentLength;
-				} catch (MalformedURLException e) {
-					System.out.println("YurlWorldResource.BiggestImage.getByteSize() - " + absUrl);
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				return 0;
-			}
-
-			private static String getBaseUrl(String url1) throws MalformedURLException {
-				System.out.println("YurlWorldResource.BiggestImage.getBaseUrl() -\t"+url1);
-				URL url = new URL(url1);
-				String file = url.getFile();
-				String path;
-				if (file.length() == 0) {
-					path = url1;
-				} else {
-					path = url.getFile().substring(0, file.lastIndexOf('/'));
-				}
-				String string = url.getProtocol() + "://" + url.getHost() + path;
-				System.out.println("YurlWorldResource.BiggestImage.getBaseUrl() -\t"+string);
-				return string;
-			}
-
-			private static List<String> getAllTags(String baseUrl, String source) throws IOException {
-				Document doc = Jsoup.parse(IOUtils.toInputStream(source, "UTF-8"), "UTF-8", baseUrl);
-				Elements tags = doc.getElementsByTag("img");
-				return FluentIterable.<Element> from(tags).transform(IMG_TO_SOURCE).toList();
-			}
-
-			private static final Function<Element, String> IMG_TO_SOURCE = new Function<Element, String>() {
-				@Override
-				public String apply(Element e) {
-					return e.absUrl("src");
-				}
-			};
-
-			private static String getBiggestImage2(final String iUrl2) {
-				String biggestImageAbsUrl = null;
-				try {
-					biggestImageAbsUrl = BiggestImage.getBiggestImage(iUrl2);
-					return biggestImageAbsUrl;
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-					throw new RuntimeException(e);
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new RuntimeException(e);
-				}
-			}
-
-			static void recordBiggestImage(final String iUrl, final String cypherUri,
-					final String id) {
-				Runnable r = new Runnable() {
-					@Override
-					public void run() {
-						if (iUrl.contains(".pdf")) {
-							// This will throw an exception because we can't get a DOM
-							return;
-						}
-						String iCypherQuery = "start n=node({id}) SET n.biggest_image = {biggestImage}";
-						try {
-							String biggestImage = getBiggestImage2(iUrl);
-							Map<String, Object> of = ImmutableMap.<String, Object> of("id",
-									Integer.parseInt(id), "biggestImage", biggestImage);
-							execute(iCypherQuery, of, "recordBiggestImage()");
-						} catch (RuntimeException e) {
-							System.out.println("Yurl.YurlResource.BiggestImage.recordBiggestImage() - " + e.getMessage());
-						}
-					}
-				};
-				executorService.execute(r);
-			}
-		}
 
 		// I hope this is the same as JSONObject.Null (not capitals)
 		@Deprecated // Does not compile in Eclipse, but does compile in groovy
