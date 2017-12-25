@@ -2775,7 +2775,7 @@
     "ordinal": 1505250239
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1505860156,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -2829,7 +2829,7 @@
     "ordinal": 1507224709
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1508546967,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -2838,7 +2838,7 @@
     "ordinal": 1508546967
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1509485174,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -2866,7 +2866,7 @@
     "ordinal": 1509740539
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1510089072,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -2875,7 +2875,7 @@
     "ordinal": 1510089072
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1511584284,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -2884,7 +2884,7 @@
     "ordinal": 1511584284
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1511584291,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -2893,7 +2893,7 @@
     "ordinal": 1511584291
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1511584297,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -2947,7 +2947,7 @@
     "ordinal": 1511910453
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512158539,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -2956,7 +2956,7 @@
     "ordinal": 1512158539
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "user_image": "https://images-na.ssl-images-amazon.com/images/I/41ZPa1q8ZSL.jpg",
     "created": 1512083214,
     "id": "STOP_RELYING_ON_THIS",
@@ -2985,7 +2985,7 @@
     "ordinal": 1512197944
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512433996,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -2994,7 +2994,7 @@
     "ordinal": 1512433996
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512005518,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3013,7 +3013,7 @@
     "ordinal": 1512096195
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "user_image": "https://images-na.ssl-images-amazon.com/images/I/71DYL-I47VL._SL1000_.jpg",
     "created": 1512456534,
     "id": "STOP_RELYING_ON_THIS",
@@ -3023,7 +3023,7 @@
     "ordinal": 1512456534
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512456538,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3032,7 +3032,7 @@
     "ordinal": 1512456538
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512519667,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3051,7 +3051,7 @@
     "ordinal": 1512520718
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512525295,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3060,7 +3060,7 @@
     "ordinal": 1512525295
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "user_image": "http://i1.adis.ws/i/hmk/121841_ALT01?h=1000&w=1196",
     "created": 1512780955,
     "id": "STOP_RELYING_ON_THIS",
@@ -3070,7 +3070,7 @@
     "ordinal": 1512780955
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512891710,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3097,7 +3097,7 @@
     "ordinal": 1512937311
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "user_image": "https://images-na.ssl-images-amazon.com/images/I/61F%2BBKJI5YL._SL1288_.jpg",
     "created": 1512932146,
     "id": "STOP_RELYING_ON_THIS",
@@ -3117,7 +3117,7 @@
     "ordinal": 1512931152
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "user_image": "https://images-na.ssl-images-amazon.com/images/I/71K709v4tkL._SY685_.jpg",
     "created": 1512523455,
     "id": "STOP_RELYING_ON_THIS",
@@ -3127,7 +3127,7 @@
     "ordinal": 1512523455
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512456427,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3175,7 +3175,7 @@
     "ordinal": 1471490852262
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512963511,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3184,7 +3184,7 @@
     "ordinal": 1512963511
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133225,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3193,7 +3193,7 @@
     "ordinal": 1513133225
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133234,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3202,7 +3202,7 @@
     "ordinal": 1513133234
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133326,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3211,7 +3211,7 @@
     "ordinal": 1513133326
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133326,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3220,7 +3220,7 @@
     "ordinal": 1513133326
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133327,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3229,7 +3229,7 @@
     "ordinal": 1513133327
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133525,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3238,7 +3238,7 @@
     "ordinal": 1513133525
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133706,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3247,7 +3247,7 @@
     "ordinal": 1513133706
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133728,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3256,7 +3256,7 @@
     "ordinal": 1513133728
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133742,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3265,7 +3265,7 @@
     "ordinal": 1513133742
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133747,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3274,7 +3274,7 @@
     "ordinal": 1513133747
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133751,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3283,7 +3283,7 @@
     "ordinal": 1513133751
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133826,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3292,7 +3292,7 @@
     "ordinal": 1513133826
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133828,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3301,7 +3301,7 @@
     "ordinal": 1513133828
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133872,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3310,7 +3310,7 @@
     "ordinal": 1513133872
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133884,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3319,7 +3319,7 @@
     "ordinal": 1513133884
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133887,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3328,7 +3328,7 @@
     "ordinal": 1513133887
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133894,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3337,7 +3337,7 @@
     "ordinal": 1513133894
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133897,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3346,7 +3346,7 @@
     "ordinal": 1513133897
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133901,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3355,7 +3355,7 @@
     "ordinal": 1513133901
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133944,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3364,7 +3364,7 @@
     "ordinal": 1513133944
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133966,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3373,7 +3373,7 @@
     "ordinal": 1513133966
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133972,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3382,7 +3382,7 @@
     "ordinal": 1513133972
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133978,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3391,7 +3391,7 @@
     "ordinal": 1513133978
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513133982,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3400,7 +3400,7 @@
     "ordinal": 1513133982
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513134015,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3409,7 +3409,7 @@
     "ordinal": 1513134015
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513134065,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3418,7 +3418,7 @@
     "ordinal": 1513134065
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513134069,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3427,7 +3427,7 @@
     "ordinal": 1513134069
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513134073,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3436,7 +3436,7 @@
     "ordinal": 1513134073
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513134080,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3445,7 +3445,7 @@
     "ordinal": 1513134080
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513135364,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3454,7 +3454,7 @@
     "ordinal": 1513135364
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513285974,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3463,7 +3463,7 @@
     "ordinal": 1513285974
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513285978,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3472,7 +3472,7 @@
     "ordinal": 1513285978
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513285983,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3481,7 +3481,7 @@
     "ordinal": 1513285983
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513285987,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3499,7 +3499,7 @@
     "ordinal": 1513319073
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513489065,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3508,7 +3508,7 @@
     "ordinal": 1513489065
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513489070,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3517,7 +3517,7 @@
     "ordinal": 1513489070
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513557823,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -3526,12 +3526,21 @@
     "ordinal": 1513557823
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1513573300,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
     "url": "https://www.ebay.com/itm/Calvin-Klein-Mens-Slim-Fit-4-Pocket-Sateen-Steam-Flat-Front-Pant/322182596326?epid=1502141485&hash=item4b039446e6:m:mQe5Dfg_fhssFt0uLPtTwXw",
     "parentId": "230184",
     "ordinal": 1513573300
+  },
+  {
+    "downloaded_video": false,
+    "created": 1514177661,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/gp/product/B00RNDK6MO/ref=oh_aui_detailpage_o00_s02?ie=UTF8&psc=1",
+    "parentId": "230184",
+    "ordinal": 1514177661
   }
 ]

@@ -39,21 +39,17 @@ import com.google.common.collect.Multimap;
 
 public class YurlList {
 
-	private static final String YURL_ORDINALS = System.getProperty("user.home")
-			+ "/sarnobat.git/db/yurl_flatfile_db/yurl_master_ordinals.txt";
+	private static final String YURL_ORDINALS = System.getProperty("user.home")			+ "/sarnobat.git/db/yurl_flatfile_db/yurl_master_ordinals.txt";
 	private static final String DOWNLOADED_VIDEOS = System
-			.getProperty("user.home")
-			+ "/sarnobat.git/db/auto/yurl_queue_httpcat_videos_downloaded.json";
+			.getProperty("user.home")			+ "/sarnobat.git/db/auto/yurl_queue_httpcat_videos_downloaded.json";
 	private static final String DOWNLOADED_VIDEOS_2017 = System
-			.getProperty("user.home")
-			+ "/sarnobat.git/db/yurl_flatfile_db/videos_download_succeeded.txt";
+			.getProperty("user.home")			+ "/sarnobat.git/db/yurl_flatfile_db/videos_download_succeeded.txt";
 	private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 
 	// TODO: Regenerate the cache file using these sources of truth.
 	private static final String CATEGORY_HIERARCHY_JSON = System
-			.getProperty("user.home")
-			+ "/github/yurl/cache/categories/all.json";
+			.getProperty("user.home")			+ "/github/yurl/cache/categories/all.json";
 
 	// This only gets invoked when it receives the first request
 	// Multiple instances get created
@@ -93,8 +89,9 @@ public class YurlList {
 
 				Collection<String> downloadedVideos = new HashSet(
 						getDownloadedVideos(DOWNLOADED_VIDEOS));
-				downloadedVideos
-						.addAll(getDownloadedVideos2017(DOWNLOADED_VIDEOS_2017));
+				// This takes too long.
+//				downloadedVideos
+//						.addAll(getDownloadedVideos2017(DOWNLOADED_VIDEOS_2017));
 				retVal1.put(
 						"urls",
 						getItemsAtLevelAndChildLevels(iRootId, downloadedVideos));
@@ -128,25 +125,34 @@ public class YurlList {
 		// TODO: this file is not in the right format
 		private Collection<String> getDownloadedVideos(String downloadedVideos)
 				throws IOException {
+			System.out.println("YurlList.YurlResource.getDownloadedVideos()");
 			return FileUtils.readLines(Paths.get(downloadedVideos).toFile(),
 					"UTF-8");
 		}
 
 		private Collection<String> getDownloadedVideos2017(
 				String downloadedVideos) throws IOException {
+			System.out
+					.println("YurlList.YurlResource.getDownloadedVideos2017() begin: " + downloadedVideos);
 			List<String> readLines = FileUtils.readLines(
 					Paths.get(downloadedVideos).toFile(), "UTF-8");
+			System.out
+					.println("YurlList.YurlResource.getDownloadedVideos2017() 2");
 			Set<String> ret = new HashSet<String>();
 			for (String line : readLines) {
 				String[] elements = line.split("::");
 				ret.add(elements[0]);
 			}
+			System.out
+					.println("YurlList.YurlResource.getDownloadedVideos2017() end");
 			return ret;
 		}
 
 		private static JSONObject getItemsAtLevelAndChildLevels(
 				Integer iRootId, Collection<String> downloadedVideos)
 				throws JSONException, IOException {
+			System.out
+					.println("YurlList.YurlResource.getItemsAtLevelAndChildLevels()");
 			JSONObject urls = new JSONObject();
 			System.out.println("getItemsAtLevelAndChildLevels() begin");
 			Collection<String> categoriesToGetUrlsFrom = ImmutableList
@@ -505,11 +511,9 @@ public class YurlList {
 		}
 
 		private static final String CATEGORY_RELATIONSHIPS = System
-				.getProperty("user.home")
-				+ "/sarnobat.git/db/yurl_flatfile_db/yurl_category_topology.txt";
+				.getProperty("user.home")				+ "/sarnobat.git/db/yurl_flatfile_db/yurl_category_topology.txt";
 		private static final String CATEGORY_NAMES = System
-				.getProperty("user.home")
-				+ "/sarnobat.git/db/yurl_flatfile_db/yurl_category_names.txt";
+				.getProperty("user.home")				+ "/sarnobat.git/db/yurl_flatfile_db/yurl_category_names.txt";
 	}
 
 	public static void main(String[] args) throws URISyntaxException,

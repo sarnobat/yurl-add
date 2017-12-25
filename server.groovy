@@ -3,22 +3,17 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -26,14 +21,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.cli.CommandLine;
@@ -44,40 +36,23 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-//import org.jvnet.hk2.annotations.Optional;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.base.Strings;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.json.JSONConfiguration;
+//import org.jvnet.hk2.annotations.Optional;
 
 /**
  * Deprecation doesn't mean the method can be removed. Only when index.html stops referring to it can it be removed.
@@ -86,10 +61,9 @@ import com.sun.jersey.api.json.JSONConfiguration;
  * 
  * Only writing to the persistent store (and the associated async tasks) should remain in this thread.
  */
-// TODO: Use javax.json.* for immutability
-public class Yurl {
+// TODO: rename to YurlStash
+public class YurlStash {
 
-	private static final String CHROMEDRIVER_PATH = "/home/sarnobat/github/yurl/chromedriver";
 	public static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
 	public static final Integer ROOT_ID = 45;
 	@Deprecated
@@ -109,7 +83,6 @@ public class Yurl {
 // usually full and images don't get saved "/media/sarnobat/Unsorted/images/other";
 	
 	@Path("yurl")
-	// TODO: Rename to YurlResource
 	public static class YurlResource { // Must be public
 
 
@@ -122,7 +95,7 @@ public class Yurl {
 
 		// This only gets invoked when it receives the first request
 		// Multiple instances get created
-		YurlResource() {
+		public YurlResource() {
 			// We can't put the auto downloader in main()
 			// then either it will be called every time the cron job is executed,
 			// or not until the server terminates unexceptionally (which never happens).
@@ -262,7 +235,7 @@ public class Yurl {
 		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
 //			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
-				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(YurlStash.ROOT_ID);
 			}
 			// TODO: the source is null clause should be obsoleted
 			JSONObject theQueryResultJson = execute(
@@ -377,106 +350,9 @@ public class Yurl {
 		// Key bindings
 		// -----------------------------------------------------------------------------
 
-		private static void deleteBinding(Integer iParentId, String key, String name) {
-			try {
-				execute("START parent=node( {parentId} ) MATCH parent-[r:CONTAINS]->category WHERE has(category.key) and category.type = 'categoryNode' and category.key = {key} DELETE category.key RETURN category",
-						ImmutableMap.<String, Object> builder()
-								.put("parentId", iParentId)
-								.put("key", key).build(), "deleteBinding()");
-				System.out.println("deleteBinding() - Removed keybinding for " + name);
-			} catch (Exception e) {
-				System.out.println("deleteBinding() - Did not removed keybinding for " + name + " since there currently isn't one.");
-			}
-		}
 		
-		private static final Function<String, Map.Entry<String, String>> LINE_TO_BINDING_ENTRY = new Function<String, Map.Entry<String, String>>() {
-			@Override
-			public Entry<String, String> apply(String bindingLine) {
-				String[] aLineElements = bindingLine.split("=");
-				// Ignore trailing comments
-				return new AbstractMap.SimpleEntry<String, String>(aLineElements[0].trim(),
-						aLineElements[1].trim().split("#")[0].trim());
-			}
-		};
-
-		private static final Predicate<String> IS_COMMENTED = new Predicate<String>(){
-			@Override
-			public boolean apply(@Nullable String aNewKeyBinding) {
-				if (aNewKeyBinding == null) {
-					return true;
-				}
-				if (aNewKeyBinding.equals("")){
-					return true;
-				}
-				if (aNewKeyBinding.trim().startsWith("#")
-						&& !aNewKeyBinding.trim().startsWith("#=")) {
-					return true;
-				}
-				if (aNewKeyBinding.trim().startsWith("_")) {
-					// do not allow key binding that is "_". This is reserved
-					// for hiding until refresh
-					return true;
-				}
-				return false;
-			}
-		};
 		
-		private Set<String> difference(String iNewKeyBindings,
-				String iOldKeyBindings) {
-			// NOTE: This is not symmetric (commutative?). If you want to
-			// support removal do that in a separate loop
-			Set<String> theNewKeyBindingLines = Sets.difference(
-					ImmutableSet.copyOf(iNewKeyBindings.trim().split("\n")),
-					ImmutableSet.copyOf(iOldKeyBindings.trim().split("\n")));
-			System.out.println("Difference: " + theNewKeyBindingLines);
-			return theNewKeyBindingLines;
-		}
 
-		/** Get or create the category node that is to be associated with the key code */
-		private static String getCategoryNodeIdString(String iCategoryName,
-				String iKeyCode, JSONArray theCategoryNodes) throws IOException {
-			String theNewCategoryNodeIdString;
-			if (shouldCreateNewCategoryNode(theCategoryNodes, iCategoryName)) {
-				// TODO: first check if there is already a node with this name,
-				// which is for re-associating the keycode with the category
-				theNewCategoryNodeIdString = (String) ((JSONArray) ((JSONArray) execute(
-						"CREATE (n { name : {name} , key : {key}, created: {created} , type :{type}}) "
-								+ "RETURN id(n)",
-						ImmutableMap.<String, Object> builder()
-								.put("name", iCategoryName)
-								.put("key", iKeyCode)
-								.put("type", "categoryNode")
-								.put("created", System.currentTimeMillis())
-								.build(), "getCategoryNodeIdString()").get("data")).get(0)).get(0);
-			} else {
-				if (theCategoryNodes.length() > 0) {
-					if (theCategoryNodes.length() > 1) {
-						// Sanity check
-						throw new RuntimeException(
-								"There should never be 2 child categories of the same node with the same name");
-					}
-					theNewCategoryNodeIdString = (String) ((JSONArray) theCategoryNodes
-							.get(0)).get(0);
-				} else {
-					theNewCategoryNodeIdString = "-1";
-				}
-			}
-			return theNewCategoryNodeIdString;
-		}
-
-		private static boolean shouldCreateNewCategoryNode(JSONArray theCategoryNodes, String iCategoryName) {
-			boolean shouldCreateNewCategoryNode = false;
-			if (theCategoryNodes.length() > 0) {
-				if (theCategoryNodes.length() > 1) {
-					// Sanity check
-					throw new RuntimeException(
-							"There should never be 2 child categories of the same node with the same name");
-				}
-			} else {
-				shouldCreateNewCategoryNode = true;
-			}
-			return shouldCreateNewCategoryNode;
-		}
 
 		
 
@@ -495,11 +371,12 @@ public class Yurl {
 			System.out.println("stash() theHttpUrl = " + theHttpUrl);
 			try {
 				// TODO: append synchronously to new yurl master queue 
-	            appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER);
+	            appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, YurlStash.QUEUE_FILE_TXT_MASTER);
 
 				launchAsynchronousTasksHttpcat(theHttpUrl, iCategoryId);
 				// TODO: check that it returned successfully (redundant?)
 //				System.out.println("stash() - node created: " + nodeId);
+				System.out.println("YurlStash.YurlResource.stash() sending empty json response. This should work.");
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(new JSONObject().toString())
 						.type("application/json").build();
@@ -510,9 +387,9 @@ public class Yurl {
 		}
 
 
-        private static void launchAsynchronousTasksHttpcat(final String iUrl, Integer iCategoryId) {
+        private static void launchAsynchronousTasksHttpcat(final String iUrl, Integer iCategoryId) throws IOException, InterruptedException {
 		
-			appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_DIR, Yurl.QUEUE_FILE_TXT_2017);
+			appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_DIR, YurlStash.QUEUE_FILE_TXT_2017);
 			
 			// Delete the url cache file for this category. It will get
 			// regenrated next time we load that category page.
@@ -527,25 +404,36 @@ public class Yurl {
 					Runnable r = new Runnable() {
 						// @Override
 						public void run() {
-							String titleFileStr = Yurl.QUEUE_FILE + "/" + Yurl.TITLE_FILE_TXT;
+							String titleFileStr = YurlStash.QUEUE_FILE + "/" + YurlStash.TITLE_FILE_TXT;
 							File file = Paths.get(titleFileStr).toFile();
-							File file2 = Paths.get(Yurl.QUEUE_FILE).toFile();
+							File file2 = Paths.get(YurlStash.QUEUE_FILE).toFile();
 							if (!file2.exists()) {
 								throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
 							}
 							String command = "echo '" + iUrl + "::" + theTitle + "' | tee -a '" + titleFileStr + "'";
 							System.out.println("appendToTextFile() - " + command);
-							Process p = new ProcessBuilder()
-									.directory(file2)
-									.command("echo","hello world")
-									.command("/bin/sh", "-c", command)
-									.inheritIO().start();
-							p.waitFor();
-							if (p.exitValue() == 0) {
-								System.out.println("appendToTextFile() - successfully appended 2 "
-										+ iUrl);
-							} else {
-								System.out.println("appendToTextFile() - error appending " + iUrl);
+							Process p;
+							try {
+								p = new ProcessBuilder()
+										.directory(file2)
+										.command("echo","hello world")
+										.command("/bin/sh", "-c", command)
+										.inheritIO().start();
+								try {
+									p.waitFor();
+								} catch (InterruptedException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								if (p.exitValue() == 0) {
+									System.out.println("appendToTextFile() - successfully appended 2 "
+											+ iUrl);
+								} else {
+									System.out.println("appendToTextFile() - error appending " + iUrl);
+								}
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
 						}
 					};
@@ -636,25 +524,36 @@ public class Yurl {
 			Runnable r = new Runnable() {
 				// @Override
 				public void run() {
-					String queueFile = dir + "/" + Yurl.QUEUE_FILE_TXT;
+					String queueFile = dir + "/" + YurlStash.QUEUE_FILE_TXT;
 					File file = Paths.get(dir).toFile();
 					if (!file.exists()) {
 						throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
 					}
 					String command =  "echo '" + id + "::" + iUrl + "::'`date +%s` | tee -a '" + queueFile + "'";
 					System.out.println("appendToTextFile() - " + command);
-					Process p = new ProcessBuilder()
-							.directory(file)
-							.command("echo","hello world")
-							.command("/bin/sh", "-c", command)
-									//"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
-											.inheritIO().start();
-					p.waitFor();
-					if (p.exitValue() == 0) {
-						System.out.println("appendToTextFile() - successfully appended 5 "
-								+ iUrl);
-					} else {
-						System.out.println("appendToTextFile() - error appending " + iUrl);
+					Process p;
+					try {
+						p = new ProcessBuilder()
+								.directory(file)
+								.command("echo","hello world")
+								.command("/bin/sh", "-c", command)
+										//"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
+												.inheritIO().start();
+						try {
+							p.waitFor();
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if (p.exitValue() == 0) {
+							System.out.println("appendToTextFile() - successfully appended 5 "
+									+ iUrl);
+						} else {
+							System.out.println("appendToTextFile() - error appending " + iUrl);
+						}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			};
@@ -770,7 +669,7 @@ public class Yurl {
                                                         Process p = new ProcessBuilder()
                                                                         .directory(Paths.get(targetDirPath).toFile())
                                                                         .command(
-                                                                                        ImmutableList.of(Yurl.YOUTUBE_DOWNLOAD,
+                                                                                        ImmutableList.of(YurlStash.YOUTUBE_DOWNLOAD,
                                                                                                         iVideoUrl)).inheritIO().start();
                                                         p.waitFor();
                                                         if (p.exitValue() == 0) {
@@ -877,8 +776,8 @@ public class Yurl {
 
 			private static void downloadVideo(String iVideoUrl, String targetDirPath, String id) {
 				try {
-					downloadVideo(iVideoUrl, targetDirPath);
-					writeSuccessToDb(iVideoUrl, id);
+//					downloadVideo(iVideoUrl, targetDirPath);
+//					writeSuccessToDb(iVideoUrl, id);
 				} catch (JSONException e) {
 					System.out.println("UndownloadedVideosBatchJob.downloadVideo() - ERROR recording download in database");
 				} catch (Exception e) {
@@ -941,7 +840,7 @@ public class Yurl {
 		@Produces("application/json")
 		public Response removeImage(
 				@QueryParam("id") Integer nodeIdToChange,
-				@QueryParam("parentId") Integer parentId) throws IOException, JSONException {
+				@QueryParam("parentId") Integer parentId) throws Exception {
 	
 			System.out.println("removeImage() - begin");
 			try {
@@ -1045,6 +944,7 @@ public class Yurl {
 		/**
 		 * This MOVES a node to a new subcategory. It deletes the relationship
 		 * with the existing parent
+		 * @throws InterruptedException 
 		 */
 		@GET
 		@Path("relate")
@@ -1053,14 +953,14 @@ public class Yurl {
 				@QueryParam("url") String iUrl,
 				@QueryParam("currentParentId") final Integer iCurrentParentId,
 				@QueryParam("created") Long created)
-				throws JSONException, IOException {
+				throws JSONException, IOException, InterruptedException {
 			
 			System.out.println("Yurl.YurlResource.move() begin");
 			
-			appendToTextFileSync(iUrl, iNewParentId.toString(), QUEUE_FILE, Yurl.QUEUE_FILE_TXT_MASTER, created);
+			appendToTextFileSync(iUrl, iNewParentId.toString(), QUEUE_FILE, YurlStash.QUEUE_FILE_TXT_MASTER, created);
 			
 			System.out.println("Yurl.YurlResource.move() 2");
-			appendToTextFileSync(iUrl, "-" + iCurrentParentId.toString(), QUEUE_DIR, Yurl.QUEUE_FILE_TXT_DELETE, created);
+			appendToTextFileSync(iUrl, "-" + iCurrentParentId.toString(), QUEUE_DIR, YurlStash.QUEUE_FILE_TXT_DELETE, created);
 			System.out.println("Yurl.YurlResource.move() 4");
 			
 			new Thread() {
@@ -1121,45 +1021,7 @@ public class Yurl {
 		// TODO: make this map immutable
 		static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams, boolean doLogging, String... iCommentPrefix) {
-			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
-			if (doLogging) {
-				System.out.println(commentPrefix + " - \t" + iCypherQuery);
-				System.out.println(commentPrefix + "- \tparams - " + iParams);
-			}
-			ClientConfig clientConfig = new DefaultClientConfig();
-			clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
-					Boolean.TRUE);
-	
-			// POST {} to the node entry point URI
-			ClientResponse theResponse = Client.create(clientConfig).resource(
-					CYPHER_URI)
-					.accept(MediaType.APPLICATION_JSON)
-					.type(MediaType.APPLICATION_JSON).entity("{ }")
-					.post(ClientResponse.class, ImmutableMap
-							.<String, Object> of("query", iCypherQuery, "params",
-									Preconditions.checkNotNull(iParams)));
-			if (theResponse.getStatus() != 200) {
-				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: " + iParams);
-				try {
-					throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream(), "UTF-8"));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			String theNeo4jResponse ;
-			try {
-				// Do not inline this. We need to close the stream after
-				// copying
-				theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream(), "UTF-8");
-				theResponse.getEntityInputStream().close();
-				theResponse.close();
-				if (doLogging) {
-					System.out.println(commentPrefix + "end");
-				}
-				return new JSONObject(theNeo4jResponse);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			throw new RuntimeException("Do not use this method");
 		}
 
 		// ----------------------------------------------------------------------------
@@ -1174,12 +1036,12 @@ public class Yurl {
 				throws JSONException, IOException {
 			JSONObject ret = new JSONObject();
 			JSONObject categoriesTreeJson;
-			java.nio.file.Path path = Paths.get("/home/sarnobat/github/.cache/" + Yurl.ROOT_ID + ".json");
+			java.nio.file.Path path = Paths.get("/home/sarnobat/github/.cache/" + YurlStash.ROOT_ID + ".json");
 			if (Files.exists(path)) {
 				categoriesTreeJson = new JSONObject(FileUtils.readFileToString(path.toFile(), "UTF-8"));
 			} else {
 				if (categoriesTreeCache == null) {
-					categoriesTreeJson = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
+					categoriesTreeJson = ReadCategoryTree.getCategoriesTree(YurlStash.ROOT_ID);
 				} else {
 					categoriesTreeJson = categoriesTreeCache;
 					refreshCategoriesTreeCacheInSeparateThread();
@@ -1198,8 +1060,6 @@ public class Yurl {
 					try {
 						//categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
 					} catch (JSONException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				}
@@ -1391,7 +1251,7 @@ public class Yurl {
 
 		// I hope this is the same as JSONObject.Null (not capitals)
 		@Deprecated // Does not compile in Eclipse, but does compile in groovy
-		public static final Object JSON_OBJECT_NULL = JSONObject.Null;//new Null()
+		public static final Object JSON_OBJECT_NULL = JSONObject.NULL;//new Null()
 	}
 
 	@SuppressWarnings("unused")
@@ -1436,7 +1296,7 @@ public class Yurl {
 		try {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:" + port + "/"), new ResourceConfig(
-							YurlResource.class));
+							YurlStash.YurlResource.class));
 			// Do not allow this in multiple processes otherwise your hard disk will fill up
 			// or overload the database
 			// Problem - this won't get executed until the server ends
