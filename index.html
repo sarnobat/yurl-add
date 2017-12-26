@@ -429,7 +429,7 @@ function relateNew(newParentId, currentRootId, button) {
 			newCount -= 1;
 			$("#count").text(newCount);
 		})
-		.error(function() { alert("error occurred "); })
+		.error(function() { alert("error occurred : " + url); })
 		.complete(function() { });
 }
 
@@ -454,7 +454,7 @@ function relate(parentId, childId, currentRootId) {
 			newCount -= 1;
 			$("#count").text(newCount);
 		})
-		.error(function() { alert("error occurred "); })
+		.error(function() { alert("error occurred " + url); })
 		.complete(function() { });
 }
 
@@ -468,7 +468,7 @@ function createAndRelate(childId, currentRootId) {
 	$.getJSON(url, function(result){})
 		.success(function() { 
 		})
-		.error(function() { alert("error occurred "); })
+		.error(function() { alert("error occurred " + url); })
 		.complete(function() { });
 }
 
@@ -542,7 +542,7 @@ function moveToTop(source, button) {
 			.success(function(data) {  
 			})
 			.error(function() {
-				alert("error occurred "); 
+				alert("error occurred 4439"); 
 			})
 			.complete(function() { });
 	} else {
@@ -564,7 +564,7 @@ function moveToBottom(source) {
 			.success(function(data) {  
 			})
 			.error(function() {
-				alert("error occurred "); 
+				alert("error occurred 4439"); 
 			})
 			.complete(function() { });
 	} else {
@@ -614,7 +614,7 @@ function sendBatch() {
 			$("#urlBatchToSend").val(data.unsuccessful);
 		})
 		.error( function(data) {
-			alert("error occurred "); 
+			alert("error occurred " + urlBase); 
 		} )
 		.complete( function() {} );
 }
@@ -648,7 +648,7 @@ function tagUrlWithCategoryIds(nodeId, selections, button) {
 			button.style.cssText = "background-color : green";
 		})
 		.error(function() { 
-			alert("error occurred "); 
+			alert("error occurred " + url); 
 		})
 		.complete(function() { 
 		}
@@ -981,7 +981,7 @@ function removeImage(id, button, url, parentId) {
                                 button.style.cssText = "background-color : green";
                         })
                         .error(function() { 
-                                alert("error occurred "); 
+                                alert("error occurred " + urlBase); 
                         })
                         .complete(function() { 
                         }
@@ -1000,7 +1000,7 @@ function changeImage(id, button, url) {
 				button.style.cssText = "background-color : green";
 			})
 			.error(function() { 
-				alert("error occurred "); 
+				alert("error occurred " + urlBase); 
 			})
 			.complete(function() { 
 			}
