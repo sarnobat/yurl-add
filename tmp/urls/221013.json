@@ -1700,6 +1700,7 @@
   },
   {
     "downloaded_video": false,
+    "user_image": "https://images.containerstore.com/catalogimages/287537/10069266PremiumAcrylicPaperTraySm_12.jpg?width=1200&height=1200&align=center",
     "created": 1512951718,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1736,6 +1737,7 @@
   },
   {
     "downloaded_video": false,
+    "user_image": "https://images.containerstore.com/catalogimages/287537/10069266PremiumAcrylicPaperTraySm_12.jpg?width=1200&height=1200&align=center",
     "created": 1512952373,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1793,6 +1795,7 @@
   },
   {
     "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/818XL-ixpAL._SL1500_.jpg",
     "created": 1513020665,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1811,6 +1814,7 @@
   },
   {
     "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/21EVsV25HcL.jpg",
     "created": 1513142479,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1820,6 +1824,7 @@
   },
   {
     "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/61KazbOZmJL._SL1000_.jpg",
     "created": 1513295907,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1838,6 +1843,7 @@
   },
   {
     "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/414IVDQ5uaL._AA300_.jpg",
     "created": 1513378405,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1856,6 +1862,7 @@
   },
   {
     "downloaded_video": false,
+    "user_image": "https://i.ebayimg.com/images/g/hQsAAOSwCQZZGfbR/s-l1600.jpg",
     "created": 1513557941,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1865,21 +1872,13 @@
   },
   {
     "downloaded_video": false,
+    "user_image": "https://i.ebayimg.com/images/g/W~wAAOSw~vpaLopB/s-l400.jpg",
     "created": 1513573449,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
     "url": "https://www.ebay.com/itm/Calvin-Klein-Mens-Slim-Fit-4-Pocket-Stretch-Sateen-Pant-Choose-SZ-Color/263382667990?epid=1365033738&hash=item3d52d492d6:m:m61ZdO1uV5YPGCx-bMgmClw",
     "parentId": "221013",
     "ordinal": 1513573449
-  },
-  {
-    "downloaded_video": false,
-    "created": 1513573553,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.macys.com/shop/product/calvin-klein-mens-sateen-slim-fit-stretch-pants?ID=642521",
-    "parentId": "221013",
-    "ordinal": 1513573553
   },
   {
     "downloaded_video": false,
@@ -1892,7 +1891,7 @@
   },
   {
     "downloaded_video": false,
-    "user_image": "http://images.amazon.com/images/P/B002JGIY3S.01.LZZZZZZZ.jpg",
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/61XBkSxuyTL._SY355_.jpg",
     "created": 1513814713,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",

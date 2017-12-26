@@ -524,7 +524,7 @@
     "ordinal": 1502324243
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512083322,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -533,7 +533,7 @@
     "ordinal": "1512164462537"
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512436038,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -598,7 +598,7 @@
     "ordinal": 1512447365
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "created": 1512930561,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -607,7 +607,7 @@
     "ordinal": 1512930561
   },
   {
-    "downloaded_video": true,
+    "downloaded_video": false,
     "user_image": "https://images-na.ssl-images-amazon.com/images/I/71ctPop%2B5JL._SY685_.jpg",
     "created": 1512523484,
     "id": "STOP_RELYING_ON_THIS",
@@ -652,5 +652,14 @@
     "url": "http://www.amazon.com/The-Science-Branding-Giep-Franzen/dp/0765617919",
     "parentId": "230183",
     "ordinal": 1447378097583
+  },
+  {
+    "downloaded_video": false,
+    "created": 1513573553,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.macys.com/shop/product/calvin-klein-mens-sateen-slim-fit-stretch-pants?ID=642521",
+    "parentId": "230183",
+    "ordinal": 1513573553
   }
 ]
