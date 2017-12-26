@@ -807,7 +807,7 @@ public class YurlStash {
 			System.err.println("Yurl.YurlResource.changeImage() begin");
 			
 			FileUtils.write(Paths.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt").toFile(), iUrl + "::" + imageUrl + "\n", "UTF-8", true);
-			System.err.println("Yurl.YurlResource.changeImage() - " + iUrl + " :: " + imageUrl);
+			System.err.println("Yurl.YurlResource.changeImage() - success: " + iUrl + " :: " + imageUrl);
 
 			removeCategoryCacheAsync(iCategoryId);
 			// TODO: remove the Neo4j part
@@ -821,7 +821,7 @@ public class YurlStash {
 			return Response
 					.ok()
 					.header("Access-Control-Allow-Origin", "*")
-					.entity(new JSONObject()).type("application/json")
+					.entity(new JSONObject().toString()).type("application/json")
 					.build();
 		}
 
