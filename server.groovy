@@ -979,7 +979,7 @@ public class YurlStash {
 //			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
 //					iNewParentId);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(new JSONObject())
+					.entity(new JSONObject().toString())
 					.type("application/json").build();
 		}
 
