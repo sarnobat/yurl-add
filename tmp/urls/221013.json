@@ -133,7 +133,7 @@
     "title": "<fill this in>",
     "url": "http://www.amazon.com/Fundamentals-Stream-Processing-Application-Analytics/dp/1107015545/ref=tmm_hrd_title_0?ie=UTF8&qid=1411960515&sr=8-4",
     "parentId": "221013",
-    "ordinal": "1505151357968"
+    "ordinal": 1417821676966
   },
   {
     "downloaded_video": false,
@@ -151,7 +151,7 @@
     "title": "<fill this in>",
     "url": "http://www.amazon.com/gp/product/0321601912/ref=pd_lpo_sbs_dp_ss_1?pf_rd_p=1944687562&pf_rd_s=lpo-top-stripe-1&pf_rd_t=201&pf_rd_i=0978739213&pf_rd_m=ATVPDKIKX0DER&pf_rd_r=1ZFP7T96G27B8CPQB3G6",
     "parentId": "221013",
-    "ordinal": "1502171801889"
+    "ordinal": 1425329853264
   },
   {
     "downloaded_video": false,
@@ -236,15 +236,6 @@
     "url": "http://www.amazon.com/The-Art-Manliness-Classic-Manners/dp/1600614620/ref=pd_sim_14_7?ie=UTF8&refRID=0H2FG3H2M7GJ7RC2TBQE",
     "parentId": "221013",
     "ordinal": 1439316783304
-  },
-  {
-    "downloaded_video": false,
-    "created": 1439436778872,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "http://www.amazon.com/Effective-Java-2nd-Joshua-Bloch/dp/0321356683/ref=sr_1_1?ie=UTF8&qid=1439436628&sr=8-1&keywords=effective+java",
-    "parentId": "221013",
-    "ordinal": 1439436778872
   },
   {
     "downloaded_video": false,
@@ -615,7 +606,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Working-Static-Sites-Bringing-Websites/dp/1491960949",
     "parentId": "221013",
-    "ordinal": "1502171756720"
+    "ordinal": 1479878085937
   },
   {
     "downloaded_video": false,
@@ -759,21 +750,12 @@
   },
   {
     "downloaded_video": false,
-    "created": 1485380997384,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Nanostand-Atletico-Madrid-Vicente-Calderon/dp/B00APZ3YPS/ref=sr_1_1?ie=UTF8&qid=1484430937&sr=8-1&keywords=vicente+calderon+3d",
-    "parentId": "221013",
-    "ordinal": "1502171660257"
-  },
-  {
-    "downloaded_video": false,
     "created": 1485809458909,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
     "url": "https://www.amazon.com/dp/B00OP85UWQ?psc=1",
     "parentId": "221013",
-    "ordinal": "1502171664067"
+    "ordinal": 1485809458909
   },
   {
     "downloaded_video": false,
@@ -791,16 +773,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Visual-Hammer-brand-emotional-visual/dp/0984937064/ref=sr_1_1?ie=UTF8&qid=1486505146&sr=8-1&keywords=visual branding",
     "parentId": "221013",
-    "ordinal": "1502171654100"
-  },
-  {
-    "downloaded_video": false,
-    "created": 1486584689816,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Visual-Language-Designers-Principles-Understand/dp/1592537413/ref=sr_1_1?ie=UTF8&qid=1308136839&sr=8-1",
-    "parentId": "221013",
-    "ordinal": 1486584689816
+    "ordinal": 1486584656567
   },
   {
     "downloaded_video": false,
@@ -910,7 +883,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Segway-miniPRO-Balancing-Personal-Transporter/dp/B019Z6HS86/ref=sr_1_2?s=outdoor-recreation&ie=UTF8&qid=1490332115&sr=1-2&keywords=segway",
     "parentId": "221013",
-    "ordinal": "1512961249190"
+    "ordinal": 1490332196645
   },
   {
     "downloaded_video": false,
@@ -920,7 +893,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Warehouse-Nash-infinite-Grassroots-Fractional-Banking-Think/dp/B009AEXZV8/ref=sr_1_1?s=books&ie=UTF8&qid=1490560808&sr=1-1&keywords=fractional banking",
     "parentId": "221013",
-    "ordinal": "1502171631022"
+    "ordinal": 1490560825655
   },
   {
     "downloaded_video": false,
@@ -1049,7 +1022,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Functional-Programming-JavaScript-functional-techniques/dp/1617292826/ref=sr_1_1?ie=UTF8&qid=1494299097&sr=8-1&keywords=javascript map reduce filter",
     "parentId": "221013",
-    "ordinal": "1507674320362"
+    "ordinal": 1494299177134
   },
   {
     "downloaded_video": false,
@@ -1068,7 +1041,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Building-Microservices-Designing-Fine-Grained-Systems/dp/1491950358/ref=sr_1_fkmr0_1?ie=UTF8&qid=1494900206&sr=8-1-fkmr0&keywords=microservices python",
     "parentId": "221013",
-    "ordinal": "1507674316582"
+    "ordinal": 1494900266220
   },
   {
     "downloaded_video": false,
@@ -1114,7 +1087,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/RESTful-Java-JAX-RS-2-0-Distributed/dp/144936134X/ref=sr_1_1?ie=UTF8&qid=1496343677&sr=8-1&keywords=java rest",
     "parentId": "221013",
-    "ordinal": "1507674314556"
+    "ordinal": 1496343805314
   },
   {
     "downloaded_video": false,
@@ -1180,7 +1153,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Power-Less-Limiting-Yourself-Essential/dp/1401309704/ref=sr_1_4?ie=UTF8&qid=1499460016&sr=8-4&keywords=art of doing less",
     "parentId": "221013",
-    "ordinal": "1502160771289"
+    "ordinal": 1499461609156
   },
   {
     "downloaded_video": false,
@@ -1236,7 +1209,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Crucial-16GBx2-PC4-17000-SODIMM-260-Pin/dp/B015HQ9TGW/ref=pd_bxgy_147_img_2?_encoding=UTF8&refRID=93S6NHNXJYEBH8GNE9X2&th=1",
     "parentId": "221013",
-    "ordinal": "1507674354873"
+    "ordinal": 1501181120
   },
   {
     "downloaded_video": false,
@@ -1246,16 +1219,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/CablesOnline-Short-3-Conductor-Power-PC-111-5/dp/B00N05P3ZE/ref=redir_mobile_desktop?_encoding=UTF8&dpID=41Kkq9mktAL&dpPl=1&keywords=short%20pc%20power%20cord&pi=AC_SX236_SY340_QL65&qid=1501981303&ref=plSrch&ref_=mp_s_a_1_1&sr=8-1",
     "parentId": "221013",
-    "ordinal": "1502158613478"
-  },
-  {
-    "downloaded_video": false,
-    "created": 1502085774,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Kanex-Extension-Display-24-Inch-27-Inch/dp/B0045I85FA/ref=redir_mobile_desktop?_encoding=UTF8&dpID=31vKpDBsKOL&dpPl=1&keywords=mini%20displayport%20extension&pi=AC_SX236_SY340_QL65&qid=1501984553&ref=plSrch&ref_=mp_s_a_1_2&sr=8-2",
-    "parentId": "221013",
-    "ordinal": "1502157865527"
+    "ordinal": 1502059932
   },
   {
     "downloaded_video": false,
@@ -1264,7 +1228,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Software-Craftsman-Professionalism-Pragmatism-Robert/dp/0134052501/ref=sr_1_2?ie=UTF8&qid=1502391070&sr=8-2&keywords=clean+architecture",
     "parentId": "221013",
-    "ordinal": "1507674312394"
+    "ordinal": 1502391134
   },
   {
     "downloaded_video": false,
@@ -1273,7 +1237,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Clean-Architecture-Craftsmans-Software-Structure/dp/0134494164/ref=sr_1_1?ie=UTF8&qid=1502391070&sr=8-1&keywords=clean+architecture",
     "parentId": "221013",
-    "ordinal": "1507674310358"
+    "ordinal": 1502391163
   },
   {
     "downloaded_video": false,
@@ -1330,7 +1294,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Kanban-Action-Marcus-Hammarberg/dp/1617291056/ref=sr_1_8?ie=UTF8&qid=1503623180&sr=8-8&keywords=kanban",
     "parentId": "221013",
-    "ordinal": "1512961131245"
+    "ordinal": 1503623973
   },
   {
     "downloaded_video": false,
@@ -1366,7 +1330,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Neutrogena-Therapeutic-Original-Dandruff-Treatment/dp/B0009KN8UA/ref=sr_1_3_a_it?ie=UTF8&qid=1503798319&sr=8-3&keywords=t+gel",
     "parentId": "221013",
-    "ordinal": "1507674344512"
+    "ordinal": 1503972409
   },
   {
     "downloaded_video": false,
@@ -1395,15 +1359,6 @@
     "url": "https://www.containerstore.com/s/kitchen/cabinet-organizers/single-chrome-corner-shelf/12d?productId=10016999",
     "parentId": "221013",
     "ordinal": 1504586047
-  },
-  {
-    "downloaded_video": false,
-    "created": 1504716424,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Hijacking-LaLiga-Atl%C3%A9tico-Barcelona-Madrid%C2%92s/dp/1785313134#productDescription_secondary_view_div_1504677271600",
-    "parentId": "221013",
-    "ordinal": 1504716424
   },
   {
     "downloaded_video": false,
@@ -1439,7 +1394,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Functional-Programming-Java-functional-techniques/dp/1617292737/ref=sr_1_1?ie=UTF8&qid=1505754543&sr=8-1&keywords=functional+programming+java",
     "parentId": "221013",
-    "ordinal": "1507674329618"
+    "ordinal": 1505755742
   },
   {
     "downloaded_video": false,
@@ -1448,7 +1403,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/SHEER-N-Nitric-Oxide-Supplement/dp/B00CCHBA8U/ref=sr_1_7_s_it?s=hpc&ie=UTF8&qid=1505754746&sr=1-7&keywords=nitric+oxide",
     "parentId": "221013",
-    "ordinal": "1507674324720"
+    "ordinal": 1505755901
   },
   {
     "downloaded_video": false,
@@ -1480,30 +1435,12 @@
   },
   {
     "downloaded_video": false,
-    "created": 1507306920,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Coleman-2000003744-Rambler-II-Stool/dp/B00339911O/ref=sr_1_1?ie=UTF8&qid=1507306839&sr=8-1&keywords=coleman+rambler+stool",
-    "parentId": "221013",
-    "ordinal": "1507674306195"
-  },
-  {
-    "downloaded_video": false,
     "created": 1507661731,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Building-Evolutionary-Architectures-Support-Constant/dp/1491986360/ref=sr_1_1?ie=UTF8&qid=1507581963&sr=8-1&keywords=evolutionary+architecture",
     "parentId": "221013",
     "ordinal": 1507661731
-  },
-  {
-    "downloaded_video": false,
-    "created": 1508195256,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Crystal-Noodle-Soup-Vegetable-Ounce/dp/B0028PDEYO/ref=pd_bxgy_325_img_3?_encoding=UTF8&psc=1&refRID=YCFRCZRFA4ESNMR0JP34",
-    "parentId": "221013",
-    "ordinal": 1508195256
   },
   {
     "downloaded_video": false,
@@ -1541,36 +1478,6 @@
     "url": "https://www.amazon.com/Maltesers-Box-100g/dp/B004TEVBVU/ref=sr_1_5_a_it?ie=UTF8&qid=1510597178&sr=8-5&keywords=maltesers&dpID=41RyfVQl4qL&preST=_SX300_QL70_&dpSrc=srch",
     "parentId": "221013",
     "ordinal": 1510597445
-  },
-  {
-    "downloaded_video": false,
-    "user_image": "https://images-na.ssl-images-amazon.com/images/I/71Lyaz2LlxL._SX522AA522_PIbundle-48,TopRight,0,0_AA522_SH20_.jpg",
-    "created": 1510598227,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Rowntrees-Fruit-Pastilles-tube-Case/dp/B000HEA8Q0",
-    "parentId": "221013",
-    "ordinal": 1510598227
-  },
-  {
-    "downloaded_video": false,
-    "user_image": "https://images-na.ssl-images-amazon.com/images/I/61AJnpDWlAL._SL1500_.jpg",
-    "created": 1510702610,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Hefty-Compartment-Plates-175-Count/dp/B001UC9EE0/ref=sr_1_9?ie=UTF8&qid=1510682655&sr=8-9&keywords=foam+plates+compartment",
-    "parentId": "221013",
-    "ordinal": "1512961084931"
-  },
-  {
-    "downloaded_video": false,
-    "user_image": "https://images-na.ssl-images-amazon.com/images/I/81VTPDQgOXL._SL1500_.jpg",
-    "created": 1510853142,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/DentalCare-Labs-Grinding-BPA-Free-Mouldable/dp/B01JNH3XFO/ref=pd_sim_194_3?_encoding=UTF8&pd_rd_i=B01JNH3XFO&pd_rd_r=87SA409QHWBG0K4QVA5Y&pd_rd_w=9dSGV&pd_rd_wg=8dIsM&psc=1&refRID=87SA409QHWBG0K4QVA5Y",
-    "parentId": "221013",
-    "ordinal": "1512443796920"
   },
   {
     "downloaded_video": false,
@@ -1615,7 +1522,7 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/Time-Management-System-Administrators-Working/dp/0596007833/ref=pd_cart_qp_2_5?_encoding=UTF8&pd_rd_i=0596007833&pd_rd_r=XA11FN531RNET7JQCQ0N&pd_rd_w=c7X3N&pd_rd_wg=NpB5d&psc=1&refRID=XA11FN531RNET7JQCQ0N",
     "parentId": "221013",
-    "ordinal": "1512436187967"
+    "ordinal": 1511543507
   },
   {
     "downloaded_video": false,
@@ -1651,10 +1558,11 @@
     "title": "<fill this in>",
     "url": "https://www.amazon.com/dp/B01LX21ISP/ref=psdc_3743561_t1_B00XELDPL8",
     "parentId": "221013",
-    "ordinal": "1512443038102"
+    "ordinal": 1512023515
   },
   {
     "downloaded_video": false,
+    "user_image": "https://n.nordstrommedia.com/ImageGallery/store/product/Zoom/2/_100017082.jpg?crop=pad&pad_color=FFF&format=jpeg&w=391&h=600",
     "created": 1512164766,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1682,24 +1590,6 @@
   },
   {
     "downloaded_video": false,
-    "created": 1512939606,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/AmazonBasics-53-005312-Portable-Photo-Studio/dp/B01GIL6EU4/ref=sr_1_5?ie=UTF8&qid=1512939496&sr=8-5&keywords=lighting+tent",
-    "parentId": "221013",
-    "ordinal": 1512939606
-  },
-  {
-    "downloaded_video": false,
-    "created": 1512940075,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Medi-Pak%C3%AF%C2%BF%C2%BD-Tape-Measure-Paper-Disposable/dp/B002C5CMN4/ref=cm_cr_arp_d_product_top?ie=UTF8",
-    "parentId": "221013",
-    "ordinal": 1512940075
-  },
-  {
-    "downloaded_video": false,
     "user_image": "https://images.containerstore.com/catalogimages/287537/10069266PremiumAcrylicPaperTraySm_12.jpg?width=1200&height=1200&align=center",
     "created": 1512951718,
     "id": "STOP_RELYING_ON_THIS",
@@ -1719,6 +1609,7 @@
   },
   {
     "downloaded_video": false,
+    "user_image": "https://images.containerstore.com/catalogimages/180185/720010PencilCupClear_x.jpg?width=1200&height=1200&align=center",
     "created": 1512952031,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1728,6 +1619,7 @@
   },
   {
     "downloaded_video": false,
+    "user_image": "https://images.containerstore.com/catalogimages/171102/TissueBox10053553_3_x.jpg?width=1200&height=1200&align=center",
     "created": 1512952202,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
@@ -1773,25 +1665,6 @@
     "url": "https://www.amazon.com/Julius-Studio-Photography-Backdrop-Background/dp/B015YHXHWQ/ref=sr_1_1?ie=UTF8&qid=1512935766&sr=8-1&keywords=white+photo+background",
     "parentId": "221013",
     "ordinal": 1512952625
-  },
-  {
-    "downloaded_video": false,
-    "created": 1512953873,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Scotch-Finish-Writeable-Inches-810K6/dp/B00006IF67/ref=sr_1_2?ie=UTF8&qid=1512953508&sr=8-2&keywords=scotchtape",
-    "parentId": "221013",
-    "ordinal": 1512953873
-  },
-  {
-    "downloaded_video": false,
-    "user_image": "https://images-na.ssl-images-amazon.com/images/I/61-ehbm36hL._SY450AA450_PIbundle-2,TopRight,0,0_AA450_SH20_.jpg",
-    "created": 1513013822,
-    "id": "STOP_RELYING_ON_THIS",
-    "title": "<fill this in>",
-    "url": "https://www.amazon.com/Sundown-Melatonin-Liquid-Cherry-Flavor/dp/B01IAICVZA/ref=sr_1_9_a_it?ie=UTF8&qid=1513013772&sr=8-9&keywords=melatonin%2Bsundown&th=1",
-    "parentId": "221013",
-    "ordinal": 1513013822
   },
   {
     "downloaded_video": false,
@@ -1901,48 +1774,391 @@
   },
   {
     "downloaded_video": false,
-    "created": 1514144397,
+    "created": 1514529224,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
-    "url": "https://www.amazon.com/gp/product/B001PNSSOQ/ref=ox_sc_act_title_1?smid=ATVPDKIKX0DER&psc=1",
+    "url": "https://www.amazon.com/Good-Cook-20466-Pastry-Natural/dp/B005PPYFGK/ref=sr_1_2?ie=UTF8&qid=1514529212&sr=8-2&keywords=good+cook+brush",
     "parentId": "221013",
-    "ordinal": 1514144397
+    "ordinal": 1514529224
   },
   {
     "downloaded_video": false,
-    "created": 1514194588,
+    "created": 1514710738,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
-    "url": "https://www.amazon.com/Oxford-Heavyweight-Ruled-Index-63500/dp/B00INBSU14/ref=sr_1_6?s=office-products&ie=UTF8&qid=1514194537&sr=1-6&keywords=index+cards",
+    "url": "https://www.amazon.com/Peplink-Balance-20-Dual-WAN-Router/dp/B0042210U6/ref=sr_1_4?ie=UTF8&qid=1514710480&sr=8-4&keywords=load+balance",
     "parentId": "221013",
-    "ordinal": 1514194588
+    "ordinal": 1514710738
   },
   {
     "downloaded_video": false,
-    "created": 1514259890,
+    "created": 1514711536,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
-    "url": "https://www.amazon.com/gp/product/B00006IDS1/ref=ox_sc_act_title_1?smid=ATVPDKIKX0DER&psc=1",
+    "url": "https://www.amazon.com/Cisco-Systems-Gigabit-Router-RV325K9NA/dp/B00HODK3N0/ref=pd_sim_147_1?_encoding=UTF8&pd_rd_i=B00HODK3N0&pd_rd_r=8QXHW1Q0GSMWN48MAYH7&pd_rd_w=TVNP5&pd_rd_wg=46kUu&psc=1&refRID=8QXHW1Q0GSMWN48MAYH7",
     "parentId": "221013",
-    "ordinal": 1514259890
+    "ordinal": 1514711536
   },
   {
     "downloaded_video": false,
-    "user_image": "https://images-na.ssl-images-amazon.com/images/I/51u-COSg-uL._SY450AA450_PIbundle-12,TopRight,0,0_AA450_SH20_.jpg",
-    "created": 1514259893,
+    "user_image": "https://images.containerstore.com/catalogimages/161086/HangerRibbedSuitNat10027738_x.jpg?width=1200&height=1200&align=center",
+    "created": 1514770912,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
-    "url": "https://www.amazon.com/gp/product/B013P2Z360/ref=ox_sc_act_title_3?smid=A1ERKQW9849CXC&psc=1",
+    "url": "https://www.containerstore.com/s/closet/hangers/view-all-hangers/basic-natural-wooden-hangers/123d?productId=10034341",
     "parentId": "221013",
-    "ordinal": 1514259893
+    "ordinal": 1514770912
   },
   {
     "downloaded_video": false,
-    "created": 1514259895,
+    "created": 1515004438,
     "id": "STOP_RELYING_ON_THIS",
     "title": "<fill this in>",
-    "url": "https://www.amazon.com/gp/product/B01BXYP4DE/ref=ox_sc_act_title_7?smid=ATVPDKIKX0DER&psc=1",
+    "url": "https://www.amazon.com/Falling-Upward-Spirituality-Halves-Life/dp/0470907754",
     "parentId": "221013",
-    "ordinal": 1514259895
+    "ordinal": 1515004438
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/41zmo-ka0-L._SX373_BO1,204,203,200_.jpg",
+    "created": 1515011877,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/SPIRE-handbook-software-development-organisations/dp/1874303037",
+    "parentId": "221013",
+    "ordinal": 1515011877
+  },
+  {
+    "downloaded_video": false,
+    "created": 1515014760,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Leave-Better-Found-Taylor-Jannsen/dp/099717692X/ref=tmm_pap_swatch_0?_encoding=UTF8&qid=&sr=",
+    "parentId": "221013",
+    "ordinal": 1515014760
+  },
+  {
+    "downloaded_video": false,
+    "created": 1515023817,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Org-Mode-Reference-Manual-Organize/dp/1906966087/ref=redir_mobile_desktop?_encoding=UTF8&dpID=51C1Vi%2BudLL&dpPl=1&keywords=org%20mode&pi=AC_SX236_SY340_QL65&qid=1514965127&ref=plSrch&ref_=mp_s_a_1_2&sr=8-2",
+    "parentId": "221013",
+    "ordinal": 1515023817
+  },
+  {
+    "downloaded_video": false,
+    "created": 1515121698,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Calvin-Klein-4-Pocket-Stretch-Sateen/dp/B0064D86CQ?th=1&psc=1",
+    "parentId": "221013",
+    "ordinal": 1515121698
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://ssli.ebayimg.com/images/g/yb4AAOSwrxdaRDW1/s-l1600.jpg",
+    "created": 1515440363,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.ebay.com/i/132460263535?chn=ps",
+    "parentId": "221013",
+    "ordinal": 1515440363
+  },
+  {
+    "downloaded_video": false,
+    "created": 1515709750,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Apple-IPhone-Lightning-Connector-iPhone/dp/B01M0GB8CC/ref=sr_1_1?ie=UTF8&qid=1515709017&sr=8-1&keywords=earpods+lightning",
+    "parentId": "221013",
+    "ordinal": 1515709750
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/71YAWrDWdBL._SL1500_.jpg",
+    "created": 1515783016,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Cadbury-Dairy-Milk-200g-box/dp/B003YUN3PM",
+    "parentId": "221013",
+    "ordinal": 1515783016
+  },
+  {
+    "downloaded_video": false,
+    "created": 1516082340,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Amazon-Services-Action-Andreas-Wittig/dp/1617292885/ref=sr_1_5?ie=UTF8&qid=1515996658&sr=8-5&keywords=aws+iam",
+    "parentId": "221013",
+    "ordinal": 1516082340
+  },
+  {
+    "downloaded_video": false,
+    "created": 1516227490,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Wwe-Wrestlemania-31-Blu-ray/dp/B01E76UQPG/ref=tmm_blu_swatch_0?_encoding=UTF8&qid=&sr=",
+    "parentId": "221013",
+    "ordinal": 1516227490
+  },
+  {
+    "downloaded_video": false,
+    "created": 1516602517,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Smiffys-Mens-Short-Black-5020570421758/dp/B00BBLDNS8/ref=sr_1_11?s=apparel&ie=UTF8&qid=1516602448&sr=1-11&nodeID=14194737011&psd=1&keywords=wig+male",
+    "parentId": "221013",
+    "ordinal": 1516602517
+  },
+  {
+    "downloaded_video": false,
+    "created": 1517028747,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Linux-Phrasebook-2nd-Developers-Library/dp/0321833880/ref=sr_1_1?ie=UTF8&qid=1517028661&sr=8-1&keywords=linux+phrasebook",
+    "parentId": "221013",
+    "ordinal": 1517028747
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/21KHdfWz9SL.jpg",
+    "created": 1518411481,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Volutrex-VOLUMIZER-effective-increase-STRENGTH/dp/B074XHXSX5/ref=pd_sim_121_6?_encoding=UTF8&pd_rd_i=B074XHXSX5&pd_rd_r=SNANX5N0GGWTKKPJG0BW&pd_rd_w=DtMaO&pd_rd_wg=VqDv5&psc=1&refRID=SNANX5N0GGWTKKPJG0BW",
+    "parentId": "221013",
+    "ordinal": 1518411481
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/719LmYL2G1L._SX522_.jpg",
+    "created": 1518567034,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Natural-Organic-Conditioner-Silicone-Treatment/dp/B01IAGDOG2",
+    "parentId": "221013",
+    "ordinal": 1518567034
+  },
+  {
+    "downloaded_video": false,
+    "created": 1518821333,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/3M-Keyboard-Platform-Installation-AKT65LE/dp/B001ASEZ2K/ref=sr_1_3?ie=UTF8&qid=1518821057&sr=8-3&keywords=tool%2Bfree%2Bkeyboard%2Btray&dpID=4126z1XDnLL&preST=_SX300_QL70_&dpSrc=srch&th=1",
+    "parentId": "221013",
+    "ordinal": 1518821333
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://www.mealsquares.com/uploads/2/6/1/2/26122767/4958299_orig.jpg",
+    "created": 1519424570,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.mealsquares.com/nutrition-facts.html",
+    "parentId": "221013",
+    "ordinal": 1519424570
+  },
+  {
+    "downloaded_video": false,
+    "created": 1519672086,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Freestyle2-Wireless-Ergonomic-Keyboard-Separation/dp/B00V6WWYN2/ref=sr_1_4?ie=UTF8&qid=1519671967&sr=8-4&keywords=kinesis+freestyle2+mac",
+    "parentId": "221013",
+    "ordinal": 1519672086
+  },
+  {
+    "downloaded_video": false,
+    "created": 1519954284,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Natures-Bounty-Absorbable-Softgels-Supplement/dp/B002Q16VVS/ref=sr_1_4_s_it?s=hpc&ie=UTF8&qid=1519954227&sr=1-4&keywords=calcium&dpID=51a2X820efL&preST=_SY300_QL70_&dpSrc=srch&th=1",
+    "parentId": "221013",
+    "ordinal": 1519954284
+  },
+  {
+    "downloaded_video": false,
+    "created": 1520054046,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/GE-Grounded-6-Outlet-Install-50759/dp/B0009HKEXM/ref=sr_1_4?ie=UTF8&qid=1520053997&sr=8-4&keywords=power+outlet+splitter",
+    "parentId": "221013",
+    "ordinal": 1520054046
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/81DuTo0lG8L._SL1500_.jpg",
+    "created": 1520371306,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/5ft-Indoor-Sink-Hose-Shower/dp/B01GQFA1V0/ref=sr_1_5?ie=UTF8&qid=1520054469&sr=8-5&keywords=sink+shower&dpID=51qqZ3nRoDL&preST=_SX300_QL70_&dpSrc=srch",
+    "parentId": "221013",
+    "ordinal": 1520371306
+  },
+  {
+    "downloaded_video": false,
+    "created": 1520371350,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Rinse-Ace-Sink-Faucet-Rinser/dp/B008N92YRW/ref=sr_1_2?ie=UTF8&qid=1520054787&sr=8-2&keywords=portable+shampoo+sprayer&dpID=41EoBdRWmlL&preST=_SY300_QL70_&dpSrc=srch",
+    "parentId": "221013",
+    "ordinal": 1520371350
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/81CeINFig3L._SL1500_.jpg",
+    "created": 1520371367,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/SmarterFresh-Sink-Sprayer-Rinser-Set/dp/B06XS16HTR/ref=pd_sbs_60_5?_encoding=UTF8&pd_rd_i=B06XS16HTR&pd_rd_r=3FH44PG97022Z7TN575S&pd_rd_w=eUAjL&pd_rd_wg=jKzYL&psc=1&refRID=3FH44PG97022Z7TN575S",
+    "parentId": "221013",
+    "ordinal": 1520371367
+  },
+  {
+    "downloaded_video": false,
+    "created": 1521394477,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Vastar-Mobile-Tripod-Adapter-Smartphone/dp/B071HPDCJ3/ref=dp_ob_title_wld",
+    "parentId": "221013",
+    "ordinal": 1521394477
+  },
+  {
+    "downloaded_video": false,
+    "created": 1522271268,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Refactoring-Improving-Existing-Addison-Wesley-Technology/dp/0134757599/ref=sr_1_1?ie=UTF8&qid=1522271037&sr=8-1&keywords=refactoring+2nd+edition",
+    "parentId": "221013",
+    "ordinal": 1522271268
+  },
+  {
+    "downloaded_video": false,
+    "created": 1522440794,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/gp/product/B01BWMYFN2/ref=ask_ql_qh_dp_hza?th=1",
+    "parentId": "221013",
+    "ordinal": 1522440794
+  },
+  {
+    "downloaded_video": false,
+    "created": 1522703457,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Mac-OS-Internals-Systems-Approach/dp/0321278542/ref=sr_1_1?ie=UTF8&qid=1522703369&sr=8-1&keywords=osx+internals&dpID=51kHOlIzp8L&preST=_SX218_BO1,204,203,200_QL40_&dpSrc=srch",
+    "parentId": "221013",
+    "ordinal": 1522703457
+  },
+  {
+    "downloaded_video": false,
+    "created": 1522703847,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Mac-OS-iOS-Internals-Apples/dp/1118057651",
+    "parentId": "221013",
+    "ordinal": 1522703847
+  },
+  {
+    "downloaded_video": false,
+    "created": 1523413387,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Google-Apps-Script-Application-Development/dp/1491946180/ref=dp_ob_title_bk",
+    "parentId": "221013",
+    "ordinal": 1523413387
+  },
+  {
+    "downloaded_video": false,
+    "created": 1523592132,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Illustrated-History-Football-David-Squires/dp/1780895585/ref=sr_1_1?ie=UTF8&qid=1523591972&sr=8-1&keywords=The+Illustrated+History+of+Football+By+David+Squires",
+    "parentId": "221013",
+    "ordinal": 1523592132
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/81Yk5pt%2B6UL._SL1500_.jpg",
+    "created": 1523682737,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Muscle-Stiffness-Relieve-Relief-Therapy/dp/B07559FYX7/ref=sr_1_1_a_it?ie=UTF8&qid=1523675475&sr=8-1&keywords=shockwave+therapy+machine",
+    "parentId": "221013",
+    "ordinal": 1523682737
+  },
+  {
+    "downloaded_video": false,
+    "created": 1524096252,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Dogs-Have-ADHD-Kathy-Hoopmann/dp/1843106515/ref=sr_1_1?ie=UTF8&qid=1524096241&sr=8-1&keywords=all+dogs+have+adhd&dpID=51aQZi1iSYL&preST=_SX218_BO1,204,203,200_QL40_&dpSrc=srch",
+    "parentId": "221013",
+    "ordinal": 1524096252
+  },
+  {
+    "downloaded_video": false,
+    "created": 1525111599,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Apple-EarPods-Lightning-Connector-iPhone/dp/B01M0GB8CC/ref=sr_1_3?ie=UTF8&qid=1525111574&sr=8-3&keywords=earpod+lightning&dpID=31I4zOzaiXL&preST=_SY300_QL70_&dpSrc=srch",
+    "parentId": "221013",
+    "ordinal": 1525111599
+  },
+  {
+    "downloaded_video": false,
+    "user_image": "https://images-na.ssl-images-amazon.com/images/I/51KXSIMMBbL._SX387_BO1,204,203,200_.jpg",
+    "created": 1525286071,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.co.uk/League-Football-Men-Who-Made/dp/0002182424/ref=pd_cp_14_4?_encoding=UTF8&psc=1&refRID=GBAJ0ERWMM5NT3P4MJ3K",
+    "parentId": "221013",
+    "ordinal": 1525286071
+  },
+  {
+    "downloaded_video": false,
+    "created": 1525293901,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Vagrant-Running-Virtualized-Development-Environments/dp/1449335837/ref=sr_1_2?ie=UTF8&qid=1525293888&sr=8-2&keywords=vagrant&dpID=51q1WOJhwAL&preST=_SX218_BO1,204,203,200_QL40_&dpSrc=srch",
+    "parentId": "221013",
+    "ordinal": 1525293901
+  },
+  {
+    "downloaded_video": false,
+    "created": 1525300909,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Kings-English-Modern-Penguin-Classics/dp/0141194316",
+    "parentId": "221013",
+    "ordinal": 1525300909
+  },
+  {
+    "downloaded_video": false,
+    "created": 1526946750,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Birds-Have-Anxiety-Kathy-Hoopmann/dp/1785921827/ref=pd_sim_14_1?_encoding=UTF8&pd_rd_i=1785921827&pd_rd_r=M2395VR4N80T8WDAKFK0&pd_rd_w=xhupI&pd_rd_wg=tOxCE&psc=1&refRID=M2395VR4N80T8WDAKFK0",
+    "parentId": "221013",
+    "ordinal": 1526946750
+  },
+  {
+    "downloaded_video": false,
+    "created": 1527385930,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/101-Things-Learned%C2%AE-Engineering-School/dp/1524761966/ref=sr_1_4?ie=UTF8&qid=1521823014&sr=8-4&keywords=101+things+i+learned",
+    "parentId": "221013",
+    "ordinal": 1527385930
+  },
+  {
+    "downloaded_video": false,
+    "created": 1527702769,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Practical-Monitoring-Effective-Strategies-World/dp/1491957352/ref=pd_sbs_14_13?_encoding=UTF8&pd_rd_i=1491957352&pd_rd_r=MN87V02D1TJ4G0ABJEWJ&pd_rd_w=MrSZa&pd_rd_wg=SL82w&psc=1&refRID=MN87V02D1TJ4G0ABJEWJ",
+    "parentId": "221013",
+    "ordinal": 1527702769
   }
 ]

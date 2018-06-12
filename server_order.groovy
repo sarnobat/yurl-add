@@ -27,11 +27,6 @@ import org.jvnet.hk2.annotations.Optional;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.json.JSONConfiguration;
 
 // TODO: Use javax.json.* for immutability
 public class YurlOrder {
@@ -109,7 +104,7 @@ public class YurlOrder {
 			return Response
 					.ok()
 					.header("Access-Control-Allow-Origin", "*")
-					.entity(new JSONObject()).type("application/json")
+					.entity(new JSONObject().toString()).type("application/json")
 					.build();
 		}
 
@@ -168,45 +163,7 @@ public class YurlOrder {
 		// TODO: make this map immutable
 		static JSONObject execute(String iCypherQuery,
 				Map<String, Object> iParams, boolean doLogging, String... iCommentPrefix) {
-			String commentPrefix = iCommentPrefix.length > 0 ? iCommentPrefix[0] + " " : "";
-			if (doLogging) {
-				System.out.println(commentPrefix + " - \t" + iCypherQuery);
-				System.out.println(commentPrefix + "- \tparams - " + iParams);
-			}
-			ClientConfig clientConfig = new DefaultClientConfig();
-			clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING,
-					Boolean.TRUE);
-	
-			// POST {} to the node entry point URI
-			ClientResponse theResponse = Client.create(clientConfig).resource(
-					CYPHER_URI)
-					.accept(MediaType.APPLICATION_JSON)
-					.type(MediaType.APPLICATION_JSON).entity("{ }")
-					.post(ClientResponse.class, ImmutableMap
-							.<String, Object> of("query", iCypherQuery, "params",
-									Preconditions.checkNotNull(iParams)));
-			if (theResponse.getStatus() != 200) {
-				System.out.println(commentPrefix + "FAILED:\n\t" + iCypherQuery + "\n\tparams: " + iParams);
-				try {
-					throw new RuntimeException(IOUtils.toString(theResponse.getEntityInputStream(), "UTF-8"));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			String theNeo4jResponse ;
-			try {
-				// Do not inline this. We need to close the stream after
-				// copying
-				theNeo4jResponse = IOUtils.toString(theResponse.getEntityInputStream(), "UTF-8");
-				theResponse.getEntityInputStream().close();
-				theResponse.close();
-				if (doLogging) {
-					System.out.println(commentPrefix + "end");
-				}
-				return new JSONObject(theNeo4jResponse);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			return new JSONObject();
 		}
 	}
 

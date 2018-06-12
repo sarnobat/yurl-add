@@ -1,0 +1,3440 @@
+[
+  {
+    "downloaded_video": false,
+    "created": 1379826052799,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Mastering-Unix-Shell-Scripting-Administrators/dp/0470183012/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=31M1KSE6C603&amp;coliid=I3I4FXFUA3U2SR",
+    "parentId": "38045",
+    "ordinal": 1379826052799
+  },
+  {
+    "downloaded_video": false,
+    "created": 1379826053094,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Shell-Scripting-Expert-Recipes-Linux/dp/1118024486/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=31M1KSE6C603&amp;coliid=I2AZIHT704SDR2",
+    "parentId": "38045",
+    "ordinal": 1379826053094
+  },
+  {
+    "downloaded_video": false,
+    "created": 1383070945797,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/In-Memory-Data-Management-Technology-Applications/dp/3642295746",
+    "parentId": "38045",
+    "ordinal": 1383070945797
+  },
+  {
+    "downloaded_video": false,
+    "created": 1383178861612,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Software-Architecture-Recovery-Matching-Techniques/dp/3843356971",
+    "parentId": "38045",
+    "ordinal": 1383178861612
+  },
+  {
+    "downloaded_video": false,
+    "created": 1383589393623,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-Handbook-Human-Machine-Interaction-Guy/dp/0754675807/ref=sr_1_1?ie=UTF8&qid=1383333153&sr=8-1&keywords=Human Machine Interaction",
+    "parentId": "38045",
+    "ordinal": 1383589393623
+  },
+  {
+    "downloaded_video": false,
+    "created": 1384048536984,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/TCP-Illustrated-Vol-Addison-Wesley-Professional/dp/0201633469/ref=pd_sim_b_5",
+    "parentId": "38045",
+    "ordinal": 1384048536984
+  },
+  {
+    "downloaded_video": false,
+    "created": 1384287963822,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Cloud-Computing-Concepts-Technology-Architecture/dp/0133387526/ref=sr_1_1_title_0_main?ie=UTF8&qid=1383795223&sr=8-1&keywords=trends in computing in books",
+    "parentId": "38045",
+    "ordinal": 1384287963822
+  },
+  {
+    "downloaded_video": false,
+    "created": 1384972781805,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Code-Language-Computer-Hardware-Software/dp/0735611319/ref=pd_sim_b_2",
+    "parentId": "38045",
+    "ordinal": 1384972781805
+  },
+  {
+    "downloaded_video": false,
+    "created": 1384972784507,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Coders-Work-Reflections-Craft-Programming/dp/1430219483/ref=pd_sim_b_1",
+    "parentId": "38045",
+    "ordinal": 1384972784507
+  },
+  {
+    "downloaded_video": false,
+    "created": 1388492079860,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.co.uk/Careers-Computing-Information-Technology-Kogan/dp/0749432004",
+    "parentId": "38045",
+    "ordinal": 1388492079860
+  },
+  {
+    "downloaded_video": false,
+    "created": 1389114643346,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0321753887/ref=s9_qpp_gw_p14_d99_i1?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=center-7&pf_rd_r=0EH9AV23FNWAV2Y9ESNP&pf_rd_t=101&pf_rd_p=1688200302&pf_rd_i=507846",
+    "parentId": "38045",
+    "ordinal": 1389114643346
+  },
+  {
+    "downloaded_video": false,
+    "created": 1389124028009,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Understanding-Open-Source-Software-Licensing/dp/0596005814/ref=sr_1_1?s=books&ie=UTF8&qid=1389122282&sr=1-1&keywords=gpl",
+    "parentId": "38045",
+    "ordinal": 1389124028009
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391129499134,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Power-Tools-Ferguson-Smart/dp/0596527934/ref=sr_1_5?s=books&ie=UTF8&qid=1391122316&sr=1-5&keywords=oreilly power tools",
+    "parentId": "38045",
+    "ordinal": 1391129499134
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391129500308,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Windows-Developer-Power-Tools-Turbocharge/dp/0596527543/ref=sr_1_7?s=books&ie=UTF8&qid=1391122316&sr=1-7&keywords=oreilly power tools",
+    "parentId": "38045",
+    "ordinal": 1391129500308
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391459490365,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-Book-Trees-Visualizing-Knowledge/dp/1616892188/ref=pd_luc_mrairnr_01_01_t_lh?ie=UTF8&psc=1",
+    "parentId": "38045",
+    "ordinal": 1391459490365
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391459494608,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/1568989369/ref=s9_simh_co_p14_d0_i2?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=left-1&pf_rd_r=0R0BPHT5KQE0KTG9T9WH&pf_rd_t=3201&pf_rd_p=1280661682&pf_rd_i=typ01",
+    "parentId": "38045",
+    "ordinal": 1391459494608
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391459512391,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Mac-Hacks-Tools-unlocking-power/dp/1449325580/ref=sr_1_10?ie=UTF8&qid=1391459215&sr=8-10&keywords=oreilly hacks",
+    "parentId": "38045",
+    "ordinal": 1391459512391
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391459530585,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Home-Theater-Hacks-Industrial-Strength-Tools/dp/0596007043/ref=sr_1_19?ie=UTF8&qid=1391459273&sr=8-19&keywords=oreilly hacks",
+    "parentId": "38045",
+    "ordinal": 1391459530585
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391459564202,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Big-Book-Apple-Hacks-Unlocking/dp/0596529821/ref=sr_1_49?ie=UTF8&qid=1391459330&sr=8-49&keywords=oreilly hacks",
+    "parentId": "38045",
+    "ordinal": 1391459564202
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391459589581,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Digital-Photography-Hacks-Industrial-Strength-Tools/dp/0596006667/ref=sr_1_78?ie=UTF8&qid=1391459352&sr=8-78&keywords=oreilly hacks",
+    "parentId": "38045",
+    "ordinal": 1391459589581
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391459599322,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Iphone-Hacks-Pushing-Beyond-Limits/dp/0596516649/ref=tmm_pap_title_0?ie=UTF8&qid=1391459375&sr=8-81",
+    "parentId": "38045",
+    "ordinal": 1391459599322
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391545879415,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0596008473/sr=8-30/qid=1391459273/ref=olp_product_details?ie=UTF8&me=&qid=1391459273&seller=&sr=8-30",
+    "parentId": "38045",
+    "ordinal": 1391545879415
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391812337603,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0201310090?ie=UTF8&tag=thcodu02-20&linkCode=as2&camp=1789&creative=9325&creativeASIN=0201310090",
+    "parentId": "38045",
+    "ordinal": 1391812337603
+  },
+  {
+    "downloaded_video": false,
+    "created": 1391820224293,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Access-Hacks-Tips-Tools-Wrangling/dp/0596009240/ref=sr_1_23?ie=UTF8&qid=1391459273&sr=8-23&keywords=oreilly hacks",
+    "parentId": "38045",
+    "ordinal": 1391820224293
+  },
+  {
+    "downloaded_video": false,
+    "created": 1394486142451,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Inside-Object-Model-Stanley-Lippman/dp/0201834545/ref=sr_1_1?ie=UTF8&qid=1394479820&sr=8-1&keywords=inside the c++ object model",
+    "parentId": "38045",
+    "ordinal": 1394486142451
+  },
+  {
+    "downloaded_video": false,
+    "created": 1394494948373,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Code-Language-Computer-Hardware-Software/dp/0735611319/ref=tmm_pap_title_0",
+    "parentId": "38045",
+    "ordinal": 1394494948373
+  },
+  {
+    "downloaded_video": false,
+    "created": 1394573944654,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/dp/0321413091/ref=rdr_ext_tmb",
+    "parentId": "38045",
+    "ordinal": 1394573944654
+  },
+  {
+    "downloaded_video": false,
+    "created": 1395091001631,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/exec/obidos/ASIN/0077109082/wwwllosengcom-20/ref=nosim",
+    "parentId": "38045",
+    "ordinal": 1395091001631
+  },
+  {
+    "downloaded_video": false,
+    "created": 1395181619388,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/aw/d/B007NZU848",
+    "parentId": "38045",
+    "ordinal": 1395181619388
+  },
+  {
+    "downloaded_video": false,
+    "created": 1395181624451,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/aw/d/0195121236/ref=redir_mdp_mobile?qid=1140798857&redirect=true&ref_=pd_bbs_1&sr=8-1",
+    "parentId": "38045",
+    "ordinal": 1395181624451
+  },
+  {
+    "downloaded_video": false,
+    "created": 1396316536067,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Software-Pioneers-Manfred-Broy/dp/3540430814",
+    "parentId": "38045",
+    "ordinal": 1396316536067
+  },
+  {
+    "downloaded_video": false,
+    "created": 1396476947138,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.pearsoned.co.uk/bookshop/subject.asp?item=136",
+    "parentId": "38045",
+    "ordinal": 1396476947138
+  },
+  {
+    "downloaded_video": false,
+    "created": 1396476956818,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.pearsonhighered.com/educator/series/AddisonWesley-Professional-Computing-Series/10134.page",
+    "parentId": "38045",
+    "ordinal": 1396476956818
+  },
+  {
+    "downloaded_video": false,
+    "created": 1396476956853,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.pearsoned.co.uk/bookshop/subject.asp?item=6900",
+    "parentId": "38045",
+    "ordinal": 1396476956853
+  },
+  {
+    "downloaded_video": false,
+    "created": 1396476958905,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://martinfowler.com/books/",
+    "parentId": "38045",
+    "ordinal": 1396476958905
+  },
+  {
+    "downloaded_video": false,
+    "created": 1398058497040,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Apple-Pro-Training-Logic-Express/dp/0321502922/ref=la_B001JSJIXC_1_3?s=books&ie=UTF8&qid=1398057680&sr=1-3",
+    "parentId": "38045",
+    "ordinal": 1398058497040
+  },
+  {
+    "downloaded_video": false,
+    "created": 1399611294833,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Design-Rules-Vol-Power-Modularity/dp/0262024667",
+    "parentId": "38045",
+    "ordinal": 1399611294833
+  },
+  {
+    "downloaded_video": false,
+    "created": 1401130228927,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/aw/d/1565921127/ref=mp_s_a_1_4?qid=1400887272&sr=1-4",
+    "parentId": "38045",
+    "ordinal": 1401130228927
+  },
+  {
+    "downloaded_video": false,
+    "created": 1405105554224,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/aw/d/0596001789/ref=redir_mdp_mobile?ref_=cm_sw_r_udp_awd_MyzTtb0ZW3TAW",
+    "parentId": "38045",
+    "ordinal": 1405105554224
+  },
+  {
+    "downloaded_video": false,
+    "created": 1405983922908,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Client-Server-Web-Apps-JavaScript-Java/dp/1449369332/ref=sr_1_4?ie=UTF8&qid=1405964425&sr=8-4&keywords=client server architecture",
+    "parentId": "38045",
+    "ordinal": 1405983922908
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015211758,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-KML-Handbook-Geographic-Visualization/dp/0321525590/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=INWW9P1WHUKEK",
+    "parentId": "38045",
+    "ordinal": 1407015211758
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015226713,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Handbook-Source-Tools-Sandeep-Koranne/dp/144197718X/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IJMC8VIFW8KK4",
+    "parentId": "38045",
+    "ordinal": 1407015226713
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015231294,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Supercharged-JavaScript-Graphics-canvas-jQuery/dp/1449393632/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IX4BO70J46X02",
+    "parentId": "38045",
+    "ordinal": 1407015231294
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015240577,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/REST-Practice-Hypermedia-Systems-Architecture/dp/0596805829/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IHB3ITGUZIAHN",
+    "parentId": "38045",
+    "ordinal": 1407015240577
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015242834,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Refactoring-HTML-Improving-Existing-Applications/dp/0321503635/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I34VHWEPQ2K7T7",
+    "parentId": "38045",
+    "ordinal": 1407015242834
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015252891,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Data-Objects-David-Jordan/dp/0596002769/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I15QA59AZKXXK0",
+    "parentId": "38045",
+    "ordinal": 1407015252891
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015255228,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/RESTful-Web-Services-Cookbook-Scalability/dp/0596801688/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I10JZ2XGA3G9O0",
+    "parentId": "38045",
+    "ordinal": 1407015255228
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015258348,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/HTTP-The-Definitive-Guide-Guides/dp/1565925092/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IT3KYZWAHP1A1",
+    "parentId": "38045",
+    "ordinal": 1407015258348
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015265692,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Cloud-Computing-A-Practical-Approach/dp/0071626948/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I39XG979OOB54B",
+    "parentId": "38045",
+    "ordinal": 1407015265692
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015268061,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Implementation-Patterns-Kent-Beck/dp/0321413091/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I241POOZALY6JS",
+    "parentId": "38045",
+    "ordinal": 1407015268061
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015270213,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java¿-Puzzlers-Traps-Pitfalls-Corner/dp/032133678X/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2C7OFDCCG2CKH",
+    "parentId": "38045",
+    "ordinal": 1407015270213
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015272188,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Restful-Web-Services-Leonard-Richardson/dp/0596529260/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1BW86AX8R6S1D",
+    "parentId": "38045",
+    "ordinal": 1407015272188
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015274638,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Digital-Library-Kaufmann-Multimedia-Information/dp/0123748577/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I26M5F4GY6HXK",
+    "parentId": "38045",
+    "ordinal": 1407015274638
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015276729,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Understanding-Libraries-Kaufmann-Multimedia-Information/dp/1558609245/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I30EYCMDLI1STL",
+    "parentId": "38045",
+    "ordinal": 1407015276729
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015279405,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Would-Move-Mount-Microsofts-Puzzle/dp/0316919160/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3ERWTB77C4NIZ",
+    "parentId": "38045",
+    "ordinal": 1407015279405
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015280123,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0316919160/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3ERWTB77C4NIZ&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015280123
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015284874,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Behind-Cloud-Salesforce-com-Billion-Dollar-Company/dp/0470521163/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I9OTG627EPW3S",
+    "parentId": "38045",
+    "ordinal": 1407015284874
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015287627,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Cloud-Computing-Web-Based-Applications-Collaborate/dp/0789738031/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=ICJA01VLNE7LY",
+    "parentId": "38045",
+    "ordinal": 1407015287627
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015295130,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Data-Structures-Algorithms-Java-Edition/dp/0672324539/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I7CQ7Q3HPCEP2",
+    "parentId": "38045",
+    "ordinal": 1407015295130
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015297657,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0072970545/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1270ZS7CVXTV5&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015297657
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015312088,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0789723107/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I260XWONPJHEJT&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015312088
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015314322,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Rethinking-Maps-Frontiers-Cartographic-Routledge/dp/0415461529/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I13TJJ3JUMBO2L",
+    "parentId": "38045",
+    "ordinal": 1407015314322
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015316257,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Best-Iphone-Apps-Discriminating-Downloaders/dp/059680427X/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3F7DVUWE7PK6Z",
+    "parentId": "38045",
+    "ordinal": 1407015316257
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015316775,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/059680427X/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3F7DVUWE7PK6Z&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015316775
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015319116,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Google-Apps-Hacks-Philipp-Lenssen/dp/059651588X/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=ICL7J0C6LQ5X0",
+    "parentId": "38045",
+    "ordinal": 1407015319116
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015321559,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/IRC-Hacks-Paul-Mutton/dp/059600687X/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1CKMREWJIUCG6",
+    "parentId": "38045",
+    "ordinal": 1407015321559
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015326643,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Hadoop-Definitive-Guide-Tom-White/dp/0596521979/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I15XCN6EZOC0I4",
+    "parentId": "38045",
+    "ordinal": 1407015326643
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015327256,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0596521979/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I15XCN6EZOC0I4&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015327256
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015332056,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Pro-Web-2-0-Mashups-Development/dp/159059858X/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3VO20AM5J3YYQ",
+    "parentId": "38045",
+    "ordinal": 1407015332056
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015334594,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Virtualization-Desktop-Enterprise-Books-Professionals/dp/1590594959/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3LH6VRN3O1KVW",
+    "parentId": "38045",
+    "ordinal": 1407015334594
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015335859,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/1590594959/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3LH6VRN3O1KVW&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015335859
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015338175,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-DAM-Book-Management-Photographers/dp/0596523572/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I13IREBSMYR4V0",
+    "parentId": "38045",
+    "ordinal": 1407015338175
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015345511,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Mediawiki-Wikipedia-Beyond-Daniel-Barrett/dp/0596519796/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2NHB2AFZ1RBWS",
+    "parentId": "38045",
+    "ordinal": 1407015345511
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015347871,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/MediaWiki-Skins-Design-Designing-attractive/dp/1847195202/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I30YD4FD1MPJ01",
+    "parentId": "38045",
+    "ordinal": 1407015347871
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015350193,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Wikipatterns-Stewart-Mader/dp/0470223626/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IR8F6K72K5MXM",
+    "parentId": "38045",
+    "ordinal": 1407015350193
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015352607,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Ambient-Findability-What-Changes-Become/dp/0596007655/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=ISYA905LVD38",
+    "parentId": "38045",
+    "ordinal": 1407015352607
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015355025,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Digital-Video-Hacks-Shooting-OReillys/dp/0596009461/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2WMMUAOK4VKN7",
+    "parentId": "38045",
+    "ordinal": 1407015355025
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015357101,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0596009461/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2WMMUAOK4VKN7&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015357101
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015359650,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Fixing-Windows-Annoyances-David-Karp/dp/0596100531/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IZ1O2J0THFJBN",
+    "parentId": "38045",
+    "ordinal": 1407015359650
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015361022,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0596100531/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IZ1O2J0THFJBN&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015361022
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015363885,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Microsoft®-Windows®-Inside-Edition-Bpg-Inside/dp/073562044X/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2S9UT33P2L68R",
+    "parentId": "38045",
+    "ordinal": 1407015363885
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015369255,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Web-Application-Architecture-Principles-Protocols/dp/0471486566/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2AUGMJG5U42UA",
+    "parentId": "38045",
+    "ordinal": 1407015369255
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015369934,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0471486566/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2AUGMJG5U42UA&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015369934
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015372350,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Microsoft-VBScript-Step-Ed-Wilson/dp/0735622973/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I22CDFHB24CJTV",
+    "parentId": "38045",
+    "ordinal": 1407015372350
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015373009,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0735622973/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I22CDFHB24CJTV&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015373009
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015376258,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Installing-Configuring-Administering-Microsoft-Professional/dp/0072258365/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I36JDYLYZZU3W7",
+    "parentId": "38045",
+    "ordinal": 1407015376258
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015377499,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0072258365/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I36JDYLYZZU3W7&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015377499
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015382294,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Essential-PowerShell-Holger-Schwichtenberg/dp/0672329662/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IHJ97DN1HIGI4",
+    "parentId": "38045",
+    "ordinal": 1407015382294
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015384913,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Windows-XP-Hacks-Second-Edition/dp/0596009186/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2LASHNOJC142G",
+    "parentId": "38045",
+    "ordinal": 1407015384913
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015387078,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Mastering-Windows-Registry-Peter-Hipson/dp/0782129870/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2K7OBL00T48U7",
+    "parentId": "38045",
+    "ordinal": 1407015387078
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015387722,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0782129870/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2K7OBL00T48U7&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015387722
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015390232,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Microsoft®-Windows®-Command-Line-Administrators-Consultant/dp/0735620385/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IYM7U39UFW4XP",
+    "parentId": "38045",
+    "ordinal": 1407015390232
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015391399,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0735620385/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IYM7U39UFW4XP&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015391399
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015394611,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Monad-AKA-PowerShell-Introducing-Language/dp/0596100094/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=ICBI7LB0QM0SW",
+    "parentId": "38045",
+    "ordinal": 1407015394611
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015396862,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Windows-Powershell-Action-Bruce-Payette/dp/1932394907/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1KMUP8063LANM",
+    "parentId": "38045",
+    "ordinal": 1407015396862
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015397452,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/1932394907/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1KMUP8063LANM&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015397452
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015399622,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Windows-Powershell-Cookbook-Exchange-2007/dp/0596528493/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IMOUCP1RHEX12",
+    "parentId": "38045",
+    "ordinal": 1407015399622
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015400727,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0596528493/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IMOUCP1RHEX12&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015400727
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015414584,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/1001-Incredible-Things-Do-Internet/dp/0446678813/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3QTKDRWUC24VF",
+    "parentId": "38045",
+    "ordinal": 1407015414584
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015422922,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Designing-Web-Standards-2nd-Edition/dp/0321385551/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I4EYUGUUZ2BPS",
+    "parentId": "38045",
+    "ordinal": 1407015422922
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015423614,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0321385551/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I4EYUGUUZ2BPS&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015423614
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015426367,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Hacking-The-Art-Exploitation-Edition/dp/1593271441/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2TWTAF8D0LMLQ",
+    "parentId": "38045",
+    "ordinal": 1407015426367
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015428459,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Upgrade-Your-Life-Lifehacker-Working/dp/0470238364/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IPV7OUZNQGYIG",
+    "parentId": "38045",
+    "ordinal": 1407015428459
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015429031,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0470238364/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IPV7OUZNQGYIG&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015429031
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015431201,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Business-Metadata-Capturing-Enterprise-Knowledge/dp/0123737265/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3PVTDOP8XB7DQ",
+    "parentId": "38045",
+    "ordinal": 1407015431201
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015433414,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Blogs-Wikis-MySpace-More-Everything/dp/155652756X/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3FVHBOSDX1XP1",
+    "parentId": "38045",
+    "ordinal": 1407015433414
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015435617,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Greasemonkey-Hacks-Tools-Remixing-Firefox/dp/0596101651/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IF46UWUQ56QMZ",
+    "parentId": "38045",
+    "ordinal": 1407015435617
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015437743,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-CSS-Anthology-Essential-Tricks/dp/097584198X/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2EM10ZOJ0XJU",
+    "parentId": "38045",
+    "ordinal": 1407015437743
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015439009,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/097584198X/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2EM10ZOJ0XJU&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015439009
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015441674,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Power-Tools-Ferguson-Smart/dp/0596527934/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3H10GKM27WYAF",
+    "parentId": "38045",
+    "ordinal": 1407015441674
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015443916,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Wikipedia-Missing-Manual-John-Broughton/dp/0596515162/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IZSJ37QOR3KMB",
+    "parentId": "38045",
+    "ordinal": 1407015443916
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015446300,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/JavaServer-Faces-Hans-Bergsten/dp/0596005393/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3NIA4PWBEQWZW",
+    "parentId": "38045",
+    "ordinal": 1407015446300
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015450957,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/XSLT-1-0-Pocket-Reference-OReilly/dp/0596100086/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I25B5FXDHV51VS",
+    "parentId": "38045",
+    "ordinal": 1407015450957
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015455325,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Excel-Hacks-Tools-Streamlining-Spreadsheets/dp/0596528345/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I23NFSCA8BJKZ5",
+    "parentId": "38045",
+    "ordinal": 1407015455325
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015459829,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Flickr-Hacks-Sharing-Photos-Online/dp/0596102453/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=ITJJJYRNTOL9Z",
+    "parentId": "38045",
+    "ordinal": 1407015459829
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015461998,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Yahoo-Hacks-Tools-Living-Frontier/dp/0596009453/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I19287OGYPR8CZ",
+    "parentId": "38045",
+    "ordinal": 1407015461998
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015464242,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Computer-Privacy-Annoyances-Dan-Tynan/dp/0596007752/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I79LUGA9GC837",
+    "parentId": "38045",
+    "ordinal": 1407015464242
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015469011,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/PDF-Hacks-Industrial-Strength-Tips-Tools/dp/0596006551/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I37FRP6Z8TFENG",
+    "parentId": "38045",
+    "ordinal": 1407015469011
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015471321,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/XML-Hacks-Industrial-Strength-Tips-Tools/dp/0596007116/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3LJ9V0YM1OA1",
+    "parentId": "38045",
+    "ordinal": 1407015471321
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015473552,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Skype-Hacks-Tools-Innovative-Service/dp/0596101899/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I34317WB48WWD7",
+    "parentId": "38045",
+    "ordinal": 1407015473552
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015476541,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Smart-Home-Hacks-Tools-Automating/dp/0596007221/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3SDLIN54KK7WO",
+    "parentId": "38045",
+    "ordinal": 1407015476541
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015479314,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/PC-Hacks-Industrial-Strength-Tips-Tools/dp/0596007485/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3B7229ACG1KHZ",
+    "parentId": "38045",
+    "ordinal": 1407015479314
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015482138,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Digital-Photography-Hacks-Industrial-Strength-Tools/dp/0596006667/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IYAO14YE3HTMC",
+    "parentId": "38045",
+    "ordinal": 1407015482138
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015485007,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Firefox-Hacks-Tools-Next-Generation-Browsing/dp/0596009283/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2R6JHCJ2QLZHK",
+    "parentId": "38045",
+    "ordinal": 1407015485007
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015487198,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Flash-Hacks-Industrial-Strength-Tips-Tools/dp/0596006454/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IQXN07G6HGKRT",
+    "parentId": "38045",
+    "ordinal": 1407015487198
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015489647,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/PayPal-Hacks-Shannon-Sofield/dp/0596007515/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3L9FZM5GWSMYK",
+    "parentId": "38045",
+    "ordinal": 1407015489647
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015491713,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Mining-Amazon-Web-Services-Applications/dp/0782143075/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I25XVOZBUEFC15",
+    "parentId": "38045",
+    "ordinal": 1407015491713
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015492279,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0782143075/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I25XVOZBUEFC15&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015492279
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015494716,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Amazon-Hacks-Industrial-Strength-Tips-Tools/dp/0596005423/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1L9ANC95TSJJO",
+    "parentId": "38045",
+    "ordinal": 1407015494716
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015497063,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Word-Hacks-Tips-Tools-Taming/dp/0596004931/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I5LPHG3SSRLZQ",
+    "parentId": "38045",
+    "ordinal": 1407015497063
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015499401,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Perl-Hacks-Programming-Debugging-Surviving/dp/0596526741/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I11CXK31U543RX",
+    "parentId": "38045",
+    "ordinal": 1407015499401
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015501828,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/PHP-Hacks-Creating-Dynamic-Websites/dp/0596101392/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3L1Z9JW45JDE4",
+    "parentId": "38045",
+    "ordinal": 1407015501828
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015503947,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Windows-XP-Cookbook-Robbie-Allen/dp/0596007256/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1ROVLQMILV9RN",
+    "parentId": "38045",
+    "ordinal": 1407015503947
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015506467,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/XSLT-Cookbook-Solutions-Examples-Developers/dp/0596009747/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1QTMB39T47QK3",
+    "parentId": "38045",
+    "ordinal": 1407015506467
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015509016,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Access-Data-Analysis-Cookbook-Bluttman/dp/0596101228/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2BN0KKN72IO2B",
+    "parentId": "38045",
+    "ordinal": 1407015509016
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015511219,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Apache-Cookbook-Solutions-Examples-Administrators/dp/0596529945/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I13UDQOCVZY5IQ",
+    "parentId": "38045",
+    "ordinal": 1407015511219
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015518789,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Perl-Cookbook-Tom-Christiansen/dp/B00006AVQQ/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1LQ58SL3XQRKR",
+    "parentId": "38045",
+    "ordinal": 1407015518789
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015519343,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/B00006AVQQ/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1LQ58SL3XQRKR&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015519343
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015536153,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Cookbook-Second-Edition-Darwin/dp/0596007019/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2H8PKRWKNCEYW",
+    "parentId": "38045",
+    "ordinal": 1407015536153
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015538741,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/159059441X/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3P9UL2O6PKFHM&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015538741
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015540836,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Python-Essential-Reference-3rd-Edition/dp/0672328623/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1JPA10YXQDC6P",
+    "parentId": "38045",
+    "ordinal": 1407015540836
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015541439,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0672328623/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1JPA10YXQDC6P&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015541439
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015543980,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Oracle-SQL-Developer-Handbook-Press/dp/0071484744/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2ZJL8GHDE9NYJ",
+    "parentId": "38045",
+    "ordinal": 1407015543980
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015546121,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Data-Strategy-Sid-Adelman/dp/0321240995/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I34D6D6HHJXR36",
+    "parentId": "38045",
+    "ordinal": 1407015546121
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015548426,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Mining-Talk-Unlocking-Unstructured-Information/dp/0132339536/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3L1ZXUCYV5W46",
+    "parentId": "38045",
+    "ordinal": 1407015548426
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015553024,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Designing-Cascading-Sheets-Warrior-Series/dp/061903520X/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IEU3SUGVBEDUC",
+    "parentId": "38045",
+    "ordinal": 1407015553024
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015553551,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/061903520X/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IEU3SUGVBEDUC&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015553551
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015555961,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Oracle-JDeveloper-10g-Forms-Developers/dp/0072259604/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I32I6C8EU9EZL0",
+    "parentId": "38045",
+    "ordinal": 1407015555961
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015558206,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/TCL-Pocket-Reference-Paul-Raines/dp/1565924983/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=ITJG3EFGN6MGX",
+    "parentId": "38045",
+    "ordinal": 1407015558206
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015560337,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/How-Microsoft-Windows-Vista-Works/dp/0789735857/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3DZOGILMOFSA6",
+    "parentId": "38045",
+    "ordinal": 1407015560337
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015572782,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Ajax-Java-Steven-Douglas-Olson/dp/0596101872/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IILZBVTJ67G7X",
+    "parentId": "38045",
+    "ordinal": 1407015572782
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015575274,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/CVS-Pocket-Reference-Second-Edition/dp/0596005679/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1BVKCSLFH7C4I",
+    "parentId": "38045",
+    "ordinal": 1407015575274
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015581181,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Semantic-Primer-Cooperative-Information-Systems/dp/0262012103/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I282OVZ84BII4",
+    "parentId": "38045",
+    "ordinal": 1407015581181
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015583475,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-Principles-Beautiful-Web-Design/dp/0975841963/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I28BL83PXJFWM1",
+    "parentId": "38045",
+    "ordinal": 1407015583475
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015584187,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0975841963/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I28BL83PXJFWM1&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015584187
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015588555,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/JUnit-Pocket-Guide-Kent-Beck/dp/0596007434/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I110L86W3PD84S",
+    "parentId": "38045",
+    "ordinal": 1407015588555
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015590661,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Writing-GNU-Emacs-Extensions-Glickstein/dp/1565922611/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IPE05XEPUTTGO",
+    "parentId": "38045",
+    "ordinal": 1407015590661
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015591370,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/1565922611/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IPE05XEPUTTGO&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015591370
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015593443,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Coding-The-Handbook-Information-Technology/dp/0976627906/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2L70R5LIKQ4RV",
+    "parentId": "38045",
+    "ordinal": 1407015593443
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015594788,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0976627906/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2L70R5LIKQ4RV&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015594788
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015599263,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Google-Pocket-Guide-Tara-Calishain/dp/0596005504/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I10M8YIBZLYI3D",
+    "parentId": "38045",
+    "ordinal": 1407015599263
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015603416,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Minimal-Perl-UNIX-Linux-People/dp/1932394508/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I83VP6IRUKT3P",
+    "parentId": "38045",
+    "ordinal": 1407015603416
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015607485,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Apache-Phrasebook-Daniel-Lopez/dp/0672328364/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3PYV28RZF70P8",
+    "parentId": "38045",
+    "ordinal": 1407015607485
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015609354,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/An-Introduction-Programming-Emacs-Lisp/dp/1882114566/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I11U2Z82H14YIV",
+    "parentId": "38045",
+    "ordinal": 1407015609354
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015610629,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/1882114566/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I11U2Z82H14YIV&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015610629
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015613438,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0976694042/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I20GEKB3V3KIF5&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015613438
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015618240,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Ajax-Hacks-Tools-Creating-Responsive/dp/0596101694/ref=wl_it_dp_o_pd_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IPVIWGBER0BX5",
+    "parentId": "38045",
+    "ordinal": 1407015618240
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015620297,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Perl-Programming-Absolute-Beginner-Jerry/dp/1598632221/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=ID0MR0L4JX3PL",
+    "parentId": "38045",
+    "ordinal": 1407015620297
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015623664,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Designing-Interfaces-Patterns-Effective-Interaction/dp/0596008031/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I10TTFGSVOVKD8",
+    "parentId": "38045",
+    "ordinal": 1407015623664
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015624202,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0596008031/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I10TTFGSVOVKD8&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015624202
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015634040,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0201565129/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1N2I3GG66DQZG&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015634040
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015637584,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/1565920171/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1JD7DCKVHVSD2&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015637584
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015640496,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0937175838/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2S6V82PRPKDL7&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015640496
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015643073,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/MediaWiki-Administrators-Tutorial-Guide-installation/dp/1904811590/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IFPSJY6BQMXTQ",
+    "parentId": "38045",
+    "ordinal": 1407015643073
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015645210,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Annoyances-Second-Edition-Steve-Bass/dp/0596008821/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IFMJ1J499GJWJ",
+    "parentId": "38045",
+    "ordinal": 1407015645210
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015647065,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Word-Annoyances-ANNOYING-Favorite-Processor/dp/0596009542/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I33TIPPF6SKUXY",
+    "parentId": "38045",
+    "ordinal": 1407015647065
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015649081,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Excel-Annoyances-Annoying-Favorite-Spreadsheet/dp/0596007280/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2P86HUDR97BJ8",
+    "parentId": "38045",
+    "ordinal": 1407015649081
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015649714,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0596007280/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2P86HUDR97BJ8&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015649714
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015652343,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Wiki-Web-Collaboration-Anja-Ebersbach/dp/3540259953/ref=wl_it_dp_o_pd_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I37DISL97GTK89",
+    "parentId": "38045",
+    "ordinal": 1407015652343
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015654553,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Unleashing-Web-2-0-Concepts-Creativity/dp/0123740347/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IXMEN7Q96P8K6",
+    "parentId": "38045",
+    "ordinal": 1407015654553
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015659065,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Ajax-Construction-Kit-Plug-Play/dp/0132350084/ref=wl_it_dp_o_pC_S_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=IL7XW0ET65O8Y",
+    "parentId": "38045",
+    "ordinal": 1407015659065
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015661126,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Sams-Teach-Yourself-AJAX-Minutes/dp/0672328682/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3CV53MV7WA8YS",
+    "parentId": "38045",
+    "ordinal": 1407015661126
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015661638,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/offer-listing/0672328682/ref=wl_it_of_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I3CV53MV7WA8YS&amp;condition=all",
+    "parentId": "38045",
+    "ordinal": 1407015661638
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015664200,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Beginning-Perl-Bioinformatics-James-Tisdall/dp/0596000804/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I1G2VKEE344ZJ2",
+    "parentId": "38045",
+    "ordinal": 1407015664200
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015666443,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Mastering-Perl-Bioinformatics-James-Tisdall/dp/1600330304/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I14IWXDOEJM6LY",
+    "parentId": "38045",
+    "ordinal": 1407015666443
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407015668372,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Developing-Bioinformatics-Computer-Skills-Cynthia/dp/1565926641/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I2XOVZ5D5QDI1M",
+    "parentId": "38045",
+    "ordinal": 1407015668372
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407962339897,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Flow-Based-Programming-2nd-Edition-Application/dp/1451542321/ref=sr_1_1?ie=UTF8&qid=1407958944&sr=8-1&keywords=flow based programming",
+    "parentId": "38045",
+    "ordinal": 1407962339897
+  },
+  {
+    "downloaded_video": false,
+    "created": 1407962342053,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Refactoring-Workbook-William-C-Wake/dp/0321109295/ref=pd_sim_b_4?ie=UTF8&refRID=1AY99134WFHN4DHVSC1Z",
+    "parentId": "38045",
+    "ordinal": 1407962342053
+  },
+  {
+    "downloaded_video": false,
+    "created": 1408383530984,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Structured-Computer-Organization-5th-Edition/dp/0131485210",
+    "parentId": "38045",
+    "ordinal": 1408383530984
+  },
+  {
+    "downloaded_video": false,
+    "created": 1408558990229,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0596009631/ref=pd_luc_rh_qp_01_04_t_lh?ie=UTF8&psc=1",
+    "parentId": "38045",
+    "ordinal": 1408558990229
+  },
+  {
+    "downloaded_video": false,
+    "created": 1408576179986,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Computer-Organization-Architecture-Stallings-Communications/dp/013293633X/ref=sr_1_1?s=books&ie=UTF8&qid=1408569969&sr=1-1&keywords=computer organization and architecture: designing for performance, 8/e william stallings solutions manual",
+    "parentId": "38045",
+    "ordinal": 1408576179986
+  },
+  {
+    "downloaded_video": false,
+    "created": 1408576193149,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Guide-Assembly-Language-Programming-Linux/dp/0387258973",
+    "parentId": "38045",
+    "ordinal": 1408576193149
+  },
+  {
+    "downloaded_video": false,
+    "created": 1408652119563,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/DNS-BIND-Cookbook-Cricket-Liu/dp/0596004109/ref=sr_1_3?ie=UTF8&qid=1408580099&sr=8-3&keywords=bind oreilly",
+    "parentId": "38045",
+    "ordinal": 1408652119563
+  },
+  {
+    "downloaded_video": false,
+    "created": 1409071485554,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/dp/0596004109/ref=rdr_ext_sb_ti_hist_2",
+    "parentId": "38045",
+    "ordinal": 1409071485554
+  },
+  {
+    "downloaded_video": false,
+    "created": 1409254811617,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-EE-Essentials-Arun-Gupta/dp/1449370179/ref=sr_1_14?ie=UTF8&qid=1409249391&sr=8-14&keywords=java streams",
+    "parentId": "38045",
+    "ordinal": 1409254811617
+  },
+  {
+    "downloaded_video": false,
+    "created": 1409254891916,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-I-Elliotte-Rusty-Harold-ebook/dp/B0043D2F6M/ref=sr_1_17?ie=UTF8&qid=undefined&sr=8-17&keywords=java streams",
+    "parentId": "38045",
+    "ordinal": 1409254891916
+  },
+  {
+    "downloaded_video": false,
+    "created": 1409254929528,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Nio-Ron-Hitchens/dp/0596002882/ref=sr_1_28?ie=UTF8&qid=1409249422&sr=8-28&keywords=java streams",
+    "parentId": "38045",
+    "ordinal": 1409254929528
+  },
+  {
+    "downloaded_video": false,
+    "created": 1409254952304,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Network-Programming-Third-Edition/dp/0596007213/ref=sr_1_27?ie=UTF8&qid=1409249422&sr=8-27&keywords=java streams",
+    "parentId": "38045",
+    "ordinal": 1409254952304
+  },
+  {
+    "downloaded_video": false,
+    "created": 1409254960600,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Enterprise-Practices-Robert-Eckstein/dp/0596003846/ref=sr_1_49?ie=UTF8&qid=undefined&sr=8-49&keywords=java streams",
+    "parentId": "38045",
+    "ordinal": 1409254960600
+  },
+  {
+    "downloaded_video": false,
+    "created": 1410496130014,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Flow-Based-Programming-2nd-Edition-Application/dp/1451542321",
+    "parentId": "38045",
+    "ordinal": 1410496130014
+  },
+  {
+    "downloaded_video": false,
+    "created": 1411164816547,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Abstract-State-Machines-High-Level-Analysis/dp/3540007024/ref=sr_1_6/192-0007090-1951057?ie=UTF8&qid=1411157205&sr=8-6&keywords=state machine",
+    "parentId": "38045",
+    "ordinal": 1411164816547
+  },
+  {
+    "downloaded_video": false,
+    "created": 1411164948827,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Modeling-Software-Finite-State-Machines/dp/0849380863/ref=sr_1_4/192-0007090-1951057?ie=UTF8&qid=1411157205&sr=8-4&keywords=state machine",
+    "parentId": "38045",
+    "ordinal": 1411164948827
+  },
+  {
+    "downloaded_video": false,
+    "created": 1411348514961,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/aw/d/0321927869/ref=mp_s_a_1_14?qid=1410311190&sr=8-14&pi=AC_SX110_SY165_QL70",
+    "parentId": "38045",
+    "ordinal": 1411348514961
+  },
+  {
+    "downloaded_video": false,
+    "created": 1411349101314,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Knoppix-Hacks-Tools-Using-Repair/dp/059651493X/ref=sr_1_1?s=books&ie=UTF8&qid=1409540539&sr=1-1&keywords=unionfs",
+    "parentId": "38045",
+    "ordinal": 1411349101314
+  },
+  {
+    "downloaded_video": false,
+    "created": 1411349101314,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Knoppix-Hacks-Tools-Using-Repair/dp/059651493X/ref=sr_1_1?s=books&ie=UTF8&qid=1409540539&sr=1-1&keywords=unionfs",
+    "parentId": "38045",
+    "ordinal": 1411349101314
+  },
+  {
+    "downloaded_video": false,
+    "created": 1411349193390,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/aw/d/1937785653",
+    "parentId": "38045",
+    "ordinal": 1411349193390
+  },
+  {
+    "downloaded_video": false,
+    "created": 1411349194437,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/aw/d/1937785467/ref=pd_aw_sims_2?pi=SY115",
+    "parentId": "38045",
+    "ordinal": 1411349194437
+  },
+  {
+    "downloaded_video": false,
+    "created": 1412051843438,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Dataflow-Reactive-Programming-Systems-Practical/dp/1497422442/ref=sr_1_1?ie=UTF8&qid=1411961499&sr=8-1&keywords=flow based programming fbp",
+    "parentId": "38045",
+    "ordinal": 1412051843438
+  },
+  {
+    "downloaded_video": false,
+    "created": 1412472398811,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Reasoning-About-Program-Transformations-Programming/dp/1441929819/ref=sr_1_9?ie=UTF8&qid=1411960634&sr=8-9&keywords=data flow programming",
+    "parentId": "38045",
+    "ordinal": 1412472398811
+  },
+  {
+    "downloaded_video": false,
+    "created": 1412472400301,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Fundamentals-Stream-Processing-Application-Analytics/dp/1107015545/ref=tmm_hrd_title_0?ie=UTF8&qid=1411960515&sr=8-4",
+    "parentId": "38045",
+    "ordinal": 1412472400301
+  },
+  {
+    "downloaded_video": false,
+    "created": 1412472401025,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Flow-Based-Programming-2nd-Edition-Application/dp/1451542321/ref=tmm_pap_title_0?ie=UTF8&qid=1411960634&sr=8-1",
+    "parentId": "38045",
+    "ordinal": 1412472401025
+  },
+  {
+    "downloaded_video": false,
+    "created": 1412810984875,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Artists-Philosophy-Object-Oriented-Programming/dp/1932504052/ref=sr_1_1?s=books&ie=UTF8&qid=1412810940&sr=1-1&keywords=9781932504057",
+    "parentId": "38045",
+    "ordinal": 1412810984875
+  },
+  {
+    "downloaded_video": false,
+    "created": 1413596642749,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Formal-Models-Operating-System-Kernels/dp/1846283752",
+    "parentId": "38045",
+    "ordinal": 1413596642749
+  },
+  {
+    "downloaded_video": false,
+    "created": 1418756379893,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Synchronization-Algorithms-Concurrent-Programming-Taubenfeld/dp/0131972596/ref=sr_1_4?ie=UTF8&qid=1418671022&sr=8-4&keywords=data synchronization",
+    "parentId": "38045",
+    "ordinal": 1418756379893
+  },
+  {
+    "downloaded_video": false,
+    "created": 1419288986317,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://d.gr-assets.com/books/1403740280l/1852553.jpg",
+    "parentId": "38045",
+    "ordinal": 1419288986317
+  },
+  {
+    "downloaded_video": false,
+    "created": 1419378832206,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/JavaScript-JQuery-Interactive-Front-End-Development/dp/1118531647/ref=sr_1_1?s=books&ie=UTF8&qid=1419368195&sr=1-1&keywords=jquery",
+    "parentId": "38045",
+    "ordinal": 1419378832206
+  },
+  {
+    "downloaded_video": false,
+    "created": 1419378833169,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/jQuery-Cookbook-Solutions-Examples-Developers/dp/0596159773/ref=sr_1_2?s=books&ie=UTF8&qid=1419368205&sr=1-2&keywords=jquery o'reilly",
+    "parentId": "38045",
+    "ordinal": 1419378833169
+  },
+  {
+    "downloaded_video": false,
+    "created": 1422048051135,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Functional-JavaScript-Introducing-Programming-Underscore-js/dp/1449360726/ref=sr_1_1?ie=UTF8&qid=1422047696&sr=8-1&keywords=functional javascript",
+    "parentId": "38045",
+    "ordinal": 1422048051135
+  },
+  {
+    "downloaded_video": false,
+    "created": 1422049424515,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/JavaScript-Patterns-Stoyan-Stefanov/dp/0596806752/ref=sr_1_7?ie=UTF8&qid=1422047696&sr=8-7&keywords=functional javascript",
+    "parentId": "38045",
+    "ordinal": 1422049424515
+  },
+  {
+    "downloaded_video": false,
+    "created": 1422049425381,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-JavaScript-Specific-Software-Development/dp/0321812182/ref=sr_1_2?ie=UTF8&qid=1422047696&sr=8-2&keywords=functional javascript",
+    "parentId": "38045",
+    "ordinal": 1422049425381
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424829657986,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Haskell-Functional-Programming-International-Computer/dp/0201882957",
+    "parentId": "38045",
+    "ordinal": 1424829657986
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903655078,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-Objective-C-2-0-Specific-Development/dp/0321917014/ref=sr_1_4?s=books&ie=UTF8&qid=1424903354&sr=1-4&keywords=effective series",
+    "parentId": "38045",
+    "ordinal": 1424903655078
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903664477,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-Covers-4-0-Specific-Development/dp/0321658701/ref=sr_1_5?s=books&ie=UTF8&qid=1424903354&sr=1-5&keywords=effective series",
+    "parentId": "38045",
+    "ordinal": 1424903664477
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903669385,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-Java-Programming-Language-Guide/dp/0201310058/ref=sr_1_12?s=books&ie=UTF8&qid=1424903354&sr=1-12&keywords=effective series",
+    "parentId": "38045",
+    "ordinal": 1424903669385
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903669977,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-Specific-Improve-Programs-Designs/dp/0201563649/ref=sr_1_19?s=books&ie=UTF8&qid=1424903374&sr=1-19&keywords=effective series",
+    "parentId": "38045",
+    "ordinal": 1424903669977
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903671767,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Code-Quality-Perspective-Effective-Development-ebook/dp/B001FWIJEG/ref=sr_1_27?s=books&ie=UTF8&qid=1424903388&sr=1-27&keywords=effective series",
+    "parentId": "38045",
+    "ordinal": 1424903671767
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903695220,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-STL-Specific-Standard-Template/dp/0201749629/ref=tmm_pap_title_0?ie=UTF8&qid=1424903388&sr=1-30",
+    "parentId": "38045",
+    "ordinal": 1424903695220
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903696028,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-Specific-Ways-Improve-Your/dp/0321245660/ref=tmm_pap_title_0?ie=UTF8&qid=1424903415&sr=1-43",
+    "parentId": "38045",
+    "ordinal": 1424903696028
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903697035,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/More-Effective-Specific-Ways-Improve/dp/0321485890/ref=tmm_pap_title_0?ie=UTF8&qid=1424903415&sr=1-45",
+    "parentId": "38045",
+    "ordinal": 1424903697035
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903697243,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-Python-Specific-Software-Development/dp/0134034287/ref=tmm_pap_title_0?ie=UTF8&qid=1424889486&sr=8-3",
+    "parentId": "38045",
+    "ordinal": 1424903697243
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903697889,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-Perl-Programming-Idiomatic-Development/dp/0321496949/ref=sr_1_1?ie=UTF8&qid=1424889518&sr=8-1&keywords=effective perl",
+    "parentId": "38045",
+    "ordinal": 1424903697889
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903699341,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-Ruby-Specific-Software-Development/dp/0133846970/ref=tmm_pap_title_0?ie=UTF8&qid=1424889486&sr=8-9",
+    "parentId": "38045",
+    "ordinal": 1424903699341
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424903703115,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Practical-Object-Oriented-Design-Ruby-Addison-Wesley/dp/0321721330/ref=pd_sim_b_1?ie=UTF8&refRID=0CG41FHDXXTGTF30YHCJ",
+    "parentId": "38045",
+    "ordinal": 1424903703115
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424908668138,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-Covers-4-0-Specific-Development/dp/0321658701/ref=sr_1_5?s=books&ie=UTF8&qid=1424903354&sr=1-5&keywords=effective series",
+    "parentId": "38045",
+    "ordinal": 1424908668138
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424908898771,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Practical-Object-Oriented-Design-Ruby-Addison-Wesley/dp/0321721330/ref=pd_sim_b_1?ie=UTF8&refRID=0CG41FHDXXTGTF30YHCJ",
+    "parentId": "38045",
+    "ordinal": 1424908898771
+  },
+  {
+    "downloaded_video": false,
+    "created": 1425329763847,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Introductory-Time-R-Use/dp/0387886974/ref=sr_1_25?s=books&ie=UTF8&qid=1424903388&sr=1-25&keywords=effective series",
+    "parentId": "38045",
+    "ordinal": 1425329763847
+  },
+  {
+    "downloaded_video": false,
+    "created": 1425329853024,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Release-It-Production-Ready-Pragmatic-Programmers/dp/0978739213",
+    "parentId": "38045",
+    "ordinal": 1425329853024
+  },
+  {
+    "downloaded_video": false,
+    "created": 1425329853264,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0321601912/ref=pd_lpo_sbs_dp_ss_1?pf_rd_p=1944687562&pf_rd_s=lpo-top-stripe-1&pf_rd_t=201&pf_rd_i=0978739213&pf_rd_m=ATVPDKIKX0DER&pf_rd_r=1ZFP7T96G27B8CPQB3G6",
+    "parentId": "38045",
+    "ordinal": 1425329853264
+  },
+  {
+    "downloaded_video": false,
+    "created": 1425329856511,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/1491950358/ref=pd_lpo_sbs_dp_ss_2?pf_rd_p=1944687562&pf_rd_s=lpo-top-stripe-1&pf_rd_t=201&pf_rd_i=0978739213&pf_rd_m=ATVPDKIKX0DER&pf_rd_r=1ZFP7T96G27B8CPQB3G6",
+    "parentId": "38045",
+    "ordinal": 1425329856511
+  },
+  {
+    "downloaded_video": false,
+    "created": 1425502892021,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530/ref=sr_1_1?ie=UTF8&qid=1425336832&sr=8-1&keywords=test driven development",
+    "parentId": "38045",
+    "ordinal": 1425502892021
+  },
+  {
+    "downloaded_video": false,
+    "created": 1427143492601,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Understanding-Context-Environment-Information-Architecture/dp/1449323170",
+    "parentId": "38045",
+    "ordinal": 1427143492601
+  },
+  {
+    "downloaded_video": false,
+    "created": 1427143496751,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/jQuery-JavaScript-Phrasebook-Developers-Library/dp/0321918967",
+    "parentId": "38045",
+    "ordinal": 1427143496751
+  },
+  {
+    "downloaded_video": false,
+    "created": 1427143497664,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Node-js-MongoDB-AngularJS-Development-Developers/dp/0321995783",
+    "parentId": "38045",
+    "ordinal": 1427143497664
+  },
+  {
+    "downloaded_video": false,
+    "created": 1427143503495,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/JavaScript-JQuery-Interactive-Front-End-Development/dp/1118531647/ref=sr_1_1?ie=UTF8&qid=1427141979&sr=8-1&keywords=javascript and jquery",
+    "parentId": "38045",
+    "ordinal": 1427143503495
+  },
+  {
+    "downloaded_video": false,
+    "created": 1427143503585,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-Joy-Bootstrap-smarter-framework/dp/1502712008/ref=tmm_pap_title_0?ie=UTF8&qid=1427141990&sr=8-2",
+    "parentId": "38045",
+    "ordinal": 1427143503585
+  },
+  {
+    "downloaded_video": false,
+    "created": 1427143508565,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Hemingway-Wrote-JavaScript-Angus-Croll/dp/1593275854/ref=sr_1_1?ie=UTF8&qid=1427142102&sr=8-1&keywords=hemingway javascript",
+    "parentId": "38045",
+    "ordinal": 1427143508565
+  },
+  {
+    "downloaded_video": false,
+    "created": 1427148283644,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Theres-Not-App-That-Experience/dp/0124166911",
+    "parentId": "38045",
+    "ordinal": 1427148283644
+  },
+  {
+    "downloaded_video": false,
+    "created": 1430254062809,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Functional-Reactive-Programming-Stephen-Blackheath/dp/1633430103/ref=sr_1_3?s=books&ie=UTF8&qid=1430252104&sr=1-3&keywords=reactive programming",
+    "parentId": "38045",
+    "ordinal": 1430254062809
+  },
+  {
+    "downloaded_video": false,
+    "created": 1430259143674,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Effective-Akka-Jamie-Allen/dp/1449360076/ref=sr_1_12?s=books&ie=UTF8&qid=1430259062&sr=1-12&keywords=actor model",
+    "parentId": "38045",
+    "ordinal": 1430259143674
+  },
+  {
+    "downloaded_video": false,
+    "created": 1430343697245,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Jenkins-Definitive-John-Ferguson-Smart/dp/1449305350/ref=pd_bxgy_b_img_y",
+    "parentId": "38045",
+    "ordinal": 1430343697245
+  },
+  {
+    "downloaded_video": false,
+    "created": 1430345071480,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Vagrant-Up-Running-Mitchell-Hashimoto/dp/1449335837/ref=pd_cp_b_3?ie=UTF8&refRID=0EHMBCR2PD2TXYB1WZY2",
+    "parentId": "38045",
+    "ordinal": 1430345071480
+  },
+  {
+    "downloaded_video": false,
+    "created": 1430345111844,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Docker-Up-Running-Karl-Matthias/dp/1491917571/ref=sr_1_3?ie=UTF8&qid=1430335349&sr=8-3&keywords=docker",
+    "parentId": "38045",
+    "ordinal": 1430345111844
+  },
+  {
+    "downloaded_video": false,
+    "created": 1430764811035,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Heart-Logs-Stream-Processing-Integration/dp/1491909382/ref=tmm_pap_title_0",
+    "parentId": "38045",
+    "ordinal": 1430764811035
+  },
+  {
+    "downloaded_video": false,
+    "created": 1430765510158,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215/ref=pd_bxgy_b_img_y",
+    "parentId": "38045",
+    "ordinal": 1430765510158
+  },
+  {
+    "downloaded_video": false,
+    "created": 1430765518135,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Implementing-Domain-Driven-Design-Vaughn-Vernon/dp/0321834577",
+    "parentId": "38045",
+    "ordinal": 1430765518135
+  },
+  {
+    "downloaded_video": false,
+    "created": 1430848997573,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Maven-Definitive-Guide-Sonatype-Company/dp/0596517335/ref=sr_1_2?s=books&ie=UTF8&qid=1430847643&sr=1-2&keywords=maven",
+    "parentId": "38045",
+    "ordinal": 1430848997573
+  },
+  {
+    "downloaded_video": false,
+    "created": 1431120454632,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Seven-Languages-Weeks-Programming-Programmers/dp/193435659X/ref=tmm_pap_title_0",
+    "parentId": "38045",
+    "ordinal": 1431120454632
+  },
+  {
+    "downloaded_video": false,
+    "created": 1431120478123,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Seven-Web-Frameworks-Weeks-Programmers/dp/1937785637/ref=pd_sim_b_6?ie=UTF8&refRID=1RXGPZH12S2GA19RY8N8",
+    "parentId": "38045",
+    "ordinal": 1431120478123
+  },
+  {
+    "downloaded_video": false,
+    "created": 1431130223441,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Programming-Concurrency-JVM-Mastering-Synchronization/dp/193435676X/ref=sr_1_1?ie=UTF8&qid=1431109167&sr=8-1&keywords=programming concurrency on the jvm",
+    "parentId": "38045",
+    "ordinal": 1431130223441
+  },
+  {
+    "downloaded_video": false,
+    "created": 1431377035313,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Functional-Programming-Patterns-Scala-Clojure/dp/1937785475/ref=pd_rhf_eetyp_s_cp_5_EG81?ie=UTF8&refRID=037V2P24Q2S8J36N0652",
+    "parentId": "38045",
+    "ordinal": 1431377035313
+  },
+  {
+    "downloaded_video": false,
+    "created": 1431377095937,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/dp/B00EKTLPA6/ref=rdr_ext_sb_ti_sims_1",
+    "parentId": "38045",
+    "ordinal": 1431377095937
+  },
+  {
+    "downloaded_video": false,
+    "created": 1431377115567,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/dp/0981531660/ref=rdr_ext_sb_ti_hist_1",
+    "parentId": "38045",
+    "ordinal": 1431377115567
+  },
+  {
+    "downloaded_video": false,
+    "created": 1431563139103,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Essential-Scrum-Practical-Addison-Wesley-Signature/dp/0137043295/ref=sr_1_12?ie=UTF8&qid=1431563153&sr=8-12&keywords=iterative development",
+    "parentId": "38045",
+    "ordinal": 1431563139103
+  },
+  {
+    "downloaded_video": false,
+    "created": 1431563167631,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Managing-Iterative-Software-Development-Projects/dp/032126889X/ref=sr_1_8?ie=UTF8&qid=1431563153&sr=8-8&keywords=iterative development",
+    "parentId": "38045",
+    "ordinal": 1431563167631
+  },
+  {
+    "downloaded_video": false,
+    "created": 1431839197394,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Programmatic-Introduction-Neo4j-Jim-Webber/dp/0321902904/ref=sr_1_8?ie=UTF8&qid=1431839019&sr=8-8&keywords=neo4j",
+    "parentId": "38045",
+    "ordinal": 1431839197394
+  },
+  {
+    "downloaded_video": false,
+    "created": 1431839250674,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Practical-Neo4j-Greg-Jordan/dp/1484200233/ref=sr_1_2?ie=UTF8&qid=1431839019&sr=8-2&keywords=neo4j",
+    "parentId": "38045",
+    "ordinal": 1431839250674
+  },
+  {
+    "downloaded_video": false,
+    "created": 1432250060149,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/HTTP-The-Definitive-Guide-Guides/dp/1565925092/ref=tmm_pap_title_0?ie=UTF8&qid=1432183162&sr=8-2",
+    "parentId": "38045",
+    "ordinal": 1432250060149
+  },
+  {
+    "downloaded_video": false,
+    "created": 1432509868382,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Students-5th-Douglas-Bell/dp/0131735799/ref=sr_1_1?ie=UTF8&qid=1432509805&sr=8-1&keywords=java for students",
+    "parentId": "38045",
+    "ordinal": 1432509868382
+  },
+  {
+    "downloaded_video": false,
+    "created": 1432749485842,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Virtual-Machine-Specification-Addison-Wesley/dp/013390590X/ref=sr_1_1?s=books&ie=UTF8&qid=1432666176&sr=1-1&keywords=jvm",
+    "parentId": "38045",
+    "ordinal": 1432749485842
+  },
+  {
+    "downloaded_video": false,
+    "created": 1432749487549,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Understanding-Java-Virtual-Machine-Sachin/dp/1842658158/ref=sr_1_4?s=books&ie=UTF8&qid=1432666176&sr=1-4&keywords=jvm",
+    "parentId": "38045",
+    "ordinal": 1432749487549
+  },
+  {
+    "downloaded_video": false,
+    "created": 1432749490590,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Inside-Java-2-Virtual-Machine/dp/0071350934/ref=sr_1_12?s=books&ie=UTF8&qid=1432666176&sr=1-12&keywords=jvm",
+    "parentId": "38045",
+    "ordinal": 1432749490590
+  },
+  {
+    "downloaded_video": false,
+    "created": 1432836651118,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Learn-You-Haskell-Great-Good/dp/1593272839",
+    "parentId": "38045",
+    "ordinal": 1432836651118
+  },
+  {
+    "downloaded_video": false,
+    "created": 1433195381952,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Mastering-DynamoDB-Tanmay-Deshpande/dp/178355195X/ref=tmm_pap_title_0?ie=UTF8&qid=1433191221&sr=1-1",
+    "parentId": "38045",
+    "ordinal": 1433195381952
+  },
+  {
+    "downloaded_video": false,
+    "created": 1433652635239,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/HTML-CSS-Visual-QuickStart-Edition/dp/0321928830",
+    "parentId": "38045",
+    "ordinal": 1433652635239
+  },
+  {
+    "downloaded_video": false,
+    "created": 1433812136299,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/TCP-Sockets-Java-Second-Programmers/dp/0123742552/ref=sr_1_1?s=books&ie=UTF8&qid=1433811985&sr=1-1&keywords=tcp java&pebp=1433812203063&perid=1XW71H9H7693Q105CW0W",
+    "parentId": "38045",
+    "ordinal": 1433812136299
+  },
+  {
+    "downloaded_video": false,
+    "created": 1433873143843,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0596002882/ref=s9_psimh_gw_p14_d0_i4?pf_rd_m=ATVPDKIKX0DER&pf_rd_s=desktop-1&pf_rd_r=07RSPW29ZAV5BVAVG57B&pf_rd_t=36701&pf_rd_p=2079475242&pf_rd_i=desktop",
+    "parentId": "38045",
+    "ordinal": 1433873143843
+  },
+  {
+    "downloaded_video": false,
+    "created": 1433873186559,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/TCP-Network-Administration-OReilly-Networking/dp/0596002971/ref=sr_1_2?ie=UTF8&qid=1433811992&sr=8-2&keywords=tcp ip&pebp=1433812135942&perid=0W82PPX5KH90B5CWZ8TD",
+    "parentId": "38045",
+    "ordinal": 1433873186559
+  },
+  {
+    "downloaded_video": false,
+    "created": 1433873200917,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/TCP-Illustrated-Vol-Transactions-Protocols/dp/0201634953/ref=sr_1_4?ie=UTF8&qid=1433811292&sr=8-4&keywords=tcp ip illustrated&pebp=1433811800673&perid=1JDF45V0TYZ5TMS7ZV86",
+    "parentId": "38045",
+    "ordinal": 1433873200917
+  },
+  {
+    "downloaded_video": false,
+    "created": 1433873272283,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Netty-Action-Norman-Maurer/dp/1617291471/ref=sr_1_9?s=books&ie=UTF8&qid=1433811920&sr=1-9&keywords=tcp java",
+    "parentId": "38045",
+    "ordinal": 1433873272283
+  },
+  {
+    "downloaded_video": false,
+    "created": 1433968338880,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/1449344763/ref=pd_luc_rh_bxgy_02_01_t_img_lh?ie=UTF8&psc=1",
+    "parentId": "38045",
+    "ordinal": 1433968338880
+  },
+  {
+    "downloaded_video": false,
+    "created": 1433968385585,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/1449342841/ref=pd_luc_rh_chashrec_04_03_t_img_lh?ie=UTF8&psc=1",
+    "parentId": "38045",
+    "ordinal": 1433968385585
+  },
+  {
+    "downloaded_video": false,
+    "created": 1434646702206,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Concurrency-Practice-Brian-Goetz/dp/0321349601/ref=sr_1_1?ie=UTF8&qid=1434646400&sr=8-1&keywords=java concurrency in practice&pebp=1434646564741&perid=0NCG1XX8N236203FD0JX",
+    "parentId": "38045",
+    "ordinal": 1434646702206
+  },
+  {
+    "downloaded_video": false,
+    "created": 1434646905022,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0071829628/ref=as_li_tf_tl?ie=UTF8&tag=httpwwwjavasc-20&linkCode=as2&creative=9325&creativeASIN=0071829628",
+    "parentId": "38045",
+    "ordinal": 1434646905022
+  },
+  {
+    "downloaded_video": false,
+    "created": 1434776714195,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/SSH-Secure-Shell-Definitive-Guide/dp/0596008953/ref=sr_1_1?s=books&ie=UTF8&qid=1434358535&sr=1-1&keywords=sftp in books&pebp=1434358540811&perid=E0A7F9C3B35B4CC49EFA",
+    "parentId": "38045",
+    "ordinal": 1434776714195
+  },
+  {
+    "downloaded_video": false,
+    "created": 1435774144128,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/CSS-Secrets-Solutions-Everyday-Problems/dp/1449372635/ref=sr_1_3?s=books&ie=UTF8&qid=1435773920&sr=1-3&keywords=web design css",
+    "parentId": "38045",
+    "ordinal": 1435774144128
+  },
+  {
+    "downloaded_video": false,
+    "created": 1437431646721,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Learning-jQuery-Deferreds-Callback-Promises-ebook/dp/B00HNYRQ4E/ref=sr_1_1?ie=UTF8&qid=1437430814&sr=8-1&keywords=promises callbacks",
+    "parentId": "38045",
+    "ordinal": 1437431646721
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805714215,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/New-Programmers-Survival-Manual-Workplace/dp/1934356816/ref=sr_1_10?ie=UTF8&qid=1438796524&sr=8-10&keywords=passionate programmer",
+    "parentId": "38045",
+    "ordinal": 1438805714215
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805719110,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Mockito-Essentials-Sujoy-Acharya/dp/1783983604/ref=sr_1_9?ie=UTF8&qid=1438733897&sr=8-9&keywords=powermock",
+    "parentId": "38045",
+    "ordinal": 1438805719110
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805721931,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Passionate-Programmer-Remarkable-Development-Pragmatic/dp/1934356344/ref=sr_1_1?ie=UTF8&qid=1438796524&sr=8-1&keywords=passionate programmer",
+    "parentId": "38045",
+    "ordinal": 1438805721931
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805722265,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/How-Stop-Sucking-Awesome-Instead-ebook/dp/B00BU3KPQU/ref=sr_1_2?ie=UTF8&qid=1438796524&sr=8-2&keywords=passionate programmer",
+    "parentId": "38045",
+    "ordinal": 1438805722265
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805725044,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Pragmatic-Thinking-Learning-Refactor-Programmers/dp/1934356050/ref=sr_1_5?ie=UTF8&qid=1438796524&sr=8-5&keywords=passionate programmer",
+    "parentId": "38045",
+    "ordinal": 1438805725044
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805728386,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.hyperink.com/How-To-Stop-Sucking-And-Be-Awesome-Instead-b9A74B5CBA6",
+    "parentId": "38045",
+    "ordinal": 1438805728386
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805729381,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.hyperink.com/Effective-Programming-More-Than-Writing-Code-b1559",
+    "parentId": "38045",
+    "ordinal": 1438805729381
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805730672,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.hyperink.com/Rock-Star-Productivity-Time-Management-Tips-Leadership-Skills-And-Other-Keys-To-Self-Improvement-b1594",
+    "parentId": "38045",
+    "ordinal": 1438805730672
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805731699,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://s3.amazonaws.com/hyperink_covers/9A74B5CBA6_thumb",
+    "parentId": "38045",
+    "ordinal": 1438805731699
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805733114,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://s3.amazonaws.com/hyperink_covers/1594_thumb",
+    "parentId": "38045",
+    "ordinal": 1438805733114
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805735392,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://93.114.44.238/viewtopic.php?t=1120640",
+    "parentId": "38045",
+    "ordinal": 1438805735392
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805760937,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Instant-Mock-Testing-PowerMock-Deep/dp/1783289953/ref=sr_1_1_twi_2_pap?ie=UTF8&qid=1438733897&sr=8-1&keywords=powermock",
+    "parentId": "38045",
+    "ordinal": 1438805760937
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438805763151,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Practical-Unit-Testing-JUnit-Mockito/dp/8393489393/ref=sr_1_2?ie=UTF8&qid=1438733897&sr=8-2&keywords=powermock",
+    "parentId": "38045",
+    "ordinal": 1438805763151
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438894539086,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Pro-Apache-Log4j-Samudra-Gupta/dp/1590594991/ref=sr_1_3?ie=UTF8&qid=1438812662&sr=8-3&keywords=log4j",
+    "parentId": "38045",
+    "ordinal": 1438894539086
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438895629992,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Rock-Star-Productivity-Management-Improvement-ebook/dp/B008OL6H6S",
+    "parentId": "38045",
+    "ordinal": 1438895629992
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438895706991,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Behind-Closed-Doors-Management-Programmers-ebook/dp/B00A4OA6UQ/ref=pd_sim_351_4?ie=UTF8&refRID=1VB6RQ366T3RW4TNBGX0",
+    "parentId": "38045",
+    "ordinal": 1438895706991
+  },
+  {
+    "downloaded_video": false,
+    "created": 1438895709522,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Peopleware-Productive-Projects-Teams-Edition-ebook/dp/B00DY5A8X2/ref=pd_sim_351_6?ie=UTF8&refRID=1VB6RQ366T3RW4TNBGX0",
+    "parentId": "38045",
+    "ordinal": 1438895709522
+  },
+  {
+    "downloaded_video": false,
+    "created": 1439230340547,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/1617292397?refRID=2S6KC22HAC4B3V11YHYT&ref_=pd_rhf_eetyp_s_cp_3",
+    "parentId": "38045",
+    "ordinal": 1439230340547
+  },
+  {
+    "downloaded_video": false,
+    "created": 1440009915000,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/TeamCity-Continuous-Integration-Volodymyr-Melymuka/dp/1849693765",
+    "parentId": "38045",
+    "ordinal": 1440009915000
+  },
+  {
+    "downloaded_video": false,
+    "created": 1440009915855,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Learning-Continuous-Integration-TeamCity-Mahalingam/dp/1849699518/ref=sr_1_1?ie=UTF8&qid=1440009866&sr=8-1&keywords=teamcity",
+    "parentId": "38045",
+    "ordinal": 1440009915855
+  },
+  {
+    "downloaded_video": false,
+    "created": 1440447250835,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Pro-Apache-Log4j-Samudra-Gupta/dp/1590594991/ref=sr_1_3?ie=UTF8&qid=1440204330&sr=8-3&keywords=log4j",
+    "parentId": "38045",
+    "ordinal": 1440447250835
+  },
+  {
+    "downloaded_video": false,
+    "created": 1440447280947,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.apress.com/9781590590997",
+    "parentId": "38045",
+    "ordinal": 1440447280947
+  },
+  {
+    "downloaded_video": false,
+    "created": 1440447334413,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Masterclass-Exceptions-Assertions-Logging/dp/0957410549",
+    "parentId": "38045",
+    "ordinal": 1440447334413
+  },
+  {
+    "downloaded_video": false,
+    "created": 1443568508425,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Functional-Programming-Java-Harnessing-Expressions/dp/1937785467/ref=sr_1_1?ie=UTF8&qid=1443549259&sr=8-1&keywords=functional programming in java",
+    "parentId": "38045",
+    "ordinal": 1443568508425
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445235718040,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Programming-GNU-Software-Nutshell-Handbooks/dp/1565921127/ref=sr_1_1?s=books&ie=UTF8&qid=1445235589&sr=1-1&keywords=gnu software",
+    "parentId": "38045",
+    "ordinal": 1445235718040
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445885946699,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Pragmatic-Project-Automation-Deploy-Monitor/dp/0974514039/ref=sr_1_5?ie=UTF8&qid=1445885112&sr=8-5&keywords=java automation",
+    "parentId": "38045",
+    "ordinal": 1445885946699
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445886066952,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Programming-Beginners-Structures-Algorithms-ebook/dp/B00YCKCU6G/ref=sr_1_4?ie=UTF8&qid=1445885112&sr=8-4&keywords=java automation",
+    "parentId": "38045",
+    "ordinal": 1445886066952
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981522123,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/UML-Distilled-Standard-Modeling-Language/dp/0321193687/ref=pd_sim_14_8?ie=UTF8&dpID=51h+wxREY5L&dpSrc=sims&preST=_AC_UL160_SR120,160_&refRID=09WYK0NN1DXG2TBPJ4JD",
+    "parentId": "38045",
+    "ordinal": 1445981522123
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981525786,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Unified-Modeling-Language-Guide-Edition/dp/0321267974/ref=pd_sim_14_15?ie=UTF8&dpID=51H7K2ATKGL&dpSrc=sims&preST=_AC_UL160_SR121,160_&refRID=0JQSVNTTCCGPNKHSAH4X",
+    "parentId": "38045",
+    "ordinal": 1445981525786
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981526898,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Unified-Modeling-Language-Reference-Manual/dp/020130998X/ref=pd_sim_14_5?ie=UTF8&dpID=516JGP8F74L&dpSrc=sims&preST=_AC_UL160_SR124,160_&refRID=15S5PG4B51YPQGHH10FX",
+    "parentId": "38045",
+    "ordinal": 1445981526898
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981528930,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Object-Oriented-Analysis-Design-Applications-Edition/dp/020189551X/ref=pd_sim_14_8?ie=UTF8&dpID=51-uo4HUPCL&dpSrc=sims&preST=_AC_UL160_SR121,160_&refRID=15S5PG4B51YPQGHH10FX",
+    "parentId": "38045",
+    "ordinal": 1445981528930
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981533213,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Unified-Modeling-Language-Reference-paperback/dp/032171895X/ref=pd_sim_14_3?ie=UTF8&dpID=51iLc0pRKTL&dpSrc=sims&preST=_AC_UL160_SR128,160_&refRID=15S5PG4B51YPQGHH10FX",
+    "parentId": "38045",
+    "ordinal": 1445981533213
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981533909,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/UML-Distilled-Standard-Modeling-Language/dp/0321193687/ref=pd_sim_14_1?ie=UTF8&dpID=51h+wxREY5L&dpSrc=sims&preST=_AC_UL160_SR120,160_&refRID=15S5PG4B51YPQGHH10FX",
+    "parentId": "38045",
+    "ordinal": 1445981533909
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981548179,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/MDA-Explained-Architecture¿-Practice-Promise/dp/032119442X/ref=pd_sim_14_13?ie=UTF8&dpID=51ABAcExECL&dpSrc=sims&preST=_AC_UL160_SR130,160_&refRID=15S5PG4B51YPQGHH10FX",
+    "parentId": "38045",
+    "ordinal": 1445981548179
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981558218,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Fundamentals-Object-Oriented-Design-Meilir-Page-Jones/dp/020169946X/ref=pd_sim_14_12?ie=UTF8&dpID=51VNXZ4EEAL&dpSrc=sims&preST=_AC_UL160_SR128,160_&refRID=15S5PG4B51YPQGHH10FX",
+    "parentId": "38045",
+    "ordinal": 1445981558218
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981558611,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-Object-Constraint-Language-Getting/dp/0321179366/ref=pd_sim_14_31?ie=UTF8&dpID=5100J1D7PPL&dpSrc=sims&preST=_AC_UL160_SR121,160_&refRID=15S5PG4B51YPQGHH10FX",
+    "parentId": "38045",
+    "ordinal": 1445981558611
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981561463,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Managing-Software-Requirements-Approach-Edition/dp/032112247X/ref=pd_sim_14_49?ie=UTF8&dpID=41X3rFTbtCL&dpSrc=sims&preST=_AC_UL160_SR127,160_&refRID=15S5PG4B51YPQGHH10FX",
+    "parentId": "38045",
+    "ordinal": 1445981561463
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981563177,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Applying-Use-Cases-Practical-Edition/dp/0201708531/ref=pd_sim_14_60?ie=UTF8&dpID=41JGWQZ4P1L&dpSrc=sims&preST=_AC_UL160_SR128,160_&refRID=0JQSVNTTCCGPNKHSAH4X",
+    "parentId": "38045",
+    "ordinal": 1445981563177
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981563430,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Object-Oriented-Analysis-Design-Applications-Edition/dp/020189551X/ref=pd_sim_14_11?ie=UTF8&dpID=51-uo4HUPCL&dpSrc=sims&preST=_AC_UL160_SR121,160_&refRID=09WYK0NN1DXG2TBPJ4JD",
+    "parentId": "38045",
+    "ordinal": 1445981563430
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981583224,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Rational-Unified-Process-Made-Easy/dp/0321166094/ref=pd_sim_14_58?ie=UTF8&dpID=51YHlG6SWmL&dpSrc=sims&preST=_AC_UL160_SR124,160_&refRID=0JWMPPET1EQ1YH376F8K",
+    "parentId": "38045",
+    "ordinal": 1445981583224
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981690726,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/User-Stories-Applied-Software-Development/dp/0321205685/ref=sr_1_2?ie=UTF8&qid=1445981164&sr=8-2&keywords=user stories",
+    "parentId": "38045",
+    "ordinal": 1445981690726
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981692261,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/User-Story-Mapping-Discover-Product/dp/1491904909/ref=sr_1_1?ie=UTF8&qid=1445981164&sr=8-1&keywords=user stories",
+    "parentId": "38045",
+    "ordinal": 1445981692261
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981695774,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Scrum-Shortcuts-without-Cutting-Corners/dp/0321822366/ref=sr_1_2?ie=UTF8&qid=1445981129&sr=8-2&keywords=user centric stories",
+    "parentId": "38045",
+    "ordinal": 1445981695774
+  },
+  {
+    "downloaded_video": false,
+    "created": 1445981698848,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Analysis-Patterns-Reusable-Object-Models/dp/0201895420/ref=pd_sim_14_23?ie=UTF8&dpID=41uNHkTq8NL&dpSrc=sims&preST=_AC_UL160_SR122,160_&refRID=04Y0KF8R9P2W3HC7519W",
+    "parentId": "38045",
+    "ordinal": 1445981698848
+  },
+  {
+    "downloaded_video": false,
+    "created": 1447708563875,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Cookbook-Cookbooks-OReilly-Christopher-Schmitt/dp/1449396798/ref=sr_1_1?ie=UTF8&qid=1447708415&sr=8-1&keywords=html 5 video cookbook",
+    "parentId": "38045",
+    "ordinal": 1447708563875
+  },
+  {
+    "downloaded_video": false,
+    "created": 1448679227706,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Records-Management-Judith-Read/dp/1305119169/ref=sr_1_5?s=books&ie=UTF8&qid=1448513048&sr=1-5&keywords=file indexing",
+    "parentId": "38045",
+    "ordinal": 1448679227706
+  },
+  {
+    "downloaded_video": false,
+    "created": 1451438727938,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://ecx.images-amazon.com/images/I/51eVu7Q3AzL._SX379_BO1,204,203,200_.jpg",
+    "parentId": "38045",
+    "ordinal": 1451438727938
+  },
+  {
+    "downloaded_video": false,
+    "created": 1451514421057,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Data-Visualization-D3-js-Cookbook-Nick-ebook/dp/B00G58JD5E",
+    "parentId": "38045",
+    "ordinal": 1451514421057
+  },
+  {
+    "downloaded_video": false,
+    "created": 1451514547648,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Learning-D3-js-Mapping-Thomas-Newton/dp/1783985607",
+    "parentId": "38045",
+    "ordinal": 1451514547648
+  },
+  {
+    "downloaded_video": false,
+    "created": 1451597480566,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Software-Paradigms-Stephen-H-Kaisler/dp/0471483478/ref=sr_1_1?s=books&ie=UTF8&qid=1451519924&sr=1-1&keywords=software paradigms",
+    "parentId": "38045",
+    "ordinal": 1451597480566
+  },
+  {
+    "downloaded_video": false,
+    "created": 1453676080136,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/CSS-Animations-Transitions-Modern-Web/dp/0133980502/ref=sr_1_1?s=books&ie=UTF8&qid=1453624577&sr=1-1&keywords=css transition",
+    "parentId": "38045",
+    "ordinal": 1453676080136
+  },
+  {
+    "downloaded_video": false,
+    "created": 1453677658745,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/CORS-Action-Creating-consuming-cross-origin/dp/161729182X",
+    "parentId": "38045",
+    "ordinal": 1453677658745
+  },
+  {
+    "downloaded_video": false,
+    "created": 1453677674464,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/CSS-Secrets-Solutions-Everyday-Problems/dp/1449372635",
+    "parentId": "38045",
+    "ordinal": 1453677674464
+  },
+  {
+    "downloaded_video": false,
+    "created": 1453677687536,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Client-Side-Data-Storage-Keeping-Local/dp/1491935111",
+    "parentId": "38045",
+    "ordinal": 1453677687536
+  },
+  {
+    "downloaded_video": false,
+    "created": 1453677836817,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Beyond-Legacy-Code-Practices-Software/dp/1680500791",
+    "parentId": "38045",
+    "ordinal": 1453677836817
+  },
+  {
+    "downloaded_video": false,
+    "created": 1453677839971,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-Senior-Software-Engineer-Practices/dp/0990702804/ref=pd_sim_14_6?ie=UTF8&dpID=41FTPNwbcsL&dpSrc=sims&preST=_AC_UL160_SR107,160_&refRID=0DF7R9TBZX6BB9V91XG2",
+    "parentId": "38045",
+    "ordinal": 1453677839971
+  },
+  {
+    "downloaded_video": false,
+    "created": 1453677851182,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Git-Pocket-Guide-Richard-Silverman/dp/1449325866",
+    "parentId": "38045",
+    "ordinal": 1453677851182
+  },
+  {
+    "downloaded_video": false,
+    "created": 1453677866563,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/HTML-CSS-Design-Build-Websites/dp/1118008189",
+    "parentId": "38045",
+    "ordinal": 1453677866563
+  },
+  {
+    "downloaded_video": false,
+    "created": 1453767849723,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0735619654/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=0735619654&linkCode=as2&tag=yegor256com-20&linkId=NQQHJZPHOKM6BTCT",
+    "parentId": "38045",
+    "ordinal": 1453767849723
+  },
+  {
+    "downloaded_video": false,
+    "created": 1455311934976,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Even-Faster-Web-Sites-Performance/dp/0596522304/ref=sr_1_5?ie=UTF8&qid=1455311582&sr=8-5&keywords=memcached",
+    "parentId": "38045",
+    "ordinal": 1455311934976
+  },
+  {
+    "downloaded_video": false,
+    "created": 1455311957281,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Scalability-Rules-Principles-Scaling-Sites/dp/0321753887/ref=sr_1_6?ie=UTF8&qid=1455311582&sr=8-6&keywords=memcached",
+    "parentId": "38045",
+    "ordinal": 1455311957281
+  },
+  {
+    "downloaded_video": false,
+    "created": 1455593543233,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Getting-Started-Google-Guava-Bejeck/dp/1783280158/ref=sr_1_1?s=books&ie=UTF8&qid=1455311231&sr=1-1&keywords=Guava",
+    "parentId": "38045",
+    "ordinal": 1455593543233
+  },
+  {
+    "downloaded_video": false,
+    "created": 1456545779554,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Data-Visualization-JavaScript-Stephen-Thomas/dp/1593276052/ref=sr_1_1?s=books&ie=UTF8&qid=1456289111&sr=1-1&keywords=9781593276058",
+    "parentId": "38045",
+    "ordinal": 1456545779554
+  },
+  {
+    "downloaded_video": false,
+    "created": 1458161637648,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Web-Animation-using-JavaScript-Develop/dp/0134096665/ref=pd_bxgy_14_img_3?ie=UTF8&refRID=1NPKT39MWE4R2P9ZZXCS",
+    "parentId": "38045",
+    "ordinal": 1458161637648
+  },
+  {
+    "downloaded_video": false,
+    "created": 1458191455752,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Learning-Unix-OS-Going-Terminal/dp/1491939982/ref=dp_ob_title_bk",
+    "parentId": "38045",
+    "ordinal": 1458191455752
+  },
+  {
+    "downloaded_video": false,
+    "created": 1458191835875,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Learning-Apache-Thrift-Krzysztof-Rakowski/dp/1785882740/ref=sr_1_1?ie=UTF8&qid=1458101680&sr=8-1&keywords=apache thrift",
+    "parentId": "38045",
+    "ordinal": 1458191835875
+  },
+  {
+    "downloaded_video": false,
+    "created": 1460152371404,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0471958697?ie=UTF8&tag=martinfowlerc-20&linkCode=as2&camp=1789&creative=9325&creativeASIN=0471958697",
+    "parentId": "38045",
+    "ordinal": 1460152371404
+  },
+  {
+    "downloaded_video": false,
+    "created": 1471931715761,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Smarter-Way-Learn-JavaScript-technology/dp/1497408180/ref=sr_1_15?ie=UTF8&qid=1451853909&sr=8-15&keywords=angularjs",
+    "parentId": "38045",
+    "ordinal": 1471931715761
+  },
+  {
+    "downloaded_video": false,
+    "created": 1472864320157,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Classic-Shell-Scripting-Hidden-Commands-ebook/dp/B0043GXMPW/ref=sr_1_4?ie=UTF8&qid=1472690028&sr=8-4&keywords=scripting#nav-subnav",
+    "parentId": "38045",
+    "ordinal": 1472864320157
+  },
+  {
+    "downloaded_video": false,
+    "created": 1473143205938,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Flow-Based-Programming-2nd-Application-Development/dp/1451542321",
+    "parentId": "38045",
+    "ordinal": 1473143205938
+  },
+  {
+    "downloaded_video": false,
+    "created": 1473302484528,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Unix-Programming-Environment-Prentice-Hall-Software/dp/013937681X",
+    "parentId": "38045",
+    "ordinal": 1473302484528
+  },
+  {
+    "downloaded_video": false,
+    "created": 1474056797470,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/HTML-Babies-Web-Design/dp/0615487661",
+    "parentId": "38045",
+    "ordinal": 1474056797470
+  },
+  {
+    "downloaded_video": false,
+    "created": 1474395895817,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Practical-Vim-Edit-Speed-Thought/dp/1680501275/ref=pd_sim_sbs_14_1?ie=UTF8&psc=1&refRID=SMSG8F8X5S2P86QQR9R5",
+    "parentId": "38045",
+    "ordinal": 1474395895817
+  },
+  {
+    "downloaded_video": false,
+    "created": 1474395897058,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/VimL-Primer-Edit-Plugins-Scripts/dp/1680500406/ref=pd_sim_sbs_14_3?ie=UTF8&psc=1&refRID=SMSG8F8X5S2P86QQR9R5",
+    "parentId": "38045",
+    "ordinal": 1474395897058
+  },
+  {
+    "downloaded_video": false,
+    "created": 1474577735458,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/tmux-Productive-Development-Brian-Hogan/dp/1934356964/ref=pd_rhf_se_s_cp_1?ie=UTF8&pd_rd_i=1934356964&pd_rd_r=8WVTVRJQDJN5BTGJ6FAS&pd_rd_w=6FSVP&pd_rd_wg=MMkVc&psc=1&refRID=8WVTVRJQDJN5BTGJ6FAS",
+    "parentId": "38045",
+    "ordinal": 1474577735458
+  },
+  {
+    "downloaded_video": false,
+    "created": 1475604848805,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Data-Munging-Perl-David-Cross/dp/1930110006",
+    "parentId": "38045",
+    "ordinal": 1475604848805
+  },
+  {
+    "downloaded_video": false,
+    "created": 1475619016287,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/gp/product/1558607013/ref=pd_sbs_14_t_0?ie=UTF8&psc=1&refRID=WV86RD9E25F3SERB42XS",
+    "parentId": "38045",
+    "ordinal": 1475619016287
+  },
+  {
+    "downloaded_video": false,
+    "created": 1475619080575,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/X3D-Extensible-Graphics-Interactive-Technology/dp/012088500X/ref=sr_1_1?s=books&ie=UTF8&qid=1475271807&sr=1-1&keywords=x3d",
+    "parentId": "38045",
+    "ordinal": 1475619080575
+  },
+  {
+    "downloaded_video": false,
+    "created": 1475642861453,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Perl-One-Liners-Programs-That-Things/dp/159327520X/ref=sr_1_1?ie=UTF8&qid=1475549092&sr=8-1&keywords=perl one liner",
+    "parentId": "38045",
+    "ordinal": 1475642861453
+  },
+  {
+    "downloaded_video": false,
+    "created": 1475895215663,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/gp/product/1491910399/ref=pd_sim_14_47?ie=UTF8&pd_rd_i=1491910399&pd_rd_r=YCE4KVG7D6YVYQG1GXZ6&pd_rd_w=srBlx&pd_rd_wg=31lR4&psc=1&refRID=YCE4KVG7D6YVYQG1GXZ6",
+    "parentId": "38045",
+    "ordinal": 1475895215663
+  },
+  {
+    "downloaded_video": false,
+    "created": 1475895218606,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/gp/product/1491920513/ref=pd_sim_14_27?ie=UTF8&pd_rd_i=1491920513&pd_rd_r=YCE4KVG7D6YVYQG1GXZ6&pd_rd_w=srBlx&pd_rd_wg=31lR4&psc=1&refRID=YCE4KVG7D6YVYQG1GXZ6",
+    "parentId": "38045",
+    "ordinal": 1475895218606
+  },
+  {
+    "downloaded_video": false,
+    "created": 1475895220781,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/gp/product/1449370780/ref=pd_sim_14_20?ie=UTF8&pd_rd_i=1449370780&pd_rd_r=YCE4KVG7D6YVYQG1GXZ6&pd_rd_w=srBlx&pd_rd_wg=31lR4&psc=1&refRID=YCE4KVG7D6YVYQG1GXZ6",
+    "parentId": "38045",
+    "ordinal": 1475895220781
+  },
+  {
+    "downloaded_video": false,
+    "created": 1475895225891,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/dp/149190142X/ref=rdr_ext_sb_ti_sims_1",
+    "parentId": "38045",
+    "ordinal": 1475895225891
+  },
+  {
+    "downloaded_video": false,
+    "created": 1477513605966,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Working-Static-Sites-Bringing-Websites/dp/1491960949/ref=sr_1_12?s=books&ie=UTF8&qid=1477509250&sr=1-12&keywords=oreilly power tools",
+    "parentId": "38045",
+    "ordinal": 1477513605966
+  },
+  {
+    "downloaded_video": false,
+    "created": 1479160743066,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Code-Simplicity-Fundamentals-Max-Kanat-Alexander/dp/1449313892/ref=redir_mobile_desktop?ie=UTF8&ref_=s9_qpp_gw_p14_d22_i20",
+    "parentId": "38045",
+    "ordinal": 1479160743066
+  },
+  {
+    "downloaded_video": false,
+    "created": 1479878090468,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Working-Static-Sites-Bringing-Websites/dp/1491960949",
+    "parentId": "38045",
+    "ordinal": 1479878090468
+  },
+  {
+    "downloaded_video": false,
+    "created": 1480562446011,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Modern-Compiler-Implementation-Java-Techniques/dp/0521586542",
+    "parentId": "38045",
+    "ordinal": 1480562446011
+  },
+  {
+    "downloaded_video": false,
+    "created": 1480988983614,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Definitive-Guide-HTML5-Experts-Development/dp/1430230908/ref=sr_1_1?ie=UTF8&qid=1480978687&sr=8-1&keywords=html5 video",
+    "parentId": "38045",
+    "ordinal": 1480988983614
+  },
+  {
+    "downloaded_video": false,
+    "created": 1480988987228,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/dp/1449304451/ref=rdr_ext_sb_ti_sims_1",
+    "parentId": "38045",
+    "ordinal": 1480988987228
+  },
+  {
+    "downloaded_video": false,
+    "created": 1480989032162,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Definitive-Guide-ImageMagick-Guides-Hardcover/dp/1590595904/ref=sr_1_1?ie=UTF8&qid=1480986183&sr=8-1&keywords=imagemagick",
+    "parentId": "38045",
+    "ordinal": 1480989032162
+  },
+  {
+    "downloaded_video": false,
+    "created": 1481070555244,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Eclipse-Steve-Holzner/dp/0596006411/ref=sr_1_2?s=books&ie=UTF8&qid=1481070283&sr=1-2&keywords=eclipse",
+    "parentId": "38045",
+    "ordinal": 1481070555244
+  },
+  {
+    "downloaded_video": false,
+    "created": 1481070557215,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Art-Debugging-GDB-DDD-Eclipse/dp/1593271743/ref=sr_1_6?s=books&ie=UTF8&qid=1481070283&sr=1-6&keywords=eclipse",
+    "parentId": "38045",
+    "ordinal": 1481070557215
+  },
+  {
+    "downloaded_video": false,
+    "created": 1481070560696,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Java-Developers-Guide-Eclipse-2nd/dp/0321305027/ref=sr_1_9?s=books&ie=UTF8&qid=1481070283&sr=1-9&keywords=eclipse",
+    "parentId": "38045",
+    "ordinal": 1481070560696
+  },
+  {
+    "downloaded_video": false,
+    "created": 1481070572045,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Eclipse-IDE-Pocket-Guide-Full-Featured/dp/0596100655/ref=sr_1_12?s=books&ie=UTF8&qid=1481070283&sr=1-12&keywords=eclipse",
+    "parentId": "38045",
+    "ordinal": 1481070572045
+  },
+  {
+    "downloaded_video": false,
+    "created": 1481070574901,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Eclipse-Action-Guide-Java-Developer/dp/1930110960/ref=sr_1_13?s=books&ie=UTF8&qid=1481070302&sr=1-13&keywords=eclipse",
+    "parentId": "38045",
+    "ordinal": 1481070574901
+  },
+  {
+    "downloaded_video": false,
+    "created": 1481070580044,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "https://www.amazon.com/Eclipse-Cookbook-Task-Oriented-Solutions-Problems/dp/0596007108/ref=sr_1_32?s=books&ie=UTF8&qid=1481070321&sr=1-32&keywords=eclipse",
+    "parentId": "38045",
+    "ordinal": 1481070580044
+  }
+]

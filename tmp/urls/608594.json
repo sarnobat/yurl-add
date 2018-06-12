@@ -1,0 +1,83 @@
+[
+  {
+    "downloaded_video": false,
+    "created": 1407015609354,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/An-Introduction-Programming-Emacs-Lisp/dp/1882114566/ref=wl_it_dp_o_pC_nS_nC?ie=UTF8&amp;colid=29YQEY6YG69GL&amp;coliid=I11U2Z82H14YIV",
+    "parentId": "608594",
+    "ordinal": 1407015609354
+  },
+  {
+    "downloaded_video": false,
+    "created": 1409254929528,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Java-Nio-Ron-Hitchens/dp/0596002882/ref=sr_1_28?ie=UTF8&qid=1409249422&sr=8-28&keywords=java streams",
+    "parentId": "608594",
+    "ordinal": 1409254929528
+  },
+  {
+    "downloaded_video": false,
+    "created": 1415065716214,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Validation-Addiction-Please-Worthy-Series/dp/1494992086/ref=tmm_pap_title_0",
+    "parentId": "608594",
+    "ordinal": 1415065716214
+  },
+  {
+    "downloaded_video": false,
+    "created": 1421989336740,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-Invisible-Cut-Editors-Movie/dp/193290753X/ref=pd_rhf_eetyp_s_cp_1_H038?ie=UTF8&refRID=1F5ZFJWT12KAG56TKN1P",
+    "parentId": "608594",
+    "ordinal": 1421989336740
+  },
+  {
+    "downloaded_video": false,
+    "created": 1424829657986,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Haskell-Functional-Programming-International-Computer/dp/0201882957",
+    "parentId": "608594",
+    "ordinal": 1424829657986
+  },
+  {
+    "downloaded_video": false,
+    "created": 1425329853264,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0321601912/ref=pd_lpo_sbs_dp_ss_1?pf_rd_p=1944687562&pf_rd_s=lpo-top-stripe-1&pf_rd_t=201&pf_rd_i=0978739213&pf_rd_m=ATVPDKIKX0DER&pf_rd_r=1ZFP7T96G27B8CPQB3G6",
+    "parentId": "608594",
+    "ordinal": 1425329853264
+  },
+  {
+    "downloaded_video": false,
+    "created": 1425502892021,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530/ref=sr_1_1?ie=UTF8&qid=1425336832&sr=8-1&keywords=test driven development",
+    "parentId": "608594",
+    "ordinal": 1425502892021
+  },
+  {
+    "downloaded_video": false,
+    "created": 1426472342112,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/The-Natural-Mind-Waking-Volume/dp/1409255395",
+    "parentId": "608594",
+    "ordinal": 1426472342112
+  },
+  {
+    "downloaded_video": false,
+    "created": 1434646906162,
+    "id": "STOP_RELYING_ON_THIS",
+    "title": "<fill this in>",
+    "url": "http://www.amazon.com/gp/product/0071829628/ref=as_li_tf_tl?ie=UTF8&tag=httpwwwjavasc-20&linkCode=as2&creative=9325&creativeASIN=0071829628",
+    "parentId": "608594",
+    "ordinal": 1434646906162
+  }
+]
