@@ -1257,36 +1257,9 @@ public class YurlStash {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 
-		String port = null;
+		String port = 4447;
 		_parseOptions: {
 
-		  Options options = new Options()
-			  .addOption("h", "help", false, "show help.");
-
-		  Option option = Option.builder("f").longOpt("file").desc("use FILE to write incoming data to").hasArg()
-			  .argName("FILE").build();
-		  options.addOption(option);
-
-		  // This doesn't work with java 7
-		  // "hasarg" is needed when the option takes a value
-		  options.addOption(Option.builder("p").longOpt("port").hasArg().required().build());
-
-		  try {
-			CommandLine cmd = new DefaultParser().parse(options, args);
-			port = cmd.getOptionValue("p", "4447");
-
-			if (cmd.hasOption("h")) {
-		
-			  // This prints out some help
-			  HelpFormatter formater = new HelpFormatter();
-
-			  formater.printHelp("yurl", options);
-			  System.exit(0);
-			}
-		  } catch (ParseException e) {
-			e.printStackTrace();
-			System.exit(-1);
-		  }
 		}
     
 		YurlResource.refreshCategoriesTreeCacheInSeparateThread();
