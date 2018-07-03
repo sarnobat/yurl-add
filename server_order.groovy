@@ -170,9 +170,9 @@ public class YurlOrder {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 
-		String port = null;
+		String port = 4439;
 		_parseOptions: {
-
+/*
 		  Options options = new Options()
 			  .addOption("h", "help", false, "show help.");
 
@@ -185,6 +185,7 @@ public class YurlOrder {
 		  options.addOption(Option.builder("p").longOpt("port").hasArg().required().build());
 
 		  try {
+
 			CommandLine cmd = new DefaultParser().parse(options, args);
 			port = cmd.getOptionValue("p", "4439");
 
@@ -200,6 +201,7 @@ public class YurlOrder {
 			e.printStackTrace();
 			System.exit(-1);
 		  }
+*/
 		}
     
 		// Turn off that stupid Jersey logger.
