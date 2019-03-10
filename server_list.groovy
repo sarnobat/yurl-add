@@ -193,6 +193,8 @@ public class YurlList {
 		private static JSONArray getUrlsInCategory(String categoryId,
 				Map<String, String> orderMap,
 				Collection<String> downloadedVideos) throws IOException {
+				
+			System.err.println("[DEBUG] getUrlsInCategory() - categoryId = " + categoryId);	
 			// Create the file if it doesn't exist
 			java.nio.file.Path urlsInCategoryJsonFile = Paths.get(System
 					.getProperty("user.home")
@@ -200,6 +202,8 @@ public class YurlList {
 					+ categoryId + ".json");
 
 			if (!urlsInCategoryJsonFile.toFile().exists()) {
+			
+				System.err.println("[DEBUG] getUrlsInCategory() - no file containing urls for this category. Generating it.");	
 
 				JSONArray urlsInCategory = new JSONArray();
 
@@ -269,8 +273,11 @@ public class YurlList {
 				FileUtils.write(urlsInCategoryJsonFile.toFile(),
 						urlsInCategory.toString(2), "UTF-8");
 			}
-			return new JSONArray(FileUtils.readFileToString(
-					urlsInCategoryJsonFile.toFile(), "UTF-8"));
+			System.err.println("[DEBUG] getUrlsInCategory() - reading json file for category " + categoryId + ": " + urlsInCategoryJsonFile);
+			String arr = FileUtils.readFileToString(
+                                        urlsInCategoryJsonFile.toFile(), "UTF-8");
+			System.err.println("[DEBUG] arr = " + arr);
+			return new JSONArray(arr);
 		}
 
 		private static List<String> getRemoveLines(List<String> lines) {
