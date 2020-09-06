@@ -39,6 +39,7 @@ import com.google.common.collect.Multimap;
 
 public class YurlList {
 
+	// TODO 2020-09: gitdb folder got moved. It can be fixed with symlinks but it's best to have properties for every single file (for readabilitytoo)
 	private static final String YURL_ORDINALS = System.getProperty("user.home")			+ "/sarnobat.git/db/yurl_flatfile_db/yurl_master_ordinals.txt";
 	private static final String DOWNLOADED_VIDEOS = System
 			.getProperty("user.home")			+ "/sarnobat.git/db/auto/yurl_queue_httpcat_videos_downloaded.json";

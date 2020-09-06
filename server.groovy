@@ -1,3 +1,8 @@
+// I think the only remaining method in use here is:
+// Request URL: http://netgear.rohidekar.com:44447/yurl/parent?nodeId=641476
+// Everything else doesn't use port 4447
+
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -366,6 +371,7 @@ public class YurlStash {
 		public Response stash(@QueryParam("param1") String iUrl,
 				@QueryParam("rootId") Integer iCategoryId) throws JSONException,
 				IOException {
+			System.out.println("stash() begin");
 			// This will convert
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
 			System.out.println("stash() theHttpUrl = " + theHttpUrl);
