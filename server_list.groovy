@@ -217,7 +217,7 @@ public class YurlList {
 				List<String> lines = FileUtils.readLines(
 						Paths.get(
 								System.getProperty("user.home")
-										+ "/sarnobat.git/yurl_master.txt")
+							+ "/sarnobat.git/db/yurl_flatfile_db/yurl_master.txt")
 								.toFile(), "UTF-8");
 
 				Map<String, String> userImages = getUserImages(Paths
@@ -277,7 +277,8 @@ public class YurlList {
 			System.err.println("[DEBUG] getUrlsInCategory() - reading json file for category " + categoryId + ": " + urlsInCategoryJsonFile);
 			String arr = FileUtils.readFileToString(
                                         urlsInCategoryJsonFile.toFile(), "UTF-8");
-			System.err.println("[DEBUG] arr = " + arr);
+// this prints too much
+	//		System.err.println("[DEBUG] arr = " + arr);
 			return new JSONArray(arr);
 		}
 
