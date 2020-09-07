@@ -78,7 +78,7 @@ public class YurlStash {
 	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
 	private static final String TITLE_FILE_TXT = "yurl_titles_2017.txt";
-    private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";
+//    private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";
     private static final String QUEUE_FILE_TXT_2017 = "yurl_queue_2017.txt";// Started using this in Aug 2017. Older data is not in this file.
     private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
