@@ -73,14 +73,16 @@ public class YurlStash {
 	public static final Integer ROOT_ID = 45;
 	@Deprecated
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
-	private static final String TARGET_DIR_PATH = "/media/sarnobat/Unsorted/Videos/";
-	@Deprecated
-	private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
+//	@Deprecated
+	private static final String TARGET_DIR_PATH = "/media/sarnobat/3TB/new/move_to_unsorted/videos/";
+    private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
+	//@Deprecated
+	//private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
+	private static final String QUEUE_FILE = QUEUE_DIR;
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
 	private static final String TITLE_FILE_TXT = "yurl_titles_2017.txt";
-//    private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";
+    private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";
     private static final String QUEUE_FILE_TXT_2017 = "yurl_queue_2017.txt";// Started using this in Aug 2017. Older data is not in this file.
-    private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/3TB/new/move_to_unsorted/images/";
 // usually full and we get zero size files: "/media/sarnobat/Unsorted/images/";
