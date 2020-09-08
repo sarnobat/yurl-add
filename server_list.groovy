@@ -195,13 +195,13 @@ public class YurlList {
 				Map<String, String> orderMap,
 				Collection<String> downloadedVideos) throws IOException {
 				
-			System.err.println("[DEBUG] getUrlsInCategory() - categoryId = " + categoryId);	
+			System.err.println("[DEBUG] getUrlsInCategory() - categoryId = " + categoryId);
+String p = 	System                                        .getProperty("user.home")                                        + "/github/yurl/tmp/urls/"                                        + categoryId + ".json";
 			// Create the file if it doesn't exist
-			java.nio.file.Path urlsInCategoryJsonFile = Paths.get(System
-					.getProperty("user.home")
-					+ "/github/yurl/tmp/urls/"
-					+ categoryId + ".json");
-
+			java.nio.file.Path urlsInCategoryJsonFile = Paths.get(p
+					);
+System.err.println("[DEBUG] getUrlsInCategory() - " + p 
+                                        );
 			if (!urlsInCategoryJsonFile.toFile().exists()) {
 			
 				System.err.println("[DEBUG] getUrlsInCategory() - no file containing urls for this category. Generating it.");	
@@ -213,21 +213,20 @@ public class YurlList {
 								.toFile(), "UTF-8");
 
 				List<String> remove = getRemoveLines(lines1);
-
+				String p2 = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master.txt";
 				List<String> lines = FileUtils.readLines(
-						Paths.get(
-								System.getProperty("user.home")
-							+ "/sarnobat.git/db/yurl_flatfile_db/yurl_master.txt")
+						Paths.get(p2)
 								.toFile(), "UTF-8");
 
 				Map<String, String> userImages = getUserImages(Paths
-						.get(System.getProperty("user.home")
-								+ "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt"));
+						.get(System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/yurl_master_images.txt"));
 
 				for (String line : filterByCategory(
 						filterToBeRemovedLines(lines, remove), categoryId)) {
+
+						String[] elements;
 					try {
-						String[] elements = line.split("::");
+						elements = line.split("::");
 						if (elements.length < 3) {
 							continue;
 						}
@@ -235,6 +234,11 @@ public class YurlList {
 						String categoryIdElement = elements[0];
 						String url = elements[1];
 						String timestamp = elements[2];
+						
+						if (url.length() == 13) {
+							url = elements[2];
+							timestamp = elements[1];
+						}
 
 						JSONObject urlObj1 = new JSONObject();
 						urlObj1.put("id", "STOP_RELYING_ON_THIS");// TODO:
@@ -260,17 +264,19 @@ public class YurlList {
 						}
 						urlObj1.put("parentId", categoryId);
 						urlObj1.put("title", "<fill this in>");
+System.err.println("[DEBUG] getUrlsInCategory() " + categoryId + "::" + p + "::" + url);
 						if (userImages.keySet().contains(url)) {
 							urlObj1.put("user_image", userImages.get(url));
 						}
 
 						urlsInCategory.put(urlObj1);
 					} catch (NumberFormatException e) {
+						System.err.println("[ERROR] url.length() = " + elements[1].length());
 						e.printStackTrace();
 						continue;
 					}
 				}
-
+	System.err.println("[DEBUG] getUrlsInCategory() urlsInCategoryJsonFile.length() = " + urlsInCategory.length() );
 				FileUtils.write(urlsInCategoryJsonFile.toFile(),
 						urlsInCategory.toString(2), "UTF-8");
 			}

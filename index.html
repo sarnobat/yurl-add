@@ -150,6 +150,8 @@ function CATEGORY_TO_LINK(accumulator, categoryNode) {
 }
 	
 function renderIfReady() {
+console.debug('SRIDHAR 1');
+console.log('SRIDHAR 1');
 	if (!uncategorizedResponse) {
 		return;
 	}
@@ -745,13 +747,22 @@ function getCategoryTableHtml(categoryId, categoryName, urlsInCategory) {
 }
 
 function getCategoryThumbnailsHtml(categoryId, categoryName, urlsInCategory1, limit) {
+
 		var urlsInCategory = urlsInCategory1.map(function(i){ if (i.ordinal < 9999999999) { i.ordinal = i.ordinal * 1000; }; return i;}).sort(function (u1, u2) {return u2.ordinal - u1.ordinal ;});
 		var urlThumbnailsHtml = "<h3><a href='/yurl/?rootId="+categoryId+"'>" + categoryName + " (" + categoryId + ")</a></h3>";
 		for (var j = 0; j < urlsInCategory.length; j++) {
+
 			if (j > limit) {
 				break;
 			}
 			var item = urlsInCategory[j];
+
+			if (item == null) {
+				debugger;
+				continue;
+			} else {
+				console.log('SRIDHAR item.url = ' + item.url);
+			}
 			var displayImageUrl = getDisplayImageUrl(item);
 			urlThumbnailsHtml += "<a href="+item.url+"><img class=itemImage src='"+displayImageUrl+"' height="+IMAGE_SIZE+" onmouseenter='zoom(this)'></a>" ;
 		}
