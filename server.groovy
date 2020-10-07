@@ -69,7 +69,7 @@ import com.google.common.util.concurrent.SimpleTimeLimiter;
 // TODO: rename to YurlStash
 public class YurlStash {
 
-	public static final String YOUTUBE_DOWNLOAD = "/home/sarnobat/bin/youtube_download";
+	public static final String YOUTUBE_DOWNLOAD = System.getProperty("user.home") + "/bin/youtube_download";
 	public static final Integer ROOT_ID = 45;
 	@Deprecated
 	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
@@ -555,7 +555,7 @@ public class YurlStash {
 						}
 						if (p.exitValue() == 0) {
 							System.out.println("appendToTextFile() - successfully appended 5 "
-									+ iUrl);
+									+ iUrl + " to " + queueFile);
 						} else {
 							System.out.println("appendToTextFile() - error appending " + iUrl);
 						}
@@ -1264,7 +1264,7 @@ public class YurlStash {
 
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
-
+System.out.println("main() - begin");
 		String port = 4447;
 		_parseOptions: {
 
