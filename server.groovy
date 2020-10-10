@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -59,6 +58,7 @@ import com.google.common.util.concurrent.SimpleTimeLimiter;
 // TODO: rename to YurlStash
 public class YurlStash {
 
+	// TODO: use java properties
 	public static final String YOUTUBE_DOWNLOAD = System.getProperty("user.home") + "/bin/youtube_download";
 	public static final Integer ROOT_ID = 45;
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/3TB/new/move_to_unsorted/videos/";
@@ -1071,10 +1071,6 @@ public class YurlStash {
 			JdkHttpServerFactory.createHttpServer(
 					new URI("http://localhost:" + port + "/"), new ResourceConfig(
 							YurlStash.YurlResource.class));
-			// Do not allow this in multiple processes otherwise your hard disk will fill up
-			// or overload the database
-			// Problem - this won't get executed until the server ends
-			//YurlWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		} catch (Exception e) {
 			//	e.printStackTrace();
 			System.err.println("Not creating server instance");
