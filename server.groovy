@@ -55,6 +55,7 @@ import com.google.common.util.concurrent.SimpleTimeLimiter;
  * 
  * Only writing to the persistent store (and the associated async tasks) should remain in this thread.
  */
+@Deprecated // Too monolithic. Use server_stash.groovy
 // TODO: rename to YurlStash
 public class YurlStash {
 
@@ -127,7 +128,7 @@ public class YurlStash {
 					// Fails if it sees the string "%)"
 					URLDecoder.decode(first, "UTF-8");
 				} catch (Exception e) {
-					System.out.println(e.getStackTrace());
+					System.err.println(e.getStackTrace());
 					addToUnsuccessful(unsuccessfulLines, first, "");
 					++i;
 					continue;
@@ -150,8 +151,8 @@ public class YurlStash {
 				String second = lines[i + 1];
 				if (first.startsWith("\"") && second.startsWith("http")) {
 
-					System.out.println("to be processed: " + first);
-					System.out.println("to be processed: " + second);
+					System.err.println("to be processed: " + first);
+					System.err.println("to be processed: " + second);
 
 					stash(second, iRootId);
 
@@ -188,7 +189,7 @@ public class YurlStash {
 		// TODO: See if you can turn this into a map-reduce
 		@SuppressWarnings("unused")
 		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
-//			System.out.println("getItemsAtLevelAndChildLevels() - " + iRootId);
+//			System.err.println("getItemsAtLevelAndChildLevels() - " + iRootId);
 			if (categoriesTreeCache == null) {
 				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(YurlStash.ROOT_ID);
 			}
@@ -250,9 +251,9 @@ public class YurlStash {
 					_16: {
 						Object val = anItem.get(6);
 						if ("null".equals(val)) {
-							System.out.println("Is null value");
+							System.err.println("Is null value");
 						} else if (val == null) {
-							System.out.println("Is null string");
+							System.err.println("Is null string");
 						} else if (isNotNull(val)) {
 							Long aValue = (Long) val;
 							anUncategorizedNodeJsonObject.put("created", aValue);
@@ -263,7 +264,7 @@ public class YurlStash {
 						if (isNotNull(val)) {
 							String aValue = (String) val;
 							if ("null".equals(aValue)) {
-								System.out.println("YurlWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
+								System.err.println("YurlWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
 							}
 							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
 						}
@@ -353,7 +354,7 @@ public class YurlStash {
 								throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
 							}
 							String command = "echo '" + iUrl + "::" + theTitle + "' | tee -a '" + titleFileStr + "'";
-							System.out.println("appendToTextFile() - " + command);
+							System.err.println("appendToTextFile() - " + command);
 							Process p;
 							try {
 								p = new ProcessBuilder()
@@ -368,10 +369,10 @@ public class YurlStash {
 									e.printStackTrace();
 								}
 								if (p.exitValue() == 0) {
-									System.out.println("appendToTextFile() - successfully appended 2 "
+									System.err.println("appendToTextFile() - successfully appended 2 "
 											+ iUrl);
 								} else {
-									System.out.println("appendToTextFile() - error appending " + iUrl);
+									System.err.println("appendToTextFile() - error appending " + iUrl);
 								}
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
@@ -390,11 +391,11 @@ public class YurlStash {
 		private static void removeCategoryCache(Integer iCategoryId) {
 			java.nio.file.Path path1 = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/urls/" + iCategoryId + ".json");
 			path1.toFile().delete();
-        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file 1: " + path1);
+        	System.err.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file 1: " + path1);
         	
         	java.nio.file.Path path = Paths.get(System.getProperty("user.home") + "/github/yurl/tmp/categories/topology/" + iCategoryId + ".txt");
 			path.toFile().delete();
-        	System.out.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file 2: " + path);
+        	System.err.println("Yurl.YurlResource.launchAsynchronousTasksHttpcat() deleted cache file 2: " + path);
 		}
 
 		private static void appendToTextFileSync(final String iUrl,
@@ -407,7 +408,7 @@ public class YurlStash {
 			    throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
 			}
 			String command =  "echo '" + id + "::" + iUrl + "::"+created+"' | tee -a '" + queueFile + "'";
-			System.out.println("appendToTextFileSync() - " + command);
+			System.err.println("appendToTextFileSync() - " + command);
 			Process p = new ProcessBuilder()
 			            .directory(file)
 			            .command("echo","hello world")
@@ -416,10 +417,10 @@ public class YurlStash {
 			                                            .inheritIO().start();
 			p.waitFor();
 			if (p.exitValue() == 0) {
-			    System.out.println("appendToTextFileSync() - successfully appended 3 "
+			    System.err.println("appendToTextFileSync() - successfully appended 3 "
 			                    + iUrl);
 			} else {
-			    System.out.println("appendToTextFileSync() - error appending " + iUrl);
+			    System.err.println("appendToTextFileSync() - error appending " + iUrl);
 			}
 		}
 		
@@ -431,7 +432,7 @@ public class YurlStash {
                     throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
             }
             String command =  "echo '" + id + "::" + iUrl + "::'`date +%s` | tee -a '" + queueFile + "'";
-            System.out.println("appendToTextFileSync() - " + command);
+            System.err.println("appendToTextFileSync() - " + command);
             Process p = new ProcessBuilder()
                             .directory(file)
                             .command("echo","hello world")
@@ -440,10 +441,10 @@ public class YurlStash {
                                                             .inheritIO().start();
             p.waitFor();
             if (p.exitValue() == 0) {
-                    System.out.println("appendToTextFileSync() - successfully appended 4 "
+                    System.err.println("appendToTextFileSync() - successfully appended 4 "
                                     + iUrl);
             } else {
-                    System.out.println("appendToTextFileSync() - error appending " + iUrl);
+                    System.err.println("appendToTextFileSync() - error appending " + iUrl);
             }
         }
 
@@ -458,7 +459,7 @@ public class YurlStash {
 						throw new RuntimeException("Non-existent: " + file.getAbsolutePath());
 					}
 					String command =  "echo '" + id + "::" + iUrl + "::'`date +%s` | tee -a '" + queueFile + "'";
-					System.out.println("appendToTextFile() - " + command);
+					System.err.println("appendToTextFile() - " + command);
 					Process p;
 					try {
 						p = new ProcessBuilder()
@@ -474,10 +475,10 @@ public class YurlStash {
 							e.printStackTrace();
 						}
 						if (p.exitValue() == 0) {
-							System.out.println("appendToTextFile() - successfully appended 5 "
+							System.err.println("appendToTextFile() - successfully appended 5 "
 									+ iUrl + " to " + queueFile);
 						} else {
-							System.out.println("appendToTextFile() - error appending " + iUrl);
+							System.err.println("appendToTextFile() - error appending " + iUrl);
 						}
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
@@ -499,7 +500,7 @@ public class YurlStash {
 										try {
 											return Jsoup.connect(iUrl.toString()).get().title();
 										} catch (org.jsoup.UnsupportedMimeTypeException e) {
-											System.out.println("YurlResource.getTitle() - " + e.getMessage());
+											System.err.println("YurlResource.getTitle() - " + e.getMessage());
 											return "";
 										}
 									}
@@ -546,7 +547,7 @@ public class YurlStash {
 				JSONArray jsonArray = results.getJSONArray("data");
 				for (int i = 0; i < jsonArray.length(); i++) {
 					final JSONArray row = jsonArray.getJSONArray(i);
-					System.out.println("downloadUndownloadedVideosBatch() - iteration: " + row);
+					System.err.println("downloadUndownloadedVideosBatch() - iteration: " + row);
 					Object title = row.get(0);
 					Object downloaded = row.get(1);
 					Object url = row.get(2);
@@ -570,17 +571,17 @@ public class YurlStash {
 										}
 									}, 10, TimeUnit.SECONDS, true);
 								} catch (Exception e) {
-									System.out.println("Continuing");
+									System.err.println("Continuing");
 									continue;
 								}
 								System.out
 										.println("downloadUndownloadedVideosBatch() - Finished retroactively downloading: "
 												+ title);
 							} else {
-								System.out.println("id - " + id.getClass());
+								System.err.println("id - " + id.getClass());
 							}
 						} else {
-							System.out.println("url - " + url.getClass());
+							System.err.println("url - " + url.getClass());
 						}
 					} else {
 						Long downloaded1 = row.getLong(1);
@@ -596,9 +597,9 @@ public class YurlStash {
 //					downloadVideo(iVideoUrl, targetDirPath);
 //					writeSuccessToDb(iVideoUrl, id);
 				} catch (JSONException e) {
-					System.out.println("UndownloadedVideosBatchJob.downloadVideo() - ERROR recording download in database");
+					System.err.println("UndownloadedVideosBatchJob.downloadVideo() - ERROR recording download in database");
 				} catch (Exception e) {
-					System.out.println(e.getMessage());
+					System.err.println(e.getMessage());
 				}
 			}
 
@@ -643,7 +644,7 @@ public class YurlStash {
 				@QueryParam("id") Integer nodeIdToChange,
 				@QueryParam("parentId") Integer parentId) throws Exception {
 	
-			System.out.println("removeImage() - begin");
+			System.err.println("removeImage() - begin");
 			try {
 				Response r = Response
 						.ok()
@@ -673,11 +674,11 @@ public class YurlStash {
 				@QueryParam("nodeId") Integer iNodeToBeTagged,
 				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo)
 				throws JSONException, IOException {
-			System.out.println("relateCategoriesToItem(): begin");
+			System.err.println("relateCategoriesToItem(): begin");
 			JSONArray theCategoryIdsToBeAddedTo = new JSONArray(
 					URLDecoder.decode(iCategoriesToBeAddedTo, "UTF-8"));
 			for (int i = 0; i < theCategoryIdsToBeAddedTo.length(); i++) {
-				System.out.println("relateCategoriesToItem(): "
+				System.err.println("relateCategoriesToItem(): "
 						+ theCategoryIdsToBeAddedTo.getInt(i) + " --> "
 						+ iNodeToBeTagged);
 				createNewRelation(theCategoryIdsToBeAddedTo.getInt(i),
@@ -711,7 +712,7 @@ public class YurlStash {
 				@QueryParam("childId") Integer iItemId,
 				@QueryParam("currentParentId") Integer iCurrentParentId)
 				throws JSONException, IOException {
-			System.out.println("createSubDirAndMoveItem() - begin");
+			System.err.println("createSubDirAndMoveItem() - begin");
 			JSONObject relateToExistingCategory = relateToExistingCategory(iItemId,
 					iCurrentParentId,
 					createNewCategoryUnderExistingCategory(iNewParentName, iCurrentParentId));
@@ -759,13 +760,13 @@ public class YurlStash {
 				@QueryParam("created") Long created)
 				throws JSONException, IOException, InterruptedException {
 			
-			System.out.println("Yurl.YurlResource.move() begin");
+			System.err.println("Yurl.YurlResource.move() begin");
 			
 			appendToTextFileSync(iUrl, iNewParentId.toString(), QUEUE_FILE, YurlStash.QUEUE_FILE_TXT_MASTER, created);
 			
-			System.out.println("Yurl.YurlResource.move() 2");
+			System.err.println("Yurl.YurlResource.move() 2");
 			appendToTextFileSync(iUrl, "-" + iCurrentParentId.toString(), QUEUE_DIR, YurlStash.QUEUE_FILE_TXT_DELETE, created);
-			System.out.println("Yurl.YurlResource.move() 4");
+			System.err.println("Yurl.YurlResource.move() 4");
 			
 			new Thread() {
 				@Override
