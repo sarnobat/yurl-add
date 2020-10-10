@@ -241,15 +241,9 @@ System.err.println("[DEBUG] getUrlsInCategory() - " + p
 						}
 
 						JSONObject urlObj1 = new JSONObject();
-						urlObj1.put("id", "STOP_RELYING_ON_THIS");// TODO:
-																	// moving a
-																	// url will
-																	// need
-																	// reimplementing
-																	// on the
-																	// client
-																	// and
-																	// server
+						// TODO: moving a url will need reimplementing on the client
+						// and server
+						urlObj1.put("id", "STOP_RELYING_ON_THIS");
 						urlObj1.put("url", url);
 						urlObj1.put("created", Long.parseLong(timestamp));
 						if (orderMap.containsKey(url)) {
@@ -264,7 +258,7 @@ System.err.println("[DEBUG] getUrlsInCategory() - " + p
 						}
 						urlObj1.put("parentId", categoryId);
 						urlObj1.put("title", "<fill this in>");
-System.err.println("[DEBUG] getUrlsInCategory() " + categoryId + "::" + p + "::" + url);
+						System.err.println("[DEBUG] getUrlsInCategory() " + categoryId + "::" + p + "::" + url);
 						if (userImages.keySet().contains(url)) {
 							urlObj1.put("user_image", userImages.get(url));
 						}
@@ -276,15 +270,15 @@ System.err.println("[DEBUG] getUrlsInCategory() " + categoryId + "::" + p + "::"
 						continue;
 					}
 				}
-	System.err.println("[DEBUG] getUrlsInCategory() urlsInCategoryJsonFile.length() = " + urlsInCategory.length() );
+				System.err.println("[DEBUG] getUrlsInCategory() urlsInCategoryJsonFile.length() = " + urlsInCategory.length() );
 				FileUtils.write(urlsInCategoryJsonFile.toFile(),
 						urlsInCategory.toString(2), "UTF-8");
 			}
 			System.err.println("[DEBUG] getUrlsInCategory() - reading json file for category " + categoryId + ": " + urlsInCategoryJsonFile);
 			String arr = FileUtils.readFileToString(
                                         urlsInCategoryJsonFile.toFile(), "UTF-8");
-// this prints too much
-	//		System.err.println("[DEBUG] arr = " + arr);
+			// this prints too much
+			//System.err.println("[DEBUG] arr = " + arr);
 			return new JSONArray(arr);
 		}
 
