@@ -34,7 +34,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
@@ -818,14 +817,7 @@ public class YurlStash {
 			System.err.println("Yurl.YurlResource.changeImage() - success: " + iUrl + " :: " + imageUrl);
 
 			removeCategoryCacheAsync(iCategoryId);
-			// TODO: remove the Neo4j part
-//			JSONObject execute = execute(
-//					"START n=node({nodeIdToChange}) "
-//							+ "SET n.user_image =  {imageUrl}"
-//							+ "RETURN n",
-//					ImmutableMap.<String, Object> of("nodeIdToChange",
-//							nodeIdToChange, "imageUrl",
-//							imageUrl), "changeImage()");
+
 			return Response
 					.ok()
 					.header("Access-Control-Allow-Origin", "*")
@@ -1265,7 +1257,7 @@ public class YurlStash {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 System.out.println("main() - begin");
-		String port = 4447;
+		String port = "4447";
 		_parseOptions: {
 
 		}
