@@ -3,23 +3,13 @@
 // Everything else doesn't use port 4447
 // Actually also image change is
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -34,19 +24,11 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 
-import com.google.common.base.Function;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet.Builder;
-import com.google.common.collect.Multimap;
-import com.google.common.util.concurrent.SimpleTimeLimiter;
 
 /**
  * Deprecation doesn't mean the method can be removed. Only when index.html stops referring to it can it be removed.
@@ -55,14 +37,11 @@ import com.google.common.util.concurrent.SimpleTimeLimiter;
  * 
  * Only writing to the persistent store (and the associated async tasks) should remain in this thread.
  */
-@Deprecated // Too monolithic. Use server_stash.groovy
 // TODO: rename to YurlStash
 public class YurlStash {
 
 	// TODO: use java properties
-	public static final String YOUTUBE_DOWNLOAD = System.getProperty("user.home") + "/bin/youtube_download";
 	public static final Integer ROOT_ID = 45;
-	private static final String TARGET_DIR_PATH = "/media/sarnobat/3TB/new/move_to_unsorted/videos/";
     private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE = QUEUE_DIR;
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
@@ -73,234 +52,6 @@ public class YurlStash {
 	
 	@Path("yurl")
 	public static class YurlResource { // Must be public
-
-		private static JSONObject categoriesTreeCache;
-		
-		@GET
-		@Path("parent")
-		@Produces("application/json")
-		public Response parent(@QueryParam("nodeId") Integer iNodeId)
-				throws JSONException, IOException {
-			ImmutableMap.Builder<String, Object> theParams = ImmutableMap.<String, Object>builder();
-			theParams.put("nodeId", iNodeId);
-			// TODO: order these by most recent-first (so that they appear this
-			// way in the UI)
-			JSONObject theParentNodeJson = execute(
-					"start n=node({nodeId}) MATCH p-[r:CONTAINS]->n RETURN id(p)",
-					theParams.build(), "parent()");
-			JSONArray theData = (JSONArray) theParentNodeJson.get("data");
-			JSONArray ret = new JSONArray();
-			for (int i = 0; i < theData.length(); i++) {
-				JSONArray a = theData.getJSONArray(i);
-				JSONObject o = new JSONObject();
-				String id = (String) a.get(0);
-				o.put("id", id);
-				ret.put(o);
-			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
-		}
-
-		//
-		// Batch
-		//
-
-		@GET
-		@Path("batchInsert")
-		@Produces("application/json")
-		// 2020-10 Haven't use this for a long time
-		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
-				@QueryParam("urls") String iUrls) throws Exception {
-			Preconditions.checkArgument(iRootId != null);
-			StringBuffer unsuccessfulLines = new StringBuffer();
-
-			String[] lines = iUrls.trim().split("\\n");
-			int i = 0;
-			while (i < lines.length) {
-
-				String first = lines[i];
-				try {
-					if (first.startsWith("http")) {
-						stash(URLEncoder.encode(first, "UTF-8"), iRootId);
-						++i;
-						continue;
-					}
-					// Fails if it sees the string "%)"
-					URLDecoder.decode(first, "UTF-8");
-				} catch (Exception e) {
-					System.err.println(e.getStackTrace());
-					addToUnsuccessful(unsuccessfulLines, first, "");
-					++i;
-					continue;
-				}
-				if (first.startsWith("=")) {
-					++i;
-					addToUnsuccessful(unsuccessfulLines, first, "");
-					continue;
-				}
-				if (first.startsWith("http")) {
-					++i;
-					addToUnsuccessful(unsuccessfulLines, first, "");
-					continue;
-				}
-				if (first.matches("^\\s*" + '$')) {
-					++i;
-					continue;
-				}
-
-				String second = lines[i + 1];
-				if (first.startsWith("\"") && second.startsWith("http")) {
-
-					System.err.println("to be processed: " + first);
-					System.err.println("to be processed: " + second);
-
-					stash(second, iRootId);
-
-				} else {
-					addToUnsuccessful(unsuccessfulLines, first, second);
-				}
-				i += 2;
-
-			}
-			JSONObject entity = new JSONObject();
-			entity.put("unsuccessful", unsuccessfulLines.toString());
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(entity.toString()).type("application/json").build();
-		}
-
-		// TODO : remove mutable state
-		@Deprecated
-		public void addToUnsuccessful(StringBuffer unsuccessfulLines,
-				String first, String second) {
-			unsuccessfulLines.append(first);
-			unsuccessfulLines.append("\n");
-			unsuccessfulLines.append(second);
-			unsuccessfulLines.append("\n");
-			unsuccessfulLines.append("\n");
-		}
-
-		// ------------------------------------------------------------------------------------
-		// Page operations
-		// ------------------------------------------------------------------------------------
-
-		////
-		//// The main part
-		////
-		// TODO: See if you can turn this into a map-reduce
-		@SuppressWarnings("unused")
-		private JSONObject getItemsAtLevelAndChildLevels(Integer iRootId) throws JSONException, IOException {
-//			System.err.println("getItemsAtLevelAndChildLevels() - " + iRootId);
-			if (categoriesTreeCache == null) {
-				categoriesTreeCache = ReadCategoryTree.getCategoriesTree(YurlStash.ROOT_ID);
-			}
-			// TODO: the source is null clause should be obsoleted
-			JSONObject theQueryResultJson = execute(
-					"START source=node({rootId}) "
-							+ "MATCH p = source-[r:CONTAINS*1..2]->u "
-							+ "WHERE (source is null or ID(source) = {rootId}) and not(has(u.type)) AND id(u) > 0  "
-							+ "RETURN distinct ID(u),u.title,u.url, extract(n in nodes(p) | id(n)) as path,u.downloaded_video,u.downloaded_image,u.created,u.ordinal, u.biggest_image, u.user_image "
-// TODO : do not hardcode the limit to 500. Category 38044 doesn't display more than 50 books since there are so many child items.
-							+ "ORDER BY u.ordinal DESC LIMIT 500", ImmutableMap
-							.<String, Object> builder().put("rootId", iRootId)
-							.build(), "getItemsAtLevelAndChildLevels()");
-			JSONArray theDataJson = (JSONArray) theQueryResultJson.get("data");
-			JSONArray theUncategorizedNodesJson = new JSONArray();
-			for (int i = 0; i < theDataJson.length(); i++) {
-				JSONObject anUncategorizedNodeJsonObject = new JSONObject();
-				_1: {
-					JSONArray anItem = theDataJson.getJSONArray(i);
-					_11: {
-						String anId = (String) anItem.get(0);
-						anUncategorizedNodeJsonObject.put("id", anId);
-					}
-					_12: {
-						String aTitle = (String) anItem.get(1);
-						anUncategorizedNodeJsonObject.put("title", aTitle);
-					}
-					_13: {
-						String aUrl = (String) anItem.get(2);
-						anUncategorizedNodeJsonObject.put("url", aUrl);
-					}
-					_14: {
-						try {
-							JSONArray path = (JSONArray) anItem.get(3);
-							if (path.length() == 3) {
-								anUncategorizedNodeJsonObject.put("parentId",
-										path.get(1));
-							} else if (path.length() == 2) {
-								anUncategorizedNodeJsonObject.put("parentId",
-										iRootId);
-							}
-							else if (path.length() == 1) {
-								// This should never happen
-								anUncategorizedNodeJsonObject.put("parentId",
-										path.get(0));
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-					_15: {
-
-						Object val = anItem.get(4);
-						if (isNotNull(val)) {
-							String aValue = (String) val;
-							anUncategorizedNodeJsonObject.put("downloaded_video", aValue);
-						}
-					}
-					_16: {
-						Object val = anItem.get(6);
-						if ("null".equals(val)) {
-							System.err.println("Is null value");
-						} else if (val == null) {
-							System.err.println("Is null string");
-						} else if (isNotNull(val)) {
-							Long aValue = (Long) val;
-							anUncategorizedNodeJsonObject.put("created", aValue);
-						}
-					}
-					_17: {
-						Object val = anItem.get(8);
-						if (isNotNull(val)) {
-							String aValue = (String) val;
-							if ("null".equals(aValue)) {
-								System.err.println("YurlWorldResource.getItemsAtLevelAndChildLevels() - does this ever occur? 1");
-							}
-							anUncategorizedNodeJsonObject.put("biggest_image", aValue);
-						}
-					}
-					_18: {
-						Object val = anItem.get(9);
-						if (isNotNull(val)) {
-							String aValue = (String) val;
-							if ("null".equals(aValue)) {
-							}
-							anUncategorizedNodeJsonObject.put("user_image", aValue);
-						}
-					}
-				}
-				theUncategorizedNodesJson.put(anUncategorizedNodeJsonObject);
-			}
-			
-			JSONObject ret = new JSONObject();
-			transform : {
-				for (int i = 0; i < theUncategorizedNodesJson.length(); i++) {
-					JSONObject jsonObject = (JSONObject) theUncategorizedNodesJson
-							.get(i);
-					String parentId = (String) jsonObject.get("parentId");
-					if (!ret.has(parentId)) {
-						ret.put(parentId, new JSONArray());
-					}
-					JSONArray target = (JSONArray) ret.get(parentId);
-					target.put(jsonObject);
-				}
-			}
-			return ret;
-		}
-
-		private static boolean isNotNull(Object val) {
-			return val != null && !("null".equals(val)) && !(val.getClass().equals(YurlResource.JSON_OBJECT_NULL));
-		}
 
 		// --------------------------------------------------------------------------------------
 		// Write operations
@@ -413,8 +164,7 @@ public class YurlStash {
 			            .directory(file)
 			            .command("echo","hello world")
 			            .command("/bin/sh", "-c", command)
-			                            //"touch '" + queueFile + "'; echo '" + id + ":" + iUrl + "' >> '" + queueFile + "'"
-			                                            .inheritIO().start();
+			            .inheritIO().start();
 			p.waitFor();
 			if (p.exitValue() == 0) {
 			    System.err.println("appendToTextFileSync() - successfully appended 3 "
@@ -490,6 +240,7 @@ public class YurlStash {
 		}
 		
 		private static String getTitle(final URL iUrl) {
+			System.err.println("YurlStash.YurlResource.getTitle() - are we still using this? If not, delete this.");
 			String title = "";
 			try {
 				title = Executors
@@ -511,98 +262,6 @@ public class YurlStash {
 				e.printStackTrace();
 			}
 			return title;
-		}
-
-		@SuppressWarnings("unused")
-		private static class DownloadVideosBatch {
-			@SuppressWarnings("unused")
-			private static void downloadUndownloadedVideosInSeparateThread() {
-				new Thread() {
-					public void run() {
-						try {
-							downloadUndownloadedVideosBatch();
-
-							// I don't remember what this is for
-							while (true) {
-								try {
-									Thread.sleep(1000 * 60 * 60);
-								} catch (InterruptedException ie) {
-								}
-							}
-						} catch (JSONException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-				}.start();
-			}
-
-			private static void downloadUndownloadedVideosBatch() throws JSONException, IOException {
-				String query = "start root=node(37658)" + " match  root-[CONTAINS*]->n"
-						+ " where not(has(n.downloaded_video)) OR n.downloaded_video is null "
-						+ " return n.title, n.downloaded_video, n.url, ID(n)" + " LIMIT 20;";
-				JSONObject results = execute(query, ImmutableMap.<String, Object> of(),
-						"downloadUndownloadedVideosBatch()");
-				JSONArray jsonArray = results.getJSONArray("data");
-				for (int i = 0; i < jsonArray.length(); i++) {
-					final JSONArray row = jsonArray.getJSONArray(i);
-					System.err.println("downloadUndownloadedVideosBatch() - iteration: " + row);
-					Object title = row.get(0);
-					Object downloaded = row.get(1);
-					Object url = row.get(2);
-					Object id = row.get(3);
-					if (downloaded == null || downloaded == JSONObject.NULL
-							|| "null".equals(downloaded)) {
-						if (url instanceof String) {
-							if (id instanceof Integer) {
-								System.out
-										.println("downloadUndownloadedVideosBatch() - Starting retroactively downloading: "
-												+ title);
-								try {
-									new SimpleTimeLimiter().callWithTimeout(new Callable<Object>() {
-
-										@Override
-										public Object call() throws Exception {
-											downloadVideo(row.getString(2), TARGET_DIR_PATH,
-													Integer.toString(row.getInt(3)));
-											return null;
-
-										}
-									}, 10, TimeUnit.SECONDS, true);
-								} catch (Exception e) {
-									System.err.println("Continuing");
-									continue;
-								}
-								System.out
-										.println("downloadUndownloadedVideosBatch() - Finished retroactively downloading: "
-												+ title);
-							} else {
-								System.err.println("id - " + id.getClass());
-							}
-						} else {
-							System.err.println("url - " + url.getClass());
-						}
-					} else {
-						Long downloaded1 = row.getLong(1);
-						System.out
-								.println("downloadUndownloadedVideosBatch() - Already downloaded: "
-										+ title + "\t" + downloaded1);
-					}
-				}
-			}
-
-			private static void downloadVideo(String iVideoUrl, String targetDirPath, String id) {
-				try {
-//					downloadVideo(iVideoUrl, targetDirPath);
-//					writeSuccessToDb(iVideoUrl, id);
-				} catch (JSONException e) {
-					System.err.println("UndownloadedVideosBatchJob.downloadVideo() - ERROR recording download in database");
-				} catch (Exception e) {
-					System.err.println(e.getMessage());
-				}
-			}
-
 		}
 
 		@GET
@@ -636,115 +295,6 @@ public class YurlStash {
 			}.start();
 		}
 
-		// I don't think this is of any use anymore
-		@GET
-		@Path("removeImage")
-		@Produces("application/json")
-		public Response removeImage(
-				@QueryParam("id") Integer nodeIdToChange,
-				@QueryParam("parentId") Integer parentId) throws Exception {
-	
-			System.err.println("removeImage() - begin");
-			try {
-				Response r = Response
-						.ok()
-						.header("Access-Control-Allow-Origin", "*")
-						.entity(execute("START n=node({nodeIdToChange}) "
-								+ "REMOVE n.user_image, n.biggest_image " + "RETURN n",
-								ImmutableMap.<String, Object> of("nodeIdToChange", nodeIdToChange),
-								"removeImage()")).type("application/json").build();
-				if (parentId == null) {
-					System.err.println("YurlWorldResource.removeImage() - Warning: cache not updated, because parentId was not passed");
-				} else {
-				}
-				return r;
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw e;
-			}
-		}
-
-	
-		/** No existing relationships get deleted */
-		@GET
-		@Path("relateCategoriesToItem")
-		@Produces("application/json")
-		// 2020-10 Don't know if this is still in use
-		public Response relateCategoriesToItem(
-				@QueryParam("nodeId") Integer iNodeToBeTagged,
-				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo)
-				throws JSONException, IOException {
-			System.err.println("relateCategoriesToItem(): begin");
-			JSONArray theCategoryIdsToBeAddedTo = new JSONArray(
-					URLDecoder.decode(iCategoriesToBeAddedTo, "UTF-8"));
-			for (int i = 0; i < theCategoryIdsToBeAddedTo.length(); i++) {
-				System.err.println("relateCategoriesToItem(): "
-						+ theCategoryIdsToBeAddedTo.getInt(i) + " --> "
-						+ iNodeToBeTagged);
-				createNewRelation(theCategoryIdsToBeAddedTo.getInt(i),
-						iNodeToBeTagged);
-			}
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(new JSONObject().toString())
-					.type("application/json").build();
-		}
-
-		private Integer createCategory(String iCategoryName) throws IOException {
-			// TODO: first check if there is already a node with this name,
-			// which is for re-associating the keycode with the category
-			return Integer
-					.parseInt((String) ((JSONArray) ((JSONArray) execute(
-							"CREATE (n { name : {name} , created: {created} , type :{type}}) " +
-							"RETURN id(n)",
-							ImmutableMap.<String, Object> builder()
-									.put("name", iCategoryName)
-									.put("type", "categoryNode")
-									.put("created", System.currentTimeMillis())
-									.build(), "createCategory()").get("data")).get(0)).get(0));
-		}
-
-		@GET
-		@Path("createAndRelate")
-		@Produces("application/json")
-		// 2020-10 Don't know if this is still in use
-		public Response createSubDirAndMoveItem(
-				@QueryParam("newParentName") String iNewParentName,
-				@QueryParam("childId") Integer iItemId,
-				@QueryParam("currentParentId") Integer iCurrentParentId)
-				throws JSONException, IOException {
-			System.err.println("createSubDirAndMoveItem() - begin");
-			JSONObject relateToExistingCategory = relateToExistingCategory(iItemId,
-					iCurrentParentId,
-					createNewCategoryUnderExistingCategory(iNewParentName, iCurrentParentId));
-			Response rResponse =  Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(relateToExistingCategory.toString())
-					.type("application/json").build();
-			return rResponse;
-		}
-
-		private Integer createNewCategoryUnderExistingCategory(String iNewParentName,
-				Integer iCurrentParentId) throws IOException {
-			// Create new category node
-			Integer theNewCategoryNodeIdString = createCategory(iNewParentName);
-
-			// Associate new category with current category
-			createNewRelation(iCurrentParentId, theNewCategoryNodeIdString);
-			return theNewCategoryNodeIdString;
-		}
-
-		@Deprecated // Uses Neo4j
-		private JSONObject relateToExistingCategory(Integer iItemId, Integer iCurrentParentId,
-				Integer theNewCategoryNodeIdString) throws IOException {
-			// delete any existing contains relationship with the
-			// specified existing parent (but not with all parents since we
-			// could have a many-to-one contains)
-			deleteExistingRelationship(iItemId, iCurrentParentId);
-			
-			// Relate the item to the new category
-			JSONObject moveHelper = createNewRelation(theNewCategoryNodeIdString, iItemId);
-			return moveHelper;
-		}
-
 		/**
 		 * This MOVES a node to a new subcategory. It deletes the relationship
 		 * with the existing parent
@@ -753,7 +303,6 @@ public class YurlStash {
 		@GET
 		@Path("relate")
 		@Produces("application/json")
-		// 2020-10 Don't know if this is still in use
 		public Response move(@QueryParam("parentId") final Integer iNewParentId,
 				@QueryParam("url") String iUrl,
 				@QueryParam("currentParentId") final Integer iCurrentParentId,
@@ -781,290 +330,16 @@ public class YurlStash {
 				}
 			}.start();
 			
-//			JSONObject moveHelper = relateToExistingCategory(iChildId, iCurrentParentId,
-//					iNewParentId);
 			return Response.ok().header("Access-Control-Allow-Origin", "*")
 					.entity(new JSONObject().toString())
 					.type("application/json").build();
 		}
-
-		private void deleteExistingRelationship(Integer iChildId, Integer iCurrentParentId)
-				throws IOException {
-			execute("START oldParent = node({currentParentId}), child = node({childId}) MATCH oldParent-[r:CONTAINS]-child DELETE r",
-					ImmutableMap.<String, Object> builder()
-							.put("currentParentId", iCurrentParentId)
-							.put("childId", iChildId).build(), "deleteExistingRelationship()");
-		}
-
-		/**
-		 * No deletion of existing relationships occurs here.
-		 * 
-		 * @throws RuntimeException
-		 *             - If the command fails. This could legitimately happen if
-		 *             we try to relate to a newly created category if the
-		 *             system becomes non-deterministic.
-		 */
-		private static JSONObject createNewRelation(Integer iParentId, Integer iChildId)
-				throws IOException, JSONException {
-			return execute(
-					"START a=node({parentId}),b=node({childId}) "
-							+ "CREATE a-[r:CONTAINS]->b SET b.accessed = {currentTime} return a,r,b;",
-					ImmutableMap.<String, Object> builder()
-							.put("parentId", iParentId)
-							.put("childId", iChildId)
-							.put("currentTime", System.currentTimeMillis())
-							.build(), "createNewRelation()");
-		}
-
-		@Deprecated
-		static JSONObject execute(String iCypherQuery, Map<String, Object> iParams, String... iCommentPrefix) {
-			return execute(iCypherQuery, iParams, true, iCommentPrefix);
-		}
-
-		// TODO: Only delete this once we're no longer using the 2015 backup of the neo4j DB. It is still providing some functinoality.
-		@Deprecated
-		// TODO: make this map immutable
-		static JSONObject execute(String iCypherQuery,
-				Map<String, Object> iParams, boolean doLogging, String... iCommentPrefix) {
-			throw new RuntimeException("Do not use this method");
-		}
-
-		// ----------------------------------------------------------------------------
-		// Read operations
-		// ----------------------------------------------------------------------------
-		
-		@GET
-		@Path("categoriesRecursive")
-		@Produces("application/json")
-		public Response categoriesRecursive(
-				@QueryParam("parentId") Integer iParentId)
-				throws JSONException, IOException {
-			JSONObject ret = new JSONObject();
-			JSONObject categoriesTreeJson;
-			java.nio.file.Path path = Paths.get("/home/sarnobat/github/.cache/" + YurlStash.ROOT_ID + ".json");
-			if (Files.exists(path)) {
-				categoriesTreeJson = new JSONObject(FileUtils.readFileToString(path.toFile(), "UTF-8"));
-			} else {
-				if (categoriesTreeCache == null) {
-					categoriesTreeJson = ReadCategoryTree.getCategoriesTree(YurlStash.ROOT_ID);
-				} else {
-					categoriesTreeJson = categoriesTreeCache;
-					refreshCategoriesTreeCacheInSeparateThread();
-				}
-				FileUtils.writeStringToFile(path.toFile(), categoriesTreeJson.toString(2), "UTF-8");
-			}
-			ret.put("categoriesTree", categoriesTreeJson);
-			return Response.ok().header("Access-Control-Allow-Origin", "*")
-					.entity(ret.toString()).type("application/json").build();
-		}
-
-		private static void refreshCategoriesTreeCacheInSeparateThread() {
-			new Thread(){
-				@Override
-				public void run() {
-					try {
-						//categoriesTreeCache = ReadCategoryTree.getCategoriesTree(Yurl.ROOT_ID);
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-				}
-			}.start();
-		}
-		
-		private static class ReadCategoryTree {
-			static JSONObject getCategoriesTree(Integer rootId)
-					throws JSONException, IOException {
-				return new AddSizes(
-						// This is the expensive query, not the other one
-						getCategorySizes(YurlResource.execute(
-								"START n=node(*) MATCH n-->u WHERE has(n.name) "
-										+ "RETURN id(n),count(u);",
-								ImmutableMap.<String, Object>of(),
-								"getCategoriesTree() - Getting sizes [The expensive query]").getJSONArray(
-								"data")))
-						.apply(
-						// Path to JSON conversion done in Cypher
-						createCategoryTreeFromCypherResultPaths(
-								// TODO: I don't think we need each path do we? We just need each parent-child relationship.
-								YurlResource.execute("START n=node({parentId}) "
-										+ "MATCH path=n-[r:CONTAINS*]->c "
-										+ "WHERE has(c.name) "
-										+ "RETURN extract(p in nodes(path)| "
-										+ "'{ " + "id : ' + id(p) + ', "
-										+ "name : \"'+ p.name +'\" , "
-										+ "key : \"' + coalesce(p.key, '') + '\"" + " }'" + ")",
-										ImmutableMap.<String, Object> of(
-												"parentId", rootId),
-												false,
-										"getCategoriesTree() - Getting all paths"),
-								rootId));
-			}
-			
-			private static Map<Integer, Integer> getCategorySizes(JSONArray counts) {
-				Map<Integer, Integer> sizesMap = new HashMap<Integer, Integer>();
-				for (int i = 0; i < counts.length(); i++) {
-					JSONArray row = counts.getJSONArray(i);
-					sizesMap.put(row.getInt(0), row.getInt(1));
-				}
-				return ImmutableMap.copyOf(sizesMap);
-			}
-			
-
-			private static JSONObject addSizesToCypherJsonResultObjects(JSONObject categoriesTree,
-					Map<Integer, Integer> categorySizes) {
-				Integer id = categoriesTree.getInt("id");
-				categoriesTree.put("size", categorySizes.get(id));
-				if (categoriesTree.has("children")) {
-					JSONArray children = categoriesTree.getJSONArray("children");
-					for (int i = 0; i < children.length(); i++) {
-						addSizesToCypherJsonResultObjects(children.getJSONObject(i), categorySizes);
-					}
-				}
-				return categoriesTree;
-			}
-			
-			private static class AddSizes implements
-					Function<JSONObject, JSONObject> {
-				private final Map<Integer, Integer> categorySizes;
-
-				AddSizes(Map<Integer, Integer> categorySizes) {
-					this.categorySizes = categorySizes;
-				}
-
-				@Override
-				public JSONObject apply(JSONObject input) {
-					return addSizesToCypherJsonResultObjects(
-							input, categorySizes);
-				}
-			}
-			
-			private static JSONObject createCategoryTreeFromCypherResultPaths(
-					JSONObject theQueryJsonResult, Integer rootId) {
-				JSONArray cypherRawResults = theQueryJsonResult
-						.getJSONArray("data");
-				checkState(cypherRawResults.length() > 0);
-				Multimap<Integer, Integer> parentToChildren = buildParentToChildMultimap2(cypherRawResults);
-				Map<Integer, JSONObject> categoryNodesWithoutChildren = createId(cypherRawResults);
-				JSONObject root = categoryNodesWithoutChildren.get(rootId);
-				root.put(
-						"children",
-						toJsonArray(buildChildren(parentToChildren.get(rootId),
-								categoryNodesWithoutChildren, parentToChildren)));
-				return root;
-			}
-
-			/**
-			 * @return - a pair for each category node
-			 */
-			private static Map<Integer, JSONObject> createId(JSONArray cypherRawResults) {
-				ImmutableMap.Builder<Integer, JSONObject> idToJsonBuilder = ImmutableMap
-						.<Integer, JSONObject> builder();
-				Set<Integer> seen = new HashSet<Integer>();
-				for (int i = 0; i < cypherRawResults.length(); i++) {
-					JSONArray treePath = cypherRawResults.getJSONArray(i).getJSONArray(0);
-					for (int j = 0; j < treePath.length(); j++) {
-						if (treePath.get(j).getClass().equals(YurlResource.JSON_OBJECT_NULL)) {
-							continue;
-						}
-						JSONObject pathHopNode = new JSONObject(treePath.getString(j));//treePath.getString(j));
-						int categoryId = pathHopNode.getInt("id");
-						if (!seen.contains(categoryId)){
-							seen.add(categoryId);
-							idToJsonBuilder.put(categoryId,
-									pathHopNode);
-						}
-					}
-				}
-				return idToJsonBuilder.build();
-			}
-			
-			private static JSONArray removeNulls(JSONArray iJsonArray) {
-				for(int i = 0; i < iJsonArray.length(); i++) {
-					if (YurlResource.JSON_OBJECT_NULL.equals(iJsonArray.get(i))) {
-						iJsonArray.remove(i);
-						--i;
-					}
-				}
-				return iJsonArray;
-			}
-
-			/**
-			 * @return Integer to set of Integers
-			 */
-			private static Multimap<Integer, Integer> buildParentToChildMultimap2(
-					JSONArray cypherRawResults) {
-				Multimap<Integer, Integer> oParentToChildren = HashMultimap.create();
-				for (int pathNum = 0; pathNum < cypherRawResults.length(); pathNum++) {
-					JSONArray categoryPath = removeNulls(cypherRawResults.getJSONArray(pathNum)
-							.getJSONArray(0));
-					for (int hopNum = 0; hopNum < categoryPath.length() - 1; hopNum++) {
-						if (categoryPath.get(hopNum).getClass()
-								.equals(YurlResource.JSON_OBJECT_NULL)) {
-							continue;
-						}
-						if (categoryPath.get(hopNum + 1).getClass()
-								.equals(YurlResource.JSON_OBJECT_NULL)) {
-							continue;
-						}
-						if (!(categoryPath.get(hopNum + 1) instanceof String)) {
-							continue;
-						}
-						int childId = new JSONObject(categoryPath.getString(hopNum + 1))
-								.getInt("id");
-						int parentId = checkNotNull(new JSONObject(categoryPath.getString(hopNum))
-								.getInt("id"));
-						Object childrenObj = oParentToChildren.get(parentId);
-						if (childrenObj != null) {
-							Set<?> children = (Set<?>) childrenObj;
-							if (!children.contains(childId)) {
-								oParentToChildren.put(parentId, childId);
-							}
-						} else {
-							oParentToChildren.put(parentId, childId);
-						}
-					}
-				}
-				return oParentToChildren;
-			}
-
-			private static JSONArray toJsonArray(Collection<JSONObject> children) {
-				JSONArray arr = new JSONArray();
-				for (JSONObject child : children) {
-					arr.put(child);
-				}
-				return arr;
-			}
-
-			private static Set<JSONObject> buildChildren(
-					Collection<Integer> childIds, Map<Integer, JSONObject> nodes,
-					Multimap<Integer, Integer> parentToChildren) {
-				Builder<JSONObject> set = ImmutableSet.builder();
-				for (int childId : childIds) {
-					JSONObject childJson = nodes.get(childId);
-					Collection<Integer> grandchildIds = parentToChildren
-							.get(childId);
-					Collection<JSONObject> grandchildNodes = buildChildren(
-							grandchildIds, nodes, parentToChildren);
-					JSONArray grandchildrenArray = toJsonArray(grandchildNodes);
-					childJson.put("children", grandchildrenArray);
-					set.add(childJson);
-				}
-				return set.build();
-			}			
-		}
-
-
-		// I hope this is the same as JSONObject.Null (not capitals)
-		@Deprecated // Does not compile in Eclipse, but does compile in groovy
-		public static final Object JSON_OBJECT_NULL = JSONObject.NULL;//new Null()
 	}
 
-	@SuppressWarnings("unused")
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
 		System.err.println("main() - begin");
 		String port = "4447";
     
-		YurlResource.refreshCategoriesTreeCacheInSeparateThread();
 		// Turn off that stupid Jersey logger.
 		// This works in Java but not in Groovy.
 		//java.util.Logger.getLogger("org.glassfish.jersey").setLevel(java.util.Level.SEVERE);
