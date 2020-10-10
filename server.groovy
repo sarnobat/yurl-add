@@ -26,7 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import javax.imageio.ImageIO;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -34,7 +33,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.json.JSONArray;
@@ -45,13 +43,11 @@ import org.jsoup.Jsoup;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
 import com.google.common.collect.Multimap;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
-//import org.jvnet.hk2.annotations.Optional;
 
 /**
  * Deprecation doesn't mean the method can be removed. Only when index.html stops referring to it can it be removed.
@@ -65,63 +61,20 @@ public class YurlStash {
 
 	public static final String YOUTUBE_DOWNLOAD = System.getProperty("user.home") + "/bin/youtube_download";
 	public static final Integer ROOT_ID = 45;
-	@Deprecated
-	private static final String CYPHER_URI = "http://netgear.rohidekar.com:7474/db/data/cypher";
-//	@Deprecated
 	private static final String TARGET_DIR_PATH = "/media/sarnobat/3TB/new/move_to_unsorted/videos/";
     private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
-	//@Deprecated
-	//private static final String QUEUE_FILE = "/home/sarnobat/sarnobat.git/";
 	private static final String QUEUE_FILE = QUEUE_DIR;
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
 	private static final String TITLE_FILE_TXT = "yurl_titles_2017.txt";
     private static final String QUEUE_FILE_TXT_MASTER = "yurl_master.txt";
     private static final String QUEUE_FILE_TXT_2017 = "yurl_queue_2017.txt";// Started using this in Aug 2017. Older data is not in this file.
 	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
-	private static final String TARGET_DIR_PATH_IMAGES = "/media/sarnobat/3TB/new/move_to_unsorted/images/";
-// usually full and we get zero size files: "/media/sarnobat/Unsorted/images/";
-	private static final String TARGET_DIR_PATH_IMAGES_OTHER = "/media/sarnobat/3TB/new/move_to_unsorted/images/other";
-// usually full and images don't get saved "/media/sarnobat/Unsorted/images/other";
 	
 	@Path("yurl")
 	public static class YurlResource { // Must be public
 
-
-		static {
-			// We can't put this in the constructor because multiple instances will get created
-			// YurlWorldResource.downloadUndownloadedVideosInSeparateThread() ;
-		}
-
 		private static JSONObject categoriesTreeCache;
-
-		// This only gets invoked when it receives the first request
-		// Multiple instances get created
-		public YurlResource() {
-			// We can't put the auto downloader in main()
-			// then either it will be called every time the cron job is executed,
-			// or not until the server terminates unexceptionally (which never happens).
-		}
 		
-		@GET
-		@Path("downloadVideo")
-		@Produces("application/json")
-		public Response downloadVideoSynchronous(@QueryParam("id") Integer iRootId, @QueryParam("url") String iUrl)
-				throws JSONException, IOException {
-			DownloadVideo.getVideoDownloadJobHttpcat(iUrl, TARGET_DIR_PATH).run();
-			JSONObject retVal = new JSONObject();
-			try {
-				return Response.ok().header("Access-Control-Allow-Origin", "*")
-						.entity(retVal.toString())
-						.type("application/json").build();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				return Response.serverError().header("Access-Control-Allow-Origin", "*")
-						.entity(e.getStackTrace())
-						.type("application/text").build();
-			}
-		}
-
 		@GET
 		@Path("parent")
 		@Produces("application/json")
@@ -154,6 +107,7 @@ public class YurlStash {
 		@GET
 		@Path("batchInsert")
 		@Produces("application/json")
+		// 2020-10 Haven't use this for a long time
 		public Response batchInsert(@QueryParam("rootId") Integer iRootId,
 				@QueryParam("urls") String iUrls) throws Exception {
 			Preconditions.checkArgument(iRootId != null);
@@ -347,16 +301,6 @@ public class YurlStash {
 			return val != null && !("null".equals(val)) && !(val.getClass().equals(YurlResource.JSON_OBJECT_NULL));
 		}
 
-		// -----------------------------------------------------------------------------
-		// Key bindings
-		// -----------------------------------------------------------------------------
-
-		
-		
-
-
-		
-
 		// --------------------------------------------------------------------------------------
 		// Write operations
 		// --------------------------------------------------------------------------------------
@@ -367,18 +311,16 @@ public class YurlStash {
 		public Response stash(@QueryParam("param1") String iUrl,
 				@QueryParam("rootId") Integer iCategoryId) throws JSONException,
 				IOException {
-			System.out.println("stash() begin");
-			// This will convert
+
+			System.err.println("stash() begin");
 			String theHttpUrl = URLDecoder.decode(iUrl, "UTF-8");
-			System.out.println("stash() theHttpUrl = " + theHttpUrl);
+			System.err.println("stash() theHttpUrl = " + theHttpUrl);
 			try {
 				// TODO: append synchronously to new yurl master queue 
 	            appendToTextFileSync(iUrl, iCategoryId.toString(), QUEUE_FILE, YurlStash.QUEUE_FILE_TXT_MASTER);
 
 				launchAsynchronousTasksHttpcat(theHttpUrl, iCategoryId);
-				// TODO: check that it returned successfully (redundant?)
-//				System.out.println("stash() - node created: " + nodeId);
-				System.out.println("YurlStash.YurlResource.stash() sending empty json response. This should work.");
+				System.err.println("YurlStash.YurlResource.stash() sending empty json response. This should work.");
 				return Response.ok().header("Access-Control-Allow-Origin", "*")
 						.entity(new JSONObject().toString())
 						.type("application/json").build();
@@ -397,9 +339,7 @@ public class YurlStash {
 			// regenrated next time we load that category page.
         	removeCategoryCache(iCategoryId);
         	
-        	// Get the title
-			
-			_10: {
+			_getTitle: {
 
 				final String theTitle = getTitle(new URL(iUrl));
 				if (theTitle != null && theTitle.length() > 0) {
@@ -445,20 +385,6 @@ public class YurlStash {
         	
             // This is not (yet) the master file. The master file is written to synchronously.
             appendToTextFile(iUrl, iCategoryId.toString(), QUEUE_FILE);
-            String targetDirPathImages;
-            if (iCategoryId.longValue() == 29172) {
-                    targetDirPathImages = TARGET_DIR_PATH_IMAGES_OTHER;
-            } else {
-                    targetDirPathImages = TARGET_DIR_PATH_IMAGES;
-            }
-            DownloadImage.downloadImageInSeparateThreadHttpcat(iUrl, targetDirPathImages, CYPHER_URI);
-            DownloadVideo.downloadVideoInSeparateThreadHttpcat(iUrl, TARGET_DIR_PATH, CYPHER_URI);
-            if (!iUrl.contains("amazon")) {
-                    // We end up with garbage images if we try to screen-scrape Amazon.
-                    // The static rules result in better images.
-            		// TODO: Store this successful image download outside Neo4j.
-                    //BiggestImage.recordBiggestImage(iUrl, CYPHER_URI, id);
-            }
         }
 
 		private static void removeCategoryCache(Integer iCategoryId) {
@@ -562,71 +488,6 @@ public class YurlStash {
 			new Thread(r).start();
 		}
 		
-		private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
-
-		private static class DownloadImage {
-			private static void downloadImageInSeparateThreadHttpcat(final String iUrl2,
-                                        final String targetDirPath, final String cypherUri) {
-                                final String iUrl = iUrl2.replaceAll("\\?.*", "");
-                                Runnable r = new Runnable() {
-                                        // @Override
-                                        public void run() {
-                                                System.out.println("downloadImageInSeparateThreadHttpcat() - " + iUrl + " :: " + targetDirPath);
-                                                if (iUrl.toLowerCase().contains(".jpg")) {
-                                                } else if (iUrl.toLowerCase().contains(".jpeg")) {
-                                                } else if (iUrl.toLowerCase().contains(".png")) {
-                                                } else if (iUrl.toLowerCase().contains(".gif")) {
-                                                } else if (iUrl.toLowerCase().contains("gstatic")) {
-                                                } else {
-                                                        return;
-                                                }
-                                                System.out
-                                                                .println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadHttpcat() Is of image type");
-                                                try {
-                                                        System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadHttpcat() About to call saveimage");
-                                                        saveImage(iUrl, targetDirPath);
-                                                        System.out.println("Yurl.YurlResource.DownloadImage.downloadImageInSeparateThreadHttpcat() About to call execute: TODO - record the fact that we downloaded the image somwhere");
-                                                        System.out.println("YurlWorldResource.downloadImageInSeparateThreadHttpcat() - image download recorded");
-                                                } catch (Exception e) {
-                                                        System.out.println("YurlWorldResource.downloadImageInSeparateThreadHttpcat(): 1 Biggest image couldn't be determined"    + e.getMessage());
-                                                }
-                                        }
-                                };
-                                new Thread(r).start();
-                        }
-
-			private static void saveImage(String urlString, String targetDirPath)
-					throws IllegalAccessError, IOException {
-				System.out.println("saveImage() - " + urlString + "\t::\t" + targetDirPath);
-				String extension = FilenameUtils.getExtension(urlString);
-				ImageIO.write(
-						ImageIO.read(new URL(urlString)),
-						extension,
-						new File(determineDestinationPathAvoidingExisting(
-								targetDirPath										+ "/"										+ URLDecoder.decode(FilenameUtils.getBaseName(urlString)
-												.replaceAll("/", "-"), "UTF-8") + "." + extension)
-								.toString()));
-				System.out.println("saveImage() - SUCCESS: " + urlString + "\t::\t" + targetDirPath);
-			}
-
-			private static java.nio.file.Path determineDestinationPathAvoidingExisting(
-					String iDestinationFilePath) throws IllegalAccessError {
-				String theDestinationFilePathWithoutExtension = iDestinationFilePath.substring(0,
-						iDestinationFilePath.lastIndexOf('.'));
-				String extension = FilenameUtils.getExtension(iDestinationFilePath);
-				java.nio.file.Path oDestinationFile = Paths.get(iDestinationFilePath);
-				while (Files.exists(oDestinationFile)) {
-					theDestinationFilePathWithoutExtension += "1";
-					iDestinationFilePath = theDestinationFilePathWithoutExtension + "." + extension;
-					oDestinationFile = Paths.get(iDestinationFilePath);
-				}
-				if (Files.exists(oDestinationFile)) {
-					throw new IllegalAccessError("an existing file will get overwritten");
-				}
-				return oDestinationFile;
-			}
-		}
-
 		private static String getTitle(final URL iUrl) {
 			String title = "";
 			try {
@@ -649,52 +510,6 @@ public class YurlStash {
 				e.printStackTrace();
 			}
 			return title;
-		}
-
-		private static class DownloadVideo {
-
-	        static void downloadVideoInSeparateThreadHttpcat(String iVideoUrl,
-	                        String TARGET_DIR_PATH, String cypherUri) {
-	                System.out.println("YurlWorldResource.downloadVideoInSeparateThreadHttpcat() - begin: "
-	                                + iVideoUrl);
-	                // VGet stopped working, so now we use a shell callout
-	                Runnable r2 = getVideoDownloadJobHttpcat(iVideoUrl, TARGET_DIR_PATH);
-	                executorService.submit(r2);
-	        }
-
-	        static Runnable getVideoDownloadJobHttpcat(final String iVideoUrl, final String targetDirPath
-                                       ) {
-                                Runnable videoDownloadJob = new Runnable() {
-                                        @Override
-                                        public void run() {
-                                                try {
-                                                        Process p = new ProcessBuilder()
-                                                                        .directory(Paths.get(targetDirPath).toFile())
-                                                                        .command(
-                                                                                        ImmutableList.of(YurlStash.YOUTUBE_DOWNLOAD,
-                                                                                                        iVideoUrl)).inheritIO().start();
-                                                        p.waitFor();
-                                                        if (p.exitValue() == 0) {
-                                                                System.out
-                                                                                .println("YurlWorldResource.downloadVideoInSeparateThreadHttpcat() - successfully downloaded "
-                                                                                                + iVideoUrl);
-								// TODO : write successful video download to file
-                                                                //writeSuccessToDb(iVideoUrl, id);
-                                                        } else {
-                                                                System.out
-                                                                                .println("YurlWorldResource.downloadVideoInSeparateThreadHttpcat() - error downloading "
-                                                                                                + iVideoUrl);
-                                                        }
-                                                } catch (InterruptedException e) {
-                                                        e.printStackTrace();
-                                                } catch (IOException e) {
-                                                        e.printStackTrace();
-                                                }
-                                        }
-                                };
-                                return videoDownloadJob;
-                        }
-
 		}
 
 		@SuppressWarnings("unused")
@@ -789,15 +604,6 @@ public class YurlStash {
 
 		}
 
-		private static void writeSuccessToDb(final String iVideoUrl, final String id)
-				throws IOException {
-                        System.out.println("writeSuccessToDb() - Attempting to record successful download in database...");
-			execute("start n=node({id}) WHERE n.url = {url} SET n.downloaded_video = {date}",
-					ImmutableMap.<String, Object> of("id", Long.valueOf(id), "url", iVideoUrl,
-							"date", System.currentTimeMillis()), "downloadVideo()");
-			System.out.println("writeSuccessToDb() - Download recorded in database");
-		}
-
 		@GET
 		@Path("updateImage")
 		@Produces("application/json")
@@ -862,6 +668,7 @@ public class YurlStash {
 		@GET
 		@Path("relateCategoriesToItem")
 		@Produces("application/json")
+		// 2020-10 Don't know if this is still in use
 		public Response relateCategoriesToItem(
 				@QueryParam("nodeId") Integer iNodeToBeTagged,
 				@QueryParam("newCategoryIds") String iCategoriesToBeAddedTo)
@@ -898,6 +705,7 @@ public class YurlStash {
 		@GET
 		@Path("createAndRelate")
 		@Produces("application/json")
+		// 2020-10 Don't know if this is still in use
 		public Response createSubDirAndMoveItem(
 				@QueryParam("newParentName") String iNewParentName,
 				@QueryParam("childId") Integer iItemId,
@@ -944,6 +752,7 @@ public class YurlStash {
 		@GET
 		@Path("relate")
 		@Produces("application/json")
+		// 2020-10 Don't know if this is still in use
 		public Response move(@QueryParam("parentId") final Integer iNewParentId,
 				@QueryParam("url") String iUrl,
 				@QueryParam("currentParentId") final Integer iCurrentParentId,
@@ -1251,11 +1060,8 @@ public class YurlStash {
 
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws URISyntaxException, JSONException, IOException {
-System.out.println("main() - begin");
+		System.err.println("main() - begin");
 		String port = "4447";
-		_parseOptions: {
-
-		}
     
 		YurlResource.refreshCategoriesTreeCacheInSeparateThread();
 		// Turn off that stupid Jersey logger.
@@ -1270,8 +1076,8 @@ System.out.println("main() - begin");
 			// Problem - this won't get executed until the server ends
 			//YurlWorldResource.downloadUndownloadedVideosInSeparateThread() ;
 		} catch (Exception e) {
-//	e.printStackTrace();
-			System.out.println("Not creating server instance");
+			//	e.printStackTrace();
+			System.err.println("Not creating server instance");
 		}
 	}
 }
