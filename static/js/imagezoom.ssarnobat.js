@@ -1,1 +1,0 @@
-/home/sarnobat/sarnobat.git/src/javascript/imagezoom.hover.ssarnobat.js
