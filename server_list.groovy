@@ -45,7 +45,7 @@ public class YurlList {
 			.getProperty("user.home")			+ "/sarnobat.git/db/auto/yurl_queue_httpcat_videos_downloaded.json";
 	private static final String DOWNLOADED_VIDEOS_2017 = System
 			.getProperty("user.home")			+ "/sarnobat.git/db/yurl_flatfile_db/videos_download_succeeded.txt";
-	private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
+	private static final String QUEUE_DIR = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE_TXT_DELETE = "yurl_deleted.txt";
 
 	// TODO: Regenerate the cache file using these sources of truth.

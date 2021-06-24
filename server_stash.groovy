@@ -42,7 +42,7 @@ public class YurlStash {
 
 	// TODO: use java properties
 	public static final Integer ROOT_ID = 45;
-    private static final String QUEUE_DIR = "/home/sarnobat/sarnobat.git/db/yurl_flatfile_db/";
+    private static final String QUEUE_DIR = System.getProperty("user.home") + "/sarnobat.git/db/yurl_flatfile_db/";
 	private static final String QUEUE_FILE = QUEUE_DIR;
 	private static final String QUEUE_FILE_TXT = "yurl_queue.txt";
 	private static final String TITLE_FILE_TXT = "yurl_titles_2017.txt";
